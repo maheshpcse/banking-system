@@ -1,0 +1,136 @@
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 2.75rem;
+  animation: page-enter 0.65s var(--ease-out);
+}
+
+.page__hero {
+  margin-bottom: 1.1rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  color: var(--text);
+}
+
+.page__hero h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 3vw, 2.1rem);
+  letter-spacing: -0.03em;
+}
+
+.lede {
+  margin: 0.45rem 0 0;
+  color: var(--text-muted);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+
+.filters button {
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text-muted);
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.filters button.is-active,
+.filters button:hover {
+  background: #fff;
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.tx-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.tx-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1rem;
+  border-radius: 0.95rem;
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  animation: float-in 0.4s var(--ease-out) both;
+}
+
+.tx-main strong {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.tx-main span,
+.tx-main small,
+.tx-side span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.tx-main small {
+  margin-top: 0.2rem;
+}
+
+.tx-side {
+  text-align: right;
+}
+
+.tx-side em {
+  display: block;
+  font-style: normal;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.tx-side em.credit {
+  color: #1f8a6e;
+}
+
+.tx-side em.debit {
+  color: #c45b6c;
+}
+
+.pager {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-muted);
+}
+
+.loading,
+.empty {
+  color: var(--text-muted);
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .tx-list li {
+    flex-direction: column;
+  }
+
+  .tx-side {
+    text-align: left;
+  }
+}

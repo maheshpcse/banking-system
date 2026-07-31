@@ -1,0 +1,62 @@
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.55;
+  animation: ambient-drift 14s ease-in-out infinite;
+}
+
+.blob--a {
+  width: 340px;
+  height: 340px;
+  top: -80px;
+  left: -60px;
+  background: rgba(127, 214, 196, 0.45);
+}
+
+.blob--b {
+  width: 420px;
+  height: 420px;
+  top: 20%;
+  right: -120px;
+  background: rgba(147, 197, 253, 0.38);
+  animation-delay: -4s;
+}
+
+.blob--c {
+  width: 280px;
+  height: 280px;
+  bottom: 5%;
+  left: 30%;
+  background: rgba(250, 214, 165, 0.28);
+  animation-delay: -8s;
+}
+
+main {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes ambient-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(18px, -22px, 0) scale(1.06);
+  }
+}
