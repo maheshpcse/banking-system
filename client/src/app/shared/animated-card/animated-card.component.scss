@@ -1,0 +1,81 @@
+.scene {
+  perspective: 1200px;
+}
+
+.card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72));
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  transform-style: preserve-3d;
+  animation: float-in 0.7s var(--ease-out) both;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, var(--glow), transparent 55%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.card__face {
+  position: relative;
+  padding: 1.35rem 1.4rem 1.4rem;
+  transform: translateZ(0);
+}
+
+.card--tilt:hover .card__face {
+  transform: translateZ(18px) rotateX(2deg) rotateY(-2deg);
+  transition: transform 0.45s var(--ease-out);
+}
+
+.card__header {
+  margin-bottom: 1rem;
+}
+
+.card__subtitle {
+  margin: 0 0 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.card__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.card--mint {
+  --glow: rgba(84, 184, 160, 0.28);
+}
+
+.card--sky {
+  --glow: rgba(96, 165, 250, 0.28);
+}
+
+.card--sand {
+  --glow: rgba(245, 200, 126, 0.3);
+}
+
+.card--rose {
+  --glow: rgba(244, 162, 176, 0.28);
+}
+
+@keyframes float-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

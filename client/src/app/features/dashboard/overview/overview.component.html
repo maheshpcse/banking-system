@@ -1,0 +1,76 @@
+<section class="page" *ngIf="!loading && summary; else loadingTpl">
+  <header class="page__hero">
+    <div>
+      <p class="eyebrow">NovaBank</p>
+      <h1>Hello, {{ summary.user.fullName.split(' ')[0] }}</h1>
+      <p class="lede">Your calm, clear balance for everyday money moves.</p>
+    </div>
+    <div class="hero-chip">
+      <span>Account</span>
+      <strong>{{ summary.user.accountNumber }}</strong>
+    </div>
+  </header>
+
+  <div class="grid">
+    <app-animated-card class="balance-card" accent="mint" title="Available balance" subtitle="Primary">
+      <p class="balance">{{ summary.user.balance | currencyFormat }}</p>
+      <div class="metric-row">
+        <div>
+          <span>Deposits</span>
+          <strong>{{ summary.monthly.deposits.total | currencyFormat }}</strong>
+        </div>
+        <div>
+          <span>Withdrawals</span>
+          <strong>{{ summary.monthly.withdrawals.total | currencyFormat }}</strong>
+        </div>
+      </div>
+    </app-animated-card>
+
+    <app-animated-card accent="sky" title="Quick action" subtitle="Move money">
+      <div class="mode-switch">
+        <button type="button" [class.is-active]="mode === 'deposit'" (click)="setMode('deposit')">Deposit</button>
+        <button type="button" [class.is-active]="mode === 'withdraw'" (click)="setMode('withdraw')">Withdraw</button>
+      </div>
+
+      <form class="form" [formGroup]="actionForm" (ngSubmit)="submitAction()">
+        <label>
+          <span>Amount</span>
+          <input type="number" step="0.01" min="0.01" formControlName="amount" placeholder="0.00" />
+        </label>
+        <label>
+          <span>Note (optional)</span>
+          <input type="text" formControlName="description" placeholder="Payday, groceries…" />
+        </label>
+        <p class="form__error" *ngIf="error">{{ error }}</p>
+        <p class="form__success" *ngIf="success">{{ success }}</p>
+        <button class="btn btn--primary" type="submit" [disabled]="actionLoading">
+          {{ actionLoading ? 'Processing…' : (mode === 'deposit' ? 'Deposit funds' : 'Withdraw funds') }}
+        </button>
+      </form>
+    </app-animated-card>
+  </div>
+
+  <app-animated-card class="recent" accent="sand" title="Recent activity" subtitle="Latest five">
+    <ul class="tx-list" *ngIf="summary.recentTransactions.length; else emptyRecent">
+      <li *ngFor="let tx of summary.recentTransactions; let i = index" [style.animationDelay]="i * 60 + 'ms'">
+        <div>
+          <strong>{{ typeLabel(tx.type) }}</strong>
+          <span>{{ tx.description || tx.reference }}</span>
+        </div>
+        <em [class.credit]="isCredit(tx.type)" [class.debit]="!isCredit(tx.type)">
+          {{ isCredit(tx.type) ? '+' : '-' }}{{ tx.amount | currencyFormat }}
+        </em>
+      </li>
+    </ul>
+    <ng-template #emptyRecent>
+      <p class="empty">No transactions yet. Make your first deposit to get started.</p>
+    </ng-template>
+  </app-animated-card>
+</section>
+
+<ng-template #loadingTpl>
+  <section class="page page--loading">
+    <div class="loader"></div>
+    <p>Loading your account…</p>
+  </section>
+</ng-template>

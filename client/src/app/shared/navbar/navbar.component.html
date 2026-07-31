@@ -1,0 +1,19 @@
+<header class="nav" *ngIf="auth.isAuthenticated()">
+  <div class="nav__inner">
+    <a routerLink="/dashboard" class="brand" (click)="closeMenu()">
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__text">NovaBank</span>
+    </a>
+
+    <button class="nav__toggle" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen">
+      Menu
+    </button>
+
+    <nav class="nav__links" [class.is-open]="menuOpen">
+      <a routerLink="/dashboard" routerLinkActive="is-active" (click)="closeMenu()">Dashboard</a>
+      <a routerLink="/transfer" routerLinkActive="is-active" (click)="closeMenu()">Transfer</a>
+      <a routerLink="/transactions" routerLinkActive="is-active" (click)="closeMenu()">History</a>
+      <button class="nav__logout" type="button" (click)="logout()">Sign out</button>
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,14 @@
+<section
+  class="card scene"
+  [ngClass]="['card--' + accent, tilt ? 'card--tilt' : '']"
+>
+  <div class="card__face">
+    <header *ngIf="title || subtitle" class="card__header">
+      <p *ngIf="subtitle" class="card__subtitle">{{ subtitle }}</p>
+      <h2 *ngIf="title" class="card__title">{{ title }}</h2>
+    </header>
+    <div class="card__body">
+      <ng-content></ng-content>
+    </div>
+  </div>
+</section>

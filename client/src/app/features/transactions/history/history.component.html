@@ -1,0 +1,50 @@
+<section class="page">
+  <header class="page__hero">
+    <div>
+      <p class="eyebrow">NovaBank</p>
+      <h1>Transaction history</h1>
+      <p class="lede">Filter and review every move on your account.</p>
+    </div>
+  </header>
+
+  <div class="filters">
+    <button type="button" [class.is-active]="type === ''" (click)="setType('')">All</button>
+    <button type="button" [class.is-active]="type === 'deposit'" (click)="setType('deposit')">Deposits</button>
+    <button type="button" [class.is-active]="type === 'withdraw'" (click)="setType('withdraw')">Withdrawals</button>
+    <button type="button" [class.is-active]="type === 'transfer_in'" (click)="setType('transfer_in')">In</button>
+    <button type="button" [class.is-active]="type === 'transfer_out'" (click)="setType('transfer_out')">Out</button>
+  </div>
+
+  <app-animated-card accent="mint" title="Ledger" subtitle="Paginated">
+    <p class="form__error" *ngIf="error">{{ error }}</p>
+
+    <div class="loading" *ngIf="loading">Loading transactions…</div>
+
+    <ul class="tx-list" *ngIf="!loading && items.length">
+      <li *ngFor="let tx of items; let i = index" [style.animationDelay]="i * 40 + 'ms'">
+        <div class="tx-main">
+          <strong>{{ typeLabel(tx.type) }}</strong>
+          <span>{{ tx.createdAt | date: 'medium' }}</span>
+          <small>{{ tx.description || tx.reference }}</small>
+          <small *ngIf="tx.counterpartyName">
+            {{ isCredit(tx.type) ? 'From' : 'To' }} {{ tx.counterpartyName }} ({{ tx.counterpartyAccount }})
+          </small>
+        </div>
+        <div class="tx-side">
+          <em [class.credit]="isCredit(tx.type)" [class.debit]="!isCredit(tx.type)">
+            {{ isCredit(tx.type) ? '+' : '-' }}{{ tx.amount | currencyFormat }}
+          </em>
+          <span>Bal {{ tx.balanceAfter | currencyFormat }}</span>
+        </div>
+      </li>
+    </ul>
+
+    <p class="empty" *ngIf="!loading && !items.length">No transactions for this filter.</p>
+
+    <div class="pager" *ngIf="pages > 1">
+      <button type="button" class="btn btn--ghost" (click)="prev()" [disabled]="page <= 1">Previous</button>
+      <span>Page {{ page }} / {{ pages }}</span>
+      <button type="button" class="btn btn--ghost" (click)="next()" [disabled]="page >= pages">Next</button>
+    </div>
+  </app-animated-card>
+</section>

@@ -1,0 +1,17 @@
+{
+  "name": "minimal-banking-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minimal Banking System built with MEAN stack (MongoDB, Express, Angular 14, Node.js)",
+  "scripts": {
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "server": "npm --prefix server run dev",
+    "server:start": "npm --prefix server start",
+    "client": "npm --prefix client start",
+    "build": "npm --prefix client run build",
+    "start": "npm run server:start"
+  },
+  "engines": {
+    "node": ">=16.20.0"
+  }
+}

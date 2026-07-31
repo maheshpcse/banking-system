@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Sora:wght@500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap');
+
+:root {
+  --bg: #f4f8fb;
+  --bg-accent: #e8f3f8;
+  --surface: rgba(255, 255, 255, 0.78);
+  --text: #1d2a36;
+  --text-muted: #6b7c8f;
+  --accent: #5fc4b0;
+  --accent-deep: #2f8f7f;
+  --accent-sky: #6aa8e8;
+  --danger: #c45b6c;
+  --success: #1f8a6e;
+  --radius-lg: 1.25rem;
+  --shadow-soft: 0 18px 40px rgba(90, 120, 150, 0.12);
+  --font-display: 'Sora', 'Manrope', sans-serif;
+  --font-body: 'Manrope', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: var(--font-body);
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(127, 214, 196, 0.22), transparent 28%),
+    radial-gradient(circle at top right, rgba(147, 197, 253, 0.2), transparent 30%),
+    linear-gradient(180deg, #f7fbfe 0%, var(--bg) 48%, #eef5f8 100%);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+.form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.form label {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.form label span {
+  font-size: 0.84rem;
+  font-weight: 650;
+  color: var(--text-muted);
+}
+
+.form input {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 0.85rem;
+  padding: 0.8rem 0.95rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.form input:focus {
+  border-color: rgba(95, 196, 176, 0.8);
+  box-shadow: 0 0 0 4px rgba(95, 196, 176, 0.16);
+  transform: translateY(-1px);
+}
+
+.form__error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.9rem;
+}
+
+.form__success {
+  margin: 0;
+  color: var(--success);
+  font-size: 0.9rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 0.9rem;
+  padding: 0.85rem 1.1rem;
+  font-weight: 700;
+  border: 0;
+  cursor: pointer;
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, #5fc4b0 0%, #6aa8e8 100%);
+  color: #15343a;
+  box-shadow: 0 12px 24px rgba(95, 196, 176, 0.28);
+}
+
+.btn--primary:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 16px 30px rgba(95, 196, 176, 0.34);
+}
+
+.btn--ghost {
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--text);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
