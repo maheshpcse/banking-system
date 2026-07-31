@@ -14,7 +14,25 @@ const PORT = process.env.PORT || 3000;
 
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || 'http://localhost:4200',
+    origin: (origin, callback) => {
+      const allowed = (process.env.CLIENT_ORIGIN || 'http://localhost:4200')
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean);
+
+      // Allow local Angular hosts during development.
+      const localDev = [
+        'http://localhost:4200',
+        'http://127.0.0.1:4200',
+        'http://0.0.0.0:4200'
+      ];
+
+      if (!origin || allowed.includes(origin) || localDev.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true
   })
 );

@@ -6,3 +6,4 @@ dist/
 .DS_Store
 coverage/
 .mongo-binaries/
+server/.local-ssl/

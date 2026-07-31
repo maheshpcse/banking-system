@@ -27,12 +27,15 @@ NovaBank is a lightweight banking web app built with the **MEAN** stack:
 # Install dependencies
 npm run install:all
 
+# Use Node 16+ (recommended for Angular 14)
 # Terminal 1 — API (http://localhost:3000)
 npm run server
 
 # Terminal 2 — Angular (http://localhost:4200)
 npm run client
 ```
+
+> On Ubuntu 24.04+, `npm run server` auto-fetches local OpenSSL 1.1 libs so the in-memory MongoDB binary can start.
 
 Open [http://localhost:4200](http://localhost:4200), create an account (starter balance **$1,000**), then deposit, withdraw, or transfer.
 
