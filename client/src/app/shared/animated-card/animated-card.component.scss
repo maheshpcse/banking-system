@@ -1,5 +1,5 @@
 .scene {
-  perspective: 1200px;
+  /* perspective: 1200px; removed — no 3D hover/tilt motion */
 }
 
 .card {
@@ -9,8 +9,8 @@
   border: 1px solid rgba(255, 255, 255, 0.7);
   box-shadow: var(--shadow-soft);
   overflow: hidden;
-  transform-style: preserve-3d;
-  animation: float-in 0.55s var(--ease-out) both;
+  /* transform-style / float-in translate removed — fade only if needed */
+  animation: none;
 }
 
 .card::before {
@@ -25,7 +25,14 @@
 .card__face {
   position: relative;
   padding: 1.35rem 1.4rem 1.4rem;
-  transform: translateZ(0);
+  transform: none;
+  transition: none;
+}
+
+.card:hover,
+.card:hover .card__face,
+.card--tilt:hover .card__face {
+  transform: none !important;
 }
 
 /* Hover tilt / lift intentionally disabled
@@ -69,13 +76,4 @@
 
 .card--rose {
   --glow: rgba(244, 162, 176, 0.28);
-}
-
-@keyframes float-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
