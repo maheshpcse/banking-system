@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { TransactionService } from '../../../core/services/transaction.service';
+import { AlertService } from '../../../core/services/alert.service';
 import { Transaction } from '../../../core/models/banking.models';
+import { withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
   selector: 'app-history',
@@ -15,7 +17,10 @@ export class HistoryComponent implements OnInit {
   pages = 1;
   type = '';
 
-  constructor(private transactionService: TransactionService) {}
+  constructor(
+    private transactionService: TransactionService,
+    private alerts: AlertService
+  ) {}
 
   ngOnInit(): void {
     this.load();
@@ -24,20 +29,21 @@ export class HistoryComponent implements OnInit {
   load(page = 1): void {
     this.loading = true;
     this.error = '';
-    this.transactionService
-      .list({ page, limit: 12, type: this.type || undefined })
-      .subscribe({
-        next: (res) => {
-          this.items = res.items;
-          this.page = res.pagination.page;
-          this.pages = res.pagination.pages;
-          this.loading = false;
-        },
-        error: (err) => {
-          this.error = err?.error?.message || 'Unable to load history';
-          this.loading = false;
-        }
-      });
+    withShimmerDelay(
+      this.transactionService.list({ page, limit: 12, type: this.type || undefined })
+    ).subscribe({
+      next: (res) => {
+        this.items = res.items;
+        this.page = res.pagination.page;
+        this.pages = res.pagination.pages;
+        this.loading = false;
+      },
+      error: async (err) => {
+        this.error = err?.error?.message || 'Unable to load history';
+        this.loading = false;
+        await this.alerts.error('History unavailable', this.error);
+      }
+    });
   }
 
   setType(type: string): void {

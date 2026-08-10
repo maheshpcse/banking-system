@@ -1,6 +1,6 @@
 <header class="nav" *ngIf="auth.isAuthenticated()">
   <div class="nav__inner">
-    <a routerLink="/dashboard" class="brand" (click)="closeMenu()">
+    <a routerLink="/dashboard" class="brand" (click)="onNavClick()">
       <span class="brand__mark" aria-hidden="true"></span>
       <span class="brand__text">NovaBank</span>
     </a>
@@ -10,9 +10,9 @@
     </button>
 
     <nav class="nav__links" [class.is-open]="menuOpen">
-      <a routerLink="/dashboard" routerLinkActive="is-active" (click)="closeMenu()">Dashboard</a>
-      <a routerLink="/transfer" routerLinkActive="is-active" (click)="closeMenu()">Transfer</a>
-      <a routerLink="/transactions" routerLinkActive="is-active" (click)="closeMenu()">History</a>
+      <a routerLink="/dashboard" routerLinkActive="is-active" (click)="onNavClick()">Dashboard</a>
+      <a routerLink="/transfer" routerLinkActive="is-active" (click)="onNavClick()">Transfer</a>
+      <a routerLink="/transactions" routerLinkActive="is-active" (click)="onNavClick()">History</a>
       <button class="nav__logout" type="button" (click)="logout()">Sign out</button>
     </nav>
   </div>

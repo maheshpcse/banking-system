@@ -1,4 +1,4 @@
-<section class="page">
+<section class="page" *ngIf="!pageLoading; else formShimmer">
   <header class="page__hero">
     <div>
       <p class="eyebrow">NovaBank</p>
@@ -23,9 +23,6 @@
           <input type="text" formControlName="description" placeholder="Rent, gift, shared dinner…" />
         </label>
 
-        <p class="form__error" *ngIf="error">{{ error }}</p>
-        <p class="form__success" *ngIf="success">{{ success }}</p>
-
         <button class="btn btn--primary" type="submit" [disabled]="loading">
           {{ loading ? 'Sending…' : 'Send transfer' }}
         </button>
@@ -44,3 +41,7 @@
     </aside>
   </div>
 </section>
+
+<ng-template #formShimmer>
+  <app-shimmer variant="form"></app-shimmer>
+</ng-template>

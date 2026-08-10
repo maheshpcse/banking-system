@@ -113,14 +113,14 @@
   font-weight: 650;
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
 .mode-switch button.is-active {
   background: #fff;
   color: var(--text);
   box-shadow: 0 6px 16px rgba(100, 130, 160, 0.12);
-  transform: translateY(-1px);
+  /* transform: translateY(-1px); removed up/down hover motion */
 }
 
 .recent {
@@ -144,7 +144,6 @@
   border-radius: 0.9rem;
   background: rgba(255, 255, 255, 0.55);
   border: 1px solid rgba(226, 232, 240, 0.9);
-  animation: float-in 0.45s var(--ease-out) both;
 }
 
 .tx-list strong {
@@ -175,30 +174,6 @@
 .empty {
   margin: 0;
   color: var(--text-muted);
-}
-
-.page--loading {
-  min-height: 50vh;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 0.85rem;
-  color: var(--text-muted);
-}
-
-.loader {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 3px solid rgba(148, 163, 184, 0.25);
-  border-top-color: var(--accent);
-  animation: spin 0.85s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 @media (max-width: 860px) {

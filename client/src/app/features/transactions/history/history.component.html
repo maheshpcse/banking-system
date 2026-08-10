@@ -1,4 +1,4 @@
-<section class="page">
+<section class="page" *ngIf="!loading; else historyShimmer">
   <header class="page__hero">
     <div>
       <p class="eyebrow">NovaBank</p>
@@ -16,12 +16,8 @@
   </div>
 
   <app-animated-card accent="mint" title="Ledger" subtitle="Paginated">
-    <p class="form__error" *ngIf="error">{{ error }}</p>
-
-    <div class="loading" *ngIf="loading">Loading transactions…</div>
-
-    <ul class="tx-list" *ngIf="!loading && items.length">
-      <li *ngFor="let tx of items; let i = index" [style.animationDelay]="i * 40 + 'ms'">
+    <ul class="tx-list" *ngIf="items.length; else emptyHistory">
+      <li *ngFor="let tx of items">
         <div class="tx-main">
           <strong>{{ typeLabel(tx.type) }}</strong>
           <span>{{ tx.createdAt | date: 'medium' }}</span>
@@ -39,7 +35,9 @@
       </li>
     </ul>
 
-    <p class="empty" *ngIf="!loading && !items.length">No transactions for this filter.</p>
+    <ng-template #emptyHistory>
+      <p class="empty">No transactions for this filter.</p>
+    </ng-template>
 
     <div class="pager" *ngIf="pages > 1">
       <button type="button" class="btn btn--ghost" (click)="prev()" [disabled]="page <= 1">Previous</button>
@@ -48,3 +46,7 @@
     </div>
   </app-animated-card>
 </section>
+
+<ng-template #historyShimmer>
+  <app-shimmer variant="history"></app-shimmer>
+</ng-template>

@@ -5,9 +5,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NavbarComponent } from './navbar/navbar.component';
 import { AnimatedCardComponent } from './animated-card/animated-card.component';
 import { CurrencyFormatPipe } from './currency-format.pipe';
+import { ShimmerComponent } from './shimmer/shimmer.component';
 
 @NgModule({
-  declarations: [NavbarComponent, AnimatedCardComponent, CurrencyFormatPipe],
+  declarations: [NavbarComponent, AnimatedCardComponent, CurrencyFormatPipe, ShimmerComponent],
   imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
   exports: [
     CommonModule,
@@ -16,7 +17,8 @@ import { CurrencyFormatPipe } from './currency-format.pipe';
     ReactiveFormsModule,
     NavbarComponent,
     AnimatedCardComponent,
-    CurrencyFormatPipe
+    CurrencyFormatPipe,
+    ShimmerComponent
   ]
 })
 export class SharedModule {}

@@ -41,8 +41,6 @@
           <span>Note (optional)</span>
           <input type="text" formControlName="description" placeholder="Payday, groceries…" />
         </label>
-        <p class="form__error" *ngIf="error">{{ error }}</p>
-        <p class="form__success" *ngIf="success">{{ success }}</p>
         <button class="btn btn--primary" type="submit" [disabled]="actionLoading">
           {{ actionLoading ? 'Processing…' : (mode === 'deposit' ? 'Deposit funds' : 'Withdraw funds') }}
         </button>
@@ -52,7 +50,7 @@
 
   <app-animated-card class="recent" accent="sand" title="Recent activity" subtitle="Latest five">
     <ul class="tx-list" *ngIf="summary.recentTransactions.length; else emptyRecent">
-      <li *ngFor="let tx of summary.recentTransactions; let i = index" [style.animationDelay]="i * 60 + 'ms'">
+      <li *ngFor="let tx of summary.recentTransactions">
         <div>
           <strong>{{ typeLabel(tx.type) }}</strong>
           <span>{{ tx.description || tx.reference }}</span>
@@ -69,8 +67,5 @@
 </section>
 
 <ng-template #loadingTpl>
-  <section class="page page--loading">
-    <div class="loader"></div>
-    <p>Loading your account…</p>
-  </section>
+  <app-shimmer variant="dashboard"></app-shimmer>
 </ng-template>
