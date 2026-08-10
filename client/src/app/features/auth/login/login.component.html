@@ -8,7 +8,7 @@
     </div>
   </div>
 
-  <app-animated-card class="auth-panel" title="Welcome back" subtitle="Sign in" accent="sky">
+  <app-animated-card class="auth-panel" title="Welcome back" subtitle="Sign in" accent="sky" [tilt]="false">
     <form class="form" [formGroup]="form" (ngSubmit)="submit()">
       <label>
         <span>Email</span>

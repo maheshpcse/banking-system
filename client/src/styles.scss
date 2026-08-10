@@ -81,7 +81,14 @@ a {
   padding: 0.8rem 0.95rem;
   color: var(--text);
   outline: none;
+  transform: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form input:hover,
+.form input:focus,
+.form input:active {
+  transform: none !important;
 }
 
 .form input:focus {
@@ -112,6 +119,7 @@ a {
   font-weight: 700;
   border: 0;
   cursor: pointer;
+  transform: none;
   transition: box-shadow 0.25s ease, background 0.25s ease, opacity 0.2s ease;
 }
 
@@ -126,9 +134,17 @@ a {
   box-shadow: 0 12px 24px rgba(95, 196, 176, 0.28);
 }
 
+.btn:hover,
+.btn:focus,
+.btn:active,
+.btn--primary:hover:not(:disabled),
+.btn--ghost:hover:not(:disabled) {
+  transform: none !important;
+}
+
 .btn--primary:hover:not(:disabled) {
   /* transform: translateY(-2px) scale(1.01); removed up/down hover motion */
-  box-shadow: 0 12px 28px rgba(95, 196, 176, 0.36);
+  box-shadow: 0 12px 24px rgba(95, 196, 176, 0.34);
 }
 
 .btn--ghost {
