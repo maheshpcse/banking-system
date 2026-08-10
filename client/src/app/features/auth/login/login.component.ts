@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { AlertService } from '../../../core/services/alert.service';
+import { withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
   selector: 'app-login',
@@ -20,7 +22,8 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private alerts: AlertService
   ) {}
 
   ngOnInit(): void {
@@ -39,14 +42,17 @@ export class LoginComponent implements OnInit {
     this.error = '';
     const { email, password } = this.form.getRawValue();
 
-    this.auth.login({ email: email!, password: password! }).subscribe({
-      next: () => {
+    withShimmerDelay(this.auth.login({ email: email!, password: password! })).subscribe({
+      next: async (res) => {
         this.loading = false;
+        await this.alerts.success('Welcome back', `Signed in as ${res.user.fullName}.`);
         this.router.navigate(['/dashboard']);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       },
-      error: (err) => {
+      error: async (err) => {
         this.loading = false;
         this.error = err?.error?.message || 'Unable to sign in';
+        await this.alerts.error('Sign in failed', this.error);
       }
     });
   }

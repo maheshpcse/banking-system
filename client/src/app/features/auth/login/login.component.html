@@ -1,4 +1,4 @@
-<section class="auth-shell">
+<section class="auth-shell" *ngIf="!loading; else authShimmer">
   <div class="auth-visual" aria-hidden="true">
     <div class="orb orb--one"></div>
     <div class="orb orb--two"></div>
@@ -19,10 +19,8 @@
         <input type="password" formControlName="password" autocomplete="current-password" placeholder="••••••••" />
       </label>
 
-      <p class="form__error" *ngIf="error">{{ error }}</p>
-
       <button class="btn btn--primary" type="submit" [disabled]="loading">
-        {{ loading ? 'Signing in…' : 'Sign in' }}
+        Sign in
       </button>
     </form>
 
@@ -32,3 +30,7 @@
     </p>
   </app-animated-card>
 </section>
+
+<ng-template #authShimmer>
+  <app-shimmer variant="auth"></app-shimmer>
+</ng-template>

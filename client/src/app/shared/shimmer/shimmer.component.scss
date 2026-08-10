@@ -1,0 +1,141 @@
+.shimmer {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 2.75rem;
+}
+
+.shimmer__hero {
+  margin-bottom: 1.25rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.shimmer__grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.shimmer__grid--form {
+  align-items: start;
+}
+
+.shimmer__auth {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 1.5rem;
+  align-items: center;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 2rem;
+}
+
+.shimmer-card {
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow-soft);
+  padding: 1.35rem 1.4rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.shimmer-card--visual {
+  min-height: 320px;
+}
+
+.shimmer-line,
+.shimmer-block,
+.shimmer-row,
+.shimmer-chip {
+  border-radius: 0.7rem;
+  background: linear-gradient(
+    90deg,
+    rgba(214, 230, 240, 0.55) 0%,
+    rgba(190, 228, 220, 0.85) 35%,
+    rgba(186, 214, 240, 0.9) 50%,
+    rgba(190, 228, 220, 0.85) 65%,
+    rgba(214, 230, 240, 0.55) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-wave 1.35s ease-in-out infinite;
+}
+
+.shimmer-line--xs {
+  width: 28%;
+  height: 0.7rem;
+}
+
+.shimmer-line--sm {
+  width: 42%;
+  height: 0.85rem;
+}
+
+.shimmer-line--md {
+  width: 58%;
+  height: 1rem;
+}
+
+.shimmer-line--lg {
+  width: 46%;
+  height: 1.8rem;
+}
+
+.shimmer-line--xl {
+  width: 70%;
+  height: 2.4rem;
+}
+
+.shimmer-line--btn {
+  width: 100%;
+  height: 2.7rem;
+  margin-top: 0.35rem;
+}
+
+.shimmer-block {
+  width: 100%;
+  height: 2.7rem;
+}
+
+.shimmer-block--sm {
+  height: 2.4rem;
+}
+
+.shimmer-row {
+  width: 100%;
+  height: 3.2rem;
+}
+
+.shimmer-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+
+.shimmer-chip {
+  width: 5.5rem;
+  height: 2.1rem;
+  border-radius: 0.75rem;
+}
+
+@keyframes shimmer-wave {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (max-width: 860px) {
+  .shimmer__grid,
+  .shimmer__auth {
+    grid-template-columns: 1fr;
+  }
+
+  .shimmer-card--visual {
+    min-height: 180px;
+  }
+}
