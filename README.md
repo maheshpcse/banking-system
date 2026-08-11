@@ -68,3 +68,39 @@ server/   Express + Mongoose API
 - `POST /api/account/withdraw`
 - `POST /api/account/transfer`
 - `GET /api/transactions`
+
+## Deployment (Docker Compose)
+
+This repository now follows the deployment conventions used in `chat-app` (Angular + Nginx container) and `chat-system` (Node service + Compose orchestration).
+
+### 1) Configure environment
+
+```bash
+cp .env.example .env
+```
+
+Update `JWT_SECRET` in `.env` before production use.
+
+### 2) Build and run
+
+```bash
+npm run docker:up
+```
+
+Services:
+- Frontend: `http://localhost:8080`
+- API health: `http://localhost:3000/api/health`
+
+### 3) Stop stack
+
+```bash
+npm run docker:down
+```
+
+### Deployment artifacts added
+
+- `client/Dockerfile` and `client/nginx.conf` (Angular static hosting + SPA routing + `/api` proxy)
+- `server/Dockerfile` (production Node runtime + health check)
+- `docker-compose.yml` (MongoDB + API + frontend stack)
+- `.github/workflows/deployment.yml` (build/smoke/compose validation)
+- `.env.example`, `.dockerignore`, `client/.dockerignore`, `server/.dockerignore`
