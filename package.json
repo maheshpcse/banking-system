@@ -9,7 +9,11 @@
     "server:start": "npm --prefix server start",
     "client": "npm --prefix client start",
     "build": "npm --prefix client run build",
-    "start": "npm run server:start"
+    "start": "npm run server:start",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
   },
   "engines": {
     "node": ">=16.20.0"
