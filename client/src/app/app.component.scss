@@ -10,40 +10,148 @@
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  background:
+    linear-gradient(165deg, #f8fcff 0%, #f3f8fb 42%, #eef6f4 100%);
 }
 
-.blob {
+/* Soft banking aurora wash — mint + sky, light and premium */
+.ambient__wash {
+  position: absolute;
+  inset: -10%;
+  background:
+    radial-gradient(ellipse 55% 40% at 12% 18%, rgba(95, 196, 176, 0.18), transparent 70%),
+    radial-gradient(ellipse 50% 45% at 88% 12%, rgba(106, 168, 232, 0.16), transparent 68%),
+    radial-gradient(ellipse 60% 50% at 70% 88%, rgba(168, 210, 230, 0.14), transparent 70%),
+    radial-gradient(ellipse 40% 35% at 20% 78%, rgba(190, 230, 210, 0.12), transparent 70%);
+  animation: wash-breathe 16s ease-in-out infinite;
+}
+
+/* Subtle ledger / statement grid — finance document cue */
+.ambient__ledger {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image:
+    linear-gradient(rgba(95, 130, 160, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(95, 130, 160, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 20%, transparent 75%);
+}
+
+/* Horizontal cash-flow ribbons (no up/down motion) */
+.ambient__flow {
+  position: absolute;
+  height: 120px;
+  width: 140%;
+  left: -20%;
+  border-radius: 999px;
+  filter: blur(28px);
+  opacity: 0.45;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(95, 196, 176, 0.22) 25%,
+    rgba(106, 168, 232, 0.2) 55%,
+    transparent 100%
+  );
+  animation: flow-x 22s linear infinite;
+}
+
+.ambient__flow--a {
+  top: 18%;
+  opacity: 0.38;
+  animation-duration: 26s;
+}
+
+.ambient__flow--b {
+  top: 48%;
+  height: 90px;
+  opacity: 0.28;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(106, 168, 232, 0.18) 30%,
+    rgba(95, 196, 176, 0.16) 60%,
+    transparent 100%
+  );
+  animation-duration: 32s;
+  animation-direction: reverse;
+}
+
+.ambient__flow--c {
+  top: 72%;
+  height: 100px;
+  opacity: 0.22;
+  animation-duration: 28s;
+  animation-delay: -8s;
+}
+
+/* Soft coin-ring motifs — banking metaphor, opacity pulse only */
+.ambient__coin {
   position: absolute;
   border-radius: 50%;
-  filter: blur(40px);
+  border: 1.5px solid rgba(95, 196, 176, 0.22);
+  box-shadow:
+    inset 0 0 0 10px rgba(255, 255, 255, 0.35),
+    inset 0 0 0 12px rgba(106, 168, 232, 0.1);
+  animation: coin-glow 10s ease-in-out infinite;
+}
+
+.ambient__coin::before,
+.ambient__coin::after {
+  content: '';
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  border: 1px solid rgba(106, 168, 232, 0.14);
+}
+
+.ambient__coin::after {
+  inset: 32%;
+  border-color: rgba(95, 196, 176, 0.16);
+}
+
+.ambient__coin--a {
+  width: 220px;
+  height: 220px;
+  top: 8%;
+  right: 8%;
   opacity: 0.55;
-  animation: ambient-drift 14s ease-in-out infinite;
 }
 
-.blob--a {
-  width: 340px;
-  height: 340px;
-  top: -80px;
-  left: -60px;
-  background: rgba(127, 214, 196, 0.45);
+.ambient__coin--b {
+  width: 160px;
+  height: 160px;
+  bottom: 14%;
+  left: 6%;
+  opacity: 0.4;
+  animation-delay: -3.5s;
+  border-color: rgba(106, 168, 232, 0.2);
 }
 
-.blob--b {
-  width: 420px;
-  height: 420px;
-  top: 20%;
-  right: -120px;
-  background: rgba(147, 197, 253, 0.38);
-  animation-delay: -4s;
+.ambient__coin--c {
+  width: 110px;
+  height: 110px;
+  top: 42%;
+  left: 42%;
+  opacity: 0.28;
+  animation-delay: -6s;
 }
 
-.blob--c {
-  width: 280px;
-  height: 280px;
-  bottom: 5%;
-  left: 30%;
-  background: rgba(250, 214, 165, 0.28);
-  animation-delay: -8s;
+/* Slow diagonal sheen — premium paper finish */
+.ambient__sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.35) 48%,
+    transparent 62%
+  );
+  background-size: 220% 100%;
+  animation: sheen-slide 18s ease-in-out infinite;
+  opacity: 0.55;
 }
 
 main {
@@ -51,12 +159,51 @@ main {
   z-index: 1;
 }
 
-@keyframes ambient-drift {
+/* Opacity / horizontal motion only — no up/down translate */
+@keyframes wash-breathe {
   0%,
   100% {
-    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
   }
   50% {
-    transform: translate3d(18px, -22px, 0) scale(1.06);
+    opacity: 0.82;
+  }
+}
+
+@keyframes flow-x {
+  0% {
+    transform: translateX(-8%);
+  }
+  100% {
+    transform: translateX(8%);
+  }
+}
+
+@keyframes coin-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.62;
+  }
+}
+
+@keyframes sheen-slide {
+  0%,
+  100% {
+    background-position: 100% 0;
+  }
+  50% {
+    background-position: 0% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient__wash,
+  .ambient__flow,
+  .ambient__coin,
+  .ambient__sheen {
+    animation: none;
   }
 }
