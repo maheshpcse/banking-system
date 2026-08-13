@@ -8,6 +8,7 @@ dist
 coverage
 e2e
 logs
+*.log
 *.md
 !README.md
 .gitignore
