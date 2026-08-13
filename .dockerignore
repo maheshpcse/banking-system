@@ -1,0 +1,7 @@
+node_modules
+.local-ssl
+*.log
+.env
+.git
+.github
+.vscode
