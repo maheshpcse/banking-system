@@ -1,19 +1,45 @@
 {
-  "name": "minimal-banking-system",
+  "name": "banking-system",
   "version": "1.0.0",
   "private": true,
-  "description": "Minimal Banking System built with MEAN stack (MongoDB, Express, Angular 14, Node.js)",
+  "description": "NovaBank Angular 14 frontend for the minimal banking system",
   "scripts": {
-    "install:all": "npm --prefix server install && npm --prefix client install",
-    "server": "npm --prefix server run dev",
-    "server:start": "npm --prefix server start",
-    "client": "npm --prefix client start",
-    "build": "npm --prefix client run build",
-    "start": "npm run server:start",
-    "docker:build": "docker compose build",
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "docker:build": "docker build -t banking-client .",
     "docker:up": "docker compose up -d --build",
-    "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f"
+    "docker:down": "docker compose down"
+  },
+  "dependencies": {
+    "@angular/animations": "^14.2.0",
+    "@angular/common": "^14.2.0",
+    "@angular/compiler": "^14.2.0",
+    "@angular/core": "^14.2.0",
+    "@angular/forms": "^14.2.0",
+    "@angular/platform-browser": "^14.2.0",
+    "@angular/platform-browser-dynamic": "^14.2.0",
+    "@angular/router": "^14.2.0",
+    "rxjs": "~7.5.0",
+    "sweetalert2": "^11.10.8",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.11.4"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^14.2.13",
+    "@angular/cli": "~14.2.13",
+    "@angular/compiler-cli": "^14.2.0",
+    "@types/jasmine": "~4.0.0",
+    "@types/node": "^18.11.18",
+    "jasmine-core": "~4.3.0",
+    "karma": "~6.4.0",
+    "karma-chrome-launcher": "~3.1.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.0.0",
+    "typescript": "~4.7.2"
   },
   "engines": {
     "node": ">=16.20.0"
