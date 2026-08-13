@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#172B36">
+  <meta name="description" content="NovaBank Banking System is temporarily unavailable while we deploy updates.">
+  <title>Maintenance · NovaBank</title>
+  <!-- Self-contained: no external fonts/assets so page works even while assets roll. -->
+  <style>
+    :root {
+      --arctic-powder: #F1F6F4;
+      --mystic-mint: #D9E8E2;
+      --nocturnal: #114C5A;
+      --nocturnal-light: #1a6b7a;
+      --oceanic-noir: #172B36;
+      --forsytha: #FFC801;
+      --deep-saffron: #FF9932;
+      --white: #ffffff;
+      --gray-100: #f5f7f6;
+      --gray-400: #a8b0ad;
+      --gray-500: #6b7572;
+      --gray-700: #333a38;
+      --gray-800: #1f2524;
+      --shadow-md: 0 4px 12px rgba(23, 43, 54, 0.1);
+      --shadow-lg: 0 8px 24px rgba(23, 43, 54, 0.12);
+      --radius: 20px;
+      --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: var(--gray-800);
+      background:
+        radial-gradient(1200px 600px at 12% -10%, rgba(217, 232, 226, 0.9), transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, rgba(255, 200, 1, 0.12), transparent 45%),
+        linear-gradient(165deg, var(--arctic-powder) 0%, var(--gray-100) 48%, var(--mystic-mint) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .shell {
+      width: min(440px, 100%);
+      position: relative;
+    }
+
+    .card {
+      position: relative;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(17, 76, 90, 0.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding: 40px 32px 32px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      overflow: hidden;
+      animation: rise 560ms var(--ease) both;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--nocturnal) 0%, var(--nocturnal-light) 45%, var(--forsytha) 100%);
+    }
+
+    .mark {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      border-radius: 18px;
+      background: linear-gradient(145deg, var(--nocturnal) 0%, var(--oceanic-noir) 100%);
+      box-shadow: var(--shadow-md);
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+
+    .mark svg {
+      width: 30px;
+      height: 30px;
+      fill: none;
+      stroke: var(--white);
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .pulse {
+      position: absolute;
+      inset: -6px;
+      border-radius: 22px;
+      border: 1px solid rgba(17, 76, 90, 0.18);
+      animation: pulse 2.4s var(--ease) infinite;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(17, 76, 90, 0.06);
+      color: var(--nocturnal);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--forsytha);
+      box-shadow: 0 0 0 0 rgba(255, 200, 1, 0.55);
+      animation: blink 1.6s ease-in-out infinite;
+    }
+
+    h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.45rem, 4vw, 1.75rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--oceanic-noir);
+      margin-bottom: 10px;
+      line-height: 1.25;
+    }
+
+    .lead {
+      color: var(--gray-500);
+      font-size: 0.95rem;
+      max-width: 32ch;
+      margin: 0 auto 28px;
+    }
+
+    .meter {
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(17, 76, 90, 0.08);
+      overflow: hidden;
+      margin: 0 auto 28px;
+      max-width: 220px;
+    }
+
+    .meter > span {
+      display: block;
+      height: 100%;
+      width: 38%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--nocturnal-light), var(--forsytha));
+      animation: slide 1.8s var(--ease) infinite;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .chip {
+      background: var(--arctic-powder);
+      border: 1px solid rgba(17, 76, 90, 0.06);
+      border-radius: 12px;
+      padding: 12px 10px;
+      text-align: left;
+    }
+
+    .chip small {
+      display: block;
+      color: var(--gray-400);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .chip strong {
+      display: block;
+      color: var(--nocturnal);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    button.primary {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      background: var(--nocturnal);
+      color: var(--white);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 20px;
+      border-radius: 999px;
+      min-width: 132px;
+      transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+      box-shadow: 0 2px 8px rgba(17, 76, 90, 0.22);
+    }
+
+    button.primary:hover {
+      background: var(--nocturnal-light);
+      transform: translateY(-1px);
+    }
+
+    button.primary:active { transform: translateY(0); }
+
+    button.primary:focus-visible {
+      outline: 2px solid var(--forsytha);
+      outline-offset: 3px;
+    }
+
+    button.ghost {
+      appearance: none;
+      border: 1px solid rgba(17, 76, 90, 0.14);
+      cursor: pointer;
+      background: transparent;
+      color: var(--nocturnal);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 18px;
+      border-radius: 999px;
+      transition: background 160ms ease, border-color 160ms ease;
+    }
+
+    button.ghost:hover {
+      background: rgba(17, 76, 90, 0.05);
+      border-color: rgba(17, 76, 90, 0.28);
+    }
+
+    button.ghost:focus-visible {
+      outline: 2px solid var(--nocturnal-light);
+      outline-offset: 3px;
+    }
+
+    .foot {
+      margin-top: 22px;
+      color: var(--gray-400);
+      font-size: 12px;
+    }
+
+    .foot time {
+      color: var(--gray-500);
+      font-variant-numeric: tabular-nums;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px) scale(0.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.35; transform: scale(1); }
+      50% { opacity: 0; transform: scale(1.08); }
+    }
+
+    @keyframes blink {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 200, 1, 0.45); }
+      50% { box-shadow: 0 0 0 6px rgba(255, 200, 1, 0); }
+    }
+
+    @keyframes slide {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(320%); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card, .pulse, .dot, .meter > span { animation: none; }
+      .card { opacity: 1; transform: none; }
+    }
+
+    @media (max-width: 420px) {
+      .card { padding: 32px 22px 26px; }
+      .meta { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; }
+      button.primary, button.ghost { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell" role="main" aria-labelledby="maint-title">
+    <section class="card" aria-live="polite">
+      <div class="mark" aria-hidden="true">
+        <span class="pulse"></span>
+        <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        </svg>
+      </div>
+
+      <div class="eyebrow"><span class="dot" aria-hidden="true"></span> Scheduled maintenance</div>
+
+      <h1 id="maint-title">We&rsquo;ll be right back</h1>
+      <p class="lead">
+        NovaBank is updating to a better experience.
+        Your accounts stay safe &mdash; this usually takes only a few minutes.
+      </p>
+
+      <div class="meter" aria-hidden="true"><span></span></div>
+
+      <div class="meta">
+        <div class="chip">
+          <small>Status</small>
+          <strong id="status-label">Deploying updates</strong>
+        </div>
+        <div class="chip">
+          <small>Typical wait</small>
+          <strong>2–8 minutes</strong>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="primary" id="btn-refresh">Try again</button>
+        <button type="button" class="ghost" id="btn-auto" aria-pressed="true">Auto-check on</button>
+      </div>
+
+      <p class="foot">
+        Last checked <time id="last-check" datetime="">—</time>
+      </p>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      var auto = true;
+      var timer = null;
+      var statusEl = document.getElementById('status-label');
+      var timeEl = document.getElementById('last-check');
+      var btnRefresh = document.getElementById('btn-refresh');
+      var btnAuto = document.getElementById('btn-auto');
+
+      function stamp() {
+        var now = new Date();
+        timeEl.dateTime = now.toISOString();
+        timeEl.textContent = now.toLocaleTimeString(undefined, {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      }
+
+      function probe() {
+        stamp();
+        var url = './index.html?_=' + Date.now();
+        fetch(url, { cache: 'no-store', credentials: 'same-origin' })
+          .then(function (res) {
+            if (!res.ok) throw new Error('bad status');
+            return res.text();
+          })
+          .then(function (html) {
+            var isMaint =
+              html.indexOf('Scheduled maintenance') !== -1 ||
+              html.indexOf('id="maint-title"') !== -1;
+            var isApp =
+              html.indexOf('app-root') !== -1 ||
+              html.indexOf('NovaBank') !== -1 && html.indexOf('Scheduled maintenance') === -1;
+
+            if (isApp && !isMaint) {
+              statusEl.textContent = 'Back online';
+              window.location.replace(window.location.pathname.split('index.html')[0] || './');
+              return;
+            }
+            statusEl.textContent = 'Still deploying';
+          })
+          .catch(function () {
+            statusEl.textContent = 'Waiting for network';
+          });
+      }
+
+      function schedule() {
+        if (timer) clearInterval(timer);
+        if (!auto) return;
+        timer = setInterval(probe, 15000);
+      }
+
+      btnRefresh.addEventListener('click', function () {
+        statusEl.textContent = 'Checking\u2026';
+        probe();
+      });
+
+      btnAuto.addEventListener('click', function () {
+        auto = !auto;
+        btnAuto.setAttribute('aria-pressed', auto ? 'true' : 'false');
+        btnAuto.textContent = auto ? 'Auto-check on' : 'Auto-check off';
+        if (auto) {
+          probe();
+          schedule();
+        } else if (timer) {
+          clearInterval(timer);
+          timer = null;
+        }
+      });
+
+      stamp();
+      schedule();
+      setTimeout(probe, 4000);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+# =============================================================================
+# Angular Frontend CI/CD — banking-system
+# Repo: https://github.com/maheshpcse/banking-system
+# Triggers on every push/PR to main. Builds, tests, deploys dist/ to Pages.
+# =============================================================================
+name: Angular CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: angular-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  # Must match GitHub Pages project URL path: https://<user>.github.io/banking-system/
+  ANGULAR_BASE_HREF: /banking-system/
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1: Install → Test → Production build
+  # ---------------------------------------------------------------------------
+  build:
+    name: Test & Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache npm packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: >
+          npx ng test
+          --watch=false
+          --browsers=ChromeHeadlessCI
+          --code-coverage=false
+        continue-on-error: false
+
+      - name: Build production bundle
+        run: >
+          npx ng build
+          --configuration production
+          --base-href=${{ env.ANGULAR_BASE_HREF }}
+
+      - name: Prepare GitHub Pages SPA fallback
+        run: |
+          cp dist/banking-system/index.html dist/banking-system/404.html
+          touch dist/banking-system/.nojekyll
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: angular-dist
+          path: dist/banking-system
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Job 2a: Publish maintenance page first
+  # ---------------------------------------------------------------------------
+  deploy-maintenance:
+    name: Deploy maintenance page
+    needs: build
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Stage maintenance site for Pages
+        run: |
+          mkdir -p pages-maintenance
+          cp maintenance/index.html pages-maintenance/index.html
+          cp pages-maintenance/index.html pages-maintenance/404.html
+          touch pages-maintenance/.nojekyll
+          echo "maintenance=1" > pages-maintenance/.maintenance
+          echo "sha=${{ github.sha }}" >> pages-maintenance/.maintenance
+          echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> pages-maintenance/.maintenance
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload maintenance Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages-maintenance
+          name: github-pages-maintenance
+
+      - name: Deploy maintenance to GitHub Pages
+        id: maintenance_deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-maintenance
+
+      - name: Hold so CDN / browsers pick up maintenance
+        run: |
+          echo "Maintenance page deployed — brief hold before app cutover"
+          sleep 20
+
+  # ---------------------------------------------------------------------------
+  # Job 2b: Deploy production Angular bundle
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Deploy application
+    needs: [build, deploy-maintenance]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: angular-dist
+          path: dist/banking-system
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/banking-system
+          name: github-pages
+
+      - name: Deploy application to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages
+
+  # ---------------------------------------------------------------------------
+  # Optional summary
+  # ---------------------------------------------------------------------------
+  notify:
+    name: Workflow summary
+    needs: [build, deploy-maintenance, deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write job summary
+        run: |
+          echo "## Angular CI/CD result" >> $GITHUB_STEP_SUMMARY
+          echo "- Build: \`${{ needs.build.result }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Maintenance deploy: \`${{ needs.deploy-maintenance.result }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- App deploy: \`${{ needs.deploy.result }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "During deploy, visitors briefly see \`maintenance/index.html\` (theme-matched hold screen), then the new SPA." >> $GITHUB_STEP_SUMMARY
