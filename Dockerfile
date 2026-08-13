@@ -20,7 +20,7 @@ FROM nginx:1.27-alpine AS runtime
 RUN rm -f /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-COPY --from=build /app/dist/banking-system /usr/share/nginx/html
+COPY --from=build /app/dist/client /usr/share/nginx/html
 # Maintenance page (swapped in when MAINTENANCE_MODE=1)
 COPY maintenance/index.html /usr/share/nginx/maintenance/index.html
 COPY scripts/docker-entrypoint.sh /docker-entrypoint-banking.sh
