@@ -21,7 +21,8 @@ export class NavbarComponent {
 
   onNavClick(): void {
     this.closeMenu();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }
 
   logout(): void {
