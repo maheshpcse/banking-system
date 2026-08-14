@@ -8,6 +8,17 @@
   </div>
 
   <div class="home__frame">
+    <div class="home__notice" *ngIf="signupComplete" role="status">
+      <div class="home__notice-copy">
+        <strong>Signup complete</strong>
+        <p>Your NovaBank account is ready. Sign in whenever you want to open your vault.</p>
+      </div>
+      <div class="home__notice-actions">
+        <a class="home__cta home__cta--primary home__cta--compact" routerLink="/auth/login">Go to Login</a>
+        <button type="button" class="home__notice-dismiss" (click)="dismissSignupNotice()">Dismiss</button>
+      </div>
+    </div>
+
     <p class="home__brand">NovaBank</p>
     <h1 class="home__headline">Banking that feels clear the moment you arrive.</h1>
     <p class="home__lede">

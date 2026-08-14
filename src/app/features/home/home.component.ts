@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -8,11 +8,27 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  constructor(private auth: AuthService, private router: Router) {}
+  signupComplete = false;
+
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     if (this.auth.isAuthenticated()) {
       void this.router.navigateByUrl('/dashboard');
+      return;
     }
+
+    this.route.queryParamMap.subscribe((params) => {
+      this.signupComplete = params.get('registered') === '1';
+    });
+  }
+
+  dismissSignupNotice(): void {
+    this.signupComplete = false;
+    void this.router.navigate(['/'], { queryParams: {} });
   }
 }
