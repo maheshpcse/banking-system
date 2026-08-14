@@ -6,6 +6,11 @@ import { AppComponent } from './app.component';
 import { AuthService } from './core/services/auth.service';
 
 describe('AppComponent', () => {
+  const authServiceMock = {
+    user$: of(null),
+    isAuthenticated: jasmine.createSpy('isAuthenticated').and.returnValue(false)
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule],
@@ -13,14 +18,16 @@ describe('AppComponent', () => {
       providers: [
         {
           provide: AuthService,
-          useValue: {
-            user$: of(null),
-            isAuthenticated: () => false
-          }
+          useValue: authServiceMock
         }
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
+  });
+
+  beforeEach(() => {
+    authServiceMock.isAuthenticated.calls.reset();
+    authServiceMock.isAuthenticated.and.returnValue(false);
   });
 
   it('should create the app', () => {
@@ -33,5 +40,15 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app.title).toEqual('NovaBank');
+  });
+
+  it('should enable sticky nav for authenticated app routes', () => {
+    authServiceMock.isAuthenticated.and.returnValue(true);
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance as any;
+
+    app['syncChrome']('/dashboard');
+
+    expect(app.hasStickyNav).toBeTrue();
   });
 });
