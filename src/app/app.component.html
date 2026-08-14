@@ -1,5 +1,5 @@
-<div class="app-shell">
-  <div class="ambient" aria-hidden="true">
+<div class="app-shell" [class.app-shell--marketing]="isMarketingSurface">
+  <div class="ambient" *ngIf="showAmbient" aria-hidden="true">
     <div class="ambient__wash"></div>
     <div class="ambient__ledger"></div>
     <div class="ambient__flow ambient__flow--a"></div>

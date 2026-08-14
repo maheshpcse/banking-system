@@ -12,6 +12,47 @@ export class AlertService {
     color: '#1d2a36'
   };
 
+  /** Small top-right toast for login/signup feedback */
+  toastSuccess(title: string, text?: string): Promise<SweetAlertResult> {
+    return Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title,
+      text,
+      showConfirmButton: false,
+      timer: 3200,
+      timerProgressBar: true,
+      background: this.theme.background,
+      color: this.theme.color,
+      customClass: {
+        popup: 'nb-toast nb-toast--success',
+        title: 'nb-toast__title',
+        htmlContainer: 'nb-toast__text'
+      }
+    });
+  }
+
+  toastError(title: string, text?: string): Promise<SweetAlertResult> {
+    return Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'error',
+      title,
+      text,
+      showConfirmButton: false,
+      timer: 3800,
+      timerProgressBar: true,
+      background: this.theme.background,
+      color: this.theme.color,
+      customClass: {
+        popup: 'nb-toast nb-toast--error',
+        title: 'nb-toast__title',
+        htmlContainer: 'nb-toast__text'
+      }
+    });
+  }
+
   success(title: string, text?: string): Promise<SweetAlertResult> {
     return Swal.fire({
       icon: 'success',

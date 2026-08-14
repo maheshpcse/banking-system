@@ -3,7 +3,10 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/auth.guard';
 
 const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  {
+    path: '',
+    loadChildren: () => import('./features/home/home.module').then((m) => m.HomeModule)
+  },
   {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.module').then((m) => m.AuthModule)
@@ -24,11 +27,16 @@ const routes: Routes = [
     loadChildren: () =>
       import('./features/transactions/transactions.module').then((m) => m.TransactionsModule)
   },
-  { path: '**', redirectTo: 'dashboard' }
+  { path: '**', redirectTo: '' }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [
+    RouterModule.forRoot(routes, {
+      scrollPositionRestoration: 'enabled',
+      anchorScrolling: 'enabled'
+    })
+  ],
   exports: [RouterModule]
 })
 export class AppRoutingModule {}
