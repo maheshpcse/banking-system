@@ -1,9 +1,24 @@
+export interface UserAvatar {
+  style: 'mint' | 'sky' | 'sand' | 'rose' | 'slate';
+  initials: string;
+}
+
+export interface UserSettings {
+  emailAlerts: boolean;
+  hideBalance: boolean;
+  compactLedger: boolean;
+  marketingTips: boolean;
+}
+
 export interface User {
   id: string;
   fullName: string;
+  username?: string;
   email: string;
   accountNumber: string;
   balance: number;
+  avatar?: UserAvatar;
+  settings?: UserSettings;
   createdAt?: string;
 }
 
@@ -11,6 +26,18 @@ export interface AuthResponse {
   message: string;
   token: string;
   user: User;
+}
+
+export interface RegisterResponse {
+  message: string;
+  user: User;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+  resetToken: string;
+  maskedEmail?: string;
+  username?: string;
 }
 
 export interface Transaction {

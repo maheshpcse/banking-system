@@ -3,7 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, User } from '../models/banking.models';
+import {
+  AuthResponse,
+  ForgotPasswordResponse,
+  RegisterResponse,
+  User,
+  UserAvatar,
+  UserSettings
+} from '../models/banking.models';
 
 @Injectable({
   providedIn: 'root'
@@ -18,23 +25,59 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) {}
 
   /** Creates an account without signing the user in. */
-  register(payload: { fullName: string; email: string; password: string }): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, payload);
+  register(payload: {
+    fullName: string;
+    username: string;
+    email: string;
+    password: string;
+  }): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${environment.apiUrl}/auth/register`, payload);
   }
 
-  login(payload: { email: string; password: string }): Observable<AuthResponse> {
+  login(payload: { identifier: string; password: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, payload).pipe(
       tap((res) => this.persistSession(res))
     );
   }
 
+  forgotPassword(identifier: string): Observable<ForgotPasswordResponse> {
+    return this.http.post<ForgotPasswordResponse>(`${environment.apiUrl}/auth/forgot-password`, {
+      identifier
+    });
+  }
+
+  resetPassword(payload: {
+    resetToken: string;
+    password: string;
+    confirmPassword: string;
+  }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/reset-password`, payload);
+  }
+
   refreshMe(): Observable<{ user: User }> {
     return this.http.get<{ user: User }>(`${environment.apiUrl}/auth/me`).pipe(
-      tap((res) => {
-        localStorage.setItem(this.userKey, JSON.stringify(res.user));
-        this.userSubject.next(res.user);
-      })
+      tap((res) => this.updateLocalUser(res.user))
     );
+  }
+
+  updateProfile(payload: {
+    fullName?: string;
+    username?: string;
+    email?: string;
+    avatar?: Partial<UserAvatar>;
+    settings?: Partial<UserSettings>;
+  }): Observable<{ message: string; user: User }> {
+    return this.http.patch<{ message: string; user: User }>(`${environment.apiUrl}/auth/profile`, payload).pipe(
+      tap((res) => this.updateLocalUser(res.user))
+    );
+  }
+
+  changePassword(payload: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/change-password`, payload);
   }
 
   updateLocalUser(user: User): void {
@@ -46,7 +89,7 @@ export class AuthService {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     this.userSubject.next(null);
-    this.router.navigate(['/']);
+    void this.router.navigateByUrl('/');
   }
 
   getToken(): string | null {

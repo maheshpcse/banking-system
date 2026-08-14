@@ -27,6 +27,11 @@ const routes: Routes = [
     loadChildren: () =>
       import('./features/transactions/transactions.module').then((m) => m.TransactionsModule)
   },
+  {
+    path: 'settings',
+    canActivate: [AuthGuard],
+    loadChildren: () => import('./features/settings/settings.module').then((m) => m.SettingsModule)
+  },
   { path: '**', redirectTo: '' }
 ];
 

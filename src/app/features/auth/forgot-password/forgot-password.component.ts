@@ -1,27 +1,24 @@
 import { Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  selector: 'app-forgot-password',
+  templateUrl: './forgot-password.component.html',
+  styleUrls: ['./forgot-password.component.scss']
 })
-export class LoginComponent {
+export class ForgotPasswordComponent {
   loading = false;
   formError = '';
   form = this.fb.group({
-    identifier: ['', [Validators.required, Validators.minLength(3)]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    identifier: ['', [Validators.required, Validators.minLength(3)]]
   });
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly auth: AuthService,
-    private readonly alerts: AlertService,
     private readonly router: Router
   ) {}
 
@@ -33,18 +30,22 @@ export class LoginComponent {
 
     this.loading = true;
     this.formError = '';
-    withShimmerDelay(
-      this.auth.login(this.form.getRawValue() as { identifier: string; password: string })
-    ).subscribe({
-      next: () => {
+    const identifier = String(this.form.value.identifier || '').trim();
+
+    withShimmerDelay(this.auth.forgotPassword(identifier)).subscribe({
+      next: (res) => {
         this.loading = false;
-        void this.router.navigateByUrl('/dashboard').then(() => {
-          this.alerts.toastSuccess('Welcome back', 'You are signed in to NovaBank.');
+        void this.router.navigate(['/auth/reset-password'], {
+          state: {
+            resetToken: res.resetToken,
+            username: res.username,
+            maskedEmail: res.maskedEmail
+          }
         });
       },
       error: (err) => {
         this.loading = false;
-        this.formError = err?.error?.message || 'Unable to sign in.';
+        this.formError = err?.error?.message || 'Unable to verify that account.';
       }
     });
   }

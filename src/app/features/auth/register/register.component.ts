@@ -1,9 +1,19 @@
 import { Component } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { withShimmerDelay } from '../../../core/utils/shimmer';
+
+function usernameValidator(control: AbstractControl): ValidationErrors | null {
+  const value = String(control.value || '').trim().toLowerCase();
+  if (!value) {
+    return { required: true };
+  }
+  if (!/^[a-z0-9._-]{3,32}$/.test(value)) {
+    return { username: true };
+  }
+  return null;
+}
 
 @Component({
   selector: 'app-register',
@@ -12,8 +22,10 @@ import { withShimmerDelay } from '../../../core/utils/shimmer';
 })
 export class RegisterComponent {
   loading = false;
+  formError = '';
   form = this.fb.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
+    username: ['', [usernameValidator]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]]
   });
@@ -21,7 +33,6 @@ export class RegisterComponent {
   constructor(
     private readonly fb: FormBuilder,
     private readonly auth: AuthService,
-    private readonly alerts: AlertService,
     private readonly router: Router
   ) {}
 
@@ -32,23 +43,23 @@ export class RegisterComponent {
     }
 
     this.loading = true;
+    this.formError = '';
+    const raw = this.form.getRawValue();
     withShimmerDelay(
-      this.auth.register(
-        this.form.getRawValue() as { fullName: string; email: string; password: string }
-      )
+      this.auth.register({
+        fullName: String(raw.fullName),
+        username: String(raw.username).trim().toLowerCase(),
+        email: String(raw.email),
+        password: String(raw.password)
+      })
     ).subscribe({
       next: () => {
         this.loading = false;
-        void this.router.navigateByUrl('/auth/login').then(() => {
-          this.alerts.toastSuccess(
-            'Account created',
-            'Your NovaBank account is ready. Please sign in to continue.'
-          );
-        });
+        void this.router.navigate(['/'], { queryParams: { registered: '1' } });
       },
       error: (err) => {
         this.loading = false;
-        this.alerts.toastError('Signup failed', err?.error?.message || 'Unable to create account.');
+        this.formError = err?.error?.message || 'Unable to create account.';
       }
     });
   }
