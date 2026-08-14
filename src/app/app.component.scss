@@ -1,7 +1,11 @@
 .app-shell {
   position: relative;
   min-height: 100vh;
-  overflow-x: hidden;
+  /* overflow-x: hidden breaks position:sticky on the nav — keep clipping on ambient only */
+}
+
+.app-shell--marketing {
+  background: transparent;
 }
 
 .ambient {

@@ -17,10 +17,9 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
+  /** Creates an account without signing the user in. */
   register(payload: { fullName: string; email: string; password: string }): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, payload).pipe(
-      tap((res) => this.persistSession(res))
-    );
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, payload);
   }
 
   login(payload: { email: string; password: string }): Observable<AuthResponse> {
@@ -47,7 +46,7 @@ export class AuthService {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     this.userSubject.next(null);
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/']);
   }
 
   getToken(): string | null {

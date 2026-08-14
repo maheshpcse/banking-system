@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
@@ -10,49 +10,39 @@ import { withShimmerDelay } from '../../../core/utils/shimmer';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   loading = false;
-  error = '';
-
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    password: ['', [Validators.required, Validators.minLength(8)]]
   });
 
   constructor(
-    private fb: FormBuilder,
-    private auth: AuthService,
-    private router: Router,
-    private alerts: AlertService
+    private readonly fb: FormBuilder,
+    private readonly auth: AuthService,
+    private readonly alerts: AlertService,
+    private readonly router: Router
   ) {}
 
-  ngOnInit(): void {
-    if (this.auth.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
-    }
-  }
-
   submit(): void {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.loading) {
       this.form.markAllAsTouched();
       return;
     }
 
     this.loading = true;
-    this.error = '';
-    const { email, password } = this.form.getRawValue();
-
-    withShimmerDelay(this.auth.login({ email: email!, password: password! })).subscribe({
-      next: async (res) => {
+    withShimmerDelay(
+      this.auth.login(this.form.getRawValue() as { email: string; password: string })
+    ).subscribe({
+      next: () => {
         this.loading = false;
-        await this.alerts.success('Welcome back', `Signed in as ${res.user.fullName}.`);
-        this.router.navigate(['/dashboard']);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        void this.router.navigateByUrl('/dashboard').then(() => {
+          this.alerts.toastSuccess('Welcome back', 'You are signed in to NovaBank.');
+        });
       },
-      error: async (err) => {
+      error: (err) => {
         this.loading = false;
-        this.error = err?.error?.message || 'Unable to sign in';
-        await this.alerts.error('Sign in failed', this.error);
+        this.alerts.toastError('Sign-in failed', err?.error?.message || 'Unable to sign in.');
       }
     });
   }

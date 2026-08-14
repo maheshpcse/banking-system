@@ -1,34 +1,40 @@
-<section class="auth-shell" *ngIf="!loading; else authShimmer">
-  <div class="auth-visual" aria-hidden="true">
-    <div class="orb orb--one"></div>
-    <div class="orb orb--two"></div>
-    <div class="stack-card">
-      <span>Instant transfers</span>
-      <strong>Clear balances. Calm banking.</strong>
+<section class="auth-page auth-page--login" *ngIf="!loading; else authShimmer">
+  <div class="auth-page__stage">
+    <div class="auth-page__mesh" aria-hidden="true"></div>
+    <div class="auth-page__band auth-page__band--a" aria-hidden="true"></div>
+    <div class="auth-page__band auth-page__band--b" aria-hidden="true"></div>
+
+    <div class="auth-page__copy">
+      <p class="auth-page__brand">NovaBank</p>
+      <h1>Sign in to your vault</h1>
+      <p>Secure access to balances, transfers, and your full ledger.</p>
     </div>
+
+    <app-animated-card class="auth-panel" title="Welcome back" subtitle="Sign in" accent="sky" [tilt]="false">
+      <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+        <label>
+          <span>Email</span>
+          <input type="email" formControlName="email" autocomplete="email" placeholder="you@email.com" />
+        </label>
+        <label>
+          <span>Password</span>
+          <input type="password" formControlName="password" autocomplete="current-password" placeholder="••••••••" />
+        </label>
+
+        <button class="btn btn--primary" type="submit" [disabled]="loading">
+          Sign in
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        New here?
+        <a routerLink="/auth/register">Create an account</a>
+      </p>
+      <p class="auth-switch auth-switch--home">
+        <a routerLink="/">Back to home</a>
+      </p>
+    </app-animated-card>
   </div>
-
-  <app-animated-card class="auth-panel" title="Welcome back" subtitle="Sign in" accent="sky" [tilt]="false">
-    <form class="form" [formGroup]="form" (ngSubmit)="submit()">
-      <label>
-        <span>Email</span>
-        <input type="email" formControlName="email" autocomplete="email" placeholder="you@email.com" />
-      </label>
-      <label>
-        <span>Password</span>
-        <input type="password" formControlName="password" autocomplete="current-password" placeholder="••••••••" />
-      </label>
-
-      <button class="btn btn--primary" type="submit" [disabled]="loading">
-        Sign in
-      </button>
-    </form>
-
-    <p class="auth-switch">
-      New here?
-      <a routerLink="/auth/register">Create an account</a>
-    </p>
-  </app-animated-card>
 </section>
 
 <ng-template #authShimmer>

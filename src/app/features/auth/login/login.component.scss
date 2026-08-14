@@ -1,89 +1,101 @@
-.auth-shell {
-  min-height: calc(100vh - 2rem);
+.auth-page {
+  min-height: 100vh;
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 1.5rem;
-  align-items: center;
-  max-width: 1080px;
-  margin: 0 auto;
+  place-items: center;
   padding: 1.5rem 1.25rem 2rem;
-  /* animation: page-enter — removed vertical enter motion */
-}
-
-.auth-visual {
   position: relative;
-  min-height: 420px;
-  border-radius: 1.75rem;
   overflow: hidden;
+}
+
+.auth-page--login {
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.55), rgba(214, 236, 248, 0.7)),
-    radial-gradient(circle at 20% 20%, rgba(127, 214, 196, 0.45), transparent 45%),
-    radial-gradient(circle at 80% 70%, rgba(147, 197, 253, 0.4), transparent 40%);
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  box-shadow: var(--shadow-soft);
+    linear-gradient(160deg, #eaf6fb 0%, #f4fbf8 48%, #e7f3ef 100%);
 }
 
-.orb {
+.auth-page--register {
+  background:
+    linear-gradient(200deg, #eef8f4 0%, #f2f8fc 52%, #e8f1f8 100%);
+}
+
+.auth-page__stage {
+  position: relative;
+  z-index: 1;
+  width: min(440px, 100%);
+  display: grid;
+  gap: 1.35rem;
+}
+
+.auth-page__mesh,
+.auth-page__band {
   position: absolute;
-  border-radius: 50%;
-  filter: blur(2px);
-  /* Soft opacity pulse only — no up/down translate motion */
-  animation: orb-pulse 8s ease-in-out infinite;
+  pointer-events: none;
 }
 
-.orb--one {
-  width: 180px;
-  height: 180px;
-  top: 18%;
-  left: 16%;
-  background: radial-gradient(circle, rgba(95, 196, 176, 0.7), rgba(95, 196, 176, 0));
+.auth-page__mesh {
+  inset: -20%;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(95, 196, 176, 0.28), transparent 42%),
+    radial-gradient(circle at 82% 18%, rgba(106, 168, 232, 0.24), transparent 40%),
+    radial-gradient(circle at 70% 78%, rgba(95, 196, 176, 0.16), transparent 45%);
+  animation: auth-mesh 14s ease-in-out infinite;
 }
 
-.orb--two {
-  width: 220px;
-  height: 220px;
-  right: 8%;
-  bottom: 12%;
-  background: radial-gradient(circle, rgba(125, 180, 240, 0.65), rgba(125, 180, 240, 0));
-  animation-delay: -3s;
+.auth-page__band {
+  height: 140px;
+  width: 130%;
+  left: -15%;
+  border-radius: 999px;
+  filter: blur(36px);
+  opacity: 0.55;
 }
 
-.stack-card {
-  position: absolute;
-  left: 1.5rem;
-  right: 1.5rem;
-  bottom: 1.5rem;
-  padding: 1.25rem 1.35rem;
-  border-radius: 1.15rem;
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  /* transform: translateZ(28px) rotateX(6deg); removed 3D up/down tilt */
-  box-shadow: 0 18px 40px rgba(90, 120, 150, 0.16);
+.auth-page__band--a {
+  top: 22%;
+  background: linear-gradient(90deg, transparent, rgba(95, 196, 176, 0.35), transparent);
+  animation: auth-band 18s linear infinite;
 }
 
-.stack-card span {
-  display: block;
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin-bottom: 0.35rem;
+.auth-page__band--b {
+  bottom: 18%;
+  background: linear-gradient(90deg, transparent, rgba(106, 168, 232, 0.32), transparent);
+  animation: auth-band 22s linear infinite reverse;
 }
 
-.stack-card strong {
+.auth-page__copy {
+  text-align: center;
+  animation: auth-fade 0.7s var(--ease-out);
+}
+
+.auth-page__brand {
+  margin: 0 0 0.55rem;
   font-family: var(--font-display);
-  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
-  line-height: 1.15;
-  letter-spacing: -0.03em;
+  font-size: clamp(2rem, 5vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
   color: var(--text);
+}
+
+.auth-page__copy h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.8vw, 1.55rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.auth-page__copy p {
+  margin: 0.45rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
 }
 
 .auth-panel {
   display: block;
+  animation: auth-fade 0.85s var(--ease-out);
 }
 
-/* Force-disable up/down transforms on auth cards, fields, and buttons */
 :host ::ng-deep app-animated-card.auth-panel,
 :host ::ng-deep app-animated-card.auth-panel .card,
 :host ::ng-deep app-animated-card.auth-panel .card__face,
@@ -98,39 +110,38 @@
 :host ::ng-deep app-animated-card.auth-panel .card:hover .card__face,
 :host ::ng-deep app-animated-card.auth-panel .card--tilt:hover .card__face {
   transform: none !important;
-  transition: none !important;
 }
 
-.auth-shell .form input,
-.auth-shell .form input:hover,
-.auth-shell .form input:focus,
-.auth-shell .form input:active,
-.auth-shell .btn,
-.auth-shell .btn:hover,
-.auth-shell .btn:focus,
-.auth-shell .btn:active,
-.auth-shell .btn--primary:hover:not(:disabled) {
+.auth-page .form input,
+.auth-page .form input:hover,
+.auth-page .form input:focus,
+.auth-page .form input:active,
+.auth-page .btn,
+.auth-page .btn:hover,
+.auth-page .btn:focus,
+.auth-page .btn:active,
+.auth-page .btn--primary:hover:not(:disabled) {
   transform: none !important;
 }
 
-.auth-shell .form input {
-  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+.auth-page .form input {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
 }
 
-.auth-shell .btn,
-.auth-shell .btn--primary {
+.auth-page .btn,
+.auth-page .btn--primary {
   transition: background 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease !important;
-}
-
-.auth-shell .btn--primary:hover:not(:disabled) {
-  /* Keep color feedback only — no lift via larger shadow offset */
-  box-shadow: 0 12px 24px rgba(95, 196, 176, 0.28) !important;
 }
 
 .auth-switch {
   margin: 1.1rem 0 0;
   color: var(--text-muted);
   font-size: 0.92rem;
+  text-align: center;
+}
+
+.auth-switch--home {
+  margin-top: 0.55rem;
 }
 
 .auth-switch a {
@@ -139,29 +150,41 @@
   text-decoration: none;
 }
 
-@keyframes orb-pulse {
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+@keyframes auth-mesh {
   0%,
   100% {
-    opacity: 0.85;
+    opacity: 1;
   }
   50% {
+    opacity: 0.78;
+  }
+}
+
+@keyframes auth-band {
+  0% {
+    transform: translateX(-6%);
+  }
+  100% {
+    transform: translateX(6%);
+  }
+}
+
+@keyframes auth-fade {
+  from {
+    opacity: 0;
+  }
+  to {
     opacity: 1;
   }
 }
 
-/* @keyframes drift — removed (used translate up/down)
-@keyframes drift {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(12px, -16px, 20px) scale(1.05); }
-}
-*/
-
-@media (max-width: 860px) {
-  .auth-shell {
-    grid-template-columns: 1fr;
-  }
-
-  .auth-visual {
-    min-height: 240px;
+@media (prefers-reduced-motion: reduce) {
+  .auth-page__mesh,
+  .auth-page__band {
+    animation: none;
   }
 }

@@ -70,7 +70,8 @@ a {
   color: var(--text-muted);
 }
 
-.form input {
+.form input,
+.form select {
   width: 100%;
   border: 1px solid rgba(148, 163, 184, 0.35);
   background: rgba(255, 255, 255, 0.88);
@@ -79,19 +80,28 @@ a {
   color: var(--text);
   outline: none;
   transform: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .form input:hover,
+.form select:hover {
+  transform: none !important;
+  background: rgba(232, 250, 247, 0.95);
+  border-color: rgba(95, 196, 176, 0.45);
+}
+
 .form input:focus,
-.form input:active {
+.form select:focus,
+.form input:active,
+.form select:active {
   transform: none !important;
 }
 
-.form input:focus {
+.form input:focus,
+.form select:focus {
   border-color: rgba(95, 196, 176, 0.8);
   box-shadow: 0 0 0 4px rgba(95, 196, 176, 0.16);
-  /* transform: translateY(-1px); removed hover/focus lift */
+  background: #fff;
 }
 
 .form__error {
@@ -140,7 +150,7 @@ a {
 }
 
 .btn--primary:hover:not(:disabled) {
-  /* transform: translateY(-2px) scale(1.01); removed up/down hover motion */
+  background: linear-gradient(135deg, #6fd4be 0%, #7ec8f0 100%);
   box-shadow: 0 12px 24px rgba(95, 196, 176, 0.34);
 }
 
@@ -151,8 +161,40 @@ a {
 }
 
 .btn--ghost:hover:not(:disabled) {
-  /* transform: translateY(-1px); removed up/down hover motion */
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(95, 196, 176, 0.16);
+  border-color: rgba(95, 196, 176, 0.4);
+  color: var(--text);
+}
+
+/* Theme-colored top-right toasts (login / signup) */
+.nb-toast {
+  border-radius: 0.9rem !important;
+  border: 1px solid rgba(95, 196, 176, 0.35) !important;
+  box-shadow: 0 14px 28px rgba(90, 120, 150, 0.14) !important;
+  font-family: var(--font-body) !important;
+  padding: 0.85rem 1rem !important;
+}
+
+.nb-toast--success {
+  background: linear-gradient(135deg, #f3fbf8 0%, #eef7fc 100%) !important;
+  border-color: rgba(95, 196, 176, 0.45) !important;
+}
+
+.nb-toast--error {
+  background: linear-gradient(135deg, #fff7f8 0%, #f7f9fc 100%) !important;
+  border-color: rgba(196, 91, 108, 0.35) !important;
+}
+
+.nb-toast__title {
+  font-family: var(--font-display) !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: var(--text) !important;
+}
+
+.nb-toast__text {
+  font-size: 0.86rem !important;
+  color: var(--text-muted) !important;
 }
 
 /* Theme-colored SweetAlert2 popups */

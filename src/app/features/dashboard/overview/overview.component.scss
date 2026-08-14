@@ -116,11 +116,15 @@
   transition: background 0.25s ease, color 0.25s ease;
 }
 
+.mode-switch button:hover:not(.is-active) {
+  background: rgba(95, 196, 176, 0.14);
+  color: var(--text);
+}
+
 .mode-switch button.is-active {
   background: #fff;
   color: var(--text);
   box-shadow: 0 6px 16px rgba(100, 130, 160, 0.12);
-  /* transform: translateY(-1px); removed up/down hover motion */
 }
 
 .recent {
@@ -144,6 +148,12 @@
   border-radius: 0.9rem;
   background: rgba(255, 255, 255, 0.55);
   border: 1px solid rgba(226, 232, 240, 0.9);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.tx-list li:hover {
+  background: rgba(232, 250, 247, 0.85);
+  border-color: rgba(95, 196, 176, 0.35);
 }
 
 .tx-list strong {

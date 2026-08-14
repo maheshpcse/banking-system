@@ -48,11 +48,21 @@
   transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.filters button.is-active,
 .filters button:hover {
-  background: #fff;
+  background: rgba(95, 196, 176, 0.16);
   color: var(--text);
-  /* transform: translateY(-1px); removed up/down hover motion */
+  border-color: rgba(95, 196, 176, 0.4);
+}
+
+.filters button.is-active {
+  background: rgba(106, 168, 232, 0.2);
+  color: var(--text);
+  border-color: rgba(106, 168, 232, 0.45);
+}
+
+.filters button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .tx-list {
@@ -71,6 +81,12 @@
   border-radius: 0.95rem;
   background: rgba(255, 255, 255, 0.58);
   border: 1px solid rgba(226, 232, 240, 0.95);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.tx-list li:hover {
+  background: rgba(232, 250, 247, 0.9);
+  border-color: rgba(95, 196, 176, 0.35);
 }
 
 .tx-main strong {

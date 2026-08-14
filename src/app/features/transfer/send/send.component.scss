@@ -46,6 +46,13 @@
   box-shadow: var(--shadow-soft);
   transform: perspective(900px) rotateY(4deg);
   animation: float-in 0.7s var(--ease-out);
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.tips__panel:hover {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(232, 250, 247, 0.95));
+  border-color: rgba(95, 196, 176, 0.35);
 }
 
 .tips__panel h2 {
