@@ -18,7 +18,8 @@ export class AppComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private viewportScroller: ViewportScroller
+    private viewportScroller: ViewportScroller,
+    private auth: AuthService
   ) {
     this.viewportScroller.setOffset([0, 0]);
   }
