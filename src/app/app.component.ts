@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ViewportScroller } from '@angular/common';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +14,7 @@ export class AppComponent implements OnInit {
   /** Ambient ledger backdrop only on authenticated app pages */
   showAmbient = false;
   isMarketingSurface = true;
+  hasStickyNav = false;
 
   constructor(
     private router: Router,
@@ -29,6 +31,7 @@ export class AppComponent implements OnInit {
         this.syncChrome(event.urlAfterRedirects);
       });
 
+    this.auth.user$.subscribe(() => this.syncChrome(this.router.url));
     this.syncChrome(this.router.url);
   }
 
@@ -62,8 +65,8 @@ export class AppComponent implements OnInit {
 
   private syncChrome(url: string): void {
     const path = url.split('?')[0];
-    this.isMarketingSurface =
-      path === '/' || path.startsWith('/auth');
+    this.isMarketingSurface = path === '/' || path.startsWith('/auth');
     this.showAmbient = !this.isMarketingSurface;
+    this.hasStickyNav = this.auth.isAuthenticated() && !this.isMarketingSurface;
   }
 }

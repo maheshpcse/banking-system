@@ -1,11 +1,17 @@
 .app-shell {
   position: relative;
   min-height: 100vh;
-  /* overflow-x: hidden breaks position:sticky on the nav — keep clipping on ambient only */
+  /* overflow-x: hidden breaks sticky/fixed nav — keep clipping on ambient only */
 }
 
 .app-shell--marketing {
   background: transparent;
+}
+
+/* Fixed full-bleed header: page content starts below the nav */
+.app-shell--has-nav main {
+  padding-top: var(--nb-nav-height);
+  min-height: calc(100vh - var(--nb-nav-height));
 }
 
 .ambient {

@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { AccountSummary, Transaction } from '../../../core/models/banking.models';
 import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { fieldError } from '../../../core/utils/form-errors';
 
 @Component({
   selector: 'app-overview',
@@ -23,6 +24,8 @@ export class OverviewComponent implements OnInit {
     description: ['']
   });
 
+  readonly fieldError = fieldError;
+
   constructor(
     private accountService: AccountService,
     private auth: AuthService,
@@ -36,7 +39,7 @@ export class OverviewComponent implements OnInit {
 
   loadSummary(): void {
     this.loading = true;
-    withShimmerDelay(this.accountService.getSummary()).subscribe({
+    withShimmerDelay(this.accountService.getSummary(), 500).subscribe({
       next: (summary) => {
         this.summary = summary;
         this.auth.updateLocalUser(summary.user);
@@ -80,7 +83,6 @@ export class OverviewComponent implements OnInit {
     }
 
     this.actionLoading = true;
-    this.loading = true;
     this.error = '';
 
     const request =
@@ -88,18 +90,19 @@ export class OverviewComponent implements OnInit {
         ? this.accountService.deposit({ amount, description })
         : this.accountService.withdraw({ amount, description });
 
-    withShimmerDelay(request).subscribe({
+    withShimmerDelay(request, 500).subscribe({
       next: async (res) => {
         this.actionLoading = false;
         this.actionForm.reset();
         this.auth.updateLocalUser(res.user);
-        this.summary = null;
+        if (this.summary) {
+          this.summary = { ...this.summary, user: res.user };
+        }
         await this.alerts.success(`${actionLabel} successful`, res.message);
         this.loadSummary();
       },
       error: async (err) => {
         this.actionLoading = false;
-        this.loading = false;
         this.error = err?.error?.message || 'Action failed';
         await this.alerts.error(`${actionLabel} failed`, this.error);
       }

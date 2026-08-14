@@ -1,4 +1,8 @@
-<div class="app-shell" [class.app-shell--marketing]="isMarketingSurface">
+<div
+  class="app-shell"
+  [class.app-shell--marketing]="isMarketingSurface"
+  [class.app-shell--has-nav]="hasStickyNav"
+>
   <div class="ambient" *ngIf="showAmbient" aria-hidden="true">
     <div class="ambient__wash"></div>
     <div class="ambient__ledger"></div>

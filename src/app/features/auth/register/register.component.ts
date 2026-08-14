@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { fieldError } from '../../../core/utils/form-errors';
 
 function usernameValidator(control: AbstractControl): ValidationErrors | null {
   const value = String(control.value || '').trim().toLowerCase();
@@ -22,6 +22,7 @@ function usernameValidator(control: AbstractControl): ValidationErrors | null {
 })
 export class RegisterComponent {
   loading = false;
+  showPassword = false;
   formError = '';
   form = this.fb.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
@@ -29,6 +30,8 @@ export class RegisterComponent {
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]]
   });
+
+  readonly fieldError = fieldError;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -45,22 +48,22 @@ export class RegisterComponent {
     this.loading = true;
     this.formError = '';
     const raw = this.form.getRawValue();
-    withShimmerDelay(
-      this.auth.register({
+    this.auth
+      .register({
         fullName: String(raw.fullName),
         username: String(raw.username).trim().toLowerCase(),
         email: String(raw.email),
         password: String(raw.password)
       })
-    ).subscribe({
-      next: () => {
-        this.loading = false;
-        void this.router.navigate(['/'], { queryParams: { registered: '1' } });
-      },
-      error: (err) => {
-        this.loading = false;
-        this.formError = err?.error?.message || 'Unable to create account.';
-      }
-    });
+      .subscribe({
+        next: () => {
+          this.loading = false;
+          void this.router.navigate(['/'], { queryParams: { registered: '1' } });
+        },
+        error: (err) => {
+          this.loading = false;
+          this.formError = err?.error?.message || 'Unable to create account.';
+        }
+      });
   }
 }

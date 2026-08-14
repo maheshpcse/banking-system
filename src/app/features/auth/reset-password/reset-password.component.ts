@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { fieldError } from '../../../core/utils/form-errors';
 
 function matchPasswords(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
@@ -20,6 +20,8 @@ function matchPasswords(group: AbstractControl): ValidationErrors | null {
 })
 export class ResetPasswordComponent implements OnInit {
   loading = false;
+  showPassword = false;
+  showConfirm = false;
   formError = '';
   formSuccess = '';
   resetToken = '';
@@ -33,6 +35,8 @@ export class ResetPasswordComponent implements OnInit {
     },
     { validators: matchPasswords }
   );
+
+  readonly fieldError = fieldError;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -67,24 +71,24 @@ export class ResetPasswordComponent implements OnInit {
     this.formSuccess = '';
     const raw = this.form.getRawValue();
 
-    withShimmerDelay(
-      this.auth.resetPassword({
+    this.auth
+      .resetPassword({
         resetToken: this.resetToken,
         password: String(raw.password),
         confirmPassword: String(raw.confirmPassword)
       })
-    ).subscribe({
-      next: (res) => {
-        this.loading = false;
-        this.formSuccess = res.message || 'Password updated.';
-        setTimeout(() => {
-          void this.router.navigateByUrl('/auth/login');
-        }, 900);
-      },
-      error: (err) => {
-        this.loading = false;
-        this.formError = err?.error?.message || 'Unable to update password.';
-      }
-    });
+      .subscribe({
+        next: (res) => {
+          this.loading = false;
+          this.formSuccess = res.message || 'Password updated.';
+          setTimeout(() => {
+            void this.router.navigateByUrl('/auth/login');
+          }, 900);
+        },
+        error: (err) => {
+          this.loading = false;
+          this.formError = err?.error?.message || 'Unable to update password.';
+        }
+      });
   }
 }

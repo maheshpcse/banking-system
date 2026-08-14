@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { fieldError } from '../../../core/utils/form-errors';
 
 @Component({
   selector: 'app-forgot-password',
@@ -15,6 +15,8 @@ export class ForgotPasswordComponent {
   form = this.fb.group({
     identifier: ['', [Validators.required, Validators.minLength(3)]]
   });
+
+  readonly fieldError = fieldError;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -32,7 +34,7 @@ export class ForgotPasswordComponent {
     this.formError = '';
     const identifier = String(this.form.value.identifier || '').trim();
 
-    withShimmerDelay(this.auth.forgotPassword(identifier)).subscribe({
+    this.auth.forgotPassword(identifier).subscribe({
       next: (res) => {
         this.loading = false;
         void this.router.navigate(['/auth/reset-password'], {

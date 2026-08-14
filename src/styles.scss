@@ -17,6 +17,7 @@
   --font-body: 'Manrope', sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --nb-nav-height: 4.25rem;
 }
 
 *,
@@ -150,10 +151,65 @@ a {
   font-size: 0.9rem;
 }
 
+.form__field-error {
+  margin: -0.15rem 0 0;
+  color: var(--danger);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.form__hint {
+  margin: -0.15rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
 .form__success {
   margin: 0;
   color: var(--success);
   font-size: 0.9rem;
+}
+
+.password-field {
+  position: relative;
+  display: block;
+}
+
+.password-field input {
+  padding-right: 3rem;
+}
+
+.password-field__toggle {
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.password-field__toggle:hover {
+  background: rgba(95, 196, 176, 0.16);
+  color: var(--text);
+}
+
+.password-field__toggle svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .btn {

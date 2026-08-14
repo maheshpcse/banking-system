@@ -13,15 +13,21 @@
         <label>
           <span>Recipient account</span>
           <input type="text" formControlName="toAccountNumber" placeholder="MBxxxxxxxxxxxx" />
+          <p class="form__field-error" *ngIf="fieldError(form.controls.toAccountNumber, 'Recipient account') as msg">
+            {{ msg }}
+          </p>
         </label>
         <label>
           <span>Amount</span>
           <input type="number" step="0.01" min="0.01" formControlName="amount" placeholder="0.00" />
+          <p class="form__field-error" *ngIf="fieldError(form.controls.amount, 'Amount') as msg">{{ msg }}</p>
         </label>
         <label>
           <span>Note (optional)</span>
           <input type="text" formControlName="description" placeholder="Rent, gift, shared dinner…" />
         </label>
+
+        <p class="form__error" *ngIf="error">{{ error }}</p>
 
         <button class="btn btn--primary" type="submit" [disabled]="loading">
           {{ loading ? 'Sending…' : 'Send transfer' }}
@@ -43,5 +49,5 @@
 </section>
 
 <ng-template #formShimmer>
-  <app-shimmer variant="form"></app-shimmer>
+  <app-shimmer variant="transfer"></app-shimmer>
 </ng-template>

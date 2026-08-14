@@ -4,6 +4,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { AlertService } from '../../core/services/alert.service';
 import { User, UserAvatar } from '../../core/models/banking.models';
 import { withShimmerDelay } from '../../core/utils/shimmer';
+import { fieldError } from '../../core/utils/form-errors';
 
 function matchPasswords(group: AbstractControl): ValidationErrors | null {
   const newPassword = group.get('newPassword')?.value;
@@ -25,15 +26,21 @@ export class AccountSettingsComponent implements OnInit {
   savingAvatar = false;
   savingPassword = false;
   savingPrefs = false;
+  showCurrent = false;
+  showNew = false;
+  showConfirm = false;
   user: User | null = null;
+  imagePreview: string | null = null;
   profileMessage = '';
   profileError = '';
   avatarMessage = '';
+  avatarError = '';
   passwordMessage = '';
   passwordError = '';
   prefsMessage = '';
 
   readonly avatarStyles: Array<UserAvatar['style']> = ['mint', 'sky', 'sand', 'rose', 'slate'];
+  readonly fieldError = fieldError;
 
   profileForm = this.fb.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
@@ -69,7 +76,7 @@ export class AccountSettingsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    withShimmerDelay(this.auth.refreshMe()).subscribe({
+    withShimmerDelay(this.auth.refreshMe(), 500).subscribe({
       next: (res) => {
         this.applyUser(res.user);
         this.loading = false;
@@ -87,6 +94,33 @@ export class AccountSettingsComponent implements OnInit {
     });
   }
 
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      this.avatarError = 'Please choose an image file (PNG, JPG, or WebP).';
+      return;
+    }
+    if (file.size > 900_000) {
+      this.avatarError = 'Image must be under 900KB.';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.imagePreview = String(reader.result || '');
+      this.avatarError = '';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearImage(): void {
+    this.imagePreview = null;
+  }
+
   saveProfile(): void {
     if (this.profileForm.invalid || this.savingProfile) {
       this.profileForm.markAllAsTouched();
@@ -101,7 +135,8 @@ export class AccountSettingsComponent implements OnInit {
         fullName: String(raw.fullName),
         username: String(raw.username).trim().toLowerCase(),
         email: String(raw.email).trim().toLowerCase()
-      })
+      }),
+      500
     ).subscribe({
       next: (res) => {
         this.applyUser(res.user);
@@ -122,14 +157,17 @@ export class AccountSettingsComponent implements OnInit {
     }
     this.savingAvatar = true;
     this.avatarMessage = '';
+    this.avatarError = '';
     const raw = this.avatarForm.getRawValue();
     withShimmerDelay(
       this.auth.updateProfile({
         avatar: {
           style: raw.style as UserAvatar['style'],
-          initials: String(raw.initials || '').trim().toUpperCase()
+          initials: String(raw.initials || '').trim().toUpperCase(),
+          image: this.imagePreview
         }
-      })
+      }),
+      500
     ).subscribe({
       next: (res) => {
         this.applyUser(res.user);
@@ -138,7 +176,7 @@ export class AccountSettingsComponent implements OnInit {
       },
       error: (err) => {
         this.savingAvatar = false;
-        this.avatarMessage = err?.error?.message || 'Unable to update avatar.';
+        this.avatarError = err?.error?.message || 'Unable to update avatar.';
       }
     });
   }
@@ -157,7 +195,8 @@ export class AccountSettingsComponent implements OnInit {
         currentPassword: String(raw.currentPassword),
         newPassword: String(raw.newPassword),
         confirmPassword: String(raw.confirmPassword)
-      })
+      }),
+      500
     ).subscribe({
       next: (res) => {
         this.savingPassword = false;
@@ -186,7 +225,8 @@ export class AccountSettingsComponent implements OnInit {
           compactLedger: !!raw.compactLedger,
           marketingTips: !!raw.marketingTips
         }
-      })
+      }),
+      500
     ).subscribe({
       next: (res) => {
         this.applyUser(res.user);
@@ -202,6 +242,7 @@ export class AccountSettingsComponent implements OnInit {
 
   private applyUser(user: User): void {
     this.user = user;
+    this.imagePreview = user.avatar?.image || null;
     this.profileForm.patchValue({
       fullName: user.fullName || '',
       username: user.username || '',

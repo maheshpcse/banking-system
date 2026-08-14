@@ -1,6 +1,8 @@
 export interface UserAvatar {
   style: 'mint' | 'sky' | 'sand' | 'rose' | 'slate';
   initials: string;
+  /** Optional profile photo as a data URL */
+  image?: string | null;
 }
 
 export interface UserSettings {
