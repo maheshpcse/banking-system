@@ -72,14 +72,14 @@ jobs:
 
       - name: Prepare GitHub Pages SPA fallback
         run: |
-          cp dist/banking-system/index.html dist/banking-system/404.html
-          touch dist/banking-system/.nojekyll
+          cp dist/client/index.html dist/client/404.html
+          touch dist/client/.nojekyll
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: angular-dist
-          path: dist/banking-system
+          path: dist/client
           retention-days: 7
 
   # ---------------------------------------------------------------------------
@@ -145,7 +145,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: angular-dist
-          path: dist/banking-system
+          path: dist/client
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -153,7 +153,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/banking-system
+          path: dist/client
           name: github-pages
 
       - name: Deploy application to GitHub Pages
