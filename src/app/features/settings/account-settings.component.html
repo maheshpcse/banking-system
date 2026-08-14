@@ -6,7 +6,8 @@
       <p class="lede">Profile, avatar, password, and premium preferences for your vault.</p>
     </div>
     <div class="hero-avatar" [ngClass]="'hero-avatar--' + (user?.avatar?.style || 'mint')" aria-hidden="true">
-      {{ user?.avatar?.initials || 'NB' }}
+      <img *ngIf="imagePreview as image" [src]="image" alt="" />
+      <ng-container *ngIf="!imagePreview">{{ user?.avatar?.initials || 'NB' }}</ng-container>
     </div>
   </header>
 
@@ -16,14 +17,17 @@
         <label>
           <span>Full name</span>
           <input type="text" formControlName="fullName" autocomplete="name" />
+          <p class="form__field-error" *ngIf="fieldError(profileForm.controls.fullName, 'Full name') as msg">{{ msg }}</p>
         </label>
         <label>
           <span>Username</span>
           <input type="text" formControlName="username" autocomplete="username" />
+          <p class="form__field-error" *ngIf="fieldError(profileForm.controls.username, 'Username') as msg">{{ msg }}</p>
         </label>
         <label>
           <span>Email</span>
           <input type="email" formControlName="email" autocomplete="email" />
+          <p class="form__field-error" *ngIf="fieldError(profileForm.controls.email, 'Email') as msg">{{ msg }}</p>
         </label>
         <p class="meta" *ngIf="user">Account {{ user.accountNumber }}</p>
         <p class="form__success" *ngIf="profileMessage">{{ profileMessage }}</p>
@@ -35,11 +39,24 @@
     <app-animated-card accent="sky" title="Avatar" subtitle="Presence">
       <form class="form" [formGroup]="avatarForm" (ngSubmit)="saveAvatar()">
         <div class="avatar-preview" [ngClass]="'hero-avatar--' + avatarForm.value.style">
-          {{ avatarForm.value.initials || user?.avatar?.initials || 'NB' }}
+          <img *ngIf="imagePreview as image" [src]="image" alt="Profile preview" />
+          <ng-container *ngIf="!imagePreview">
+            {{ avatarForm.value.initials || user?.avatar?.initials || 'NB' }}
+          </ng-container>
         </div>
+
+        <label class="upload">
+          <span>Profile image</span>
+          <input type="file" accept="image/png,image/jpeg,image/webp" (change)="onImageSelected($event)" />
+        </label>
+        <button type="button" class="btn btn--ghost" *ngIf="imagePreview" (click)="clearImage()">
+          Remove photo
+        </button>
+
         <label>
-          <span>Initials</span>
+          <span>Initials (fallback)</span>
           <input type="text" formControlName="initials" maxlength="3" placeholder="AR" />
+          <p class="form__field-error" *ngIf="fieldError(avatarForm.controls.initials, 'Initials') as msg">{{ msg }}</p>
         </label>
         <div class="style-row" role="listbox" aria-label="Avatar style">
           <button
@@ -54,6 +71,7 @@
           </button>
         </div>
         <p class="form__success" *ngIf="avatarMessage">{{ avatarMessage }}</p>
+        <p class="form__error" *ngIf="avatarError">{{ avatarError }}</p>
         <button class="btn btn--primary" type="submit" [disabled]="savingAvatar">Save avatar</button>
       </form>
     </app-animated-card>
@@ -62,15 +80,99 @@
       <form class="form" [formGroup]="passwordForm" (ngSubmit)="savePassword()">
         <label>
           <span>Current password</span>
-          <input type="password" formControlName="currentPassword" autocomplete="current-password" />
+          <div class="password-field">
+            <input
+              [type]="showCurrent ? 'text' : 'password'"
+              formControlName="currentPassword"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="password-field__toggle"
+              (click)="showCurrent = !showCurrent"
+              [attr.aria-label]="showCurrent ? 'Hide password' : 'Show password'"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <ng-container *ngIf="!showCurrent; else hideCur">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </ng-container>
+                <ng-template #hideCur>
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94"></path>
+                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"></path>
+                  <path d="M14.12 14.12a3 3 0 0 1-4.24-4.24"></path>
+                  <path d="M1 1l22 22"></path>
+                </ng-template>
+              </svg>
+            </button>
+          </div>
+          <p class="form__field-error" *ngIf="fieldError(passwordForm.controls.currentPassword, 'Current password') as msg">
+            {{ msg }}
+          </p>
         </label>
         <label>
           <span>New password</span>
-          <input type="password" formControlName="newPassword" autocomplete="new-password" />
+          <div class="password-field">
+            <input
+              [type]="showNew ? 'text' : 'password'"
+              formControlName="newPassword"
+              autocomplete="new-password"
+            />
+            <button
+              type="button"
+              class="password-field__toggle"
+              (click)="showNew = !showNew"
+              [attr.aria-label]="showNew ? 'Hide password' : 'Show password'"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <ng-container *ngIf="!showNew; else hideNew">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </ng-container>
+                <ng-template #hideNew>
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94"></path>
+                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"></path>
+                  <path d="M14.12 14.12a3 3 0 0 1-4.24-4.24"></path>
+                  <path d="M1 1l22 22"></path>
+                </ng-template>
+              </svg>
+            </button>
+          </div>
+          <p class="form__field-error" *ngIf="fieldError(passwordForm.controls.newPassword, 'New password') as msg">
+            {{ msg }}
+          </p>
         </label>
         <label>
           <span>Confirm new password</span>
-          <input type="password" formControlName="confirmPassword" autocomplete="new-password" />
+          <div class="password-field">
+            <input
+              [type]="showConfirm ? 'text' : 'password'"
+              formControlName="confirmPassword"
+              autocomplete="new-password"
+            />
+            <button
+              type="button"
+              class="password-field__toggle"
+              (click)="showConfirm = !showConfirm"
+              [attr.aria-label]="showConfirm ? 'Hide password' : 'Show password'"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <ng-container *ngIf="!showConfirm; else hideConfirm">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </ng-container>
+                <ng-template #hideConfirm>
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94"></path>
+                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"></path>
+                  <path d="M14.12 14.12a3 3 0 0 1-4.24-4.24"></path>
+                  <path d="M1 1l22 22"></path>
+                </ng-template>
+              </svg>
+            </button>
+          </div>
+          <p class="form__field-error" *ngIf="fieldError(passwordForm.controls.confirmPassword, 'Confirm password') as msg">
+            {{ msg }}
+          </p>
         </label>
         <p class="form__error" *ngIf="passwordForm.hasError('mismatch') && passwordForm.touched">
           Passwords do not match.
@@ -107,5 +209,5 @@
 </section>
 
 <ng-template #settingsShimmer>
-  <app-shimmer variant="form"></app-shimmer>
+  <app-shimmer variant="settings"></app-shimmer>
 </ng-template>

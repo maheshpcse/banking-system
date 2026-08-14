@@ -1,18 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { AccountService } from '../../../core/services/account.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { fieldError } from '../../../core/utils/form-errors';
+import { of } from 'rxjs';
+import { delay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-send',
   templateUrl: './send.component.html',
   styleUrls: ['./send.component.scss']
 })
-export class SendComponent {
+export class SendComponent implements OnInit {
   loading = false;
-  pageLoading = false;
+  pageLoading = true;
   error = '';
 
   form = this.fb.group({
@@ -21,12 +24,23 @@ export class SendComponent {
     description: ['']
   });
 
+  readonly fieldError = fieldError;
+
   constructor(
     private fb: FormBuilder,
     private accountService: AccountService,
     private auth: AuthService,
     private alerts: AlertService
   ) {}
+
+  ngOnInit(): void {
+    // Page-layout shimmer: API response time (none) + 0.5s
+    of(true)
+      .pipe(delay(500))
+      .subscribe(() => {
+        this.pageLoading = false;
+      });
+  }
 
   async submit(): Promise<void> {
     if (this.form.invalid) {
@@ -47,7 +61,6 @@ export class SendComponent {
     }
 
     this.loading = true;
-    this.pageLoading = true;
     this.error = '';
 
     withShimmerDelay(
@@ -55,18 +68,17 @@ export class SendComponent {
         toAccountNumber: toAccountNumber!,
         amount: Number(amount),
         description: description || undefined
-      })
+      }),
+      500
     ).subscribe({
       next: async (res) => {
         this.loading = false;
-        this.pageLoading = false;
         this.auth.updateLocalUser(res.user);
         this.form.reset();
         await this.alerts.success('Transfer successful', res.message);
       },
       error: async (err) => {
         this.loading = false;
-        this.pageLoading = false;
         this.error = err?.error?.message || 'Transfer failed';
         await this.alerts.error('Transfer failed', this.error);
       }

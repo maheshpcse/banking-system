@@ -6,5 +6,12 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./shimmer.component.scss']
 })
 export class ShimmerComponent {
-  @Input() variant: 'dashboard' | 'history' | 'history-ledger' | 'form' | 'auth' = 'dashboard';
+  @Input() variant:
+    | 'dashboard'
+    | 'history'
+    | 'history-ledger'
+    | 'form'
+    | 'transfer'
+    | 'settings'
+    | 'auth' = 'dashboard';
 }

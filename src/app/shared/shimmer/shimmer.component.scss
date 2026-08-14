@@ -20,6 +20,11 @@
   gap: 0.55rem;
 }
 
+.shimmer__hero--settings {
+  grid-template-columns: 1fr auto;
+  align-items: end;
+}
+
 .shimmer__grid {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
@@ -31,14 +36,36 @@
   align-items: start;
 }
 
+.shimmer__grid--settings {
+  grid-template-columns: 1fr 1fr;
+}
+
+.shimmer-avatar {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 1.2rem;
+  background: linear-gradient(
+    90deg,
+    rgba(214, 230, 240, 0.55) 0%,
+    rgba(190, 228, 220, 0.85) 35%,
+    rgba(186, 214, 240, 0.9) 50%,
+    rgba(190, 228, 220, 0.85) 65%,
+    rgba(214, 230, 240, 0.55) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-wave 1.35s ease-in-out infinite;
+}
+
 .shimmer__auth {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
+  grid-template-columns: minmax(0, 440px);
+  justify-content: center;
   gap: 1.5rem;
   align-items: center;
   max-width: 1080px;
   margin: 0 auto;
   padding: 1.5rem 1.25rem 2rem;
+  min-height: 60vh;
 }
 
 .shimmer-card {
@@ -51,8 +78,8 @@
   gap: 0.75rem;
 }
 
-.shimmer-card--visual {
-  min-height: 320px;
+.shimmer-card--tips {
+  min-height: 14rem;
 }
 
 .shimmer-line,
@@ -141,11 +168,9 @@
 
 @media (max-width: 860px) {
   .shimmer__grid,
-  .shimmer__auth {
+  .shimmer__grid--settings,
+  .shimmer__auth,
+  .shimmer__hero--settings {
     grid-template-columns: 1fr;
-  }
-
-  .shimmer-card--visual {
-    min-height: 180px;
   }
 }
