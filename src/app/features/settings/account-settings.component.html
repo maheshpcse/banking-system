@@ -48,8 +48,6 @@
             <input type="email" formControlName="email" autocomplete="email" />
             <p class="form__field-error" *ngIf="fieldError(profileForm.controls.email, 'Email') as msg">{{ msg }}</p>
           </label>
-          <p class="form__success" *ngIf="profileMessage">{{ profileMessage }}</p>
-          <p class="form__error" *ngIf="profileError">{{ profileError }}</p>
           <button class="btn btn--primary" type="submit" [disabled]="savingProfile">Save profile</button>
         </form>
       </app-animated-card>
@@ -93,8 +91,6 @@
               {{ style }}
             </button>
           </div>
-          <p class="form__success" *ngIf="avatarMessage">{{ avatarMessage }}</p>
-          <p class="form__error" *ngIf="avatarError">{{ avatarError }}</p>
           <button class="btn btn--primary" type="submit" [disabled]="savingAvatar">Save avatar</button>
         </form>
       </app-animated-card>
@@ -205,8 +201,6 @@
           <p class="form__error" *ngIf="passwordForm.hasError('mismatch') && passwordForm.touched">
             Passwords do not match.
           </p>
-          <p class="form__success" *ngIf="passwordMessage">{{ passwordMessage }}</p>
-          <p class="form__error" *ngIf="passwordError">{{ passwordError }}</p>
           <button class="btn btn--primary" type="submit" [disabled]="savingPassword">Update password</button>
         </form>
       </app-animated-card>
@@ -234,7 +228,6 @@
             <input type="checkbox" formControlName="marketingTips" />
             <span>Occasional product tips from NovaBank</span>
           </label>
-          <p class="form__success" *ngIf="prefsMessage">{{ prefsMessage }}</p>
           <button class="btn btn--primary" type="submit" [disabled]="savingPrefs">Save preferences</button>
         </form>
       </app-animated-card>

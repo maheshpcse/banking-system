@@ -61,7 +61,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
         this.error = err?.error?.message || 'Unable to load dashboard';
         this.loading = false;
         this.shellBoot.complete();
-        await this.alerts.error('Dashboard unavailable', this.error);
+        await this.alerts.error(this.error || 'Unable to load dashboard');
       }
     });
   }
@@ -112,11 +112,10 @@ export class OverviewComponent implements OnInit, OnDestroy {
     const actionLabel = this.mode === 'deposit' ? 'Deposit' : 'Withdraw';
 
     const confirmed = await this.alerts.confirm({
-      title: `${actionLabel} $${amount.toFixed(2)}?`,
       text:
         this.mode === 'deposit'
-          ? 'Funds will be added to your available balance.'
-          : 'Funds will be deducted from your available balance.',
+          ? `Deposit $${amount.toFixed(2)}? Funds will be added to your available balance.`
+          : `Withdraw $${amount.toFixed(2)}? Funds will be deducted from your available balance.`,
       confirmText: actionLabel,
       cancelText: 'Cancel'
     });
@@ -141,13 +140,13 @@ export class OverviewComponent implements OnInit, OnDestroy {
         if (this.summary) {
           this.summary = { ...this.summary, user: res.user };
         }
-        await this.alerts.success(`${actionLabel} successful`, res.message);
+        await this.alerts.success(res.message || `${actionLabel} successful`);
         this.loadSummary();
       },
       error: async (err) => {
         this.actionLoading = false;
         this.error = err?.error?.message || 'Action failed';
-        await this.alerts.error(`${actionLabel} failed`, this.error);
+        await this.alerts.error(this.error);
       }
     });
   }

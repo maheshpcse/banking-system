@@ -41,7 +41,7 @@ export class HistoryComponent implements OnInit {
       error: async (err) => {
         this.error = err?.error?.message || 'Unable to load history';
         this.loading = false;
-        await this.alerts.error('History unavailable', this.error);
+        await this.alerts.error(this.error || 'Unable to load history');
       }
     });
   }

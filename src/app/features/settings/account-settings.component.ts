@@ -33,13 +33,6 @@ export class AccountSettingsComponent implements OnInit {
   showConfirm = false;
   user: User | null = null;
   imagePreview: string | null = null;
-  profileMessage = '';
-  profileError = '';
-  avatarMessage = '';
-  avatarError = '';
-  passwordMessage = '';
-  passwordError = '';
-  prefsMessage = '';
 
   readonly avatarStyles: Array<UserAvatar['style']> = ['mint', 'sky', 'sand', 'rose', 'slate'];
   readonly fieldError = fieldError;
@@ -98,7 +91,7 @@ export class AccountSettingsComponent implements OnInit {
           return;
         }
         this.loading = false;
-        await this.alerts.error('Settings unavailable', 'Unable to load your account profile.');
+        await this.alerts.error('Unable to load your account profile.');
       }
     });
   }
@@ -114,8 +107,6 @@ export class AccountSettingsComponent implements OnInit {
   private resetTab(tab: SettingsTab): void {
     switch (tab) {
       case 'identity':
-        this.profileMessage = '';
-        this.profileError = '';
         this.profileForm.reset({
           fullName: this.user?.fullName || '',
           username: this.user?.username || '',
@@ -123,8 +114,6 @@ export class AccountSettingsComponent implements OnInit {
         });
         break;
       case 'presence':
-        this.avatarMessage = '';
-        this.avatarError = '';
         this.imagePreview = this.user?.avatar?.image || null;
         this.avatarForm.reset({
           style: this.user?.avatar?.style || 'mint',
@@ -132,8 +121,6 @@ export class AccountSettingsComponent implements OnInit {
         });
         break;
       case 'security':
-        this.passwordMessage = '';
-        this.passwordError = '';
         this.showCurrent = false;
         this.showNew = false;
         this.showConfirm = false;
@@ -144,7 +131,6 @@ export class AccountSettingsComponent implements OnInit {
         });
         break;
       case 'experience':
-        this.prefsMessage = '';
         this.prefsForm.reset({
           emailAlerts: this.user?.settings?.emailAlerts !== false,
           hideBalance: !!this.user?.settings?.hideBalance,
@@ -162,18 +148,17 @@ export class AccountSettingsComponent implements OnInit {
       return;
     }
     if (!file.type.startsWith('image/')) {
-      this.avatarError = 'Please choose an image file (PNG, JPG, or WebP).';
+      void this.alerts.warning('Please choose an image file (PNG, JPG, or WebP).');
       return;
     }
     if (file.size > 900_000) {
-      this.avatarError = 'Image must be under 900KB.';
+      void this.alerts.warning('Image must be under 900KB.');
       return;
     }
 
     const reader = new FileReader();
     reader.onload = () => {
       this.imagePreview = String(reader.result || '');
-      this.avatarError = '';
     };
     reader.readAsDataURL(file);
   }
@@ -188,8 +173,6 @@ export class AccountSettingsComponent implements OnInit {
       return;
     }
     this.savingProfile = true;
-    this.profileMessage = '';
-    this.profileError = '';
     const raw = this.profileForm.getRawValue();
     withShimmerDelay(
       this.auth.updateProfile({
@@ -199,14 +182,14 @@ export class AccountSettingsComponent implements OnInit {
       }),
       500
     ).subscribe({
-      next: (res) => {
+      next: async (res) => {
         this.applyUser(res.user);
         this.savingProfile = false;
-        this.profileMessage = 'Profile saved.';
+        await this.alerts.success(res.message || 'Profile saved.');
       },
-      error: (err) => {
+      error: async (err) => {
         this.savingProfile = false;
-        this.profileError = err?.error?.message || 'Unable to update profile.';
+        await this.alerts.error(err?.error?.message || 'Unable to update profile.');
       }
     });
   }
@@ -217,8 +200,6 @@ export class AccountSettingsComponent implements OnInit {
       return;
     }
     this.savingAvatar = true;
-    this.avatarMessage = '';
-    this.avatarError = '';
     const raw = this.avatarForm.getRawValue();
     withShimmerDelay(
       this.auth.updateProfile({
@@ -230,14 +211,14 @@ export class AccountSettingsComponent implements OnInit {
       }),
       500
     ).subscribe({
-      next: (res) => {
+      next: async (res) => {
         this.applyUser(res.user);
         this.savingAvatar = false;
-        this.avatarMessage = 'Avatar updated.';
+        await this.alerts.success(res.message || 'Avatar updated.');
       },
-      error: (err) => {
+      error: async (err) => {
         this.savingAvatar = false;
-        this.avatarError = err?.error?.message || 'Unable to update avatar.';
+        await this.alerts.error(err?.error?.message || 'Unable to update avatar.');
       }
     });
   }
@@ -248,8 +229,6 @@ export class AccountSettingsComponent implements OnInit {
       return;
     }
     this.savingPassword = true;
-    this.passwordMessage = '';
-    this.passwordError = '';
     const raw = this.passwordForm.getRawValue();
     withShimmerDelay(
       this.auth.changePassword({
@@ -259,14 +238,14 @@ export class AccountSettingsComponent implements OnInit {
       }),
       500
     ).subscribe({
-      next: (res) => {
+      next: async (res) => {
         this.savingPassword = false;
-        this.passwordMessage = res.message || 'Password updated.';
         this.passwordForm.reset();
+        await this.alerts.success(res.message || 'Password updated.');
       },
-      error: (err) => {
+      error: async (err) => {
         this.savingPassword = false;
-        this.passwordError = err?.error?.message || 'Unable to change password.';
+        await this.alerts.error(err?.error?.message || 'Unable to change password.');
       }
     });
   }
@@ -276,7 +255,6 @@ export class AccountSettingsComponent implements OnInit {
       return;
     }
     this.savingPrefs = true;
-    this.prefsMessage = '';
     const raw = this.prefsForm.getRawValue();
     withShimmerDelay(
       this.auth.updateProfile({
@@ -289,14 +267,14 @@ export class AccountSettingsComponent implements OnInit {
       }),
       500
     ).subscribe({
-      next: (res) => {
+      next: async (res) => {
         this.applyUser(res.user);
         this.savingPrefs = false;
-        this.prefsMessage = 'Preferences saved.';
+        await this.alerts.success(res.message || 'Preferences saved.');
       },
-      error: (err) => {
+      error: async (err) => {
         this.savingPrefs = false;
-        this.prefsMessage = err?.error?.message || 'Unable to save preferences.';
+        await this.alerts.error(err?.error?.message || 'Unable to save preferences.');
       }
     });
   }

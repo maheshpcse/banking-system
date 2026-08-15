@@ -50,8 +50,7 @@ export class SendComponent implements OnInit {
 
     const { toAccountNumber, amount, description } = this.form.getRawValue();
     const confirmed = await this.alerts.confirm({
-      title: `Send $${Number(amount).toFixed(2)}?`,
-      text: `Transfer to account ${toAccountNumber}. This cannot be undone.`,
+      text: `Send $${Number(amount).toFixed(2)} to account ${toAccountNumber}? This cannot be undone.`,
       confirmText: 'Send transfer',
       cancelText: 'Cancel'
     });
@@ -75,12 +74,12 @@ export class SendComponent implements OnInit {
         this.loading = false;
         this.auth.updateLocalUser(res.user);
         this.form.reset();
-        await this.alerts.success('Transfer successful', res.message);
+        await this.alerts.success(res.message || 'Transfer successful');
       },
       error: async (err) => {
         this.loading = false;
         this.error = err?.error?.message || 'Transfer failed';
-        await this.alerts.error('Transfer failed', this.error);
+        await this.alerts.error(this.error);
       }
     });
   }
