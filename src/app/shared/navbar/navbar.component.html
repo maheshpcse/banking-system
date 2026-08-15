@@ -13,23 +13,7 @@
       <a routerLink="/dashboard" routerLinkActive="is-active" (click)="onNavClick()">Dashboard</a>
       <a routerLink="/transfer" routerLinkActive="is-active" (click)="onNavClick()">Transfer</a>
       <a routerLink="/transactions" routerLinkActive="is-active" (click)="onNavClick()">History</a>
-      <a routerLink="/settings" routerLinkActive="is-active" class="nav__account" (click)="onNavClick()">
-        <span
-          class="nav__avatar"
-          [ngClass]="'nav__avatar--' + (auth.currentUser?.avatar?.style || 'mint')"
-          aria-hidden="true"
-        >
-          <img
-            *ngIf="auth.currentUser?.avatar?.image as image"
-            [src]="image"
-            alt=""
-          />
-          <ng-container *ngIf="!auth.currentUser?.avatar?.image">
-            {{ auth.currentUser?.avatar?.initials || 'NB' }}
-          </ng-container>
-        </span>
-        Account
-      </a>
+      <a routerLink="/settings" routerLinkActive="is-active" (click)="onNavClick()">Account</a>
       <button class="nav__logout" type="button" (click)="logout()">Sign out</button>
     </nav>
   </div>

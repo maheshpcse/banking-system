@@ -1,9 +1,17 @@
 .scene {
   /* perspective: 1200px; removed — no 3D hover/tilt motion */
+  height: 100%;
+  display: block;
+}
+
+:host {
+  display: block;
+  height: 100%;
 }
 
 .card {
   position: relative;
+  height: 100%;
   border-radius: var(--radius-lg);
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72));
   border: 1px solid rgba(255, 255, 255, 0.7);

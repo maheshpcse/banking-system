@@ -11,7 +11,7 @@
 }
 
 .shimmer-card--ledger {
-  min-height: 22rem;
+  min-height: 14rem;
 }
 
 .shimmer__hero {
@@ -27,7 +27,7 @@
 
 .shimmer__grid {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
   margin-bottom: 1rem;
 }
@@ -117,6 +117,22 @@
 .shimmer-line--lg {
   width: 46%;
   height: 1.8rem;
+}
+
+/* Shared page-title shimmer language across post-login pages */
+.shimmer-line--brand {
+  width: min(42%, 11rem);
+  height: 1.85rem;
+}
+
+.shimmer-line--title {
+  width: min(58%, 18rem);
+  height: 1.45rem;
+}
+
+.shimmer-line--lede {
+  width: min(72%, 24rem);
+  height: 0.9rem;
 }
 
 .shimmer-line--xl {

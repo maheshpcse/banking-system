@@ -3,6 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { AccountService } from '../../../core/services/account.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
+import { ShellBootService } from '../../../core/services/shell-boot.service';
 import { AccountSummary, Transaction } from '../../../core/models/banking.models';
 import { withShimmerDelay } from '../../../core/utils/shimmer';
 import { fieldError } from '../../../core/utils/form-errors';
@@ -30,7 +31,8 @@ export class OverviewComponent implements OnInit {
     private accountService: AccountService,
     private auth: AuthService,
     private fb: FormBuilder,
-    private alerts: AlertService
+    private alerts: AlertService,
+    public shellBoot: ShellBootService
   ) {}
 
   ngOnInit(): void {
@@ -44,10 +46,12 @@ export class OverviewComponent implements OnInit {
         this.summary = summary;
         this.auth.updateLocalUser(summary.user);
         this.loading = false;
+        this.shellBoot.complete();
       },
       error: async (err) => {
         this.error = err?.error?.message || 'Unable to load dashboard';
         this.loading = false;
+        this.shellBoot.complete();
         await this.alerts.error('Dashboard unavailable', this.error);
       }
     });

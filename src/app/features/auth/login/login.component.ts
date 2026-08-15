@@ -3,6 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ShellBootService } from '../../../core/services/shell-boot.service';
 import { fieldError } from '../../../core/utils/form-errors';
 
 @Component({
@@ -25,7 +26,8 @@ export class LoginComponent {
     private readonly fb: FormBuilder,
     private readonly auth: AuthService,
     private readonly alerts: AlertService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly shellBoot: ShellBootService
   ) {}
 
   submit(): void {
@@ -38,10 +40,14 @@ export class LoginComponent {
     this.formError = '';
     this.auth.login(this.form.getRawValue() as { identifier: string; password: string }).subscribe({
       next: () => {
+        // Start shell boot before navigation so navbar + dashboard shimmer appear together.
+        this.shellBoot.begin();
         void this.router.navigateByUrl('/dashboard').then((ok) => {
           this.loading = false;
           if (ok) {
             this.alerts.toastSuccess('Welcome back', 'You are signed in to NovaBank.');
+          } else {
+            this.shellBoot.complete();
           }
         });
       },
