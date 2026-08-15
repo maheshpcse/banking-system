@@ -8,6 +8,7 @@ Copy into the server repo:
 
 | This folder | Target in server repo |
 | --- | --- |
+| `src/index.js` | `src/index.js` |
 | `src/models/User.js` | `src/models/User.js` |
 | `src/routes/auth.js` | `src/routes/auth.js` |
 | `src/routes/account.js` | `src/routes/account.js` |
@@ -24,9 +25,9 @@ Standalone MongoDB rejects multi-document sessions:
 
 ## API contract used by the UI
 
-- `POST /api/auth/register` → `{ fullName, username, email, password }` (no auto-login token)
-- `POST /api/auth/login` → `{ identifier, password }` (username **or** email)
-- `POST /api/auth/forgot-password` → `{ identifier }` → `{ resetToken, username, maskedEmail }`
+- `POST /api/auth/register` → `{ fullName, username, email, password }`
+- `POST /api/auth/login` → `{ identifier, password }`
+- `POST /api/auth/forgot-password` → `{ identifier }`
 - `POST /api/auth/reset-password` → `{ resetToken, password, confirmPassword }`
 - `PATCH /api/auth/profile` (Bearer) → profile / avatar / settings
 - `POST /api/auth/change-password` (Bearer) → `{ currentPassword, newPassword, confirmPassword }`

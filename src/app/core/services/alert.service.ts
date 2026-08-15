@@ -1,6 +1,15 @@
 import { Injectable } from '@angular/core';
 import Swal, { SweetAlertIcon, SweetAlertResult } from 'sweetalert2';
 
+/** Shared modal titles across the app */
+export const ALERT_TITLES = {
+  success: 'Success',
+  error: 'Error',
+  warning: 'Warning',
+  info: 'Notice',
+  confirm: 'Confirm'
+} as const;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -53,10 +62,10 @@ export class AlertService {
     });
   }
 
-  success(title: string, text?: string): Promise<SweetAlertResult> {
+  success(text?: string): Promise<SweetAlertResult> {
     return Swal.fire({
       icon: 'success',
-      title,
+      title: ALERT_TITLES.success,
       text,
       confirmButtonText: 'Continue',
       ...this.theme,
@@ -69,10 +78,10 @@ export class AlertService {
     });
   }
 
-  error(title: string, text?: string): Promise<SweetAlertResult> {
+  error(text?: string): Promise<SweetAlertResult> {
     return Swal.fire({
       icon: 'error',
-      title,
+      title: ALERT_TITLES.error,
       text,
       confirmButtonText: 'OK',
       confirmButtonColor: '#c45b6c',
@@ -87,10 +96,28 @@ export class AlertService {
     });
   }
 
-  info(title: string, text?: string): Promise<SweetAlertResult> {
+  warning(text?: string): Promise<SweetAlertResult> {
+    return Swal.fire({
+      icon: 'warning',
+      title: ALERT_TITLES.warning,
+      text,
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#d4a017',
+      background: this.theme.background,
+      color: this.theme.color,
+      customClass: {
+        popup: 'nb-alert',
+        confirmButton: 'nb-alert__confirm',
+        title: 'nb-alert__title',
+        htmlContainer: 'nb-alert__text'
+      }
+    });
+  }
+
+  info(text?: string): Promise<SweetAlertResult> {
     return Swal.fire({
       icon: 'info',
-      title,
+      title: ALERT_TITLES.info,
       text,
       confirmButtonText: 'OK',
       ...this.theme,
@@ -104,7 +131,6 @@ export class AlertService {
   }
 
   confirm(options: {
-    title: string;
     text?: string;
     confirmText?: string;
     cancelText?: string;
@@ -112,7 +138,7 @@ export class AlertService {
   }): Promise<boolean> {
     return Swal.fire({
       icon: options.icon || 'question',
-      title: options.title,
+      title: ALERT_TITLES.confirm,
       text: options.text,
       showCancelButton: true,
       confirmButtonText: options.confirmText || 'Confirm',
