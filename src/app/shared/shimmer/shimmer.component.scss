@@ -20,11 +20,6 @@
   gap: 0.55rem;
 }
 
-.shimmer__hero--settings {
-  grid-template-columns: 1fr auto;
-  align-items: end;
-}
-
 .shimmer__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -46,22 +41,6 @@
   gap: 0.65rem;
   padding: 0.9rem;
   min-height: auto;
-}
-
-.shimmer-avatar {
-  width: 4.5rem;
-  height: 4.5rem;
-  border-radius: 1.2rem;
-  background: linear-gradient(
-    90deg,
-    rgba(214, 230, 240, 0.55) 0%,
-    rgba(190, 228, 220, 0.85) 35%,
-    rgba(186, 214, 240, 0.9) 50%,
-    rgba(190, 228, 220, 0.85) 65%,
-    rgba(214, 230, 240, 0.55) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer-wave 1.35s ease-in-out infinite;
 }
 
 .shimmer__auth {
@@ -193,8 +172,7 @@
 @media (max-width: 860px) {
   .shimmer__grid,
   .shimmer__grid--settings,
-  .shimmer__auth,
-  .shimmer__hero--settings {
+  .shimmer__auth {
     grid-template-columns: 1fr;
   }
 }
