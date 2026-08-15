@@ -1,9 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { AppComponent } from './app.component';
 import { AuthService } from './core/services/auth.service';
+import { ShellBootService } from './core/services/shell-boot.service';
 
 describe('AppComponent', () => {
   const authServiceMock = {
@@ -11,15 +12,20 @@ describe('AppComponent', () => {
     isAuthenticated: jasmine.createSpy('isAuthenticated').and.returnValue(false)
   };
 
+  const shellBootMock = {
+    bootstrapping$: new BehaviorSubject(false),
+    isBootstrapping: false,
+    begin: jasmine.createSpy('begin'),
+    complete: jasmine.createSpy('complete')
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule],
       declarations: [AppComponent],
       providers: [
-        {
-          provide: AuthService,
-          useValue: authServiceMock
-        }
+        { provide: AuthService, useValue: authServiceMock },
+        { provide: ShellBootService, useValue: shellBootMock }
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
@@ -28,6 +34,8 @@ describe('AppComponent', () => {
   beforeEach(() => {
     authServiceMock.isAuthenticated.calls.reset();
     authServiceMock.isAuthenticated.and.returnValue(false);
+    shellBootMock.isBootstrapping = false;
+    shellBootMock.bootstrapping$.next(false);
   });
 
   it('should create the app', () => {

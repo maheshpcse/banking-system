@@ -1,6 +1,6 @@
 <div
   class="app-shell"
-  [class.app-shell--marketing]="isMarketingSurface"
+  [class.app-shell--marketing]="isMarketingSurface && !bootstrapping"
   [class.app-shell--has-nav]="hasStickyNav"
 >
   <div class="ambient" *ngIf="showAmbient" aria-hidden="true">
@@ -16,6 +16,9 @@
   </div>
   <app-navbar></app-navbar>
   <main>
-    <router-outlet></router-outlet>
+    <app-shimmer *ngIf="bootstrapping" [variant]="bootVariant"></app-shimmer>
+    <div [hidden]="bootstrapping">
+      <router-outlet></router-outlet>
+    </div>
   </main>
 </div>

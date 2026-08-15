@@ -1,73 +1,95 @@
-import { Component, OnInit } from '@angular/core';
-import { ViewportScroller } from '@angular/common';
-import { NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService } from './core/services/auth.service';
+import { ShellBootService } from './core/services/shell-boot.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'NovaBank';
   /** Ambient ledger backdrop only on authenticated app pages */
   showAmbient = false;
   isMarketingSurface = true;
   hasStickyNav = false;
+  bootstrapping = false;
+  bootVariant: 'dashboard' | 'history' | 'transfer' | 'settings' | 'form' = 'dashboard';
+
+  private readonly subs = new Subscription();
 
   constructor(
     private router: Router,
-    private viewportScroller: ViewportScroller,
-    private auth: AuthService
-  ) {
-    this.viewportScroller.setOffset([0, 0]);
-  }
+    private auth: AuthService,
+    private shellBoot: ShellBootService
+  ) {}
 
   ngOnInit(): void {
-    this.router.events
-      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-      .subscribe((event) => {
-        this.smoothScrollToTop();
-        this.syncChrome(event.urlAfterRedirects);
-      });
+    this.subs.add(
+      this.shellBoot.bootstrapping$.subscribe((boot) => {
+        this.bootstrapping = boot;
+        this.syncChrome(this.router.url);
+      })
+    );
 
-    this.auth.user$.subscribe(() => this.syncChrome(this.router.url));
+    this.subs.add(
+      this.router.events.subscribe((event) => {
+        if (event instanceof NavigationStart && this.auth.isAuthenticated()) {
+          this.bootVariant = this.variantForUrl(event.url);
+          if (this.shellBoot.isBootstrapping) {
+            this.syncChrome(event.url);
+          }
+        }
+
+        if (event instanceof NavigationEnd) {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          this.syncChrome(event.urlAfterRedirects);
+        }
+
+        if (event instanceof NavigationCancel || event instanceof NavigationError) {
+          this.shellBoot.complete();
+          this.syncChrome(this.router.url);
+        }
+      })
+    );
+
+    this.subs.add(
+      this.auth.user$.subscribe(() => this.syncChrome(this.router.url))
+    );
+
     this.syncChrome(this.router.url);
   }
 
-  private smoothScrollToTop(): void {
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    document.body.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-
-    const main = document.querySelector('main');
-    if (main) {
-      main.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-      this.resetOverflowScroll(main);
-    }
-  }
-
-  /** Smooth-reset nested overflow scrollports under a layout root. */
-  private resetOverflowScroll(root: ParentNode): void {
-    root.querySelectorAll<HTMLElement>('*').forEach((el) => {
-      const { overflowX, overflowY } = window.getComputedStyle(el);
-      const y =
-        (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') &&
-        el.scrollHeight > el.clientHeight + 1;
-      const x =
-        (overflowX === 'auto' || overflowX === 'scroll' || overflowX === 'overlay') &&
-        el.scrollWidth > el.clientWidth + 1;
-      if (y || x) {
-        el.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-      }
-    });
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 
   private syncChrome(url: string): void {
     const path = url.split('?')[0];
     this.isMarketingSurface = path === '/' || path.startsWith('/auth');
-    this.showAmbient = !this.isMarketingSurface;
-    this.hasStickyNav = this.auth.isAuthenticated() && !this.isMarketingSurface;
+    this.showAmbient = !this.isMarketingSurface || this.shellBoot.isBootstrapping;
+    this.hasStickyNav =
+      this.auth.isAuthenticated() &&
+      (!this.isMarketingSurface || this.shellBoot.isBootstrapping);
+    this.bootVariant = this.variantForUrl(path);
+  }
+
+  private variantForUrl(url: string): 'dashboard' | 'history' | 'transfer' | 'settings' | 'form' {
+    const path = url.split('?')[0];
+    if (path.startsWith('/transactions')) {
+      return 'history';
+    }
+    if (path.startsWith('/transfer')) {
+      return 'transfer';
+    }
+    if (path.startsWith('/settings')) {
+      return 'settings';
+    }
+    if (path.startsWith('/dashboard')) {
+      return 'dashboard';
+    }
+    return 'form';
   }
 }

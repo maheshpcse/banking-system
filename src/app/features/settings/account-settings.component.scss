@@ -107,6 +107,28 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  align-items: stretch;
+}
+
+:host ::ng-deep .settings-grid > app-animated-card,
+:host ::ng-deep .settings-grid > app-animated-card .card,
+:host ::ng-deep .settings-grid > app-animated-card .card__face {
+  height: 100%;
+}
+
+:host ::ng-deep .settings-grid > app-animated-card .card__face {
+  display: flex;
+  flex-direction: column;
+}
+
+:host ::ng-deep .settings-grid > app-animated-card .card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+:host ::ng-deep .settings-grid > app-animated-card .form {
+  flex: 1;
 }
 
 .meta {

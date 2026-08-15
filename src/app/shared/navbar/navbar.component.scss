@@ -53,12 +53,6 @@
   gap: 0.35rem;
 }
 
-.nav__account {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
 .nav__links a,
 .nav__logout {
   text-decoration: none;
@@ -82,46 +76,6 @@
 .nav__links a.is-active {
   color: var(--text);
   background: rgba(106, 168, 232, 0.18);
-}
-
-.nav__avatar {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.7rem;
-  display: inline-grid;
-  place-items: center;
-  font-size: 0.72rem;
-  font-weight: 750;
-  color: #15343a;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  margin-right: 0.15rem;
-}
-
-.nav__avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.nav__avatar--mint {
-  background: linear-gradient(145deg, #8fdccb, #b7e7f5);
-}
-
-.nav__avatar--sky {
-  background: linear-gradient(145deg, #9ec8f2, #c9e7f8);
-}
-
-.nav__avatar--sand {
-  background: linear-gradient(145deg, #f0d7a8, #f7e9c8);
-}
-
-.nav__avatar--rose {
-  background: linear-gradient(145deg, #f0b8c2, #f8d9df);
-}
-
-.nav__avatar--slate {
-  background: linear-gradient(145deg, #c5d0da, #e2e8ef);
 }
 
 .nav__toggle {

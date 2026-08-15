@@ -12,7 +12,7 @@
   </header>
 
   <div class="grid">
-    <app-animated-card class="balance-card" accent="mint" title="Available balance" subtitle="Primary">
+    <app-animated-card class="balance-card equal-card" accent="mint" title="Available balance" subtitle="Primary">
       <p class="balance">{{ summary.user.balance | currencyFormat }}</p>
       <div class="metric-row">
         <div>
@@ -24,9 +24,22 @@
           <strong>{{ summary.monthly.withdrawals.total | currencyFormat }}</strong>
         </div>
       </div>
+      <div class="metric-row metric-row--secondary">
+        <div>
+          <span>Transfers in</span>
+          <strong>{{ summary.monthly.transfersIn.total | currencyFormat }}</strong>
+        </div>
+        <div>
+          <span>Transfers out</span>
+          <strong>{{ summary.monthly.transfersOut.total | currencyFormat }}</strong>
+        </div>
+      </div>
+      <p class="balance-note">
+        Track inflow and outflow in one place. Use Quick action beside this card to deposit or withdraw without leaving your dashboard.
+      </p>
     </app-animated-card>
 
-    <app-animated-card accent="sky" title="Quick action" subtitle="Move money">
+    <app-animated-card class="equal-card" accent="sky" title="Quick action" subtitle="Move money">
       <div class="mode-switch">
         <button type="button" [class.is-active]="mode === 'deposit'" (click)="setMode('deposit')">Deposit</button>
         <button type="button" [class.is-active]="mode === 'withdraw'" (click)="setMode('withdraw')">Withdraw</button>
@@ -68,5 +81,5 @@
 </section>
 
 <ng-template #loadingTpl>
-  <app-shimmer variant="dashboard"></app-shimmer>
+  <app-shimmer *ngIf="!shellBoot.isBootstrapping" variant="dashboard"></app-shimmer>
 </ng-template>
