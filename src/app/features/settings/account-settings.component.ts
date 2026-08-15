@@ -104,7 +104,55 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   setTab(tab: SettingsTab): void {
+    if (tab === this.activeTab) {
+      return;
+    }
+    this.resetTab(this.activeTab);
     this.activeTab = tab;
+  }
+
+  private resetTab(tab: SettingsTab): void {
+    switch (tab) {
+      case 'identity':
+        this.profileMessage = '';
+        this.profileError = '';
+        this.profileForm.reset({
+          fullName: this.user?.fullName || '',
+          username: this.user?.username || '',
+          email: this.user?.email || ''
+        });
+        break;
+      case 'presence':
+        this.avatarMessage = '';
+        this.avatarError = '';
+        this.imagePreview = this.user?.avatar?.image || null;
+        this.avatarForm.reset({
+          style: this.user?.avatar?.style || 'mint',
+          initials: this.user?.avatar?.initials || ''
+        });
+        break;
+      case 'security':
+        this.passwordMessage = '';
+        this.passwordError = '';
+        this.showCurrent = false;
+        this.showNew = false;
+        this.showConfirm = false;
+        this.passwordForm.reset({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+        break;
+      case 'experience':
+        this.prefsMessage = '';
+        this.prefsForm.reset({
+          emailAlerts: this.user?.settings?.emailAlerts !== false,
+          hideBalance: !!this.user?.settings?.hideBalance,
+          compactLedger: !!this.user?.settings?.compactLedger,
+          marketingTips: !!this.user?.settings?.marketingTips
+        });
+        break;
+    }
   }
 
   onImageSelected(event: Event): void {
