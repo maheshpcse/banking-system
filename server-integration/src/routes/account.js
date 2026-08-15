@@ -58,7 +58,8 @@ router.get('/summary', async (req, res) => {
 
 /**
  * Deposit / withdraw / transfer intentionally avoid MongoDB multi-document
- * transactions. Standalone MongoDB rejects sessions with:
+ * transactions. Standalone MongoDB (common on Railway / Atlas free / docker
+ * single-node) rejects sessions with:
  * "Transaction numbers are only allowed on a replica set member or mongos"
  */
 router.post('/deposit', async (req, res) => {
