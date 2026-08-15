@@ -103,32 +103,63 @@
   background: linear-gradient(145deg, #c5d0da, #e2e8ef);
 }
 
-.settings-grid {
+.settings-shell {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 220px minmax(0, 1fr);
   gap: 1rem;
-  align-items: stretch;
+  align-items: start;
 }
 
-:host ::ng-deep .settings-grid > app-animated-card,
-:host ::ng-deep .settings-grid > app-animated-card .card,
-:host ::ng-deep .settings-grid > app-animated-card .card__face {
-  height: 100%;
+.settings-nav {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.55rem;
+  border-radius: 1.15rem;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: var(--shadow-soft);
+  position: sticky;
+  top: calc(var(--nb-nav-height) + 0.85rem);
 }
 
-:host ::ng-deep .settings-grid > app-animated-card .card__face {
-  display: flex;
-  flex-direction: column;
+.settings-nav__item {
+  display: grid;
+  gap: 0.15rem;
+  text-align: left;
+  border: 0;
+  border-radius: 0.85rem;
+  padding: 0.8rem 0.9rem;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-:host ::ng-deep .settings-grid > app-animated-card .card__body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+.settings-nav__item strong {
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: inherit;
 }
 
-:host ::ng-deep .settings-grid > app-animated-card .form {
-  flex: 1;
+.settings-nav__item span {
+  font-size: 0.8rem;
+  color: inherit;
+  opacity: 0.85;
+}
+
+.settings-nav__item:hover {
+  background: rgba(95, 196, 176, 0.14);
+  color: var(--text);
+}
+
+.settings-nav__item.is-active {
+  background: linear-gradient(135deg, rgba(95, 196, 176, 0.22), rgba(106, 168, 232, 0.18));
+  color: var(--text);
+}
+
+.settings-panel {
+  min-width: 0;
 }
 
 .meta {
@@ -187,13 +218,23 @@
 }
 
 @media (max-width: 860px) {
-  .settings-grid,
   .page__hero {
-    grid-template-columns: 1fr;
     display: grid;
+    align-items: start;
   }
 
-  .page__hero {
-    align-items: start;
+  .settings-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-nav {
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .settings-nav {
+    grid-template-columns: 1fr;
   }
 }

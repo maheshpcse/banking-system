@@ -6,6 +6,8 @@ import { User, UserAvatar } from '../../core/models/banking.models';
 import { withShimmerDelay } from '../../core/utils/shimmer';
 import { fieldError } from '../../core/utils/form-errors';
 
+type SettingsTab = 'identity' | 'presence' | 'security' | 'experience';
+
 function matchPasswords(group: AbstractControl): ValidationErrors | null {
   const newPassword = group.get('newPassword')?.value;
   const confirmPassword = group.get('confirmPassword')?.value;
@@ -41,6 +43,13 @@ export class AccountSettingsComponent implements OnInit {
 
   readonly avatarStyles: Array<UserAvatar['style']> = ['mint', 'sky', 'sand', 'rose', 'slate'];
   readonly fieldError = fieldError;
+  readonly tabs: Array<{ id: SettingsTab; label: string; hint: string }> = [
+    { id: 'identity', label: 'Identity', hint: 'Profile details' },
+    { id: 'presence', label: 'Presence', hint: 'Avatar & photo' },
+    { id: 'security', label: 'Security', hint: 'Password' },
+    { id: 'experience', label: 'Experience', hint: 'Preferences' }
+  ];
+  activeTab: SettingsTab = 'identity';
 
   profileForm = this.fb.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
@@ -92,6 +101,10 @@ export class AccountSettingsComponent implements OnInit {
         await this.alerts.error('Settings unavailable', 'Unable to load your account profile.');
       }
     });
+  }
+
+  setTab(tab: SettingsTab): void {
+    this.activeTab = tab;
   }
 
   onImageSelected(event: Event): void {

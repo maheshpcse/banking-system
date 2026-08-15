@@ -37,7 +37,15 @@
 }
 
 .shimmer__grid--settings {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: start;
+}
+
+.shimmer-card--nav {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.9rem;
+  min-height: auto;
 }
 
 .shimmer-avatar {
