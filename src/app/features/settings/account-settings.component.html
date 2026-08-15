@@ -48,7 +48,6 @@
             <input type="email" formControlName="email" autocomplete="email" />
             <p class="form__field-error" *ngIf="fieldError(profileForm.controls.email, 'Email') as msg">{{ msg }}</p>
           </label>
-          <p class="meta" *ngIf="user">Account {{ user.accountNumber }}</p>
           <p class="form__success" *ngIf="profileMessage">{{ profileMessage }}</p>
           <p class="form__error" *ngIf="profileError">{{ profileError }}</p>
           <button class="btn btn--primary" type="submit" [disabled]="savingProfile">Save profile</button>
