@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { AccountService } from '../../../core/services/account.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -8,17 +8,22 @@ import { AccountSummary, Transaction } from '../../../core/models/banking.models
 import { withShimmerDelay } from '../../../core/utils/shimmer';
 import { fieldError } from '../../../core/utils/form-errors';
 
+const ACCOUNT_REVEAL_MS = 3500;
+
 @Component({
   selector: 'app-overview',
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.scss']
 })
-export class OverviewComponent implements OnInit {
+export class OverviewComponent implements OnInit, OnDestroy {
   loading = true;
   actionLoading = false;
   error = '';
   summary: AccountSummary | null = null;
   mode: 'deposit' | 'withdraw' = 'deposit';
+  accountVisible = false;
+
+  private accountHideTimer: ReturnType<typeof setTimeout> | null = null;
 
   actionForm = this.fb.group({
     amount: [null as number | null, [Validators.required, Validators.min(0.01)]],
@@ -39,6 +44,10 @@ export class OverviewComponent implements OnInit {
     this.loadSummary();
   }
 
+  ngOnDestroy(): void {
+    this.clearAccountHideTimer();
+  }
+
   loadSummary(): void {
     this.loading = true;
     withShimmerDelay(this.accountService.getSummary(), 500).subscribe({
@@ -55,6 +64,36 @@ export class OverviewComponent implements OnInit {
         await this.alerts.error('Dashboard unavailable', this.error);
       }
     });
+  }
+
+  maskedAccountNumber(accountNumber: string | null | undefined): string {
+    const value = String(accountNumber || '');
+    if (value.length <= 4) {
+      return value;
+    }
+    return `${'•'.repeat(value.length - 4)}${value.slice(-4)}`;
+  }
+
+  toggleAccountVisibility(): void {
+    if (this.accountVisible) {
+      this.hideAccountNumber();
+      return;
+    }
+    this.accountVisible = true;
+    this.clearAccountHideTimer();
+    this.accountHideTimer = setTimeout(() => this.hideAccountNumber(), ACCOUNT_REVEAL_MS);
+  }
+
+  private hideAccountNumber(): void {
+    this.accountVisible = false;
+    this.clearAccountHideTimer();
+  }
+
+  private clearAccountHideTimer(): void {
+    if (this.accountHideTimer) {
+      clearTimeout(this.accountHideTimer);
+      this.accountHideTimer = null;
+    }
   }
 
   setMode(mode: 'deposit' | 'withdraw'): void {
