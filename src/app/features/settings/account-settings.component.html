@@ -26,7 +26,7 @@
     </aside>
 
     <div class="settings-panel">
-      <app-shimmer *ngIf="panelLoading" variant="settings-panel"></app-shimmer>
+      <app-shimmer *ngIf="panelLoading" variant="settings-panel" [panel]="activeTab"></app-shimmer>
 
       <ng-container *ngIf="!panelLoading">
       <app-animated-card
@@ -104,14 +104,12 @@
         title="Account opening"
         subtitle="Banking"
       >
-        <span
+        <app-account-number
           cardHeaderActions
-          class="banking-account-badge"
-          [class.banking-account-badge--pending]="!hasAccountNumber"
-          [attr.title]="hasAccountNumber ? 'Account ' + user?.accountNumber : 'Account number pending'"
-        >
-          {{ hasAccountNumber ? user?.accountNumber : 'Pending' }}
-        </span>
+          variant="badge"
+          [value]="hasAccountNumber ? user?.accountNumber : null"
+          pendingLabel="Pending"
+        ></app-account-number>
         <div class="banking-progress" *ngIf="application as app; else noApp">
           <p class="banking-progress__label">Opening progress</p>
           <ol class="banking-progress__steps">

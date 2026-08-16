@@ -28,7 +28,10 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
       confirmText: 'Approve',
       loadingText: 'Issuing account number…',
       action: async () => this.admin.approveRequest(row.id),
-      successMessage: (user) => (user?.accountNumber ? `Issued ${user.accountNumber}` : 'Approved.')
+      successMessage: (user) =>
+        user?.accountNumber
+          ? `Issued ••••${String(user.accountNumber).slice(-4)}`
+          : 'Approved.'
     });
   }
 

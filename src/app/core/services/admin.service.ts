@@ -130,7 +130,7 @@ export class AdminService {
     this.notifications.push({
       kind: 'account',
       title: 'Account approved',
-      body: `${activated.fullName} account ${activated.accountNumber} is active.`,
+      body: `${activated.fullName} account ••••${String(activated.accountNumber).slice(-4)} is active.`,
       href: '/settings?tab=banking'
     });
     return activated;

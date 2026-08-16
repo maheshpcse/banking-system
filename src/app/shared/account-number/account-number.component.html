@@ -1,0 +1,27 @@
+<span class="acct-num" [ngClass]="'acct-num--' + variant" *ngIf="hasValue; else pendingTpl">
+  <strong class="acct-num__value">{{ displayValue }}</strong>
+  <button
+    type="button"
+    class="acct-num__toggle"
+    (click)="toggle(); $event.stopPropagation()"
+    [attr.aria-label]="visible ? 'Hide account number' : 'Show full account number'"
+    [attr.aria-pressed]="visible"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <ng-container *ngIf="!visible; else hideIcon">
+        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </ng-container>
+      <ng-template #hideIcon>
+        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94"></path>
+        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"></path>
+        <path d="M14.12 14.12a3 3 0 0 1-4.24-4.24"></path>
+        <path d="M1 1l22 22"></path>
+      </ng-template>
+    </svg>
+  </button>
+</span>
+
+<ng-template #pendingTpl>
+  <span class="acct-num acct-num--pending" [ngClass]="'acct-num--' + variant">{{ pendingLabel }}</span>
+</ng-template>
