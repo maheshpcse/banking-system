@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, catchError, tap, map } from 'rxjs';
+import { Observable, tap, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AccountApplication,
@@ -103,56 +103,10 @@ export class AccountLifecycleService {
   }): Observable<{ message: string; user: User }> {
     return this.http
       .post<{ message: string; user: User }>(`${environment.apiUrl}/account/application`, payload)
-      .pipe(
-        tap((res) => this.auth.updateLocalUser(res.user)),
-        catchError(() => of(this.localSubmit(payload)))
-      );
+      .pipe(tap((res) => this.auth.updateLocalUser(res.user)));
   }
 
-  /** Demo / offline path when API is unavailable */
-  private localSubmit(payload: {
-    address: UserAddress;
-    card: {
-      holderName: string;
-      number: string;
-      expiryMonth: string;
-      expiryYear: string;
-      cvv: string;
-    };
-  }): { message: string; user: User } {
-    const current = this.auth.currentUser;
-    if (!current) {
-      throw new Error('Not signed in');
-    }
-    const card: BankCard = {
-      holderName: payload.card.holderName,
-      number: payload.card.number.replace(/\s+/g, ''),
-      expiryMonth: payload.card.expiryMonth,
-      expiryYear: payload.card.expiryYear,
-      cvv: payload.card.cvv,
-      brand: 'novabank',
-      status: 'pending'
-    };
-    const user: User = {
-      ...current,
-      accountStatus: 'under_review',
-      address: payload.address,
-      card,
-      application: {
-        status: 'under_review',
-        address: payload.address,
-        cardDraft: card,
-        steps: defaultSteps('under_review'),
-        submittedAt: new Date().toISOString(),
-        reviewNote: null,
-        decidedAt: null
-      }
-    };
-    this.auth.updateLocalUser(user);
-    return { message: 'Application submitted for manager review.', user };
-  }
-
-  /** Admin/manager local approve helper when API missing */
+  /** Admin/manager local approve helper when API missing (UI should prefer /api/admin). */
   activateAccountLocal(user: User): User {
     const digits = String(Math.floor(100000000000 + Math.random() * 899999999999));
     const accountNumber = `MB${digits}`;

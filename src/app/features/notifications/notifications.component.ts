@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { AppNotification, NotificationKind } from '../../core/models/banking.models';
 import { NotificationService } from '../../core/services/notification.service';
 
@@ -37,11 +36,9 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.sub = this.notifications.notifications$.subscribe((items) => (this.items = items));
-    of(true)
-      .pipe(delay(500))
-      .subscribe(() => {
-        this.pageLoading = false;
-      });
+    this.notifications.refresh().subscribe(() => {
+      this.pageLoading = false;
+    });
   }
 
   ngOnDestroy(): void {

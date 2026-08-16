@@ -17,6 +17,7 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.sub = this.admin.users$.subscribe((users) => (this.users = users));
+    this.admin.refreshCustomers().subscribe();
   }
 
   ngOnDestroy(): void {

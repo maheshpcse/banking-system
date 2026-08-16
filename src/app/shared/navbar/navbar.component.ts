@@ -25,6 +25,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.sub = this.notifications.notifications$.subscribe(() => {
       this.unreadCount = this.notifications.unreadCount;
     });
+    if (this.auth.isAuthenticated()) {
+      this.notifications.refresh().subscribe();
+    }
     this.unreadCount = this.notifications.unreadCount;
   }
 

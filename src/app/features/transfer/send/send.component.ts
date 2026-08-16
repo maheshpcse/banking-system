@@ -72,13 +72,8 @@ export class SendComponent implements OnInit {
           .pipe(
             tap((res) => {
               this.auth.updateLocalUser(res.user);
-              this.notifications.push({
-                kind: 'transfer',
-                title: 'Transfer sent',
-                body: `$${Number(amount).toFixed(2)} sent to ${toAccountNumber}.`,
-                href: '/transactions',
-                browserPush: true
-              });
+              // Transfer notifications are persisted by the API for sender + recipient.
+              this.notifications.refresh().subscribe();
             })
           ),
       successMessage: (res) => res.message || 'Transfer successful',

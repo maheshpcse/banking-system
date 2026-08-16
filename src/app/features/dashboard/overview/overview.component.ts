@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { ShellBootService } from '../../../core/services/shell-boot.service';
 import { AccountLifecycleService } from '../../../core/services/account-lifecycle.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { AccountApplication, AccountSummary, Transaction } from '../../../core/models/banking.models';
 import { withShimmerDelay } from '../../../core/utils/shimmer';
 import { fieldError } from '../../../core/utils/form-errors';
@@ -34,6 +35,7 @@ export class OverviewComponent implements OnInit {
     private fb: FormBuilder,
     private alerts: AlertService,
     private lifecycle: AccountLifecycleService,
+    private notifications: NotificationService,
     public shellBoot: ShellBootService
   ) {}
 
@@ -121,6 +123,7 @@ export class OverviewComponent implements OnInit {
 
     this.actionForm.reset();
     this.auth.updateLocalUser(outcome.result.user);
+    this.notifications.refresh().subscribe();
     // Soft refresh: update amounts + recent activity without page shimmer
     this.loadSummary(false);
   }
