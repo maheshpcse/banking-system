@@ -176,8 +176,10 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     if (tab === this.activeTab) {
       return;
     }
-    this.resetTab(this.activeTab);
+    const leaving = this.activeTab;
     this.activeTab = tab;
+    this.resetTab(leaving);
+    this.resetTab(tab);
     this.flashPanel();
   }
 
@@ -231,7 +233,6 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       case 'banking':
         break;
       case 'cardinfo':
-        this.cardFlipped = false;
         this.patchBankingFromUser();
         break;
       case 'experience':
@@ -331,7 +332,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   private patchBankingFromUser(): void {
     const addr = this.user?.address;
     const card = this.user?.card;
-    this.bankingForm.patchValue({
+    this.bankingForm.reset({
       line1: addr?.line1 || '',
       line2: addr?.line2 || '',
       city: addr?.city || '',
@@ -344,6 +345,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       expiryYear: card?.expiryYear || '',
       cvv: card?.cvv || ''
     });
+    this.cardFlipped = false;
   }
 
   onImageSelected(event: Event): void {

@@ -220,6 +220,18 @@
   cursor: pointer;
 }
 
+.form--prefs {
+  gap: 0.15rem;
+}
+
+.form--prefs .toggle {
+  padding: 0.35rem 0;
+}
+
+.form--prefs .btn {
+  margin-top: 0.65rem;
+}
+
 .toggle input {
   width: 1.05rem;
   height: 1.05rem;

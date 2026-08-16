@@ -73,6 +73,48 @@
 .shimmer__grid--cardinfo {
   grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
   margin-bottom: 0;
+  align-items: start;
+}
+
+.shimmer-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.shimmer-panel-head__copy {
+  display: grid;
+  gap: 0.45rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.shimmer-chip--badge {
+  width: 7.5rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  border-radius: 0.65rem;
+}
+
+.shimmer-step {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.85rem;
+  background: rgba(241, 245, 249, 0.55);
+}
+
+.shimmer-line--btn-inline {
+  width: min(100%, 14rem);
+  margin-top: 0.35rem;
+}
+
+.shimmer-cardinfo-preview {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
 }
 
 .shimmer-cardinfo-fields {
@@ -81,9 +123,27 @@
   align-content: start;
 }
 
+.shimmer-cardinfo-row {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.shimmer-cardinfo-row--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.shimmer-cardinfo-row--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .shimmer-block--card {
   height: 12rem;
   border-radius: 1rem;
+}
+
+.shimmer-block--issued {
+  height: 4.25rem;
+  border-radius: 0.95rem;
 }
 
 .shimmer__hero-copy {
@@ -268,6 +328,10 @@
   height: 3.2rem;
 }
 
+.shimmer-row--pref {
+  height: 2.15rem;
+}
+
 .shimmer-chips {
   display: flex;
   flex-wrap: wrap;
@@ -310,5 +374,10 @@
 
   .shimmer-avatar {
     align-self: flex-end;
+  }
+
+  .shimmer-cardinfo-row--2,
+  .shimmer-cardinfo-row--3 {
+    grid-template-columns: 1fr;
   }
 }
