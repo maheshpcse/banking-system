@@ -8,6 +8,7 @@ import { AccountLifecycleService } from '../../../core/services/account-lifecycl
 import { AccountApplication, AccountSummary, Transaction } from '../../../core/models/banking.models';
 import { withShimmerDelay } from '../../../core/utils/shimmer';
 import { fieldError } from '../../../core/utils/form-errors';
+import { map } from 'rxjs/operators';
 
 const ACCOUNT_REVEAL_MS = 3500;
 
@@ -18,7 +19,6 @@ const ACCOUNT_REVEAL_MS = 3500;
 })
 export class OverviewComponent implements OnInit, OnDestroy {
   loading = true;
-  actionLoading = false;
   error = '';
   summary: AccountSummary | null = null;
   mode: 'deposit' | 'withdraw' = 'deposit';
@@ -55,16 +55,23 @@ export class OverviewComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.loadSummary();
+    this.loadSummary(true);
   }
 
   ngOnDestroy(): void {
     this.clearAccountHideTimer();
   }
 
-  loadSummary(): void {
-    this.loading = true;
-    withShimmerDelay(this.accountService.getSummary(), 500).subscribe({
+  /** Full-page shimmer only on initial boot / hard load */
+  loadSummary(withPageShimmer = false): void {
+    if (withPageShimmer) {
+      this.loading = true;
+    }
+    const request$ = withPageShimmer
+      ? withShimmerDelay(this.accountService.getSummary(), 500)
+      : this.accountService.getSummary();
+
+    request$.subscribe({
       next: (summary) => {
         this.summary = summary;
         this.auth.updateLocalUser(summary.user);
@@ -129,44 +136,32 @@ export class OverviewComponent implements OnInit, OnDestroy {
     const description = this.actionForm.value.description || undefined;
     const actionLabel = this.mode === 'deposit' ? 'Deposit' : 'Withdraw';
 
-    const confirmed = await this.alerts.confirm({
+    const outcome = await this.alerts.confirmAction({
       text:
         this.mode === 'deposit'
           ? `Deposit $${amount.toFixed(2)}? Funds will be added to your available balance.`
           : `Withdraw $${amount.toFixed(2)}? Funds will be deducted from your available balance.`,
       confirmText: actionLabel,
-      cancelText: 'Cancel'
+      cancelText: 'Cancel',
+      loadingText: `${actionLabel} in progress…`,
+      action: () =>
+        (this.mode === 'deposit'
+          ? this.accountService.deposit({ amount, description })
+          : this.accountService.withdraw({ amount, description })
+        ).pipe(map((res) => res)),
+      successMessage: (res) => res.message || `${actionLabel} successful`,
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || `${actionLabel} failed`
     });
 
-    if (!confirmed) {
+    if (!outcome.ok) {
       return;
     }
 
-    this.actionLoading = true;
-    this.error = '';
-
-    const request =
-      this.mode === 'deposit'
-        ? this.accountService.deposit({ amount, description })
-        : this.accountService.withdraw({ amount, description });
-
-    withShimmerDelay(request, 500).subscribe({
-      next: async (res) => {
-        this.actionLoading = false;
-        this.actionForm.reset();
-        this.auth.updateLocalUser(res.user);
-        if (this.summary) {
-          this.summary = { ...this.summary, user: res.user };
-        }
-        await this.alerts.success(res.message || `${actionLabel} successful`);
-        this.loadSummary();
-      },
-      error: async (err) => {
-        this.actionLoading = false;
-        this.error = err?.error?.message || 'Action failed';
-        await this.alerts.error(this.error);
-      }
-    });
+    this.actionForm.reset();
+    this.auth.updateLocalUser(outcome.result.user);
+    // Soft refresh: update amounts + recent activity without page shimmer
+    this.loadSummary(false);
   }
 
   typeLabel(type: Transaction['type']): string {

@@ -4,7 +4,12 @@
 >
   <div class="card__face">
     <header *ngIf="title || subtitle" class="card__header">
-      <p *ngIf="subtitle" class="card__subtitle">{{ subtitle }}</p>
+      <div class="card__header-top" *ngIf="subtitle">
+        <p class="card__subtitle">{{ subtitle }}</p>
+        <div class="card__header-actions">
+          <ng-content select="[cardHeaderActions]"></ng-content>
+        </div>
+      </div>
       <h2 *ngIf="title" class="card__title">{{ title }}</h2>
     </header>
     <div class="card__body">

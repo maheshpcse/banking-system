@@ -33,7 +33,7 @@
       <ng-template #pendingAccount>
         <div class="hero-chip__pending">
           <strong>Pending</strong>
-          <a routerLink="/settings" [queryParams]="{ tab: 'banking' }">Complete opening</a>
+          <a routerLink="/settings" [queryParams]="{ tab: 'cardinfo' }">Complete opening</a>
         </div>
       </ng-template>
     </div>
@@ -57,26 +57,26 @@
   <div class="grid">
     <app-animated-card class="balance-card equal-card" accent="mint" title="Available balance" subtitle="Primary">
       <p class="balance">
-        <app-nb-icon name="wallet"></app-nb-icon>
+        <span class="balance__icon"><app-nb-icon name="wallet"></app-nb-icon></span>
         <span>{{ summary.user.balance | currencyFormat }}</span>
       </p>
       <div class="metric-row">
         <div>
-          <span><app-nb-icon name="arrow-down"></app-nb-icon> Deposits</span>
+          <span class="metric-label"><app-nb-icon name="arrow-down"></app-nb-icon><span>Deposits</span></span>
           <strong>{{ summary.monthly.deposits.total | currencyFormat }}</strong>
         </div>
         <div>
-          <span><app-nb-icon name="arrow-up"></app-nb-icon> Withdrawals</span>
+          <span class="metric-label"><app-nb-icon name="arrow-up"></app-nb-icon><span>Withdrawals</span></span>
           <strong>{{ summary.monthly.withdrawals.total | currencyFormat }}</strong>
         </div>
       </div>
       <div class="metric-row metric-row--secondary">
         <div>
-          <span><app-nb-icon name="transfer"></app-nb-icon> Transfers in</span>
+          <span class="metric-label"><app-nb-icon name="transfer"></app-nb-icon><span>Transfers in</span></span>
           <strong>{{ summary.monthly.transfersIn.total | currencyFormat }}</strong>
         </div>
         <div>
-          <span><app-nb-icon name="transfer"></app-nb-icon> Transfers out</span>
+          <span class="metric-label"><app-nb-icon name="transfer"></app-nb-icon><span>Transfers out</span></span>
           <strong>{{ summary.monthly.transfersOut.total | currencyFormat }}</strong>
         </div>
       </div>
@@ -89,7 +89,7 @@
       <div class="locked-note" *ngIf="!canMoveMoney">
         <app-nb-icon name="shield"></app-nb-icon>
         <p>Deposit and withdraw are locked until your account number is generated and activated.</p>
-        <a class="btn btn--ghost" routerLink="/settings" [queryParams]="{ tab: 'banking' }">Open account application</a>
+        <a class="btn btn--ghost" routerLink="/settings" [queryParams]="{ tab: 'cardinfo' }">Open account application</a>
       </div>
 
       <ng-container *ngIf="canMoveMoney">
@@ -108,8 +108,8 @@
             <span>Note (optional)</span>
             <input type="text" formControlName="description" placeholder="Payday, groceries…" />
           </label>
-          <button class="btn btn--primary" type="submit" [disabled]="actionLoading">
-            {{ actionLoading ? 'Processing…' : (mode === 'deposit' ? 'Deposit funds' : 'Withdraw funds') }}
+          <button class="btn btn--primary" type="submit">
+            {{ mode === 'deposit' ? 'Deposit funds' : 'Withdraw funds' }}
           </button>
         </form>
       </ng-container>
@@ -117,9 +117,7 @@
   </div>
 
   <app-animated-card class="recent" accent="sand" title="Recent activity" subtitle="Latest five">
-    <div class="recent__tools">
-      <a routerLink="/transactions" class="recent__view-all">View all</a>
-    </div>
+    <a cardHeaderActions routerLink="/transactions" class="card-link-btn">View all</a>
     <ul class="tx-list" *ngIf="summary.recentTransactions.length; else emptyRecent">
       <li *ngFor="let tx of summary.recentTransactions">
         <div class="tx-list__left">

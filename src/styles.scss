@@ -93,6 +93,41 @@ input {
 
 a {
   color: inherit;
+  text-decoration: none;
+}
+
+a:hover,
+a:focus {
+  text-decoration: none;
+}
+
+.link-chip,
+.card-link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  border: 0;
+  border-radius: 0.7rem;
+  padding: 0.4rem 0.7rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--accent-deep);
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.link-chip:hover,
+.link-chip:focus,
+.card-link-btn:hover,
+.card-link-btn:focus {
+  text-decoration: none !important;
+  color: var(--text);
+  background: rgba(95, 196, 176, 0.16);
+  box-shadow: 0 6px 16px rgba(90, 120, 150, 0.1);
 }
 
 .form {

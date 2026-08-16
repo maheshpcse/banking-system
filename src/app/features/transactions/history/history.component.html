@@ -1,4 +1,4 @@
-<section class="page" *ngIf="!loading; else historyShimmer">
+<section class="page" *ngIf="!pageLoading; else historyShimmer">
   <header class="page__hero">
     <div>
       <p class="eyebrow">NovaBank</p>
@@ -8,72 +8,48 @@
   </header>
 
   <div class="filters">
-    <button
-      type="button"
-      [class.is-active]="type === ''"
-      (click)="setType('')"
-    >
-      All
-    </button>
-    <button
-      type="button"
-      [class.is-active]="type === 'deposit'"
-      (click)="setType('deposit')"
-    >
-      Deposits
-    </button>
-    <button
-      type="button"
-      [class.is-active]="type === 'withdraw'"
-      (click)="setType('withdraw')"
-    >
-      Withdrawals
-    </button>
-    <button
-      type="button"
-      [class.is-active]="type === 'transfer_in'"
-      (click)="setType('transfer_in')"
-    >
-      In
-    </button>
-    <button
-      type="button"
-      [class.is-active]="type === 'transfer_out'"
-      (click)="setType('transfer_out')"
-    >
-      Out
-    </button>
+    <button type="button" [class.is-active]="type === ''" (click)="setType('')">All</button>
+    <button type="button" [class.is-active]="type === 'deposit'" (click)="setType('deposit')">Deposits</button>
+    <button type="button" [class.is-active]="type === 'withdraw'" (click)="setType('withdraw')">Withdrawals</button>
+    <button type="button" [class.is-active]="type === 'transfer_in'" (click)="setType('transfer_in')">In</button>
+    <button type="button" [class.is-active]="type === 'transfer_out'" (click)="setType('transfer_out')">Out</button>
   </div>
 
   <app-animated-card accent="mint" title="Ledger" subtitle="Paginated">
-    <ul class="tx-list" *ngIf="items.length; else emptyHistory">
-      <li *ngFor="let tx of items">
-        <div class="tx-main">
-          <strong>{{ typeLabel(tx.type) }}</strong>
-          <span>{{ tx.createdAt | date: 'medium' }}</span>
-          <small>{{ tx.description || tx.reference }}</small>
-          <small *ngIf="tx.counterpartyName">
-            {{ isCredit(tx.type) ? 'From' : 'To' }} {{ tx.counterpartyName }} ({{ tx.counterpartyAccount }})
-          </small>
-        </div>
-        <div class="tx-side">
-          <em [class.credit]="isCredit(tx.type)" [class.debit]="!isCredit(tx.type)">
-            {{ isCredit(tx.type) ? '+' : '-' }}{{ tx.amount | currencyFormat }}
-          </em>
-          <span>Bal {{ tx.balanceAfter | currencyFormat }}</span>
-        </div>
-      </li>
-    </ul>
+    <div class="ledger-body" *ngIf="!listLoading; else ledgerShimmer">
+      <ul class="tx-list" *ngIf="items.length; else emptyHistory">
+        <li *ngFor="let tx of items">
+          <div class="tx-main">
+            <strong>{{ typeLabel(tx.type) }}</strong>
+            <span>{{ tx.createdAt | date: 'medium' }}</span>
+            <small>{{ tx.description || tx.reference }}</small>
+            <small *ngIf="tx.counterpartyName">
+              {{ isCredit(tx.type) ? 'From' : 'To' }} {{ tx.counterpartyName }} ({{ tx.counterpartyAccount }})
+            </small>
+          </div>
+          <div class="tx-side">
+            <em [class.credit]="isCredit(tx.type)" [class.debit]="!isCredit(tx.type)">
+              {{ isCredit(tx.type) ? '+' : '-' }}{{ tx.amount | currencyFormat }}
+            </em>
+            <span>Bal {{ tx.balanceAfter | currencyFormat }}</span>
+          </div>
+        </li>
+      </ul>
 
-    <ng-template #emptyHistory>
-      <p class="empty">No transactions for this filter.</p>
-    </ng-template>
+      <ng-template #emptyHistory>
+        <p class="empty">No transactions for this filter.</p>
+      </ng-template>
 
-    <div class="pager" *ngIf="pages > 1">
-      <button type="button" class="btn btn--ghost" (click)="prev()" [disabled]="page <= 1">Previous</button>
-      <span>Page {{ page }} / {{ pages }}</span>
-      <button type="button" class="btn btn--ghost" (click)="next()" [disabled]="page >= pages">Next</button>
+      <div class="pager" *ngIf="pages > 1">
+        <button type="button" class="btn btn--ghost" (click)="prev()" [disabled]="page <= 1">Previous</button>
+        <span>Page {{ page }} / {{ pages }}</span>
+        <button type="button" class="btn btn--ghost" (click)="next()" [disabled]="page >= pages">Next</button>
+      </div>
     </div>
+
+    <ng-template #ledgerShimmer>
+      <app-shimmer variant="history-ledger"></app-shimmer>
+    </ng-template>
   </app-animated-card>
 </section>
 

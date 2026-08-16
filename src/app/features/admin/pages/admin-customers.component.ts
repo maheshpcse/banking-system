@@ -24,22 +24,28 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   }
 
   async setStatus(user: User, status: AccountStatus): Promise<void> {
-    const ok = await this.alerts.confirm({
+    await this.alerts.confirmAction({
       text: `Set ${user.fullName} to ${status}?`,
-      confirmText: 'Update'
+      confirmText: 'Update',
+      loadingText: 'Updating status…',
+      action: async () => {
+        this.admin.setStatus(user.id, status);
+        return status;
+      },
+      successMessage: (s) => `Status updated to ${s}.`
     });
-    if (!ok) return;
-    this.admin.setStatus(user.id, status);
-    await this.alerts.success(`Status updated to ${status}.`);
   }
 
   async remove(user: User): Promise<void> {
-    const ok = await this.alerts.confirm({
+    await this.alerts.confirmAction({
       text: `Delete ${user.fullName} from the operations directory?`,
-      confirmText: 'Delete'
+      confirmText: 'Delete',
+      loadingText: 'Removing customer…',
+      action: async () => {
+        this.admin.removeUser(user.id);
+        return true;
+      },
+      successMessage: 'Customer removed from directory.'
     });
-    if (!ok) return;
-    this.admin.removeUser(user.id);
-    await this.alerts.success('Customer removed from directory.');
   }
 }

@@ -9,7 +9,7 @@ import { AccountApplication, User, UserAvatar } from '../../core/models/banking.
 import { withShimmerDelay } from '../../core/utils/shimmer';
 import { fieldError } from '../../core/utils/form-errors';
 
-type SettingsTab = 'identity' | 'presence' | 'banking' | 'security' | 'experience';
+type SettingsTab = 'identity' | 'presence' | 'banking' | 'cardinfo' | 'security' | 'experience';
 
 function matchPasswords(group: AbstractControl): ValidationErrors | null {
   const newPassword = group.get('newPassword')?.value;
@@ -42,7 +42,8 @@ export class AccountSettingsComponent implements OnInit {
   readonly tabs: Array<{ id: SettingsTab; label: string; hint: string }> = [
     { id: 'identity', label: 'Identity', hint: 'Profile details' },
     { id: 'presence', label: 'Presence', hint: 'Avatar & photo' },
-    { id: 'banking', label: 'Banking', hint: 'Account & card' },
+    { id: 'banking', label: 'Banking', hint: 'Opening progress' },
+    { id: 'cardinfo', label: 'Card info', hint: 'Card & address' },
     { id: 'security', label: 'Security', hint: 'Password' },
     { id: 'experience', label: 'Experience', hint: 'Preferences' }
   ];
@@ -110,7 +111,14 @@ export class AccountSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     const tab = this.route.snapshot.queryParamMap.get('tab');
-    if (tab === 'banking' || tab === 'identity' || tab === 'presence' || tab === 'security' || tab === 'experience') {
+    if (
+      tab === 'banking' ||
+      tab === 'cardinfo' ||
+      tab === 'identity' ||
+      tab === 'presence' ||
+      tab === 'security' ||
+      tab === 'experience'
+    ) {
       this.activeTab = tab;
     }
     withShimmerDelay(this.auth.refreshMe(), 500).subscribe({
@@ -166,6 +174,8 @@ export class AccountSettingsComponent implements OnInit {
         });
         break;
       case 'banking':
+        break;
+      case 'cardinfo':
         this.cardFlipped = false;
         this.patchBankingFromUser();
         break;

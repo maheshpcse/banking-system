@@ -10,7 +10,10 @@ import { withShimmerDelay } from '../../../core/utils/shimmer';
   styleUrls: ['./history.component.scss']
 })
 export class HistoryComponent implements OnInit {
-  loading = true;
+  /** Full-page shimmer only on first boot */
+  pageLoading = true;
+  /** Ledger-only shimmer when filtering / paging */
+  listLoading = false;
   error = '';
   items: Transaction[] = [];
   page = 1;
@@ -23,24 +26,32 @@ export class HistoryComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.load();
+    this.load(1, true);
   }
 
-  load(page = 1): void {
-    this.loading = true;
+  load(page = 1, initial = false): void {
+    if (initial) {
+      this.pageLoading = true;
+    } else {
+      this.listLoading = true;
+    }
     this.error = '';
-    withShimmerDelay(
-      this.transactionService.list({ page, limit: 12, type: this.type || undefined })
-    ).subscribe({
+    const request$ = initial
+      ? withShimmerDelay(this.transactionService.list({ page, limit: 12, type: this.type || undefined }))
+      : this.transactionService.list({ page, limit: 12, type: this.type || undefined });
+
+    request$.subscribe({
       next: (res) => {
         this.items = res.items;
         this.page = res.pagination.page;
         this.pages = res.pagination.pages;
-        this.loading = false;
+        this.pageLoading = false;
+        this.listLoading = false;
       },
       error: async (err) => {
         this.error = err?.error?.message || 'Unable to load history';
-        this.loading = false;
+        this.pageLoading = false;
+        this.listLoading = false;
         await this.alerts.error(this.error || 'Unable to load history');
       }
     });
@@ -48,18 +59,18 @@ export class HistoryComponent implements OnInit {
 
   setType(type: string): void {
     this.type = type;
-    this.load(1);
+    this.load(1, false);
   }
 
   prev(): void {
     if (this.page > 1) {
-      this.load(this.page - 1);
+      this.load(this.page - 1, false);
     }
   }
 
   next(): void {
     if (this.page < this.pages) {
-      this.load(this.page + 1);
+      this.load(this.page + 1, false);
     }
   }
 

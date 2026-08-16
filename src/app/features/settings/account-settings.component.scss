@@ -68,6 +68,39 @@
   margin-bottom: 0.35rem;
 }
 
+.avatar-preview--lg {
+  width: 7.5rem;
+  height: 7.5rem;
+  border-radius: 999px;
+  font-size: 1.65rem;
+  margin: 0 auto 1rem;
+}
+
+.form--avatar {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.form--avatar label,
+.form--avatar .style-row,
+.form--avatar .btn {
+  text-align: left;
+}
+
+.form--avatar .upload,
+.form--avatar .avatar-preview--lg + .upload {
+  justify-items: center;
+}
+
+.form--avatar .style-row {
+  justify-content: center;
+}
+
+.form--avatar .btn--primary {
+  justify-self: center;
+}
+
 .upload input[type='file'] {
   cursor: pointer;
   padding: 0.65rem;
@@ -286,8 +319,40 @@
 .banking-layout {
   display: grid;
   grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
-  gap: 1.1rem;
+  gap: 1.25rem;
   align-items: start;
+}
+
+.banking-layout__card {
+  display: grid;
+  gap: 0.85rem;
+  justify-items: stretch;
+}
+
+.issued-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.9rem;
+  background: rgba(95, 196, 176, 0.14);
+  border: 1px solid rgba(95, 196, 176, 0.28);
+}
+
+.issued-bar__status {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text);
+  font-weight: 650;
+  font-size: 0.9rem;
+}
+
+.issued-bar__status app-nb-icon {
+  color: var(--accent-deep);
+  display: inline-flex;
 }
 
 .section-label {
@@ -299,8 +364,26 @@
 
 .form-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
+  align-items: start;
+}
+
+.form-row--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-row--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.form-row label {
+  min-width: 0;
+  align-content: start;
+}
+
+.form__field-error--slot {
+  min-height: 1.15rem;
+  margin: 0;
 }
 
 .banking-issued {
@@ -324,7 +407,13 @@
 
 @media (max-width: 900px) {
   .banking-layout,
-  .form-row {
+  .form-row--2,
+  .form-row--3 {
     grid-template-columns: 1fr;
+  }
+
+  .issued-bar {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

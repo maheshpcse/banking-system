@@ -23,22 +23,27 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
   }
 
   async approve(row: AdminRequestRow): Promise<void> {
-    const ok = await this.alerts.confirm({
+    await this.alerts.confirmAction({
       text: `Approve account opening for ${row.fullName}? This issues an account number and activates the ATM card.`,
-      confirmText: 'Approve'
+      confirmText: 'Approve',
+      loadingText: 'Issuing account number…',
+      action: async () => this.admin.approveRequest(row.id),
+      successMessage: (user) => (user?.accountNumber ? `Issued ${user.accountNumber}` : 'Approved.')
     });
-    if (!ok) return;
-    const user = this.admin.approveRequest(row.id);
-    await this.alerts.success(user?.accountNumber ? `Issued ${user.accountNumber}` : 'Approved.');
   }
 
   async reject(row: AdminRequestRow): Promise<void> {
-    const ok = await this.alerts.confirm({
+    const outcome = await this.alerts.confirmAction({
       text: `Reject application for ${row.fullName}?`,
-      confirmText: 'Reject'
+      confirmText: 'Reject',
+      loadingText: 'Rejecting application…',
+      action: async () => {
+        this.admin.rejectRequest(row.id, 'Additional verification required.');
+        return true;
+      },
+      successMessage: 'Application rejected.'
     });
-    if (!ok) return;
-    this.admin.rejectRequest(row.id, 'Additional verification required.');
-    await this.alerts.warning('Application rejected.');
+    // success modal already shown; keep title Success (common titles)
+    void outcome;
   }
 }

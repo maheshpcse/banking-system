@@ -81,14 +81,22 @@
 }
 
 .hero-chip__pending a {
+  display: inline-flex;
+  align-items: center;
   color: var(--accent-deep);
   font-size: 0.82rem;
   font-weight: 650;
   text-decoration: none;
+  border-radius: 0.65rem;
+  padding: 0.25rem 0.55rem;
+  margin-left: -0.55rem;
 }
 
-.hero-chip__pending a:hover {
-  text-decoration: underline;
+.hero-chip__pending a:hover,
+.hero-chip__pending a:focus {
+  text-decoration: none;
+  background: rgba(95, 196, 176, 0.16);
+  box-shadow: 0 6px 16px rgba(90, 120, 150, 0.1);
 }
 
 .progress-banner {
@@ -156,17 +164,34 @@
 .balance {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.65rem;
 }
 
-.balance app-nb-icon {
-  color: var(--accent-deep);
-}
-
-.metric-row span {
+.balance__icon {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 0.75rem;
+  background: rgba(95, 196, 176, 0.16);
+  color: var(--accent-deep);
+  flex: 0 0 auto;
+}
+
+.metric-label {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-bottom: 0.2rem;
+}
+
+.metric-label app-nb-icon {
+  display: inline-flex;
+  color: var(--accent-deep);
+  flex: 0 0 auto;
 }
 
 .locked-note {
@@ -185,22 +210,6 @@
   line-height: 1.45;
 }
 
-.recent__tools {
-  display: flex;
-  justify-content: flex-end;
-  margin: -0.35rem 0 0.75rem;
-}
-
-.recent__view-all {
-  color: var(--accent-deep);
-  font-weight: 650;
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-
-.recent__view-all:hover {
-  text-decoration: underline;
-}
 
 .tx-list__left {
   display: flex;
