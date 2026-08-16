@@ -16,6 +16,7 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.sub = this.admin.requests$.subscribe((rows) => (this.requests = rows));
+    this.admin.refreshRequests().subscribe();
   }
 
   ngOnDestroy(): void {

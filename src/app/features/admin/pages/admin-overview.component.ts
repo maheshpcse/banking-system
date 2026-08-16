@@ -15,8 +15,14 @@ export class AdminOverviewComponent implements OnInit {
   constructor(private readonly admin: AdminService, private readonly notifications: NotificationService) {}
 
   ngOnInit(): void {
-    this.customers = this.admin.listUsers().filter((u) => (u.role || 'customer') === 'customer').length;
-    this.pending = this.admin.listRequests().filter((r) => r.status === 'under_review').length;
-    this.unread = this.notifications.unreadCount;
+    this.admin.refreshCustomers().subscribe((users) => {
+      this.customers = users.filter((u) => (u.role || 'customer') === 'customer').length;
+    });
+    this.admin.refreshRequests().subscribe((rows) => {
+      this.pending = rows.filter((r) => r.status === 'under_review').length;
+    });
+    this.notifications.refresh().subscribe(() => {
+      this.unread = this.notifications.unreadCount;
+    });
   }
 }

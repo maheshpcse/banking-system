@@ -17,6 +17,7 @@ export class AdminNotificationsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.sub = this.notifications.notifications$.subscribe((items) => (this.items = items));
+    this.notifications.refresh().subscribe();
   }
 
   ngOnDestroy(): void {

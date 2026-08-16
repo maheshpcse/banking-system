@@ -1,19 +1,28 @@
 # Backend sync for `banking-system-server`
 
-Cursor cannot push to https://github.com/maheshpcse/banking-system-server with the current GitHub App token (`403` for `cursor[bot]`).
+Cursor cannot push to https://github.com/maheshpcse/banking-system-server with the current GitHub App token (`403`).
 
 ## Apply these files
 
-Copy into the server repo:
+Copy into the server repo and redeploy / restart the API:
 
 | This folder | Target in server repo |
 | --- | --- |
 | `src/index.js` | `src/index.js` |
 | `src/models/User.js` | `src/models/User.js` |
+| `src/models/Notification.js` | `src/models/Notification.js` **(new)** |
 | `src/routes/auth.js` | `src/routes/auth.js` |
 | `src/routes/account.js` | `src/routes/account.js` |
+| `src/routes/notifications.js` | `src/routes/notifications.js` **(new)** |
+| `src/routes/admin.js` | `src/routes/admin.js` **(new)** |
 
-Then redeploy / restart the API.
+## MongoDB collections used
+
+| Collection | Written by |
+| --- | --- |
+| `users` | register, login/profile updates, card application, deposit/withdraw/transfer balances, admin approve/status |
+| `transactions` | deposit, withdraw, transfer ledger rows |
+| `notifications` | application submit, money moves, transfers, admin approve/reject/status |
 
 ## Account money moves (`account.js`)
 
@@ -21,24 +30,43 @@ Standalone MongoDB rejects multi-document sessions:
 
 `Transaction numbers are only allowed on a replica set member or mongos`
 
-`POST /api/account/deposit`, `POST /api/account/withdraw`, and `POST /api/account/transfer` no longer use `startSession()` / `startTransaction()`. They update balances then write ledger rows, with a best-effort balance rollback if ledger create fails.
+`POST /api/account/deposit`, `POST /api/account/withdraw`, and `POST /api/account/transfer` do not use `startSession()` / `startTransaction()`. They update balances then write ledger rows, with a best-effort balance rollback if ledger create fails.
 
 ## API contract used by the UI
 
+### Auth
 - `POST /api/auth/register` → `{ fullName, username, email, password }`
 - `POST /api/auth/login` → `{ identifier, password }`
 - `POST /api/auth/forgot-password` → `{ identifier }`
 - `POST /api/auth/reset-password` → `{ resetToken, password, confirmPassword }`
 - `PATCH /api/auth/profile` (Bearer) → profile / avatar / settings
-- `POST /api/auth/change-password` (Bearer) → `{ currentPassword, newPassword, confirmPassword }`
+- `POST /api/auth/change-password` (Bearer)
+
+### Account
+- `GET /api/account/summary`
 - `POST /api/account/deposit` → `{ amount, description? }`
 - `POST /api/account/withdraw` → `{ amount, description? }`
 - `POST /api/account/transfer` → `{ toAccountNumber, amount, description? }`
+- `POST /api/account/application` → address + card (persists on `users`, creates `notifications`)
 
-After you grant Cursor write access to `banking-system-server`, ask again and these can be pushed as a server PR automatically.
+### Notifications
+- `GET /api/notifications`
+- `POST /api/notifications` → `{ kind, title, body, href? }`
+- `PATCH /api/notifications/:id/read`
+- `POST /api/notifications/read-all`
 
+### Admin (manager/admin role)
+- `GET /api/admin/customers`
+- `GET /api/admin/requests`
+- `PATCH /api/admin/customers/:id/status` → `{ status }`
+- `DELETE /api/admin/customers/:id`
+- `POST /api/admin/requests/:userId/approve`
+- `POST /api/admin/requests/:userId/reject` → `{ reviewNote? }`
 
 ## Account lifecycle
 - New customers may have `accountNumber: null` and `accountStatus: address_required|under_review`
-- `POST /api/account/application` submits address + card for approval
+- `POST /api/account/application` submits address + card for approval (MongoDB `users` + `notifications`)
 - Deposit / withdraw / transfer return 403 until an active account number exists
+- Admin approve issues `accountNumber` and writes an account notification
+
+After you grant Cursor write access to `banking-system-server`, ask again and these can be pushed as a server PR automatically.

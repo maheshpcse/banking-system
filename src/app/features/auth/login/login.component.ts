@@ -3,6 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { ShellBootService } from '../../../core/services/shell-boot.service';
 import { fieldError } from '../../../core/utils/form-errors';
 
@@ -27,7 +28,8 @@ export class LoginComponent {
     private readonly auth: AuthService,
     private readonly alerts: AlertService,
     private readonly router: Router,
-    private readonly shellBoot: ShellBootService
+    private readonly shellBoot: ShellBootService,
+    private readonly notifications: NotificationService
   ) {}
 
   submit(): void {
@@ -40,6 +42,7 @@ export class LoginComponent {
     this.formError = '';
     this.auth.login(this.form.getRawValue() as { identifier: string; password: string }).subscribe({
       next: () => {
+        this.notifications.refresh().subscribe();
         const role = this.auth.currentUser?.role || 'customer';
         const dest = role === 'admin' || role === 'manager' ? '/admin' : '/dashboard';
         // Start shell boot before navigation so navbar + first page shimmer appear together.

@@ -1,13 +1,17 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 import { AppNotification, NotificationKind } from '../models/banking.models';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
-  private readonly storageKey = 'nb_notifications';
-  private readonly subject = new BehaviorSubject<AppNotification[]>(this.read());
+  private readonly subject = new BehaviorSubject<AppNotification[]>([]);
 
   readonly notifications$ = this.subject.asObservable();
+
+  constructor(private readonly http: HttpClient) {}
 
   get unreadCount(): number {
     return this.subject.value.filter((n) => !n.read).length;
@@ -17,6 +21,20 @@ export class NotificationService {
     return this.subject.value;
   }
 
+  /** Load notifications from MongoDB via API */
+  refresh(): Observable<AppNotification[]> {
+    return this.http
+      .get<{ items: AppNotification[]; unreadCount: number }>(`${environment.apiUrl}/notifications`)
+      .pipe(
+        map((res) => res.items || []),
+        tap((items) => this.subject.next(items)),
+        catchError(() => {
+          this.subject.next([]);
+          return of([]);
+        })
+      );
+  }
+
   push(input: {
     kind: NotificationKind;
     title: string;
@@ -24,35 +42,55 @@ export class NotificationService {
     href?: string;
     browserPush?: boolean;
   }): void {
-    const item: AppNotification = {
-      id: `n_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      kind: input.kind,
-      title: input.title,
-      body: input.body,
-      href: input.href,
-      createdAt: new Date().toISOString(),
-      read: false
-    };
-    const next = [item, ...this.subject.value].slice(0, 100);
-    this.persist(next);
-
-    if (input.browserPush !== false) {
-      void this.tryBrowserPush(item.title, item.body);
-    }
+    this.http
+      .post<{ message: string; item: AppNotification }>(`${environment.apiUrl}/notifications`, {
+        kind: input.kind,
+        title: input.title,
+        body: input.body,
+        href: input.href
+      })
+      .subscribe({
+        next: (res) => {
+          const item = res.item;
+          this.subject.next([item, ...this.subject.value.filter((n) => n.id !== item.id)].slice(0, 100));
+          if (input.browserPush !== false) {
+            void this.tryBrowserPush(item.title, item.body);
+          }
+        },
+        error: () => {
+          // Keep UI responsive if API is briefly unavailable; refresh will reconcile.
+        }
+      });
   }
 
   markRead(id: string): void {
-    const next = this.subject.value.map((n) => (n.id === id ? { ...n, read: true } : n));
-    this.persist(next);
+    this.http.patch<{ item: AppNotification }>(`${environment.apiUrl}/notifications/${id}/read`, {}).subscribe({
+      next: (res) => {
+        const next = this.subject.value.map((n) => (n.id === id ? { ...n, read: true } : n));
+        if (res.item) {
+          const idx = next.findIndex((n) => n.id === id);
+          if (idx >= 0) {
+            next[idx] = res.item;
+          }
+        }
+        this.subject.next(next);
+      }
+    });
   }
 
   markAllRead(): void {
-    const next = this.subject.value.map((n) => ({ ...n, read: true }));
-    this.persist(next);
+    this.http.post<{ items: AppNotification[] }>(`${environment.apiUrl}/notifications/read-all`, {}).subscribe({
+      next: (res) => {
+        this.subject.next(res.items || this.subject.value.map((n) => ({ ...n, read: true })));
+      },
+      error: () => {
+        this.subject.next(this.subject.value.map((n) => ({ ...n, read: true })));
+      }
+    });
   }
 
   clear(): void {
-    this.persist([]);
+    this.subject.next([]);
   }
 
   private async tryBrowserPush(title: string, body: string): Promise<void> {
@@ -69,20 +107,6 @@ export class NotificationService {
       }
     } catch {
       // Browser may block notifications; in-app list still works.
-    }
-  }
-
-  private persist(items: AppNotification[]): void {
-    localStorage.setItem(this.storageKey, JSON.stringify(items));
-    this.subject.next(items);
-  }
-
-  private read(): AppNotification[] {
-    try {
-      const raw = localStorage.getItem(this.storageKey);
-      return raw ? (JSON.parse(raw) as AppNotification[]) : [];
-    } catch {
-      return [];
     }
   }
 }
