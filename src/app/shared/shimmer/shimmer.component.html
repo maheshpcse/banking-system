@@ -136,23 +136,51 @@
         </div>
 
         <div class="shimmer-card shimmer-card--settings-panel" *ngSwitchCase="'banking'">
+          <div class="shimmer-panel-head">
+            <div class="shimmer-panel-head__copy">
+              <div class="shimmer-line shimmer-line--xs"></div>
+              <div class="shimmer-line shimmer-line--md"></div>
+            </div>
+            <span class="shimmer-chip shimmer-chip--badge"></span>
+          </div>
           <div class="shimmer-line shimmer-line--xs"></div>
-          <div class="shimmer-line shimmer-line--md"></div>
-          <div class="shimmer-row" *ngFor="let i of [1, 2, 3, 4, 5]"></div>
-          <div class="shimmer-line shimmer-line--btn"></div>
+          <div class="shimmer-step" *ngFor="let i of [1, 2, 3, 4, 5]">
+            <div class="shimmer-line shimmer-line--sm"></div>
+            <div class="shimmer-line shimmer-line--lede"></div>
+          </div>
+          <div class="shimmer-line shimmer-line--btn shimmer-line--btn-inline"></div>
         </div>
 
         <div class="shimmer-card shimmer-card--settings-panel" *ngSwitchCase="'cardinfo'">
-          <div class="shimmer-line shimmer-line--xs"></div>
-          <div class="shimmer-line shimmer-line--md"></div>
+          <div class="shimmer-panel-head">
+            <div class="shimmer-panel-head__copy">
+              <div class="shimmer-line shimmer-line--xs"></div>
+              <div class="shimmer-line shimmer-line--md"></div>
+            </div>
+          </div>
           <div class="shimmer__grid shimmer__grid--cardinfo">
-            <div class="shimmer-block shimmer-block--card"></div>
+            <div class="shimmer-cardinfo-preview">
+              <div class="shimmer-block shimmer-block--card"></div>
+              <div class="shimmer-block shimmer-block--issued"></div>
+            </div>
             <div class="shimmer-cardinfo-fields">
+              <div class="shimmer-line shimmer-line--sm"></div>
               <div class="shimmer-block"></div>
+              <div class="shimmer-block"></div>
+              <div class="shimmer-cardinfo-row shimmer-cardinfo-row--3">
+                <div class="shimmer-block shimmer-block--sm"></div>
+                <div class="shimmer-block shimmer-block--sm"></div>
+                <div class="shimmer-block shimmer-block--sm"></div>
+              </div>
+              <div class="shimmer-line shimmer-line--sm"></div>
               <div class="shimmer-block"></div>
               <div class="shimmer-block shimmer-block--sm"></div>
-              <div class="shimmer-block"></div>
-              <div class="shimmer-block shimmer-block--sm"></div>
+              <div class="shimmer-cardinfo-row shimmer-cardinfo-row--2">
+                <div class="shimmer-block shimmer-block--sm"></div>
+                <div class="shimmer-block shimmer-block--sm"></div>
+                <div class="shimmer-block shimmer-block--sm"></div>
+                <div class="shimmer-block shimmer-block--sm"></div>
+              </div>
               <div class="shimmer-line shimmer-line--btn"></div>
             </div>
           </div>
@@ -170,8 +198,8 @@
         <div class="shimmer-card shimmer-card--settings-panel" *ngSwitchCase="'experience'">
           <div class="shimmer-line shimmer-line--xs"></div>
           <div class="shimmer-line shimmer-line--md"></div>
-          <div class="shimmer-row" *ngFor="let i of [1, 2, 3, 4]"></div>
-          <div class="shimmer-line shimmer-line--btn"></div>
+          <div class="shimmer-row shimmer-row--pref" *ngFor="let i of [1, 2, 3, 4]"></div>
+          <div class="shimmer-line shimmer-line--btn shimmer-line--btn-inline"></div>
         </div>
 
         <div class="shimmer-card shimmer-card--settings-panel" *ngSwitchDefault>
