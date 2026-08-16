@@ -6,7 +6,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-DIST_PATH="${DIST_PATH:-dist/banking-system}"
+DIST_PATH="${DIST_PATH:-dist/client}"
 MAINT_PATH="${MAINT_PATH:-maintenance/index.html}"
 TARGET_PATH="${TARGET_PATH:-}"
 DO_BUILD=0
@@ -18,7 +18,7 @@ Usage: $0 [--build] [--skip-maintenance] [--target DIR] [--dist DIR]
   --build              Run ng build before copy
   --skip-maintenance   Publish app only
   --target DIR         Live web root (required to apply)
-  --dist DIR           Built app folder (default: dist/banking-system)
+  --dist DIR           Built app folder (default: dist/client)
 EOF
 }
 

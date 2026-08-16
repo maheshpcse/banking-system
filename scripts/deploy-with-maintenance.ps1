@@ -7,7 +7,7 @@
   Does NOT run ng build unless -Build is passed.
 
 .PARAMETER DistPath
-  Path to production static files (default: dist/banking-system)
+  Path to production static files (default: dist/client)
 
 .PARAMETER MaintenancePath
   Path to maintenance/index.html (default: maintenance/index.html)
@@ -23,7 +23,7 @@
 #>
 [CmdletBinding()]
 param(
-  [string]$DistPath = "dist/banking-system",
+  [string]$DistPath = "dist/client",
   [string]$MaintenancePath = "maintenance/index.html",
   [string]$TargetPath = "",
   [switch]$Build,
