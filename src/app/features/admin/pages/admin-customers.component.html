@@ -22,7 +22,13 @@
           <strong>{{ user.fullName }}</strong>
           <span>{{ user.email }}</span>
         </td>
-        <td>{{ user.accountNumber || 'Pending' }}</td>
+        <td>
+          <app-account-number
+            variant="inline"
+            [value]="user.accountNumber"
+            pendingLabel="Pending"
+          ></app-account-number>
+        </td>
         <td><span class="pill" [attr.data-status]="user.accountStatus">{{ user.accountStatus || 'pending' }}</span></td>
         <td>{{ user.balance | currencyFormat }}</td>
         <td class="actions">

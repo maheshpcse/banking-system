@@ -11,12 +11,15 @@ import { fieldError } from '../../core/utils/form-errors';
 
 type SettingsTab = 'identity' | 'presence' | 'banking' | 'cardinfo' | 'security' | 'experience';
 
+/** Loaded once for native <select> options — no custom popup UI */
 const US_STATES = [
-  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
-  'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
-  'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
-  'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
-  'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC'
+  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
+  'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky',
+  'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
+  'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
+  'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
+  'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
+  'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming', 'District of Columbia'
 ];
 
 const COUNTRIES = [
@@ -175,12 +178,21 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     }
     this.resetTab(this.activeTab);
     this.activeTab = tab;
+    this.flashPanel();
+  }
+
+  private flashPanel(): void {
     this.panelLoading = true;
     this.clearPanelTimer();
     this.panelTimer = setTimeout(() => {
       this.panelLoading = false;
       this.panelTimer = null;
     }, 480);
+  }
+
+  private async afterSaveSuccess(message: string): Promise<void> {
+    await this.alerts.success(message);
+    this.flashPanel();
   }
 
   private clearPanelTimer(): void {
@@ -307,7 +319,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
           else users.unshift(res.user);
           localStorage.setItem(usersKey, JSON.stringify(users));
         } catch {}
-        await this.alerts.success(res.message || 'Application submitted for review.');
+        await this.afterSaveSuccess(res.message || 'Application submitted for review.');
       },
       error: async (err) => {
         this.savingApplication = false;
@@ -378,7 +390,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       next: async (res) => {
         this.applyUser(res.user);
         this.savingProfile = false;
-        await this.alerts.success(res.message || 'Profile saved.');
+        await this.afterSaveSuccess(res.message || 'Profile saved.');
       },
       error: async (err) => {
         this.savingProfile = false;
@@ -407,7 +419,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       next: async (res) => {
         this.applyUser(res.user);
         this.savingAvatar = false;
-        await this.alerts.success(res.message || 'Avatar updated.');
+        await this.afterSaveSuccess(res.message || 'Avatar updated.');
       },
       error: async (err) => {
         this.savingAvatar = false;
@@ -434,7 +446,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       next: async (res) => {
         this.savingPassword = false;
         this.passwordForm.reset();
-        await this.alerts.success(res.message || 'Password updated.');
+        await this.afterSaveSuccess(res.message || 'Password updated.');
       },
       error: async (err) => {
         this.savingPassword = false;
@@ -463,7 +475,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       next: async (res) => {
         this.applyUser(res.user);
         this.savingPrefs = false;
-        await this.alerts.success(res.message || 'Preferences saved.');
+        await this.afterSaveSuccess(res.message || 'Preferences saved.');
       },
       error: async (err) => {
         this.savingPrefs = false;

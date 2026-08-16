@@ -1,0 +1,77 @@
+.acct-num {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.acct-num__value {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.acct-num__toggle {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.acct-num__toggle:hover {
+  background: rgba(95, 196, 176, 0.16);
+  color: var(--text);
+}
+
+.acct-num__toggle svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.acct-num--pending {
+  font-family: var(--font-display);
+  font-weight: 650;
+  letter-spacing: 0;
+  color: #9a6b00;
+}
+
+.acct-num--badge {
+  padding: 0.2rem 0.35rem 0.2rem 0.55rem;
+  border-radius: 0.65rem;
+  background: rgba(241, 245, 249, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+}
+
+.acct-num--badge .acct-num__value {
+  font-size: 0.82rem;
+}
+
+.acct-num--badge.acct-num--pending {
+  padding: 0.35rem 0.65rem;
+  background: rgba(255, 248, 230, 0.95);
+  border-color: rgba(212, 160, 23, 0.35);
+}
+
+.acct-num--hero .acct-num__value {
+  font-size: 0.95rem;
+}
+
+.acct-num--inline .acct-num__value {
+  font-size: 0.9rem;
+}

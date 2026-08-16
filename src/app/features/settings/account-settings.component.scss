@@ -184,28 +184,6 @@
   max-height: none;
 }
 
-.banking-account-badge {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--text);
-  padding: 0.35rem 0.65rem;
-  border-radius: 0.65rem;
-  background: rgba(241, 245, 249, 0.95);
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  white-space: nowrap;
-}
-
-.banking-account-badge--pending {
-  font-family: var(--font-display);
-  font-weight: 650;
-  letter-spacing: 0;
-  color: #9a6b00;
-  background: rgba(255, 248, 230, 0.95);
-  border-color: rgba(212, 160, 23, 0.35);
-}
-
 .style-row {
   display: flex;
   flex-wrap: wrap;

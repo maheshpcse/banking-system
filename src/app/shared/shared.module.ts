@@ -8,6 +8,7 @@ import { CurrencyFormatPipe } from './currency-format.pipe';
 import { ShimmerComponent } from './shimmer/shimmer.component';
 import { BankCardComponent } from './bank-card/bank-card.component';
 import { NbIconComponent } from './nb-icon/nb-icon.component';
+import { AccountNumberComponent } from './account-number/account-number.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { NbIconComponent } from './nb-icon/nb-icon.component';
     CurrencyFormatPipe,
     ShimmerComponent,
     BankCardComponent,
-    NbIconComponent
+    NbIconComponent,
+    AccountNumberComponent
   ],
   imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
   exports: [
@@ -29,7 +31,8 @@ import { NbIconComponent } from './nb-icon/nb-icon.component';
     CurrencyFormatPipe,
     ShimmerComponent,
     BankCardComponent,
-    NbIconComponent
+    NbIconComponent,
+    AccountNumberComponent
   ]
 })
 export class SharedModule {}

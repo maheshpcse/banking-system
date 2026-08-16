@@ -16,4 +16,14 @@ export class ShimmerComponent {
     | 'settings-panel'
     | 'notifications'
     | 'auth' = 'dashboard';
+
+  /** Account settings panel tab layout when variant is settings-panel */
+  @Input() panel:
+    | 'identity'
+    | 'presence'
+    | 'banking'
+    | 'cardinfo'
+    | 'security'
+    | 'experience'
+    | '' = '';
 }

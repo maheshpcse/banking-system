@@ -149,20 +149,43 @@ a:focus {
 .form input,
 .form select {
   width: 100%;
+  box-sizing: border-box;
   border: 1px solid rgba(148, 163, 184, 0.35);
-  background: rgba(255, 255, 255, 0.88);
+  background-color: rgba(255, 255, 255, 0.88);
   border-radius: 0.85rem;
   padding: 0.8rem 0.95rem;
   color: var(--text);
   outline: none;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.35;
+  min-height: 2.95rem;
   transform: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.form select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 2.55rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7c8f' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  background-size: 1rem;
+  cursor: pointer;
+}
+
+.form select option,
+.form select optgroup {
+  color: var(--text);
+  background-color: #fff;
 }
 
 .form input:hover,
 .form select:hover {
   transform: none !important;
-  background: rgba(232, 250, 247, 0.95);
+  background-color: rgba(232, 250, 247, 0.95);
   border-color: rgba(95, 196, 176, 0.45);
 }
 
@@ -177,7 +200,7 @@ a:focus {
 .form select:focus {
   border-color: rgba(95, 196, 176, 0.8);
   box-shadow: 0 0 0 4px rgba(95, 196, 176, 0.16);
-  background: #fff;
+  background-color: #fff;
 }
 
 .form__error {
