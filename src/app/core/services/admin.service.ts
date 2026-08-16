@@ -76,8 +76,15 @@ export class AdminService {
   }
 
   removeUser(userId: string): void {
+    const user = this.usersSubject.value.find((u) => u.id === userId);
     this.persistUsers(this.usersSubject.value.filter((u) => u.id !== userId));
     this.persistRequests(this.requestsSubject.value.filter((r) => r.userId !== userId));
+    this.notifications.push({
+      kind: 'admin',
+      title: 'Customer removed',
+      body: user ? `${user.fullName}'s profile was deleted from NovaBank.` : 'A customer profile was deleted.',
+      href: '/admin/customers'
+    });
   }
 
   approveRequest(requestId: string): User | null {
@@ -179,6 +186,42 @@ export class AdminService {
         }
       ]);
     }
+
+    this.seedPendingRequestFromLocalUser();
+  }
+
+  /** Backfills a pending request entry if the signed-in demo user is under review but was never queued. */
+  private seedPendingRequestFromLocalUser(): void {
+    let current: User | null = null;
+    try {
+      const raw = localStorage.getItem('mb_user');
+      current = raw ? (JSON.parse(raw) as User) : null;
+    } catch {
+      current = null;
+    }
+    if (!current || current.accountStatus !== 'under_review') {
+      return;
+    }
+    const alreadyQueued = this.requestsSubject.value.some((r) => r.userId === current?.id);
+    if (alreadyQueued) {
+      return;
+    }
+    if (!this.usersSubject.value.some((u) => u.id === current?.id)) {
+      this.upsertUser(current);
+    }
+    this.persistRequests([
+      {
+        id: `req_${current.id}`,
+        userId: current.id,
+        fullName: current.fullName,
+        email: current.email,
+        submittedAt: current.application?.submittedAt || new Date().toISOString(),
+        status: 'under_review',
+        address: current.address || null,
+        card: current.card || null
+      },
+      ...this.requestsSubject.value
+    ]);
   }
 
   private readUsers(): User[] {
