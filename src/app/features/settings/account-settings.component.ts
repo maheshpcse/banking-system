@@ -267,6 +267,11 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       this.bankingForm.markAllAsTouched();
       return;
     }
+    const isFirstApplication =
+      !this.hasAccountNumber &&
+      this.user?.accountStatus !== 'under_review' &&
+      this.user?.accountStatus !== 'active' &&
+      this.user?.accountStatus !== 'approved';
     this.savingApplication = true;
     const raw = this.bankingForm.getRawValue();
     withShimmerDelay(
@@ -292,35 +297,64 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       next: async (res) => {
         this.applyUser(res.user);
         this.savingApplication = false;
-        this.notifications.push({
-          kind: 'account',
-          title: 'Application submitted',
-          body: 'Your account & card request is under manager review.',
-          href: '/settings?tab=banking'
-        });
-        // Queue for admin demo inbox
-        try {
-          const key = 'nb_admin_requests';
-          const list = JSON.parse(localStorage.getItem(key) || '[]');
-          list.unshift({
-            id: `req_${Date.now()}`,
-            userId: res.user.id,
-            fullName: res.user.fullName,
-            email: res.user.email,
-            submittedAt: new Date().toISOString(),
-            status: 'under_review',
-            address: res.user.address,
-            card: res.user.card
+        if (isFirstApplication) {
+          this.notifications.push({
+            kind: 'account',
+            title: 'Application submitted',
+            body: 'Your account & card request is under manager review.',
+            href: '/settings?tab=banking'
           });
-          localStorage.setItem(key, JSON.stringify(list.slice(0, 50)));
-          const usersKey = 'nb_admin_users';
-          const users = JSON.parse(localStorage.getItem(usersKey) || '[]');
-          const idx = users.findIndex((u: any) => u.id === res.user.id);
-          if (idx >= 0) users[idx] = res.user;
-          else users.unshift(res.user);
-          localStorage.setItem(usersKey, JSON.stringify(users));
-        } catch {}
-        await this.afterSaveSuccess(res.message || 'Application submitted for review.');
+          // Queue for admin demo inbox (first submission only)
+          try {
+            const key = 'nb_admin_requests';
+            const list = JSON.parse(localStorage.getItem(key) || '[]');
+            list.unshift({
+              id: `req_${Date.now()}`,
+              userId: res.user.id,
+              fullName: res.user.fullName,
+              email: res.user.email,
+              submittedAt: new Date().toISOString(),
+              status: 'under_review',
+              address: res.user.address,
+              card: res.user.card
+            });
+            localStorage.setItem(key, JSON.stringify(list.slice(0, 50)));
+            const usersKey = 'nb_admin_users';
+            const users = JSON.parse(localStorage.getItem(usersKey) || '[]');
+            const idx = users.findIndex((u: any) => u.id === res.user.id);
+            if (idx >= 0) users[idx] = res.user;
+            else users.unshift(res.user);
+            localStorage.setItem(usersKey, JSON.stringify(users));
+          } catch {}
+        } else {
+          // Keep admin demo rows in sync on later card/address updates (no new notification)
+          try {
+            const usersKey = 'nb_admin_users';
+            const users = JSON.parse(localStorage.getItem(usersKey) || '[]');
+            const idx = users.findIndex((u: { id?: string }) => u.id === res.user.id);
+            if (idx >= 0) {
+              users[idx] = res.user;
+              localStorage.setItem(usersKey, JSON.stringify(users));
+            }
+            const reqKey = 'nb_admin_requests';
+            const list = JSON.parse(localStorage.getItem(reqKey) || '[]');
+            const reqIdx = list.findIndex((r: { userId?: string }) => r.userId === res.user.id);
+            if (reqIdx >= 0) {
+              list[reqIdx] = {
+                ...list[reqIdx],
+                address: res.user.address,
+                card: res.user.card,
+                fullName: res.user.fullName,
+                email: res.user.email
+              };
+              localStorage.setItem(reqKey, JSON.stringify(list));
+            }
+          } catch {}
+        }
+        await this.afterSaveSuccess(
+          res.message ||
+            (isFirstApplication ? 'Application submitted for review.' : 'Card & address updated.')
+        );
       },
       error: async (err) => {
         this.savingApplication = false;
