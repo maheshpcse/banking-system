@@ -3,6 +3,12 @@
   width: 100%;
   max-width: 380px;
   aspect-ratio: 1.586 / 1;
+  min-height: 220px;
+}
+
+:host {
+  display: block;
+  width: 100%;
 }
 
 .bank-card__inner {

@@ -5,10 +5,9 @@ import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { AccountLifecycleService } from '../../../core/services/account-lifecycle.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
 import { fieldError } from '../../../core/utils/form-errors';
 import { of } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { delay, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-send',
@@ -16,7 +15,6 @@ import { delay } from 'rxjs/operators';
   styleUrls: ['./send.component.scss']
 })
 export class SendComponent implements OnInit {
-  loading = false;
   pageLoading = true;
 
   form = this.fb.group({
@@ -59,44 +57,37 @@ export class SendComponent implements OnInit {
     }
 
     const { toAccountNumber, amount, description } = this.form.getRawValue();
-    const confirmed = await this.alerts.confirm({
+    const outcome = await this.alerts.confirmAction({
       text: `Send $${Number(amount).toFixed(2)} to account ${toAccountNumber}? This cannot be undone.`,
       confirmText: 'Send transfer',
-      cancelText: 'Cancel'
+      cancelText: 'Cancel',
+      loadingText: 'Sending transfer…',
+      action: () =>
+        this.accountService
+          .transfer({
+            toAccountNumber: toAccountNumber!,
+            amount: Number(amount),
+            description: description || undefined
+          })
+          .pipe(
+            tap((res) => {
+              this.auth.updateLocalUser(res.user);
+              this.notifications.push({
+                kind: 'transfer',
+                title: 'Transfer sent',
+                body: `$${Number(amount).toFixed(2)} sent to ${toAccountNumber}.`,
+                href: '/transactions',
+                browserPush: true
+              });
+            })
+          ),
+      successMessage: (res) => res.message || 'Transfer successful',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Transfer failed'
     });
 
-    if (!confirmed) {
-      return;
+    if (outcome.ok) {
+      this.form.reset();
     }
-
-    this.loading = true;
-
-    withShimmerDelay(
-      this.accountService.transfer({
-        toAccountNumber: toAccountNumber!,
-        amount: Number(amount),
-        description: description || undefined
-      }),
-      500
-    ).subscribe({
-      next: async (res) => {
-        this.loading = false;
-        this.auth.updateLocalUser(res.user);
-        this.form.reset();
-        this.notifications.push({
-          kind: 'transfer',
-          title: 'Transfer sent',
-          body: `$${Number(amount).toFixed(2)} sent to ${toAccountNumber}.`,
-          href: '/transactions',
-          browserPush: true
-        });
-        await this.alerts.success(res.message || 'Transfer successful');
-      },
-      error: async (err) => {
-        this.loading = false;
-        // Modal only — do not bind API errors under the recipient field.
-        await this.alerts.error(err?.error?.message || 'Transfer failed');
-      }
-    });
   }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import Swal, { SweetAlertIcon, SweetAlertResult } from 'sweetalert2';
+import { firstValueFrom, isObservable, Observable } from 'rxjs';
 
 /** Shared modal titles across the app */
 export const ALERT_TITLES = {
@@ -19,6 +20,14 @@ export class AlertService {
     cancelButtonColor: '#94a3b8',
     background: '#f7fbfe',
     color: '#1d2a36'
+  };
+
+  private readonly alertClasses = {
+    popup: 'nb-alert',
+    confirmButton: 'nb-alert__confirm',
+    cancelButton: 'nb-alert__cancel',
+    title: 'nb-alert__title',
+    htmlContainer: 'nb-alert__text'
   };
 
   /** Small top-right toast for login/signup feedback */
@@ -69,12 +78,7 @@ export class AlertService {
       text,
       confirmButtonText: 'Continue',
       ...this.theme,
-      customClass: {
-        popup: 'nb-alert',
-        confirmButton: 'nb-alert__confirm',
-        title: 'nb-alert__title',
-        htmlContainer: 'nb-alert__text'
-      }
+      customClass: this.alertClasses
     });
   }
 
@@ -88,10 +92,8 @@ export class AlertService {
       background: this.theme.background,
       color: this.theme.color,
       customClass: {
-        popup: 'nb-alert',
-        confirmButton: 'nb-alert__confirm nb-alert__confirm--danger',
-        title: 'nb-alert__title',
-        htmlContainer: 'nb-alert__text'
+        ...this.alertClasses,
+        confirmButton: 'nb-alert__confirm nb-alert__confirm--danger'
       }
     });
   }
@@ -105,12 +107,7 @@ export class AlertService {
       confirmButtonColor: '#d4a017',
       background: this.theme.background,
       color: this.theme.color,
-      customClass: {
-        popup: 'nb-alert',
-        confirmButton: 'nb-alert__confirm',
-        title: 'nb-alert__title',
-        htmlContainer: 'nb-alert__text'
-      }
+      customClass: this.alertClasses
     });
   }
 
@@ -121,12 +118,7 @@ export class AlertService {
       text,
       confirmButtonText: 'OK',
       ...this.theme,
-      customClass: {
-        popup: 'nb-alert',
-        confirmButton: 'nb-alert__confirm',
-        title: 'nb-alert__title',
-        htmlContainer: 'nb-alert__text'
-      }
+      customClass: this.alertClasses
     });
   }
 
@@ -145,13 +137,91 @@ export class AlertService {
       cancelButtonText: options.cancelText || 'Cancel',
       reverseButtons: true,
       ...this.theme,
-      customClass: {
-        popup: 'nb-alert',
-        confirmButton: 'nb-alert__confirm',
-        cancelButton: 'nb-alert__cancel',
-        title: 'nb-alert__title',
-        htmlContainer: 'nb-alert__text'
-      }
+      customClass: this.alertClasses
     }).then((result) => !!result.isConfirmed);
+  }
+
+  /**
+   * Confirm → loading spinner in the same modal → success/error in the same modal.
+   */
+  async confirmAction<T>(options: {
+    text?: string;
+    confirmText?: string;
+    cancelText?: string;
+    loadingText?: string;
+    icon?: SweetAlertIcon;
+    action: () => Observable<T> | Promise<T>;
+    successMessage?: string | ((result: T) => string);
+    errorMessage?: string | ((err: unknown) => string);
+  }): Promise<{ ok: true; result: T } | { ok: false; cancelled?: boolean; error?: unknown }> {
+    const confirmed = await this.confirm({
+      text: options.text,
+      confirmText: options.confirmText,
+      cancelText: options.cancelText,
+      icon: options.icon
+    });
+
+    if (!confirmed) {
+      return { ok: false, cancelled: true };
+    }
+
+    void Swal.fire({
+      title: ALERT_TITLES.confirm,
+      text: options.loadingText || 'Please wait…',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      ...this.theme,
+      customClass: this.alertClasses,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    try {
+      const pending = options.action();
+      const result = isObservable(pending) ? await firstValueFrom(pending) : await pending;
+      const message =
+        typeof options.successMessage === 'function'
+          ? options.successMessage(result)
+          : options.successMessage || 'Done.';
+
+      await Swal.fire({
+        icon: 'success',
+        title: ALERT_TITLES.success,
+        text: message,
+        confirmButtonText: 'Continue',
+        ...this.theme,
+        customClass: this.alertClasses
+      });
+
+      return { ok: true, result };
+    } catch (error) {
+      const message =
+        typeof options.errorMessage === 'function'
+          ? options.errorMessage(error)
+          : options.errorMessage || this.readErrorMessage(error);
+
+      await Swal.fire({
+        icon: 'error',
+        title: ALERT_TITLES.error,
+        text: message,
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#c45b6c',
+        background: this.theme.background,
+        color: this.theme.color,
+        customClass: {
+          ...this.alertClasses,
+          confirmButton: 'nb-alert__confirm nb-alert__confirm--danger'
+        }
+      });
+
+      return { ok: false, error };
+    }
+  }
+
+  private readErrorMessage(error: unknown): string {
+    const err = error as { error?: { message?: string }; message?: string };
+    return err?.error?.message || err?.message || 'Something went wrong.';
   }
 }

@@ -118,6 +118,22 @@
       </div>
     </ng-container>
 
+    <ng-container *ngSwitchCase="'notifications'">
+      <div class="shimmer__hero">
+        <div class="shimmer-line shimmer-line--brand"></div>
+        <div class="shimmer-line shimmer-line--title"></div>
+        <div class="shimmer-line shimmer-line--lede"></div>
+      </div>
+      <div class="shimmer-chips">
+        <span *ngFor="let i of [1, 2, 3, 4, 5]" class="shimmer-chip"></span>
+      </div>
+      <div class="shimmer-card" *ngFor="let i of [1, 2, 3]">
+        <div class="shimmer-line shimmer-line--md"></div>
+        <div class="shimmer-line shimmer-line--lede"></div>
+        <div class="shimmer-line shimmer-line--xs"></div>
+      </div>
+    </ng-container>
+
     <ng-container *ngSwitchDefault>
       <div class="shimmer__auth">
         <div class="shimmer-card">

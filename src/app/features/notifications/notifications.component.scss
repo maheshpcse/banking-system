@@ -35,6 +35,55 @@
   background: rgba(95, 196, 176, 0.18);
   color: var(--text);
 }
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+.filters button {
+  border: 0;
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  background: rgba(241, 245, 249, 0.95);
+  color: var(--text-muted);
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.filters button:hover {
+  background: rgba(95, 196, 176, 0.16);
+  color: var(--text);
+  box-shadow: 0 6px 16px rgba(90, 120, 150, 0.1);
+}
+.filters button.is-active {
+  background: rgba(106, 168, 232, 0.2);
+  color: var(--text);
+}
+.table-wrap {
+  overflow: auto;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-soft);
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.88);
+}
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: 0.85rem 0.9rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+}
+.data-table tbody tr {
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.data-table tbody tr:hover,
+.data-table tbody tr.is-unread {
+  background: rgba(232, 250, 247, 0.85);
+}
 .notif-list,
 .notif-grid {
   display: grid;
