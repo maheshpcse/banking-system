@@ -63,6 +63,168 @@
   letter-spacing: 0.04em;
 }
 
+.hero-chip--pending {
+  min-width: 200px;
+  background: linear-gradient(145deg, rgba(255, 248, 230, 0.95), rgba(255, 255, 255, 0.82));
+  border-color: rgba(212, 160, 23, 0.35);
+}
+
+.hero-chip__pending {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.hero-chip__pending strong {
+  font-family: var(--font-display);
+  color: #9a6b00;
+  letter-spacing: 0;
+}
+
+.hero-chip__pending a {
+  color: var(--accent-deep);
+  font-size: 0.82rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.hero-chip__pending a:hover {
+  text-decoration: underline;
+}
+
+.progress-banner {
+  margin-bottom: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 1.15rem;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: var(--shadow-soft);
+}
+
+.progress-banner__head {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 0.85rem;
+  color: var(--accent-deep);
+}
+
+.progress-banner__head strong {
+  display: block;
+  color: var(--text);
+  font-family: var(--font-display);
+}
+
+.progress-banner__head p {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.progress-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.progress-steps li {
+  padding: 0.55rem 0.6rem;
+  border-radius: 0.75rem;
+  background: rgba(241, 245, 249, 0.9);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.progress-steps li[data-status='complete'] {
+  background: rgba(95, 196, 176, 0.2);
+  color: var(--text);
+}
+
+.progress-steps li[data-status='current'] {
+  background: rgba(106, 168, 232, 0.22);
+  color: var(--text);
+}
+
+.progress-steps li[data-status='rejected'] {
+  background: rgba(196, 91, 108, 0.18);
+  color: #8f3042;
+}
+
+.balance {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.balance app-nb-icon {
+  color: var(--accent-deep);
+}
+
+.metric-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.locked-note {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+  color: var(--text-muted);
+}
+
+.locked-note app-nb-icon {
+  color: var(--accent-deep);
+}
+
+.locked-note p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.recent__tools {
+  display: flex;
+  justify-content: flex-end;
+  margin: -0.35rem 0 0.75rem;
+}
+
+.recent__view-all {
+  color: var(--accent-deep);
+  font-weight: 650;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.recent__view-all:hover {
+  text-decoration: underline;
+}
+
+.tx-list__left {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.tx-list__icon {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.7rem;
+  display: grid;
+  place-items: center;
+  background: rgba(196, 91, 108, 0.12);
+  color: #c45b6c;
+  flex: 0 0 auto;
+}
+
+.tx-list__icon.is-credit {
+  background: rgba(31, 138, 110, 0.12);
+  color: #1f8a6e;
+}
+
 .hero-chip__value {
   display: flex;
   align-items: center;
@@ -264,5 +426,9 @@
 
   .page__hero {
     align-items: start;
+  }
+
+  .progress-steps {
+    grid-template-columns: 1fr 1fr;
   }
 }

@@ -1,0 +1,41 @@
+<header class="admin-hero">
+  <div>
+    <p class="eyebrow">NovaBank</p>
+    <h1>Operations notifications</h1>
+    <p class="lede">Timeline of approvals, transfers, and account events.</p>
+  </div>
+  <div class="tools">
+    <button type="button" class="btn btn--ghost" [class.is-active]="view === 'table'" (click)="view = 'table'">Table</button>
+    <button type="button" class="btn btn--ghost" [class.is-active]="view === 'list'" (click)="view = 'list'">List</button>
+    <button type="button" class="btn btn--ghost" (click)="markAll()">Mark all read</button>
+  </div>
+</header>
+
+<div class="table-wrap" *ngIf="view === 'table' && items.length">
+  <table class="data-table">
+    <thead>
+      <tr><th>When</th><th>Kind</th><th>Title</th><th>Detail</th><th>Read</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of items">
+        <td>{{ item.createdAt | date: 'short' }}</td>
+        <td>{{ item.kind }}</td>
+        <td>{{ item.title }}</td>
+        <td>{{ item.body }}</td>
+        <td>{{ item.read ? 'Yes' : 'No' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="request-list" *ngIf="view === 'list' && items.length">
+  <article class="request-card" *ngFor="let item of items">
+    <div>
+      <strong>{{ item.title }}</strong>
+      <p>{{ item.body }}</p>
+      <p class="muted">{{ item.createdAt | date: 'medium' }}</p>
+    </div>
+  </article>
+</div>
+
+<p class="hint" *ngIf="!items.length">No notifications yet.</p>

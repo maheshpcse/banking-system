@@ -1,0 +1,37 @@
+<header class="admin-hero">
+  <div>
+    <p class="eyebrow">NovaBank</p>
+    <h1>Customers</h1>
+    <p class="lede">Activate, block, deactivate, or remove accounts.</p>
+  </div>
+</header>
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th>Account</th>
+        <th>Status</th>
+        <th>Balance</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of users">
+        <td>
+          <strong>{{ user.fullName }}</strong>
+          <span>{{ user.email }}</span>
+        </td>
+        <td>{{ user.accountNumber || 'Pending' }}</td>
+        <td><span class="pill" [attr.data-status]="user.accountStatus">{{ user.accountStatus || 'pending' }}</span></td>
+        <td>{{ user.balance | currencyFormat }}</td>
+        <td class="actions">
+          <button type="button" class="btn btn--ghost" (click)="setStatus(user, 'active')">Activate</button>
+          <button type="button" class="btn btn--ghost" (click)="setStatus(user, 'blocked')">Block</button>
+          <button type="button" class="btn btn--ghost" (click)="setStatus(user, 'deactivated')">Deactivate</button>
+          <button type="button" class="btn btn--ghost" (click)="remove(user)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

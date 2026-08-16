@@ -1,12 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { AlertService } from '../../core/services/alert.service';
-import { User, UserAvatar } from '../../core/models/banking.models';
+import { AccountLifecycleService } from '../../core/services/account-lifecycle.service';
+import { NotificationService } from '../../core/services/notification.service';
+import { AccountApplication, User, UserAvatar } from '../../core/models/banking.models';
 import { withShimmerDelay } from '../../core/utils/shimmer';
 import { fieldError } from '../../core/utils/form-errors';
 
-type SettingsTab = 'identity' | 'presence' | 'security' | 'experience';
+type SettingsTab = 'identity' | 'presence' | 'banking' | 'security' | 'experience';
 
 function matchPasswords(group: AbstractControl): ValidationErrors | null {
   const newPassword = group.get('newPassword')?.value;
@@ -39,10 +42,13 @@ export class AccountSettingsComponent implements OnInit {
   readonly tabs: Array<{ id: SettingsTab; label: string; hint: string }> = [
     { id: 'identity', label: 'Identity', hint: 'Profile details' },
     { id: 'presence', label: 'Presence', hint: 'Avatar & photo' },
+    { id: 'banking', label: 'Banking', hint: 'Account & card' },
     { id: 'security', label: 'Security', hint: 'Password' },
     { id: 'experience', label: 'Experience', hint: 'Preferences' }
   ];
   activeTab: SettingsTab = 'identity';
+  savingApplication = false;
+  cardFlipped = false;
 
   profileForm = this.fb.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
@@ -71,13 +77,42 @@ export class AccountSettingsComponent implements OnInit {
     marketingTips: [false]
   });
 
+  bankingForm = this.fb.group({
+    line1: ['', [Validators.required, Validators.minLength(3)]],
+    line2: [''],
+    city: ['', [Validators.required]],
+    state: ['', [Validators.required]],
+    postalCode: ['', [Validators.required, Validators.minLength(3)]],
+    country: ['United States', [Validators.required]],
+    holderName: ['', [Validators.required, Validators.minLength(2)]],
+    cardNumber: ['', [Validators.required, Validators.minLength(16), Validators.maxLength(19)]],
+    expiryMonth: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])$/)]],
+    expiryYear: ['', [Validators.required, Validators.pattern(/^[0-9]{2}$/)]],
+    cvv: ['', [Validators.required, Validators.pattern(/^[0-9]{3}$/)]]
+  });
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly auth: AuthService,
-    private readonly alerts: AlertService
+    private readonly alerts: AlertService,
+    private readonly lifecycle: AccountLifecycleService,
+    private readonly notifications: NotificationService,
+    private readonly route: ActivatedRoute
   ) {}
 
+  get application(): AccountApplication | null {
+    return this.lifecycle.applicationFor(this.user);
+  }
+
+  get hasAccountNumber(): boolean {
+    return this.lifecycle.hasAccountNumber(this.user);
+  }
+
   ngOnInit(): void {
+    const tab = this.route.snapshot.queryParamMap.get('tab');
+    if (tab === 'banking' || tab === 'identity' || tab === 'presence' || tab === 'security' || tab === 'experience') {
+      this.activeTab = tab;
+    }
     withShimmerDelay(this.auth.refreshMe(), 500).subscribe({
       next: (res) => {
         this.applyUser(res.user);
@@ -130,6 +165,10 @@ export class AccountSettingsComponent implements OnInit {
           confirmPassword: ''
         });
         break;
+      case 'banking':
+        this.cardFlipped = false;
+        this.patchBankingFromUser();
+        break;
       case 'experience':
         this.prefsForm.reset({
           emailAlerts: this.user?.settings?.emailAlerts !== false,
@@ -139,6 +178,107 @@ export class AccountSettingsComponent implements OnInit {
         });
         break;
     }
+  }
+
+  onCardNumberInput(): void {
+    const ctrl = this.bankingForm.controls.cardNumber;
+    const digits = String(ctrl.value || '').replace(/\D/g, '').slice(0, 16);
+    const grouped = digits.replace(/(.{4})/g, '$1 ').trim();
+    ctrl.setValue(grouped, { emitEvent: false });
+    this.cardFlipped = false;
+  }
+
+  onCvvFocus(): void {
+    this.cardFlipped = true;
+  }
+
+  onCvvBlur(): void {
+    this.cardFlipped = false;
+  }
+
+  submitBankingApplication(): void {
+    if (this.bankingForm.invalid || this.savingApplication) {
+      this.bankingForm.markAllAsTouched();
+      return;
+    }
+    this.savingApplication = true;
+    const raw = this.bankingForm.getRawValue();
+    withShimmerDelay(
+      this.lifecycle.submitApplication({
+        address: {
+          line1: String(raw.line1),
+          line2: String(raw.line2 || ''),
+          city: String(raw.city),
+          state: String(raw.state),
+          postalCode: String(raw.postalCode),
+          country: String(raw.country)
+        },
+        card: {
+          holderName: String(raw.holderName),
+          number: String(raw.cardNumber).replace(/\s+/g, ''),
+          expiryMonth: String(raw.expiryMonth),
+          expiryYear: String(raw.expiryYear),
+          cvv: String(raw.cvv)
+        }
+      }),
+      500
+    ).subscribe({
+      next: async (res) => {
+        this.applyUser(res.user);
+        this.savingApplication = false;
+        this.notifications.push({
+          kind: 'account',
+          title: 'Application submitted',
+          body: 'Your account & card request is under manager review.',
+          href: '/settings?tab=banking'
+        });
+        // Queue for admin demo inbox
+        try {
+          const key = 'nb_admin_requests';
+          const list = JSON.parse(localStorage.getItem(key) || '[]');
+          list.unshift({
+            id: `req_${Date.now()}`,
+            userId: res.user.id,
+            fullName: res.user.fullName,
+            email: res.user.email,
+            submittedAt: new Date().toISOString(),
+            status: 'under_review',
+            address: res.user.address,
+            card: res.user.card
+          });
+          localStorage.setItem(key, JSON.stringify(list.slice(0, 50)));
+          const usersKey = 'nb_admin_users';
+          const users = JSON.parse(localStorage.getItem(usersKey) || '[]');
+          const idx = users.findIndex((u: any) => u.id === res.user.id);
+          if (idx >= 0) users[idx] = res.user;
+          else users.unshift(res.user);
+          localStorage.setItem(usersKey, JSON.stringify(users));
+        } catch {}
+        await this.alerts.success(res.message || 'Application submitted for review.');
+      },
+      error: async (err) => {
+        this.savingApplication = false;
+        await this.alerts.error(err?.error?.message || 'Unable to submit application.');
+      }
+    });
+  }
+
+  private patchBankingFromUser(): void {
+    const addr = this.user?.address;
+    const card = this.user?.card;
+    this.bankingForm.patchValue({
+      line1: addr?.line1 || '',
+      line2: addr?.line2 || '',
+      city: addr?.city || '',
+      state: addr?.state || '',
+      postalCode: addr?.postalCode || '',
+      country: addr?.country || 'United States',
+      holderName: card?.holderName || this.user?.fullName || '',
+      cardNumber: card?.number ? String(card.number).replace(/(\d{4})(?=\d)/g, '$1 ').trim() : '',
+      expiryMonth: card?.expiryMonth || '',
+      expiryYear: card?.expiryYear || '',
+      cvv: card?.cvv || ''
+    });
   }
 
   onImageSelected(event: Event): void {
@@ -280,22 +420,30 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   private applyUser(user: User): void {
-    this.user = user;
-    this.imagePreview = user.avatar?.image || null;
+    // Normalize legacy users without lifecycle fields
+    const normalized: User = {
+      ...user,
+      accountNumber: user.accountNumber || null,
+      role: user.role || 'customer',
+      accountStatus: user.accountStatus || (user.accountNumber ? 'active' : 'address_required')
+    };
+    this.user = normalized;
+    this.imagePreview = normalized.avatar?.image || null;
     this.profileForm.patchValue({
-      fullName: user.fullName || '',
-      username: user.username || '',
-      email: user.email || ''
+      fullName: normalized.fullName || '',
+      username: normalized.username || '',
+      email: normalized.email || ''
     });
     this.avatarForm.patchValue({
-      style: user.avatar?.style || 'mint',
-      initials: user.avatar?.initials || ''
+      style: normalized.avatar?.style || 'mint',
+      initials: normalized.avatar?.initials || ''
     });
     this.prefsForm.patchValue({
-      emailAlerts: user.settings?.emailAlerts !== false,
-      hideBalance: !!user.settings?.hideBalance,
-      compactLedger: !!user.settings?.compactLedger,
-      marketingTips: !!user.settings?.marketingTips
+      emailAlerts: normalized.settings?.emailAlerts !== false,
+      hideBalance: !!normalized.settings?.hideBalance,
+      compactLedger: !!normalized.settings?.compactLedger,
+      marketingTips: !!normalized.settings?.marketingTips
     });
+    this.patchBankingFromUser();
   }
 }

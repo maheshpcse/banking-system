@@ -40,9 +40,11 @@ export class LoginComponent {
     this.formError = '';
     this.auth.login(this.form.getRawValue() as { identifier: string; password: string }).subscribe({
       next: () => {
-        // Start shell boot before navigation so navbar + dashboard shimmer appear together.
+        const role = this.auth.currentUser?.role || 'customer';
+        const dest = role === 'admin' || role === 'manager' ? '/admin' : '/dashboard';
+        // Start shell boot before navigation so navbar + first page shimmer appear together.
         this.shellBoot.begin();
-        void this.router.navigateByUrl('/dashboard').then((ok) => {
+        void this.router.navigateByUrl(dest).then((ok) => {
           this.loading = false;
           if (ok) {
             this.alerts.toastSuccess('Welcome back', 'You are signed in to NovaBank.');

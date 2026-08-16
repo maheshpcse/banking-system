@@ -6,9 +6,18 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { AnimatedCardComponent } from './animated-card/animated-card.component';
 import { CurrencyFormatPipe } from './currency-format.pipe';
 import { ShimmerComponent } from './shimmer/shimmer.component';
+import { BankCardComponent } from './bank-card/bank-card.component';
+import { NbIconComponent } from './nb-icon/nb-icon.component';
 
 @NgModule({
-  declarations: [NavbarComponent, AnimatedCardComponent, CurrencyFormatPipe, ShimmerComponent],
+  declarations: [
+    NavbarComponent,
+    AnimatedCardComponent,
+    CurrencyFormatPipe,
+    ShimmerComponent,
+    BankCardComponent,
+    NbIconComponent
+  ],
   imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
   exports: [
     CommonModule,
@@ -18,7 +27,9 @@ import { ShimmerComponent } from './shimmer/shimmer.component';
     NavbarComponent,
     AnimatedCardComponent,
     CurrencyFormatPipe,
-    ShimmerComponent
+    ShimmerComponent,
+    BankCardComponent,
+    NbIconComponent
   ]
 })
 export class SharedModule {}

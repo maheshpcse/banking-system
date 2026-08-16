@@ -9,7 +9,11 @@
 
   <div class="layout">
     <app-animated-card accent="sky" title="New transfer" subtitle="Secure">
-      <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+      <div class="locked-note" *ngIf="!canTransfer">
+        <p>Transfers unlock after your account number is generated and activated.</p>
+        <a class="btn btn--ghost" routerLink="/settings" [queryParams]="{ tab: 'banking' }">Open account application</a>
+      </div>
+      <form *ngIf="canTransfer" class="form" [formGroup]="form" (ngSubmit)="submit()">
         <label>
           <span>Recipient account</span>
           <input type="text" formControlName="toAccountNumber" placeholder="MBxxxxxxxxxxxx" />
@@ -27,7 +31,6 @@
           <input type="text" formControlName="description" placeholder="Rent, gift, shared dinner…" />
         </label>
 
-        <p class="form__error" *ngIf="error">{{ error }}</p>
 
         <button class="btn btn--primary" type="submit" [disabled]="loading">
           {{ loading ? 'Sending…' : 'Send transfer' }}

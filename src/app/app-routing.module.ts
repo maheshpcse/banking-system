@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/auth.guard';
+import { RoleGuard } from './core/role.guard';
 
 const routes: Routes = [
   {
@@ -31,6 +32,17 @@ const routes: Routes = [
     path: 'settings',
     canActivate: [AuthGuard],
     loadChildren: () => import('./features/settings/settings.module').then((m) => m.SettingsModule)
+  },
+  {
+    path: 'notifications',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./features/notifications/notifications.module').then((m) => m.NotificationsModule)
+  },
+  {
+    path: 'admin',
+    canActivate: [AuthGuard, RoleGuard],
+    loadChildren: () => import('./features/admin/admin.module').then((m) => m.AdminModule)
   },
   { path: '**', redirectTo: '' }
 ];

@@ -232,3 +232,99 @@
     grid-template-columns: 1fr;
   }
 }
+
+.banking-progress {
+  margin-bottom: 1.1rem;
+}
+
+.banking-progress__label {
+  margin: 0 0 0.55rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.banking-progress__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.banking-progress__steps li {
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.85rem;
+  background: rgba(241, 245, 249, 0.9);
+  display: grid;
+  gap: 0.15rem;
+}
+
+.banking-progress__steps li strong {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+}
+
+.banking-progress__steps li span {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.banking-progress__steps li[data-status='complete'] {
+  background: rgba(95, 196, 176, 0.18);
+}
+
+.banking-progress__steps li[data-status='current'] {
+  background: rgba(106, 168, 232, 0.2);
+}
+
+.banking-progress__steps li[data-status='rejected'] {
+  background: rgba(196, 91, 108, 0.16);
+}
+
+.banking-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+  gap: 1.1rem;
+  align-items: start;
+}
+
+.section-label {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.banking-issued {
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+}
+
+.issued-meta {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.issued-meta p {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 900px) {
+  .banking-layout,
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
