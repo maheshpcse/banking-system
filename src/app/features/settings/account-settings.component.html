@@ -26,6 +26,9 @@
     </aside>
 
     <div class="settings-panel">
+      <app-shimmer *ngIf="panelLoading" variant="settings-panel"></app-shimmer>
+
+      <ng-container *ngIf="!panelLoading">
       <app-animated-card
         *ngIf="activeTab === 'identity'"
         accent="mint"
@@ -101,6 +104,14 @@
         title="Account opening"
         subtitle="Banking"
       >
+        <span
+          cardHeaderActions
+          class="banking-account-badge"
+          [class.banking-account-badge--pending]="!hasAccountNumber"
+          [attr.title]="hasAccountNumber ? 'Account ' + user?.accountNumber : 'Account number pending'"
+        >
+          {{ hasAccountNumber ? user?.accountNumber : 'Pending' }}
+        </span>
         <div class="banking-progress" *ngIf="application as app; else noApp">
           <p class="banking-progress__label">Opening progress</p>
           <ol class="banking-progress__steps">
@@ -109,11 +120,9 @@
               <span>{{ step.detail }}</span>
             </li>
           </ol>
-          <p class="meta" *ngIf="hasAccountNumber">Account {{ user?.accountNumber }}</p>
-          <p class="meta" *ngIf="!hasAccountNumber">Account number will appear here after approval.</p>
           <button
             type="button"
-            class="btn btn--primary"
+            class="btn btn--primary banking-progress__actions"
             *ngIf="!hasAccountNumber"
             (click)="setTab('cardinfo')"
           >
@@ -221,7 +230,10 @@
               </label>
               <label>
                 <span>State</span>
-                <input type="text" formControlName="state" autocomplete="address-level1" />
+                <select formControlName="state" autocomplete="address-level1">
+                  <option value="" disabled>Select state</option>
+                  <option *ngFor="let state of usStates" [value]="state">{{ state }}</option>
+                </select>
                 <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.state, 'State') as msg">{{ msg }}</p>
               </label>
               <label>
@@ -231,7 +243,9 @@
               </label>
               <label>
                 <span>Country</span>
-                <input type="text" formControlName="country" autocomplete="country-name" />
+                <select formControlName="country" autocomplete="country-name">
+                  <option *ngFor="let country of countries" [value]="country">{{ country }}</option>
+                </select>
                 <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.country, 'Country') as msg">{{ msg }}</p>
               </label>
             </div>
@@ -379,6 +393,7 @@
           <button class="btn btn--primary" type="submit" [disabled]="savingPrefs">Save preferences</button>
         </form>
       </app-animated-card>
+      </ng-container>
     </div>
   </div>
 </section>
