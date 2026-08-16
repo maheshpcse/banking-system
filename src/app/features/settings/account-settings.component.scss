@@ -69,35 +69,15 @@
 }
 
 .avatar-preview--lg {
-  width: 7.5rem;
-  height: 7.5rem;
+  width: 8.75rem;
+  height: 8.75rem;
   border-radius: 999px;
-  font-size: 1.65rem;
-  margin: 0 auto 1rem;
+  font-size: 1.85rem;
+  margin: 0 auto 1.1rem;
 }
 
-.form--avatar {
-  display: grid;
-  justify-items: center;
-  text-align: center;
-}
-
-.form--avatar label,
-.form--avatar .style-row,
-.form--avatar .btn {
-  text-align: left;
-}
-
-.form--avatar .upload,
-.form--avatar .avatar-preview--lg + .upload {
-  justify-items: center;
-}
-
-.form--avatar .style-row {
-  justify-content: center;
-}
-
-.form--avatar .btn--primary {
+/* Only the avatar image is centered — form fields stay left-aligned */
+.form--avatar .avatar-preview--lg {
   justify-self: center;
 }
 
@@ -193,6 +173,37 @@
 
 .settings-panel {
   min-width: 0;
+  overflow: visible;
+}
+
+.settings-panel,
+.settings-panel ::ng-deep .card,
+.settings-panel ::ng-deep .card__face,
+.settings-panel ::ng-deep .card__body {
+  overflow: visible;
+  max-height: none;
+}
+
+.banking-account-badge {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.65rem;
+  background: rgba(241, 245, 249, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  white-space: nowrap;
+}
+
+.banking-account-badge--pending {
+  font-family: var(--font-display);
+  font-weight: 650;
+  letter-spacing: 0;
+  color: #9a6b00;
+  background: rgba(255, 248, 230, 0.95);
+  border-color: rgba(212, 160, 23, 0.35);
 }
 
 .style-row {
@@ -267,7 +278,7 @@
 }
 
 .banking-progress {
-  margin-bottom: 1.1rem;
+  margin-bottom: 0.35rem;
 }
 
 .banking-progress__label {
@@ -276,6 +287,10 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
+}
+
+.banking-progress__actions {
+  margin-top: 1rem;
 }
 
 .banking-progress__steps {
@@ -321,14 +336,20 @@
   grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
   gap: 1.35rem;
   align-items: start;
+  overflow: visible;
 }
 
 .banking-layout__card {
   display: grid;
   gap: 0.75rem;
   align-content: start;
-  position: sticky;
-  top: calc(var(--nb-nav-height) + 1rem);
+  /* Keep card preview in normal document flow — no inner sticky scroll */
+  position: static;
+}
+
+.banking-form {
+  overflow: visible;
+  max-height: none;
 }
 
 .card-stage {
@@ -434,9 +455,5 @@
   .form-row--2,
   .form-row--3 {
     grid-template-columns: 1fr;
-  }
-
-  .banking-layout__card {
-    position: static;
   }
 }

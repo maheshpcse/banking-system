@@ -1,15 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { Transaction } from '../../../core/models/banking.models';
 import { withShimmerDelay } from '../../../core/utils/shimmer';
+
+const HISTORY_TYPES = new Set(['deposit', 'withdraw', 'transfer_in', 'transfer_out']);
 
 @Component({
   selector: 'app-history',
   templateUrl: './history.component.html',
   styleUrls: ['./history.component.scss']
 })
-export class HistoryComponent implements OnInit {
+export class HistoryComponent implements OnInit, OnDestroy {
   /** Full-page shimmer only on first boot */
   pageLoading = true;
   /** Ledger-only shimmer when filtering / paging */
@@ -20,13 +24,36 @@ export class HistoryComponent implements OnInit {
   pages = 1;
   type = '';
 
+  private querySub: Subscription | null = null;
+  private bootstrapped = false;
+
   constructor(
     private transactionService: TransactionService,
-    private alerts: AlertService
+    private alerts: AlertService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.load(1, true);
+    this.querySub = this.route.queryParamMap.subscribe((params) => {
+      const next = this.normalizeType(params.get('type'));
+      const typeChanged = next !== this.type;
+      this.type = next;
+
+      if (!this.bootstrapped) {
+        this.bootstrapped = true;
+        this.load(1, true);
+        return;
+      }
+
+      if (typeChanged) {
+        this.load(1, false);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.querySub?.unsubscribe();
   }
 
   load(page = 1, initial = false): void {
@@ -58,8 +85,12 @@ export class HistoryComponent implements OnInit {
   }
 
   setType(type: string): void {
-    this.type = type;
-    this.load(1, false);
+    const next = this.normalizeType(type);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: next ? { type: next } : {},
+      replaceUrl: true
+    });
   }
 
   prev(): void {
@@ -91,5 +122,10 @@ export class HistoryComponent implements OnInit {
 
   isCredit(type: Transaction['type']): boolean {
     return type === 'deposit' || type === 'transfer_in';
+  }
+
+  private normalizeType(raw: string | null | undefined): string {
+    const value = String(raw || '');
+    return HISTORY_TYPES.has(value) ? value : '';
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -10,6 +10,27 @@ import { withShimmerDelay } from '../../core/utils/shimmer';
 import { fieldError } from '../../core/utils/form-errors';
 
 type SettingsTab = 'identity' | 'presence' | 'banking' | 'cardinfo' | 'security' | 'experience';
+
+const US_STATES = [
+  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+  'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+  'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+  'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+  'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC'
+];
+
+const COUNTRIES = [
+  'United States',
+  'Canada',
+  'United Kingdom',
+  'Australia',
+  'India',
+  'Germany',
+  'France',
+  'Mexico',
+  'Singapore',
+  'United Arab Emirates'
+];
 
 function matchPasswords(group: AbstractControl): ValidationErrors | null {
   const newPassword = group.get('newPassword')?.value;
@@ -25,8 +46,9 @@ function matchPasswords(group: AbstractControl): ValidationErrors | null {
   templateUrl: './account-settings.component.html',
   styleUrls: ['./account-settings.component.scss']
 })
-export class AccountSettingsComponent implements OnInit {
+export class AccountSettingsComponent implements OnInit, OnDestroy {
   loading = true;
+  panelLoading = false;
   savingProfile = false;
   savingAvatar = false;
   savingPassword = false;
@@ -38,6 +60,8 @@ export class AccountSettingsComponent implements OnInit {
   imagePreview: string | null = null;
 
   readonly avatarStyles: Array<UserAvatar['style']> = ['mint', 'sky', 'sand', 'rose', 'slate'];
+  readonly usStates = US_STATES;
+  readonly countries = COUNTRIES;
   readonly fieldError = fieldError;
   readonly tabs: Array<{ id: SettingsTab; label: string; hint: string }> = [
     { id: 'identity', label: 'Identity', hint: 'Profile details' },
@@ -50,6 +74,8 @@ export class AccountSettingsComponent implements OnInit {
   activeTab: SettingsTab = 'identity';
   savingApplication = false;
   cardFlipped = false;
+
+  private panelTimer: ReturnType<typeof setTimeout> | null = null;
 
   profileForm = this.fb.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
@@ -139,12 +165,29 @@ export class AccountSettingsComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.clearPanelTimer();
+  }
+
   setTab(tab: SettingsTab): void {
     if (tab === this.activeTab) {
       return;
     }
     this.resetTab(this.activeTab);
     this.activeTab = tab;
+    this.panelLoading = true;
+    this.clearPanelTimer();
+    this.panelTimer = setTimeout(() => {
+      this.panelLoading = false;
+      this.panelTimer = null;
+    }, 480);
+  }
+
+  private clearPanelTimer(): void {
+    if (this.panelTimer) {
+      clearTimeout(this.panelTimer);
+      this.panelTimer = null;
+    }
   }
 
   private resetTab(tab: SettingsTab): void {

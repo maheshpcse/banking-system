@@ -13,6 +13,7 @@ export class ShimmerComponent {
     | 'form'
     | 'transfer'
     | 'settings'
+    | 'settings-panel'
     | 'notifications'
     | 'auth' = 'dashboard';
 }

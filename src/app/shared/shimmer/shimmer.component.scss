@@ -10,14 +10,86 @@
   max-width: none;
 }
 
+.shimmer--settings-panel {
+  padding: 0;
+  margin: 0;
+  max-width: none;
+}
+
 .shimmer-card--ledger {
   min-height: 14rem;
+}
+
+.shimmer-card--settings-panel {
+  min-height: 18rem;
 }
 
 .shimmer__hero {
   margin-bottom: 1.25rem;
   display: grid;
   gap: 0.55rem;
+}
+
+.shimmer__hero--alerts {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.shimmer__hero-copy {
+  display: grid;
+  gap: 0.55rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.shimmer-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+}
+
+.shimmer-chip--tool {
+  width: 4.6rem;
+  height: 2.2rem;
+}
+
+.shimmer-notif {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: start;
+  padding: 1.05rem 1.15rem;
+  margin-bottom: 0.75rem;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow-soft);
+}
+
+.shimmer-notif__icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(
+    90deg,
+    rgba(214, 230, 240, 0.55) 0%,
+    rgba(190, 228, 220, 0.85) 35%,
+    rgba(186, 214, 240, 0.9) 50%,
+    rgba(190, 228, 220, 0.85) 65%,
+    rgba(214, 230, 240, 0.55) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-wave 1.35s ease-in-out infinite;
+}
+
+.shimmer-notif__body {
+  display: grid;
+  gap: 0.45rem;
+  padding-top: 0.15rem;
 }
 
 .shimmer__grid {
@@ -174,5 +246,14 @@
   .shimmer__grid--settings,
   .shimmer__auth {
     grid-template-columns: 1fr;
+  }
+
+  .shimmer__hero--alerts {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .shimmer-tools {
+    justify-content: flex-start;
   }
 }

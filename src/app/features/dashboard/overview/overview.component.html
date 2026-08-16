@@ -87,8 +87,10 @@
 
     <app-animated-card class="equal-card" accent="sky" title="Quick action" subtitle="Move money">
       <div class="locked-note" *ngIf="!canMoveMoney">
-        <app-nb-icon name="shield"></app-nb-icon>
-        <p>Deposit and withdraw are locked until your account number is generated and activated.</p>
+        <p class="locked-note__text">
+          <app-nb-icon name="shield"></app-nb-icon>
+          <span>Deposit and withdraw are locked until your account number is generated and activated.</span>
+        </p>
         <a class="btn btn--ghost" routerLink="/settings" [queryParams]="{ tab: 'cardinfo' }">Open account application</a>
       </div>
 
@@ -120,18 +122,20 @@
     <a cardHeaderActions routerLink="/transactions" class="card-link-btn">View all</a>
     <ul class="tx-list" *ngIf="summary.recentTransactions.length; else emptyRecent">
       <li *ngFor="let tx of summary.recentTransactions">
-        <div class="tx-list__left">
-          <span class="tx-list__icon" [class.is-credit]="isCredit(tx.type)">
-            <app-nb-icon [name]="isCredit(tx.type) ? 'arrow-down' : 'arrow-up'"></app-nb-icon>
-          </span>
-          <div>
-            <strong>{{ typeLabel(tx.type) }}</strong>
-            <span>{{ tx.description || tx.reference }}</span>
+        <a class="tx-list__link" routerLink="/transactions" [queryParams]="{ type: tx.type }">
+          <div class="tx-list__left">
+            <span class="tx-list__icon" [class.is-credit]="isCredit(tx.type)">
+              <app-nb-icon [name]="isCredit(tx.type) ? 'arrow-down' : 'arrow-up'"></app-nb-icon>
+            </span>
+            <div>
+              <strong>{{ typeLabel(tx.type) }}</strong>
+              <span>{{ tx.description || tx.reference }}</span>
+            </div>
           </div>
-        </div>
-        <em [class.credit]="isCredit(tx.type)" [class.debit]="!isCredit(tx.type)">
-          {{ isCredit(tx.type) ? '+' : '-' }}{{ tx.amount | currencyFormat }}
-        </em>
+          <em [class.credit]="isCredit(tx.type)" [class.debit]="!isCredit(tx.type)">
+            {{ isCredit(tx.type) ? '+' : '-' }}{{ tx.amount | currencyFormat }}
+          </em>
+        </a>
       </li>
     </ul>
     <ng-template #emptyRecent>
