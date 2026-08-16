@@ -318,41 +318,65 @@
 
 .banking-layout {
   display: grid;
-  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
-  gap: 1.25rem;
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  gap: 1.35rem;
   align-items: start;
 }
 
 .banking-layout__card {
   display: grid;
-  gap: 0.85rem;
-  justify-items: stretch;
+  gap: 0.75rem;
+  align-content: start;
+  position: sticky;
+  top: calc(var(--nb-nav-height) + 1rem);
+}
+
+.card-stage {
+  width: 100%;
+  min-height: 230px;
+}
+
+.card-stage app-bank-card {
+  display: block;
+  width: 100%;
+}
+
+.card-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
 }
 
 .issued-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.75rem 0.85rem;
-  border-radius: 0.9rem;
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 0.95rem;
   background: rgba(95, 196, 176, 0.14);
   border: 1px solid rgba(95, 196, 176, 0.28);
 }
 
 .issued-bar__status {
   margin: 0;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
   color: var(--text);
   font-weight: 650;
   font-size: 0.9rem;
+  line-height: 1.35;
 }
 
 .issued-bar__status app-nb-icon {
   color: var(--accent-deep);
   display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.issued-bar__flip {
+  width: 100%;
+  justify-content: center;
 }
 
 .section-label {
@@ -412,8 +436,7 @@
     grid-template-columns: 1fr;
   }
 
-  .issued-bar {
-    flex-direction: column;
-    align-items: stretch;
+  .banking-layout__card {
+    position: static;
   }
 }

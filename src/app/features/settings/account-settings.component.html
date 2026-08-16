@@ -133,26 +133,31 @@
         subtitle="Card info"
       >
         <div class="banking-layout">
-          <div class="banking-layout__card">
-            <app-bank-card
-              [holderName]="bankingForm.value.holderName || user?.card?.holderName || 'CARD HOLDER'"
-              [number]="bankingForm.value.cardNumber || user?.card?.number || ''"
-              [expiryMonth]="bankingForm.value.expiryMonth || user?.card?.expiryMonth || 'MM'"
-              [expiryYear]="bankingForm.value.expiryYear || user?.card?.expiryYear || 'YY'"
-              [cvv]="bankingForm.value.cvv || user?.card?.cvv || ''"
-              [flipped]="cardFlipped"
-            ></app-bank-card>
+          <aside class="banking-layout__card">
+            <div class="card-stage">
+              <app-bank-card
+                [holderName]="bankingForm.value.holderName || user?.card?.holderName || 'CARD HOLDER'"
+                [number]="bankingForm.value.cardNumber || user?.card?.number || ''"
+                [expiryMonth]="bankingForm.value.expiryMonth || user?.card?.expiryMonth || 'MM'"
+                [expiryYear]="bankingForm.value.expiryYear || user?.card?.expiryYear || 'YY'"
+                [cvv]="bankingForm.value.cvv || user?.card?.cvv || ''"
+                [flipped]="cardFlipped"
+              ></app-bank-card>
+            </div>
 
-            <div class="issued-bar" *ngIf="hasAccountNumber && user?.card as card">
+            <div class="issued-bar" *ngIf="hasAccountNumber">
               <p class="issued-bar__status">
                 <app-nb-icon name="check"></app-nb-icon>
-                <span>Account active · ATM card {{ card.status }}</span>
+                <span>Account active · ATM card {{ user?.card?.status || 'pending' }}</span>
               </p>
-              <button type="button" class="btn btn--ghost" (click)="cardFlipped = !cardFlipped">
+              <button type="button" class="btn btn--ghost issued-bar__flip" (click)="cardFlipped = !cardFlipped">
                 {{ cardFlipped ? 'Show front' : 'Show CVV side' }}
               </button>
             </div>
-          </div>
+            <p class="card-hint" *ngIf="!hasAccountNumber">
+              Card preview updates as you type. Focus CVV to flip the card.
+            </p>
+          </aside>
 
           <form class="form banking-form" [formGroup]="bankingForm" (ngSubmit)="submitBankingApplication()">
             <p class="section-label">ATM card details</p>

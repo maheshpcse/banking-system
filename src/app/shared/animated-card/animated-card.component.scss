@@ -16,7 +16,7 @@
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72));
   border: 1px solid rgba(255, 255, 255, 0.7);
   box-shadow: var(--shadow-soft);
-  overflow: hidden;
+  overflow: visible;
   /* transform-style / float-in translate removed — fade only if needed */
   animation: none;
   transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
