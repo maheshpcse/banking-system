@@ -1,0 +1,85 @@
+.admin-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1.1rem;
+}
+.eyebrow {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+}
+.admin-hero h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+}
+.lede, .hint, .muted {
+  color: var(--text-muted);
+}
+.lede { margin: 0.4rem 0 0; }
+.hint { margin-top: 1rem; }
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.stat {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(255,255,255,0.8);
+  border: 1px solid rgba(255,255,255,0.85);
+  box-shadow: var(--shadow-soft);
+}
+.stat span { display:block; color: var(--text-muted); font-size: 0.78rem; }
+.stat strong { font-family: var(--font-display); font-size: 1.25rem; }
+.table-wrap { overflow: auto; border-radius: 1rem; box-shadow: var(--shadow-soft); }
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255,255,255,0.88);
+}
+.data-table th, .data-table td {
+  text-align: left;
+  padding: 0.85rem 0.9rem;
+  border-bottom: 1px solid rgba(148,163,184,0.22);
+  vertical-align: top;
+}
+.data-table td strong { display:block; }
+.data-table td span { color: var(--text-muted); font-size: 0.82rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.pill {
+  display: inline-flex;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(148,163,184,0.18);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+.pill[data-status='active'], .pill[data-status='approved'] { background: rgba(95,196,176,0.22); }
+.pill[data-status='under_review'], .pill[data-status='pending'] { background: rgba(212,160,23,0.2); }
+.pill[data-status='blocked'], .pill[data-status='rejected'] { background: rgba(196,91,108,0.18); }
+.request-list { display: grid; gap: 0.75rem; }
+.request-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  background: rgba(255,255,255,0.84);
+  border: 1px solid rgba(255,255,255,0.85);
+  box-shadow: var(--shadow-soft);
+}
+.tools { display:flex; gap:0.4rem; flex-wrap:wrap; }
+.tools .is-active { background: rgba(95,196,176,0.18); }
+@media (max-width: 900px) {
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .request-card, .admin-hero { display: grid; }
+}

@@ -3,6 +3,8 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { AccountService } from '../../../core/services/account.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
+import { AccountLifecycleService } from '../../../core/services/account-lifecycle.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { withShimmerDelay } from '../../../core/utils/shimmer';
 import { fieldError } from '../../../core/utils/form-errors';
 import { of } from 'rxjs';
@@ -16,7 +18,6 @@ import { delay } from 'rxjs/operators';
 export class SendComponent implements OnInit {
   loading = false;
   pageLoading = true;
-  error = '';
 
   form = this.fb.group({
     toAccountNumber: ['', [Validators.required, Validators.minLength(6)]],
@@ -30,11 +31,16 @@ export class SendComponent implements OnInit {
     private fb: FormBuilder,
     private accountService: AccountService,
     private auth: AuthService,
-    private alerts: AlertService
+    private alerts: AlertService,
+    private lifecycle: AccountLifecycleService,
+    private notifications: NotificationService
   ) {}
 
+  get canTransfer(): boolean {
+    return this.lifecycle.canMoveMoney(this.auth.currentUser);
+  }
+
   ngOnInit(): void {
-    // Page-layout shimmer: API response time (none) + 0.5s
     of(true)
       .pipe(delay(500))
       .subscribe(() => {
@@ -43,6 +49,10 @@ export class SendComponent implements OnInit {
   }
 
   async submit(): Promise<void> {
+    if (!this.canTransfer) {
+      await this.alerts.warning('Your account number must be issued before transfers.');
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -60,7 +70,6 @@ export class SendComponent implements OnInit {
     }
 
     this.loading = true;
-    this.error = '';
 
     withShimmerDelay(
       this.accountService.transfer({
@@ -74,12 +83,19 @@ export class SendComponent implements OnInit {
         this.loading = false;
         this.auth.updateLocalUser(res.user);
         this.form.reset();
+        this.notifications.push({
+          kind: 'transfer',
+          title: 'Transfer sent',
+          body: `$${Number(amount).toFixed(2)} sent to ${toAccountNumber}.`,
+          href: '/transactions',
+          browserPush: true
+        });
         await this.alerts.success(res.message || 'Transfer successful');
       },
       error: async (err) => {
         this.loading = false;
-        this.error = err?.error?.message || 'Transfer failed';
-        await this.alerts.error(this.error);
+        // Modal only — do not bind API errors under the recipient field.
+        await this.alerts.error(err?.error?.message || 'Transfer failed');
       }
     });
   }

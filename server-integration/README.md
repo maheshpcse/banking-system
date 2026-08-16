@@ -36,3 +36,9 @@ Standalone MongoDB rejects multi-document sessions:
 - `POST /api/account/transfer` → `{ toAccountNumber, amount, description? }`
 
 After you grant Cursor write access to `banking-system-server`, ask again and these can be pushed as a server PR automatically.
+
+
+## Account lifecycle
+- New customers may have `accountNumber: null` and `accountStatus: address_required|under_review`
+- `POST /api/account/application` submits address + card for approval
+- Deposit / withdraw / transfer return 403 until an active account number exists

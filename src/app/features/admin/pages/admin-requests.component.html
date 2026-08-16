@@ -1,0 +1,24 @@
+<header class="admin-hero">
+  <div>
+    <p class="eyebrow">NovaBank</p>
+    <h1>Opening requests</h1>
+    <p class="lede">Verify address and card details, then approve or reject.</p>
+  </div>
+</header>
+<div class="request-list" *ngIf="requests.length; else empty">
+  <article class="request-card" *ngFor="let row of requests">
+    <div>
+      <strong>{{ row.fullName }}</strong>
+      <p>{{ row.email }} · {{ row.submittedAt | date: 'medium' }}</p>
+      <p class="muted">{{ row.address?.line1 }}, {{ row.address?.city }} {{ row.address?.postalCode }}</p>
+      <span class="pill" [attr.data-status]="row.status">{{ row.status }}</span>
+    </div>
+    <div class="actions" *ngIf="row.status === 'under_review'">
+      <button type="button" class="btn btn--primary" (click)="approve(row)">Approve</button>
+      <button type="button" class="btn btn--ghost" (click)="reject(row)">Reject</button>
+    </div>
+  </article>
+</div>
+<ng-template #empty>
+  <p class="hint">No opening requests yet. Customers submit from Account → Banking.</p>
+</ng-template>

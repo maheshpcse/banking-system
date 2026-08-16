@@ -1,0 +1,14 @@
+<header class="admin-hero">
+  <div>
+    <p class="eyebrow">NovaBank</p>
+    <h1>Operations desk</h1>
+    <p class="lede">Approve openings, manage account status, and monitor customer activity.</p>
+  </div>
+</header>
+<div class="stat-grid">
+  <article class="stat"><app-nb-icon name="user"></app-nb-icon><div><span>Customers</span><strong>{{ customers }}</strong></div></article>
+  <article class="stat"><app-nb-icon name="clock"></app-nb-icon><div><span>Pending requests</span><strong>{{ pending }}</strong></div></article>
+  <article class="stat"><app-nb-icon name="bell"></app-nb-icon><div><span>Unread alerts</span><strong>{{ unread }}</strong></div></article>
+  <article class="stat"><app-nb-icon name="shield"></app-nb-icon><div><span>Controls</span><strong>Active</strong></div></article>
+</div>
+<p class="hint">Use Customers for status actions and Requests for KYC / card approvals. Billing reports will attach here in a later phase — see docs/billing-system-integration.md.</p>

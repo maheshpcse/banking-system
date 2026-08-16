@@ -78,3 +78,15 @@
     transform: none;
   }
 }
+
+.locked-note {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+  color: var(--text-muted);
+}
+
+.locked-note p {
+  margin: 0;
+  line-height: 1.45;
+}

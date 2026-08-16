@@ -4,7 +4,8 @@ import { AccountService } from '../../../core/services/account.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { ShellBootService } from '../../../core/services/shell-boot.service';
-import { AccountSummary, Transaction } from '../../../core/models/banking.models';
+import { AccountLifecycleService } from '../../../core/services/account-lifecycle.service';
+import { AccountApplication, AccountSummary, Transaction } from '../../../core/models/banking.models';
 import { withShimmerDelay } from '../../../core/utils/shimmer';
 import { fieldError } from '../../../core/utils/form-errors';
 
@@ -37,8 +38,21 @@ export class OverviewComponent implements OnInit, OnDestroy {
     private auth: AuthService,
     private fb: FormBuilder,
     private alerts: AlertService,
+    private lifecycle: AccountLifecycleService,
     public shellBoot: ShellBootService
   ) {}
+
+  get hasAccountNumber(): boolean {
+    return this.lifecycle.hasAccountNumber(this.summary?.user);
+  }
+
+  get canMoveMoney(): boolean {
+    return this.lifecycle.canMoveMoney(this.summary?.user);
+  }
+
+  get application(): AccountApplication | null {
+    return this.lifecycle.applicationFor(this.summary?.user || null);
+  }
 
   ngOnInit(): void {
     this.loadSummary();
@@ -102,6 +116,10 @@ export class OverviewComponent implements OnInit, OnDestroy {
   }
 
   async submitAction(): Promise<void> {
+    if (!this.canMoveMoney) {
+      await this.alerts.warning('Account number is required before deposit or withdraw.');
+      return;
+    }
     if (this.actionForm.invalid) {
       this.actionForm.markAllAsTouched();
       return;

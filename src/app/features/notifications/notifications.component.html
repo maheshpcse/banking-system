@@ -1,0 +1,36 @@
+<section class="page">
+  <header class="page__hero">
+    <div>
+      <p class="eyebrow">NovaBank</p>
+      <h1>Notifications</h1>
+      <p class="lede">Transfers, account decisions, and operations alerts in one timeline.</p>
+    </div>
+    <div class="tools">
+      <button type="button" class="btn btn--ghost" [class.is-active]="view === 'list'" (click)="view = 'list'">List</button>
+      <button type="button" class="btn btn--ghost" [class.is-active]="view === 'grid'" (click)="view = 'grid'">Grid</button>
+      <button type="button" class="btn btn--ghost" (click)="markAll()">Mark all read</button>
+    </div>
+  </header>
+
+  <div [class]="view === 'grid' ? 'notif-grid' : 'notif-list'" *ngIf="items.length; else empty">
+    <article
+      class="notif-card"
+      *ngFor="let item of items"
+      [class.is-unread]="!item.read"
+      (click)="markRead(item)"
+    >
+      <div class="notif-card__icon" [attr.data-kind]="item.kind">
+        <app-nb-icon [name]="item.kind === 'transfer' ? 'transfer' : item.kind === 'account' ? 'card' : 'bell'"></app-nb-icon>
+      </div>
+      <div>
+        <strong>{{ item.title }}</strong>
+        <p>{{ item.body }}</p>
+        <time>{{ item.createdAt | date: 'medium' }}</time>
+      </div>
+    </article>
+  </div>
+
+  <ng-template #empty>
+    <p class="empty">No notifications yet. Transfers and account decisions will appear here.</p>
+  </ng-template>
+</section>

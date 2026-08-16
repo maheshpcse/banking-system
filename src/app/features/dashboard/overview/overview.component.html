@@ -5,9 +5,9 @@
       <h1>Hello, {{ summary.user.fullName.split(' ')[0] }}</h1>
       <p class="lede">Your calm, clear balance for everyday money moves.</p>
     </div>
-    <div class="hero-chip">
+    <div class="hero-chip" [class.hero-chip--pending]="!hasAccountNumber">
       <span>Account</span>
-      <div class="hero-chip__value">
+      <div class="hero-chip__value" *ngIf="hasAccountNumber; else pendingAccount">
         <strong>{{ accountVisible ? summary.user.accountNumber : maskedAccountNumber(summary.user.accountNumber) }}</strong>
         <button
           type="button"
@@ -30,66 +30,106 @@
           </svg>
         </button>
       </div>
+      <ng-template #pendingAccount>
+        <div class="hero-chip__pending">
+          <strong>Pending</strong>
+          <a routerLink="/settings" [queryParams]="{ tab: 'banking' }">Complete opening</a>
+        </div>
+      </ng-template>
     </div>
   </header>
 
+  <div class="progress-banner" *ngIf="!hasAccountNumber && application as app">
+    <div class="progress-banner__head">
+      <app-nb-icon name="shield"></app-nb-icon>
+      <div>
+        <strong>Account opening in progress</strong>
+        <p>Address verification and manager approval are required before deposits, withdrawals, and transfers.</p>
+      </div>
+    </div>
+    <ol class="progress-steps">
+      <li *ngFor="let step of app.steps" [attr.data-status]="step.status">
+        <span>{{ step.label }}</span>
+      </li>
+    </ol>
+  </div>
+
   <div class="grid">
     <app-animated-card class="balance-card equal-card" accent="mint" title="Available balance" subtitle="Primary">
-      <p class="balance">{{ summary.user.balance | currencyFormat }}</p>
+      <p class="balance">
+        <app-nb-icon name="wallet"></app-nb-icon>
+        <span>{{ summary.user.balance | currencyFormat }}</span>
+      </p>
       <div class="metric-row">
         <div>
-          <span>Deposits</span>
+          <span><app-nb-icon name="arrow-down"></app-nb-icon> Deposits</span>
           <strong>{{ summary.monthly.deposits.total | currencyFormat }}</strong>
         </div>
         <div>
-          <span>Withdrawals</span>
+          <span><app-nb-icon name="arrow-up"></app-nb-icon> Withdrawals</span>
           <strong>{{ summary.monthly.withdrawals.total | currencyFormat }}</strong>
         </div>
       </div>
       <div class="metric-row metric-row--secondary">
         <div>
-          <span>Transfers in</span>
+          <span><app-nb-icon name="transfer"></app-nb-icon> Transfers in</span>
           <strong>{{ summary.monthly.transfersIn.total | currencyFormat }}</strong>
         </div>
         <div>
-          <span>Transfers out</span>
+          <span><app-nb-icon name="transfer"></app-nb-icon> Transfers out</span>
           <strong>{{ summary.monthly.transfersOut.total | currencyFormat }}</strong>
         </div>
       </div>
       <p class="balance-note">
-        Track inflow and outflow in one place. Use Quick action beside this card to deposit or withdraw without leaving your dashboard.
+        Track inflow and outflow in one place. Deposit and withdraw unlock after your account number is issued.
       </p>
     </app-animated-card>
 
     <app-animated-card class="equal-card" accent="sky" title="Quick action" subtitle="Move money">
-      <div class="mode-switch">
-        <button type="button" [class.is-active]="mode === 'deposit'" (click)="setMode('deposit')">Deposit</button>
-        <button type="button" [class.is-active]="mode === 'withdraw'" (click)="setMode('withdraw')">Withdraw</button>
+      <div class="locked-note" *ngIf="!canMoveMoney">
+        <app-nb-icon name="shield"></app-nb-icon>
+        <p>Deposit and withdraw are locked until your account number is generated and activated.</p>
+        <a class="btn btn--ghost" routerLink="/settings" [queryParams]="{ tab: 'banking' }">Open account application</a>
       </div>
 
-      <form class="form" [formGroup]="actionForm" (ngSubmit)="submitAction()">
-        <label>
-          <span>Amount</span>
-          <input type="number" step="0.01" min="0.01" formControlName="amount" placeholder="0.00" />
-          <p class="form__field-error" *ngIf="fieldError(actionForm.controls.amount, 'Amount') as msg">{{ msg }}</p>
-        </label>
-        <label>
-          <span>Note (optional)</span>
-          <input type="text" formControlName="description" placeholder="Payday, groceries…" />
-        </label>
-        <button class="btn btn--primary" type="submit" [disabled]="actionLoading">
-          {{ actionLoading ? 'Processing…' : (mode === 'deposit' ? 'Deposit funds' : 'Withdraw funds') }}
-        </button>
-      </form>
+      <ng-container *ngIf="canMoveMoney">
+        <div class="mode-switch">
+          <button type="button" [class.is-active]="mode === 'deposit'" (click)="setMode('deposit')">Deposit</button>
+          <button type="button" [class.is-active]="mode === 'withdraw'" (click)="setMode('withdraw')">Withdraw</button>
+        </div>
+
+        <form class="form" [formGroup]="actionForm" (ngSubmit)="submitAction()">
+          <label>
+            <span>Amount</span>
+            <input type="number" step="0.01" min="0.01" formControlName="amount" placeholder="0.00" />
+            <p class="form__field-error" *ngIf="fieldError(actionForm.controls.amount, 'Amount') as msg">{{ msg }}</p>
+          </label>
+          <label>
+            <span>Note (optional)</span>
+            <input type="text" formControlName="description" placeholder="Payday, groceries…" />
+          </label>
+          <button class="btn btn--primary" type="submit" [disabled]="actionLoading">
+            {{ actionLoading ? 'Processing…' : (mode === 'deposit' ? 'Deposit funds' : 'Withdraw funds') }}
+          </button>
+        </form>
+      </ng-container>
     </app-animated-card>
   </div>
 
   <app-animated-card class="recent" accent="sand" title="Recent activity" subtitle="Latest five">
+    <div class="recent__tools">
+      <a routerLink="/transactions" class="recent__view-all">View all</a>
+    </div>
     <ul class="tx-list" *ngIf="summary.recentTransactions.length; else emptyRecent">
       <li *ngFor="let tx of summary.recentTransactions">
-        <div>
-          <strong>{{ typeLabel(tx.type) }}</strong>
-          <span>{{ tx.description || tx.reference }}</span>
+        <div class="tx-list__left">
+          <span class="tx-list__icon" [class.is-credit]="isCredit(tx.type)">
+            <app-nb-icon [name]="isCredit(tx.type) ? 'arrow-down' : 'arrow-up'"></app-nb-icon>
+          </span>
+          <div>
+            <strong>{{ typeLabel(tx.type) }}</strong>
+            <span>{{ tx.description || tx.reference }}</span>
+          </div>
         </div>
         <em [class.credit]="isCredit(tx.type)" [class.debit]="!isCredit(tx.type)">
           {{ isCredit(tx.type) ? '+' : '-' }}{{ tx.amount | currencyFormat }}
@@ -97,7 +137,7 @@
       </li>
     </ul>
     <ng-template #emptyRecent>
-      <p class="empty">No transactions yet. Make your first deposit to get started.</p>
+      <p class="empty">No transactions yet. Complete account opening to get started.</p>
     </ng-template>
   </app-animated-card>
 </section>

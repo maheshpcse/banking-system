@@ -1,6 +1,6 @@
 <header class="nav" *ngIf="auth.isAuthenticated()">
   <div class="nav__inner">
-    <a routerLink="/dashboard" class="brand" (click)="onNavClick()">
+    <a [routerLink]="isStaff ? '/admin' : '/dashboard'" class="brand" (click)="onNavClick()">
       <span class="brand__mark" aria-hidden="true"></span>
       <span class="brand__text">NovaBank</span>
     </a>
@@ -10,10 +10,21 @@
     </button>
 
     <nav class="nav__links" [class.is-open]="menuOpen">
-      <a routerLink="/dashboard" routerLinkActive="is-active" (click)="onNavClick()">Dashboard</a>
-      <a routerLink="/transfer" routerLinkActive="is-active" (click)="onNavClick()">Transfer</a>
-      <a routerLink="/transactions" routerLinkActive="is-active" (click)="onNavClick()">History</a>
-      <a routerLink="/settings" routerLinkActive="is-active" (click)="onNavClick()">Account</a>
+      <ng-container *ngIf="!isStaff">
+        <a routerLink="/dashboard" routerLinkActive="is-active" (click)="onNavClick()">Dashboard</a>
+        <a routerLink="/transfer" routerLinkActive="is-active" (click)="onNavClick()">Transfer</a>
+        <a routerLink="/transactions" routerLinkActive="is-active" (click)="onNavClick()">History</a>
+        <a routerLink="/settings" routerLinkActive="is-active" (click)="onNavClick()">Account</a>
+      </ng-container>
+      <ng-container *ngIf="isStaff">
+        <a routerLink="/admin" routerLinkActive="is-active" (click)="onNavClick()">Operations</a>
+        <a routerLink="/admin/customers" routerLinkActive="is-active" (click)="onNavClick()">Customers</a>
+        <a routerLink="/admin/requests" routerLinkActive="is-active" (click)="onNavClick()">Requests</a>
+      </ng-container>
+      <a routerLink="/notifications" routerLinkActive="is-active" class="nav__bell" (click)="onNavClick()">
+        Alerts
+        <span class="nav__badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </a>
       <button class="nav__logout" type="button" (click)="logout()">Sign out</button>
     </nav>
   </div>
