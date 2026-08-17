@@ -15,6 +15,9 @@ export class ShimmerComponent {
     | 'settings'
     | 'settings-panel'
     | 'notifications'
+    | 'admin-overview'
+    | 'admin-customers'
+    | 'admin-requests'
     | 'auth' = 'dashboard';
 
   /** Account settings panel tab layout when variant is settings-panel */

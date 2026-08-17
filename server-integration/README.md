@@ -56,7 +56,8 @@ Standalone MongoDB rejects multi-document sessions:
 - `POST /api/notifications/read-all`
 
 ### Admin (manager/admin role)
-- `GET /api/admin/customers`
+- `GET /api/admin/customers?page=1&limit=5` → paginated customers (`pagination: { page, limit, total, pages }`)
+- `GET /api/admin/customers/:id` → single customer profile
 - `GET /api/admin/requests`
 - `PATCH /api/admin/customers/:id/status` → `{ status }`
 - `DELETE /api/admin/customers/:id`

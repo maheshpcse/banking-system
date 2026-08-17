@@ -1,49 +1,9 @@
 .admin {
-  max-width: 1200px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: 1.5rem 1.25rem 2.75rem;
-  display: grid;
-  grid-template-columns: 210px minmax(0, 1fr);
-  gap: 1rem;
-  align-items: start;
 }
-.admin__nav {
-  display: grid;
-  gap: 0.35rem;
-  padding: 0.7rem;
-  border-radius: 1.1rem;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: var(--shadow-soft);
-  position: sticky;
-  top: calc(var(--nb-nav-height) + 0.85rem);
-}
-.admin__eyebrow {
-  margin: 0 0 0.35rem;
-  padding: 0.35rem 0.7rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-.admin__nav a {
-  text-decoration: none;
-  color: var(--text-muted);
-  padding: 0.7rem 0.8rem;
-  border-radius: 0.8rem;
-  font-weight: 650;
-}
-.admin__nav a.is-active,
-.admin__nav a:hover {
-  background: rgba(95, 196, 176, 0.16);
-  color: var(--text);
-}
-@media (max-width: 860px) {
-  .admin {
-    grid-template-columns: 1fr;
-  }
-  .admin__nav {
-    position: static;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+
+.admin__body {
+  min-width: 0;
 }

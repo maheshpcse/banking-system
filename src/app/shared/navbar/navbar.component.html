@@ -17,7 +17,12 @@
         <a routerLink="/settings" routerLinkActive="is-active" (click)="onNavClick()">Account</a>
       </ng-container>
       <ng-container *ngIf="isStaff">
-        <a routerLink="/admin" routerLinkActive="is-active" (click)="onNavClick()">Operations</a>
+        <a
+          routerLink="/admin"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          (click)="onNavClick()"
+        >Operations</a>
         <a routerLink="/admin/customers" routerLinkActive="is-active" (click)="onNavClick()">Customers</a>
         <a routerLink="/admin/requests" routerLinkActive="is-active" (click)="onNavClick()">Requests</a>
       </ng-container>

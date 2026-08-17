@@ -1,11 +1,4 @@
 <section class="admin">
-  <aside class="admin__nav">
-    <p class="admin__eyebrow">Operations</p>
-    <a routerLink="/admin" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Overview</a>
-    <a routerLink="/admin/customers" routerLinkActive="is-active">Customers</a>
-    <a routerLink="/admin/requests" routerLinkActive="is-active">Requests</a>
-    <a routerLink="/admin/notifications" routerLinkActive="is-active">Notifications</a>
-  </aside>
   <div class="admin__body">
     <router-outlet></router-outlet>
   </div>
