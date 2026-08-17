@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AdminRequestRow, AdminService } from '../../../core/services/admin.service';
 import { AlertService } from '../../../core/services/alert.service';
+import { withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
   selector: 'app-admin-requests',
@@ -10,13 +11,22 @@ import { AlertService } from '../../../core/services/alert.service';
 })
 export class AdminRequestsComponent implements OnInit, OnDestroy {
   requests: AdminRequestRow[] = [];
+  pageLoading = true;
   private sub?: Subscription;
 
   constructor(private readonly admin: AdminService, private readonly alerts: AlertService) {}
 
   ngOnInit(): void {
     this.sub = this.admin.requests$.subscribe((rows) => (this.requests = rows));
-    this.admin.refreshRequests().subscribe();
+    withShimmerDelay(this.admin.refreshRequests(), 500).subscribe({
+      next: () => {
+        this.pageLoading = false;
+      },
+      error: async (err) => {
+        this.pageLoading = false;
+        await this.alerts.error(err?.error?.message || 'Unable to load opening requests');
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -32,22 +42,21 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
       successMessage: (user) =>
         user?.accountNumber
           ? `Issued ••••${String(user.accountNumber).slice(-4)}`
-          : 'Approved.'
+          : 'Approved.',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Unable to approve application'
     });
   }
 
   async reject(row: AdminRequestRow): Promise<void> {
-    const outcome = await this.alerts.confirmAction({
+    await this.alerts.confirmAction({
       text: `Reject application for ${row.fullName}?`,
       confirmText: 'Reject',
       loadingText: 'Rejecting application…',
-      action: async () => {
-        this.admin.rejectRequest(row.id, 'Additional verification required.');
-        return true;
-      },
-      successMessage: 'Application rejected.'
+      action: async () => this.admin.rejectRequest(row.id, 'Additional verification required.'),
+      successMessage: 'Application rejected.',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Unable to reject application'
     });
-    // success modal already shown; keep title Success (common titles)
-    void outcome;
   }
 }

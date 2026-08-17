@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, firstValueFrom, map, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AccountStatus, User } from '../models/banking.models';
@@ -16,13 +16,32 @@ export interface AdminRequestRow {
   reviewNote?: string;
 }
 
+export interface AdminPagination {
+  page: number;
+  limit: number;
+  total: number;
+  pages: number;
+}
+
+export interface AdminCustomersPage {
+  items: User[];
+  pagination: AdminPagination;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private readonly usersSubject = new BehaviorSubject<User[]>([]);
   private readonly requestsSubject = new BehaviorSubject<AdminRequestRow[]>([]);
+  private readonly paginationSubject = new BehaviorSubject<AdminPagination>({
+    page: 1,
+    limit: 5,
+    total: 0,
+    pages: 1
+  });
 
   readonly users$ = this.usersSubject.asObservable();
   readonly requests$ = this.requestsSubject.asObservable();
+  readonly pagination$ = this.paginationSubject.asObservable();
 
   constructor(private readonly http: HttpClient) {}
 
@@ -34,11 +53,30 @@ export class AdminService {
     return this.requestsSubject.value;
   }
 
-  refreshCustomers(): Observable<User[]> {
-    return this.http.get<{ items: User[] }>(`${environment.apiUrl}/admin/customers`).pipe(
-      map((res) => res.items || []),
-      tap((items) => this.usersSubject.next(items))
-    );
+  get pagination(): AdminPagination {
+    return this.paginationSubject.value;
+  }
+
+  refreshCustomers(page = 1, limit = 5): Observable<AdminCustomersPage> {
+    const params = new HttpParams().set('page', String(page)).set('limit', String(limit));
+    return this.http
+      .get<AdminCustomersPage>(`${environment.apiUrl}/admin/customers`, { params })
+      .pipe(
+        map((res) => ({
+          items: res.items || [],
+          pagination: res.pagination || { page, limit, total: (res.items || []).length, pages: 1 }
+        })),
+        tap((res) => {
+          this.usersSubject.next(res.items);
+          this.paginationSubject.next(res.pagination);
+        })
+      );
+  }
+
+  getCustomer(userId: string): Observable<User> {
+    return this.http
+      .get<{ user: User }>(`${environment.apiUrl}/admin/customers/${userId}`)
+      .pipe(map((res) => res.user));
   }
 
   refreshRequests(): Observable<AdminRequestRow[]> {
@@ -55,13 +93,15 @@ export class AdminService {
         { status }
       )
     );
-    await firstValueFrom(this.refreshCustomers());
+    const { page, limit } = this.paginationSubject.value;
+    await firstValueFrom(this.refreshCustomers(page, limit));
     return res.user;
   }
 
   async removeUser(userId: string): Promise<void> {
     await firstValueFrom(this.http.delete<{ message: string }>(`${environment.apiUrl}/admin/customers/${userId}`));
-    await firstValueFrom(this.refreshCustomers());
+    const { page, limit } = this.paginationSubject.value;
+    await firstValueFrom(this.refreshCustomers(page, limit));
     await firstValueFrom(this.refreshRequests());
   }
 
@@ -72,7 +112,8 @@ export class AdminService {
         {}
       )
     );
-    await firstValueFrom(this.refreshCustomers());
+    const { page, limit } = this.paginationSubject.value;
+    await firstValueFrom(this.refreshCustomers(page, limit));
     await firstValueFrom(this.refreshRequests());
     return res.user || null;
   }
@@ -84,7 +125,8 @@ export class AdminService {
         { reviewNote }
       )
     );
-    await firstValueFrom(this.refreshCustomers());
+    const { page, limit } = this.paginationSubject.value;
+    await firstValueFrom(this.refreshCustomers(page, limit));
     await firstValueFrom(this.refreshRequests());
     return res.user || null;
   }

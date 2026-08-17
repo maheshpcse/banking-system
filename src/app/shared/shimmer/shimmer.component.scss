@@ -332,6 +332,31 @@
   height: 2.15rem;
 }
 
+.shimmer__grid--admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.shimmer-card--stat {
+  display: grid;
+  gap: 0.45rem;
+  min-height: auto;
+  padding: 1rem;
+}
+
+.shimmer-card--table {
+  display: grid;
+  gap: 0.55rem;
+  min-height: 16rem;
+}
+
+.shimmer-card--request {
+  margin-bottom: 0.75rem;
+  min-height: auto;
+}
+
 .shimmer-chips {
   display: flex;
   flex-wrap: wrap;
@@ -358,7 +383,8 @@
   .shimmer__grid,
   .shimmer__grid--settings,
   .shimmer__auth,
-  .shimmer__grid--cardinfo {
+  .shimmer__grid--cardinfo,
+  .shimmer__grid--admin-stats {
     grid-template-columns: 1fr;
   }
 

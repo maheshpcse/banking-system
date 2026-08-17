@@ -1,43 +1,161 @@
-<header class="admin-hero">
-  <div>
-    <p class="eyebrow">NovaBank</p>
-    <h1>Customers</h1>
-    <p class="lede">Activate, block, deactivate, or remove accounts.</p>
+<section class="page" *ngIf="!pageLoading; else customersShimmer">
+  <header class="admin-hero">
+    <div>
+      <p class="eyebrow">NovaBank</p>
+      <h1>Customers</h1>
+      <p class="lede">Activate, block, deactivate, or remove accounts.</p>
+    </div>
+  </header>
+
+  <div class="table-wrap" *ngIf="users.length; else emptyCustomers">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Account</th>
+          <th>Status</th>
+          <th>Balance</th>
+          <th class="actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users">
+          <td>
+            <strong>{{ user.fullName }}</strong>
+            <span>{{ user.email }}</span>
+          </td>
+          <td>
+            <app-account-number
+              variant="inline"
+              [value]="user.accountNumber"
+              pendingLabel="Pending"
+            ></app-account-number>
+          </td>
+          <td>
+            <span class="pill" [attr.data-status]="user.accountStatus">
+              {{ user.accountStatus || 'pending' }}
+            </span>
+          </td>
+          <td>{{ user.balance | currencyFormat }}</td>
+          <td class="actions-col">
+            <div class="action-bar" (click)="$event.stopPropagation()">
+              <button type="button" class="icon-btn" (click)="viewUser(user)" title="View profile">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <span>View</span>
+              </button>
+
+              <div class="menu" [class.is-open]="menuOpenId === user.id">
+                <button
+                  type="button"
+                  class="icon-btn icon-btn--more"
+                  (click)="toggleMenu($event, user.id)"
+                  [attr.aria-expanded]="menuOpenId === user.id"
+                  title="More actions"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="5" r="1.6"></circle>
+                    <circle cx="12" cy="12" r="1.6"></circle>
+                    <circle cx="12" cy="19" r="1.6"></circle>
+                  </svg>
+                </button>
+                <div class="menu__panel" *ngIf="menuOpenId === user.id">
+                  <button type="button" (click)="setStatus(user, 'active')">Activate</button>
+                  <button type="button" (click)="setStatus(user, 'blocked')">Block</button>
+                  <button type="button" (click)="setStatus(user, 'deactivated')">Deactivate</button>
+                  <button type="button" class="is-danger" (click)="remove(user)">Delete</button>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-</header>
-<div class="table-wrap">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Customer</th>
-        <th>Account</th>
-        <th>Status</th>
-        <th>Balance</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let user of users">
-        <td>
-          <strong>{{ user.fullName }}</strong>
-          <span>{{ user.email }}</span>
-        </td>
-        <td>
-          <app-account-number
-            variant="inline"
-            [value]="user.accountNumber"
-            pendingLabel="Pending"
-          ></app-account-number>
-        </td>
-        <td><span class="pill" [attr.data-status]="user.accountStatus">{{ user.accountStatus || 'pending' }}</span></td>
-        <td>{{ user.balance | currencyFormat }}</td>
-        <td class="actions">
-          <button type="button" class="btn btn--ghost" (click)="setStatus(user, 'active')">Activate</button>
-          <button type="button" class="btn btn--ghost" (click)="setStatus(user, 'blocked')">Block</button>
-          <button type="button" class="btn btn--ghost" (click)="setStatus(user, 'deactivated')">Deactivate</button>
-          <button type="button" class="btn btn--ghost" (click)="remove(user)">Delete</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+
+  <div class="pager" *ngIf="pagination.pages > 1">
+    <button type="button" class="btn btn--ghost" (click)="prev()" [disabled]="pagination.page <= 1">
+      Previous
+    </button>
+    <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+    <button
+      type="button"
+      class="btn btn--ghost"
+      (click)="next()"
+      [disabled]="pagination.page >= pagination.pages"
+    >
+      Next
+    </button>
+  </div>
+</section>
+
+<ng-template #emptyCustomers>
+  <p class="hint">No customers found.</p>
+</ng-template>
+
+<ng-template #customersShimmer>
+  <app-shimmer variant="admin-customers"></app-shimmer>
+</ng-template>
+
+<div class="drawer-backdrop" *ngIf="viewing as user" (click)="closeView()"></div>
+<aside class="drawer" *ngIf="viewing as user" role="dialog" aria-modal="true" aria-label="Customer profile">
+  <header class="drawer__head">
+    <div>
+      <p class="drawer__eyebrow">Customer profile</p>
+      <h2>{{ user.fullName }}</h2>
+    </div>
+    <button type="button" class="icon-btn icon-btn--close" (click)="closeView()" aria-label="Close">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 6l12 12M18 6 6 18"></path>
+      </svg>
+    </button>
+  </header>
+
+  <div class="drawer__body">
+    <section class="drawer__section">
+      <h3>Profile</h3>
+      <dl class="meta-grid">
+        <div><dt>Email</dt><dd>{{ user.email }}</dd></div>
+        <div><dt>Username</dt><dd>{{ user.username || '—' }}</dd></div>
+        <div><dt>Role</dt><dd>{{ user.role || 'customer' }}</dd></div>
+        <div><dt>Status</dt><dd>{{ user.accountStatus || 'pending' }}</dd></div>
+        <div><dt>Balance</dt><dd>{{ user.balance | currencyFormat }}</dd></div>
+        <div>
+          <dt>Account</dt>
+          <dd>
+            <app-account-number
+              variant="inline"
+              [value]="user.accountNumber"
+              pendingLabel="Pending"
+            ></app-account-number>
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="drawer__section">
+      <h3>Address</h3>
+      <ng-container *ngIf="user.address; else noAddress">
+        <p>{{ user.address.line1 }}</p>
+        <p *ngIf="user.address.line2">{{ user.address.line2 }}</p>
+        <p>
+          {{ user.address.city }}{{ user.address.state ? ', ' + user.address.state : '' }}
+          {{ user.address.postalCode }}
+        </p>
+        <p>{{ user.address.country }}</p>
+      </ng-container>
+      <ng-template #noAddress><p class="muted">No address on file.</p></ng-template>
+    </section>
+
+    <section class="drawer__section" *ngIf="user.card as card">
+      <h3>Card</h3>
+      <dl class="meta-grid">
+        <div><dt>Holder</dt><dd>{{ card.holderName }}</dd></div>
+        <div><dt>Status</dt><dd>{{ card.status }}</dd></div>
+        <div><dt>Expiry</dt><dd>{{ card.expiryMonth }}/{{ card.expiryYear }}</dd></div>
+      </dl>
+    </section>
+  </div>
+</aside>
