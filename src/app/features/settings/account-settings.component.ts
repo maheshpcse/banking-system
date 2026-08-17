@@ -403,7 +403,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       next: async (res) => {
         this.applyUser(res.user);
         this.savingAvatar = false;
-        await this.afterSaveSuccess(res.message || 'Avatar updated.');
+        await this.afterSaveSuccess('Avatar updated.');
       },
       error: async (err) => {
         this.savingAvatar = false;
@@ -459,7 +459,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       next: async (res) => {
         this.applyUser(res.user);
         this.savingPrefs = false;
-        await this.afterSaveSuccess(res.message || 'Preferences saved.');
+        await this.afterSaveSuccess('Preferences saved.');
       },
       error: async (err) => {
         this.savingPrefs = false;
