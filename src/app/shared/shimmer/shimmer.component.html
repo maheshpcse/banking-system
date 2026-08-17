@@ -238,7 +238,7 @@
     </ng-container>
 
     <ng-container *ngSwitchCase="'admin-overview'">
-      <div class="shimmer__hero">
+      <div class="shimmer__hero shimmer__hero--admin">
         <div class="shimmer-line shimmer-line--brand"></div>
         <div class="shimmer-line shimmer-line--title"></div>
         <div class="shimmer-line shimmer-line--lede"></div>
@@ -246,34 +246,58 @@
       <div class="shimmer__grid shimmer__grid--admin-stats">
         <div class="shimmer-card shimmer-card--stat" *ngFor="let i of [1, 2, 3, 4]">
           <div class="shimmer-notif__icon"></div>
-          <div class="shimmer-line shimmer-line--xs"></div>
-          <div class="shimmer-line shimmer-line--md"></div>
+          <div class="shimmer-stat-copy">
+            <div class="shimmer-line shimmer-line--xs"></div>
+            <div class="shimmer-line shimmer-line--sm"></div>
+          </div>
         </div>
       </div>
-      <div class="shimmer-line shimmer-line--lede"></div>
+      <div class="shimmer-line shimmer-line--lede shimmer-line--admin-hint"></div>
     </ng-container>
 
     <ng-container *ngSwitchCase="'admin-customers'">
-      <div class="shimmer__hero">
+      <div class="shimmer__hero shimmer__hero--admin">
         <div class="shimmer-line shimmer-line--brand"></div>
         <div class="shimmer-line shimmer-line--title"></div>
         <div class="shimmer-line shimmer-line--lede"></div>
       </div>
       <div class="shimmer-card shimmer-card--table">
-        <div class="shimmer-row" *ngFor="let i of [1, 2, 3, 4, 5]"></div>
+        <div class="shimmer-row shimmer-row--table-head"></div>
+        <div class="shimmer-row shimmer-row--table" *ngFor="let i of [1, 2, 3, 4, 5]">
+          <div class="shimmer-table-cell shimmer-table-cell--name">
+            <div class="shimmer-line shimmer-line--sm"></div>
+            <div class="shimmer-line shimmer-line--xs"></div>
+          </div>
+          <div class="shimmer-line shimmer-line--xs shimmer-table-cell--acct"></div>
+          <div class="shimmer-chip shimmer-chip--pill"></div>
+          <div class="shimmer-line shimmer-line--xs shimmer-table-cell--bal"></div>
+          <div class="shimmer-table-actions">
+            <span class="shimmer-chip shimmer-chip--action"></span>
+            <span class="shimmer-chip shimmer-chip--more"></span>
+          </div>
+        </div>
       </div>
     </ng-container>
 
     <ng-container *ngSwitchCase="'admin-requests'">
-      <div class="shimmer__hero">
+      <div class="shimmer__hero shimmer__hero--admin">
         <div class="shimmer-line shimmer-line--brand"></div>
         <div class="shimmer-line shimmer-line--title"></div>
         <div class="shimmer-line shimmer-line--lede"></div>
       </div>
-      <div class="shimmer-card shimmer-card--request" *ngFor="let i of [1, 2, 3]">
-        <div class="shimmer-line shimmer-line--md"></div>
-        <div class="shimmer-line shimmer-line--lede"></div>
-        <div class="shimmer-line shimmer-line--xs"></div>
+      <div class="shimmer-request-list">
+        <div class="shimmer-card shimmer-card--request" *ngFor="let i of [1, 2, 3]">
+          <div class="shimmer-request-copy">
+            <div class="shimmer-line shimmer-line--md"></div>
+            <div class="shimmer-line shimmer-line--lede"></div>
+            <div class="shimmer-line shimmer-line--xs"></div>
+            <span class="shimmer-chip shimmer-chip--pill"></span>
+          </div>
+          <div class="shimmer-request-actions">
+            <span class="shimmer-chip shimmer-chip--action"></span>
+            <span class="shimmer-chip shimmer-chip--action"></span>
+          </div>
+        </div>
       </div>
     </ng-container>
 
