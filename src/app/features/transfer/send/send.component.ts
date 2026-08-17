@@ -1,21 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { AccountService } from '../../../core/services/account.service';
+import { Subscription, of } from 'rxjs';
+import { debounceTime, delay, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
+import { AccountDirectoryItem, AccountService } from '../../../core/services/account.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { AccountLifecycleService } from '../../../core/services/account-lifecycle.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { fieldError } from '../../../core/utils/form-errors';
-import { of } from 'rxjs';
-import { delay, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-send',
   templateUrl: './send.component.html',
   styleUrls: ['./send.component.scss']
 })
-export class SendComponent implements OnInit {
+export class SendComponent implements OnInit, OnDestroy {
   pageLoading = true;
+  suggestions: AccountDirectoryItem[] = [];
+  showSuggestions = false;
+  highlightIndex = -1;
+  private recipientSub?: Subscription;
+
+  @ViewChild('recipientField') recipientField?: ElementRef<HTMLInputElement>;
 
   form = this.fb.group({
     toAccountNumber: ['', [Validators.required, Validators.minLength(6)]],
@@ -44,6 +50,81 @@ export class SendComponent implements OnInit {
       .subscribe(() => {
         this.pageLoading = false;
       });
+
+    this.recipientSub = this.form.controls.toAccountNumber.valueChanges
+      .pipe(
+        debounceTime(220),
+        distinctUntilChanged(),
+        switchMap((raw) => {
+          const q = String(raw || '')
+            .replace(/\s+/g, '')
+            .toUpperCase();
+          if (q.length < 2 || !this.canTransfer) {
+            this.suggestions = [];
+            this.showSuggestions = false;
+            return of([] as AccountDirectoryItem[]);
+          }
+          return this.accountService.lookupDirectory(q);
+        })
+      )
+      .subscribe((items) => {
+        this.suggestions = items;
+        this.showSuggestions = items.length > 0;
+        this.highlightIndex = items.length ? 0 : -1;
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.recipientSub?.unsubscribe();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocClick(event: MouseEvent): void {
+    const target = event.target as Node;
+    if (this.recipientField?.nativeElement.contains(target)) {
+      return;
+    }
+    const panel = document.querySelector('.autocomplete__panel');
+    if (panel?.contains(target)) {
+      return;
+    }
+    this.showSuggestions = false;
+  }
+
+  onRecipientInput(): void {
+    const ctrl = this.form.controls.toAccountNumber;
+    const next = String(ctrl.value || '')
+      .replace(/\s+/g, '')
+      .toUpperCase();
+    if (next !== ctrl.value) {
+      ctrl.setValue(next, { emitEvent: true });
+    }
+  }
+
+  selectSuggestion(item: AccountDirectoryItem): void {
+    this.form.controls.toAccountNumber.setValue(item.accountNumber, { emitEvent: false });
+    this.suggestions = [];
+    this.showSuggestions = false;
+    this.highlightIndex = -1;
+  }
+
+  onRecipientKeydown(event: KeyboardEvent): void {
+    if (!this.showSuggestions || !this.suggestions.length) {
+      return;
+    }
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.highlightIndex = (this.highlightIndex + 1) % this.suggestions.length;
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.highlightIndex =
+        (this.highlightIndex - 1 + this.suggestions.length) % this.suggestions.length;
+    } else if (event.key === 'Enter' && this.highlightIndex >= 0) {
+      event.preventDefault();
+      this.selectSuggestion(this.suggestions[this.highlightIndex]);
+    } else if (event.key === 'Escape') {
+      this.showSuggestions = false;
+    }
   }
 
   async submit(): Promise<void> {
@@ -82,7 +163,9 @@ export class SendComponent implements OnInit {
     });
 
     if (outcome.ok) {
-      this.form.reset();
+      this.form.reset({ toAccountNumber: '', amount: null, description: '' });
+      this.suggestions = [];
+      this.showSuggestions = false;
     }
   }
 }

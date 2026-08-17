@@ -16,18 +16,36 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   constructor(public auth: AuthService, private readonly notifications: NotificationService) {}
 
+  get role(): UserRole {
+    return this.auth.currentUser?.role || 'customer';
+  }
+
   get isStaff(): boolean {
-    const role: UserRole = this.auth.currentUser?.role || 'customer';
-    return role === 'admin' || role === 'manager';
+    return this.role === 'admin' || this.role === 'manager';
+  }
+
+  get isAdmin(): boolean {
+    return this.role === 'admin';
+  }
+
+  get isManager(): boolean {
+    return this.role === 'manager';
+  }
+
+  get homeLink(): string {
+    if (this.isAdmin) {
+      return '/admin';
+    }
+    if (this.isManager) {
+      return '/manager';
+    }
+    return '/dashboard';
   }
 
   ngOnInit(): void {
     this.sub = this.notifications.notifications$.subscribe(() => {
       this.unreadCount = this.notifications.unreadCount;
     });
-    if (this.auth.isAuthenticated()) {
-      this.notifications.refresh().subscribe();
-    }
     this.unreadCount = this.notifications.unreadCount;
   }
 

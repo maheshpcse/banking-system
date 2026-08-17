@@ -14,9 +14,29 @@
         <a class="btn btn--ghost" routerLink="/settings" [queryParams]="{ tab: 'cardinfo' }">Open account application</a>
       </div>
       <form *ngIf="canTransfer" class="form" [formGroup]="form" (ngSubmit)="submit()">
-        <label>
+        <label class="autocomplete" #recipientField>
           <span>Recipient account</span>
-          <input type="text" formControlName="toAccountNumber" placeholder="MBxxxxxxxxxxxx" />
+          <input
+            type="text"
+            formControlName="toAccountNumber"
+            placeholder="Start typing MBxxxxxxxxxxxx"
+            autocomplete="off"
+            (input)="onRecipientInput()"
+            (focus)="showSuggestions = suggestions.length > 0"
+            (keydown)="onRecipientKeydown($event)"
+          />
+          <div class="autocomplete__panel" *ngIf="showSuggestions && suggestions.length">
+            <button
+              type="button"
+              class="autocomplete__option"
+              *ngFor="let item of suggestions; let i = index"
+              [class.is-active]="i === highlightIndex"
+              (click)="selectSuggestion(item)"
+            >
+              <strong>{{ item.accountNumber }}</strong>
+              <span>{{ item.displayName }}</span>
+            </button>
+          </div>
           <p class="form__field-error" *ngIf="fieldError(form.controls.toAccountNumber, 'Recipient account') as msg">
             {{ msg }}
           </p>
@@ -31,7 +51,6 @@
           <input type="text" formControlName="description" placeholder="Rent, gift, shared dinner…" />
         </label>
 
-
         <button class="btn btn--primary" type="submit">
           Send transfer
         </button>
@@ -43,8 +62,8 @@
         <h2>How it works</h2>
         <ol>
           <li>Ask the recipient for their NovaBank account number.</li>
-          <li>Enter the amount and an optional note.</li>
-          <li>Funds move instantly between accounts.</li>
+          <li>Start typing — matching accounts appear as suggestions.</li>
+          <li>Both of you get an alert when the transfer completes.</li>
         </ol>
       </div>
     </aside>

@@ -5,7 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { AlertService } from '../../core/services/alert.service';
 import { AccountLifecycleService } from '../../core/services/account-lifecycle.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { AccountApplication, User, UserAvatar } from '../../core/models/banking.models';
+import { AccountApplication, CardAccountType, CardBrand, User, UserAvatar } from '../../core/models/banking.models';
 import { withShimmerDelay } from '../../core/utils/shimmer';
 import { fieldError } from '../../core/utils/form-errors';
 
@@ -44,6 +44,31 @@ function matchPasswords(group: AbstractControl): ValidationErrors | null {
   return newPassword === confirmPassword ? null : { mismatch: true };
 }
 
+function cardExpiryNotPast(group: AbstractControl): ValidationErrors | null {
+  const month = String(group.get('expiryMonth')?.value || '');
+  const year = String(group.get('expiryYear')?.value || '');
+  if (!/^(0[1-9]|1[0-2])$/.test(month) || !/^[0-9]{2}$/.test(year)) {
+    return null;
+  }
+  const now = new Date();
+  const exp = new Date(2000 + Number(year), Number(month), 0, 23, 59, 59);
+  return exp.getTime() >= now.getTime() ? null : { expiryPast: true };
+}
+
+function accountExpiryNotPast(group: AbstractControl): ValidationErrors | null {
+  const month = String(group.get('accountExpiryMonth')?.value || '');
+  const year = String(group.get('accountExpiryYear')?.value || '');
+  if (!month && !year) {
+    return null;
+  }
+  if (!/^(0[1-9]|1[0-2])$/.test(month) || !/^[0-9]{2}$/.test(year)) {
+    return null;
+  }
+  const now = new Date();
+  const exp = new Date(2000 + Number(year), Number(month), 0, 23, 59, 59);
+  return exp.getTime() >= now.getTime() ? null : { accountExpiryPast: true };
+}
+
 @Component({
   selector: 'app-account-settings',
   templateUrl: './account-settings.component.html',
@@ -61,22 +86,43 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   showConfirm = false;
   user: User | null = null;
   imagePreview: string | null = null;
+  imageFileName = '';
 
   readonly avatarStyles: Array<UserAvatar['style']> = ['mint', 'sky', 'sand', 'rose', 'slate'];
   readonly usStates = US_STATES;
   readonly countries = COUNTRIES;
+  readonly cardBrands: Array<{ id: CardBrand; label: string }> = [
+    { id: 'visa', label: 'Visa' },
+    { id: 'mastercard', label: 'Mastercard' },
+    { id: 'amex', label: 'American Express' },
+    { id: 'discover', label: 'Discover' },
+    { id: 'novabank', label: 'NovaBank' }
+  ];
+  readonly accountTypes: Array<{ id: CardAccountType; label: string }> = [
+    { id: 'personal', label: 'Personal' },
+    { id: 'business', label: 'Business' },
+    { id: 'savings', label: 'Savings' },
+    { id: 'debit', label: 'Debit' },
+    { id: 'credit', label: 'Credit' },
+    { id: 'other', label: 'Other' }
+  ];
   readonly fieldError = fieldError;
-  readonly tabs: Array<{ id: SettingsTab; label: string; hint: string }> = [
-    { id: 'identity', label: 'Identity', hint: 'Profile details' },
-    { id: 'presence', label: 'Presence', hint: 'Avatar & photo' },
+  readonly allTabs: Array<{ id: SettingsTab; label: string; hint: string; staff?: boolean }> = [
+    { id: 'identity', label: 'Identity', hint: 'Profile details', staff: true },
+    { id: 'presence', label: 'Presence', hint: 'Avatar & photo', staff: true },
     { id: 'banking', label: 'Banking', hint: 'Opening progress' },
     { id: 'cardinfo', label: 'Card info', hint: 'Card & address' },
-    { id: 'security', label: 'Security', hint: 'Password' },
-    { id: 'experience', label: 'Experience', hint: 'Preferences' }
+    { id: 'security', label: 'Security', hint: 'Password', staff: true },
+    { id: 'experience', label: 'Experience', hint: 'Preferences', staff: true }
   ];
   activeTab: SettingsTab = 'identity';
   savingApplication = false;
   cardFlipped = false;
+
+  get tabs(): Array<{ id: SettingsTab; label: string; hint: string }> {
+    const staff = this.auth.currentUser?.role === 'admin' || this.auth.currentUser?.role === 'manager';
+    return staff ? this.allTabs.filter((t) => t.staff) : this.allTabs;
+  }
 
   private panelTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -104,22 +150,31 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     emailAlerts: [true],
     hideBalance: [false],
     compactLedger: [false],
-    marketingTips: [false]
+    marketingTips: [false],
+    theme: ['daylight' as NonNullable<User['settings']>['theme']],
+    fontScale: ['comfortable' as NonNullable<User['settings']>['fontScale']]
   });
 
-  bankingForm = this.fb.group({
-    line1: ['', [Validators.required, Validators.minLength(3)]],
-    line2: [''],
-    city: ['', [Validators.required]],
-    state: ['', [Validators.required]],
-    postalCode: ['', [Validators.required, Validators.minLength(3)]],
-    country: ['United States', [Validators.required]],
-    holderName: ['', [Validators.required, Validators.minLength(2)]],
-    cardNumber: ['', [Validators.required, Validators.minLength(16), Validators.maxLength(19)]],
-    expiryMonth: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])$/)]],
-    expiryYear: ['', [Validators.required, Validators.pattern(/^[0-9]{2}$/)]],
-    cvv: ['', [Validators.required, Validators.pattern(/^[0-9]{3}$/)]]
-  });
+  bankingForm = this.fb.group(
+    {
+      line1: ['', [Validators.required, Validators.minLength(3)]],
+      line2: [''],
+      city: ['', [Validators.required]],
+      state: ['', [Validators.required]],
+      postalCode: ['', [Validators.required, Validators.minLength(3)]],
+      country: ['', [Validators.required]],
+      holderName: ['', [Validators.required, Validators.minLength(2)]],
+      brand: ['visa' as CardBrand, [Validators.required]],
+      accountType: ['personal' as CardAccountType, [Validators.required]],
+      cardNumber: ['', [Validators.required, Validators.minLength(16), Validators.maxLength(19)]],
+      expiryMonth: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])$/)]],
+      expiryYear: ['', [Validators.required, Validators.pattern(/^[0-9]{2}$/)]],
+      cvv: ['', [Validators.required, Validators.pattern(/^[0-9]{3,4}$/)]],
+      accountExpiryMonth: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])$/)]],
+      accountExpiryYear: ['', [Validators.required, Validators.pattern(/^[0-9]{2}$/)]]
+    },
+    { validators: [cardExpiryNotPast, accountExpiryNotPast] }
+  );
 
   constructor(
     private readonly fb: FormBuilder,
@@ -240,7 +295,9 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
           emailAlerts: this.user?.settings?.emailAlerts !== false,
           hideBalance: !!this.user?.settings?.hideBalance,
           compactLedger: !!this.user?.settings?.compactLedger,
-          marketingTips: !!this.user?.settings?.marketingTips
+          marketingTips: !!this.user?.settings?.marketingTips,
+          theme: this.user?.settings?.theme || 'daylight',
+          fontScale: this.user?.settings?.fontScale || 'comfortable'
         });
         break;
     }
@@ -251,6 +308,44 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     const digits = String(ctrl.value || '').replace(/\D/g, '').slice(0, 16);
     const grouped = digits.replace(/(.{4})/g, '$1 ').trim();
     ctrl.setValue(grouped, { emitEvent: false });
+    this.cardFlipped = false;
+  }
+
+  generateCardDetails(): void {
+    const brand = (this.bankingForm.value.brand || 'visa') as CardBrand;
+    const prefixes: Record<CardBrand, string> = {
+      visa: '4',
+      mastercard: '5',
+      amex: '3',
+      discover: '6',
+      novabank: '9'
+    };
+    let digits = prefixes[brand] || '4';
+    while (digits.length < 16) {
+      digits += String(Math.floor(Math.random() * 10));
+    }
+    const now = new Date();
+    const expMonth = String(((now.getMonth() + 6) % 12) + 1).padStart(2, '0');
+    const expYear = String((now.getFullYear() + (now.getMonth() + 6 >= 12 ? 4 : 3)) % 100).padStart(
+      2,
+      '0'
+    );
+    const acctMonth = String(((now.getMonth() + 3) % 12) + 1).padStart(2, '0');
+    const acctYear = String((now.getFullYear() + 5) % 100).padStart(2, '0');
+    const cvvLen = brand === 'amex' ? 4 : 3;
+    let cvv = '';
+    while (cvv.length < cvvLen) {
+      cvv += String(Math.floor(Math.random() * 10));
+    }
+    this.bankingForm.patchValue({
+      cardNumber: digits.replace(/(.{4})/g, '$1 ').trim(),
+      expiryMonth: expMonth,
+      expiryYear: expYear,
+      cvv,
+      accountExpiryMonth: acctMonth,
+      accountExpiryYear: acctYear,
+      holderName: this.bankingForm.value.holderName || this.user?.fullName || ''
+    });
     this.cardFlipped = false;
   }
 
@@ -289,7 +384,11 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
           number: String(raw.cardNumber).replace(/\s+/g, ''),
           expiryMonth: String(raw.expiryMonth),
           expiryYear: String(raw.expiryYear),
-          cvv: String(raw.cvv)
+          cvv: String(raw.cvv),
+          brand: String(raw.brand || 'visa'),
+          accountType: String(raw.accountType || 'personal'),
+          accountExpiryMonth: String(raw.accountExpiryMonth),
+          accountExpiryYear: String(raw.accountExpiryYear)
         }
       }),
       500
@@ -320,12 +419,16 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       city: addr?.city || '',
       state: addr?.state || '',
       postalCode: addr?.postalCode || '',
-      country: addr?.country || 'United States',
+      country: addr?.country || '',
       holderName: card?.holderName || this.user?.fullName || '',
+      brand: (card?.brand as CardBrand) || 'visa',
+      accountType: (card?.accountType as CardAccountType) || 'personal',
       cardNumber: card?.number ? String(card.number).replace(/(\d{4})(?=\d)/g, '$1 ').trim() : '',
       expiryMonth: card?.expiryMonth || '',
       expiryYear: card?.expiryYear || '',
-      cvv: card?.cvv || ''
+      cvv: card?.cvv || '',
+      accountExpiryMonth: card?.accountExpiryMonth || card?.expiryMonth || '',
+      accountExpiryYear: card?.accountExpiryYear || card?.expiryYear || ''
     });
     this.cardFlipped = false;
   }
@@ -334,17 +437,23 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) {
+      this.imageFileName = '';
       return;
     }
     if (!file.type.startsWith('image/')) {
       void this.alerts.warning('Please choose an image file (PNG, JPG, or WebP).');
+      input.value = '';
+      this.imageFileName = '';
       return;
     }
     if (file.size > 900_000) {
       void this.alerts.warning('Image must be under 900KB.');
+      input.value = '';
+      this.imageFileName = '';
       return;
     }
 
+    this.imageFileName = file.name;
     const reader = new FileReader();
     reader.onload = () => {
       this.imagePreview = String(reader.result || '');
@@ -352,8 +461,15 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     reader.readAsDataURL(file);
   }
 
-  clearImage(): void {
+  clearImage(event?: Event): void {
     this.imagePreview = null;
+    this.imageFileName = '';
+    const host = (event?.target as HTMLElement | undefined)?.closest('form');
+    const input = (host?.querySelector('input[type="file"]') ||
+      document.querySelector('.form--avatar input[type="file"]')) as HTMLInputElement | null;
+    if (input) {
+      input.value = '';
+    }
   }
 
   saveProfile(): void {
@@ -451,7 +567,9 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
           emailAlerts: !!raw.emailAlerts,
           hideBalance: !!raw.hideBalance,
           compactLedger: !!raw.compactLedger,
-          marketingTips: !!raw.marketingTips
+          marketingTips: !!raw.marketingTips,
+          theme: (raw.theme || 'daylight') as NonNullable<User['settings']>['theme'],
+          fontScale: (raw.fontScale || 'comfortable') as NonNullable<User['settings']>['fontScale']
         }
       }),
       500
@@ -491,8 +609,21 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       emailAlerts: normalized.settings?.emailAlerts !== false,
       hideBalance: !!normalized.settings?.hideBalance,
       compactLedger: !!normalized.settings?.compactLedger,
-      marketingTips: !!normalized.settings?.marketingTips
+      marketingTips: !!normalized.settings?.marketingTips,
+      theme: normalized.settings?.theme || 'daylight',
+      fontScale: normalized.settings?.fontScale || 'comfortable'
     });
+    this.imageFileName = normalized.avatar?.image ? 'Current profile photo' : '';
+    this.applyAppearance(normalized);
     this.patchBankingFromUser();
+  }
+
+  private applyAppearance(user: User): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const root = document.documentElement;
+    root.dataset['nbTheme'] = user.settings?.theme || 'daylight';
+    root.dataset['nbFont'] = user.settings?.fontScale || 'comfortable';
   }
 }

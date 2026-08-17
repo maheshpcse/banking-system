@@ -66,7 +66,11 @@ async function main() {
   console.log('Sign in on the same Login page with:');
   console.log(`  username: ${username}`);
   console.log(`  password: ${password}`);
-  console.log('There is no separate admin login URL — staff are redirected to /admin after login.');
+  console.log(
+    role === 'manager'
+      ? 'Managers are redirected to /manager after login.'
+      : 'Admins are redirected to /admin after login.'
+  );
 
   await mongoose.disconnect();
 }

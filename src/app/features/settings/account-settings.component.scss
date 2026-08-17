@@ -122,6 +122,24 @@
   cursor: pointer;
 }
 
+.file-meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.section-head .section-label {
+  margin: 0;
+}
+
 .hero-avatar--mint,
 .style-chip--mint.is-active,
 .avatar-preview.hero-avatar--mint {

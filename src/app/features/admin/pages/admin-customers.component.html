@@ -7,7 +7,7 @@
     </div>
   </header>
 
-  <div class="table-wrap" *ngIf="users.length; else emptyCustomers">
+  <div class="table-wrap" [class.is-menu-open]="!!menuOpenId" *ngIf="users.length; else emptyCustomers">
     <table class="data-table">
       <thead>
         <tr>
@@ -99,14 +99,26 @@
   <app-shimmer variant="admin-customers"></app-shimmer>
 </ng-template>
 
-<div class="drawer-backdrop" *ngIf="viewing as user" (click)="closeView()"></div>
-<aside class="drawer" *ngIf="viewing as user" role="dialog" aria-modal="true" aria-label="Customer profile">
+<div
+  class="drawer-backdrop"
+  *ngIf="viewing"
+  [class.is-open]="drawerOpen"
+  (click)="closeView()"
+></div>
+<aside
+  class="drawer"
+  *ngIf="viewing as user"
+  [class.is-open]="drawerOpen"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Customer profile"
+>
   <header class="drawer__head">
     <div>
       <p class="drawer__eyebrow">Customer profile</p>
       <h2>{{ user.fullName }}</h2>
     </div>
-    <button type="button" class="icon-btn icon-btn--close" (click)="closeView()" aria-label="Close">
+    <button type="button" class="icon-btn icon-btn--close" (click)="closeView()" aria-label="Close profile">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M6 6l12 12M18 6 6 18"></path>
       </svg>

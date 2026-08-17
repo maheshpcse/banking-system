@@ -83,6 +83,7 @@ export class OverviewComponent implements OnInit {
   setMode(mode: 'deposit' | 'withdraw'): void {
     this.mode = mode;
     this.error = '';
+    this.actionForm.reset({ amount: null, description: '' });
   }
 
   async submitAction(): Promise<void> {
@@ -121,7 +122,7 @@ export class OverviewComponent implements OnInit {
       return;
     }
 
-    this.actionForm.reset();
+    this.actionForm.reset({ amount: null, description: '' });
     this.auth.updateLocalUser(outcome.result.user);
     this.notifications.refresh().subscribe();
     // Soft refresh: update amounts + recent activity without page shimmer

@@ -42,7 +42,14 @@ const routes: Routes = [
   {
     path: 'admin',
     canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['admin'] },
     loadChildren: () => import('./features/admin/admin.module').then((m) => m.AdminModule)
+  },
+  {
+    path: 'manager',
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['manager'] },
+    loadChildren: () => import('./features/manager/manager.module').then((m) => m.ManagerModule)
   },
   { path: '**', redirectTo: '' }
 ];

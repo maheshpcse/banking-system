@@ -16,6 +16,8 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   pageLoading = true;
   menuOpenId: string | null = null;
   viewing: User | null = null;
+  drawerOpen = false;
+  private drawerCloseTimer: ReturnType<typeof setTimeout> | null = null;
   private subUsers?: Subscription;
   private subPage?: Subscription;
 
@@ -30,11 +32,21 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subUsers?.unsubscribe();
     this.subPage?.unsubscribe();
+    if (this.drawerCloseTimer) {
+      clearTimeout(this.drawerCloseTimer);
+    }
   }
 
   @HostListener('document:click')
   onDocumentClick(): void {
     this.menuOpenId = null;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.viewing) {
+      this.closeView();
+    }
   }
 
   loadPage(page: number, initial = false): void {
@@ -64,15 +76,30 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
 
   async viewUser(user: User): Promise<void> {
     this.menuOpenId = null;
+    if (this.drawerCloseTimer) {
+      clearTimeout(this.drawerCloseTimer);
+      this.drawerCloseTimer = null;
+    }
     try {
       this.viewing = await firstValueFrom(this.admin.getCustomer(user.id));
     } catch {
       this.viewing = user;
     }
+    this.drawerOpen = false;
+    requestAnimationFrame(() => {
+      this.drawerOpen = true;
+    });
   }
 
   closeView(): void {
-    this.viewing = null;
+    this.drawerOpen = false;
+    if (this.drawerCloseTimer) {
+      clearTimeout(this.drawerCloseTimer);
+    }
+    this.drawerCloseTimer = setTimeout(() => {
+      this.viewing = null;
+      this.drawerCloseTimer = null;
+    }, 280);
   }
 
   async setStatus(user: User, status: AccountStatus): Promise<void> {
