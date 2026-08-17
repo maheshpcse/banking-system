@@ -37,6 +37,47 @@
   align-items: start;
 }
 
+.autocomplete {
+  position: relative;
+}
+
+.autocomplete__panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% - 0.15rem);
+  z-index: 40;
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.35rem;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 16px 36px rgba(90, 120, 150, 0.16);
+}
+
+.autocomplete__option {
+  display: grid;
+  gap: 0.15rem;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  border-radius: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.autocomplete__option span {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.autocomplete__option:hover,
+.autocomplete__option.is-active {
+  background: rgba(95, 196, 176, 0.14);
+}
+
 .tips__panel {
   padding: 1.4rem;
   border-radius: 1.25rem;

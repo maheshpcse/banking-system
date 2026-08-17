@@ -1,0 +1,52 @@
+<section class="page" *ngIf="!pageLoading; else shimmer">
+  <header class="admin-hero">
+    <div>
+      <p class="eyebrow">NovaBank</p>
+      <h1>Manager desk</h1>
+      <p class="lede">
+        Oversee customer openings, schedule transaction reports, and prepare Billing System handoffs.
+      </p>
+    </div>
+  </header>
+
+  <div class="stat-grid">
+    <article class="stat">
+      <app-nb-icon name="user"></app-nb-icon>
+      <div><span>Customers</span><strong>{{ customers }}</strong></div>
+    </article>
+    <article class="stat">
+      <app-nb-icon name="clock"></app-nb-icon>
+      <div><span>Pending approvals</span><strong>{{ pending }}</strong></div>
+    </article>
+    <article class="stat">
+      <app-nb-icon name="bell"></app-nb-icon>
+      <div><span>Unread alerts</span><strong>{{ unread }}</strong></div>
+    </article>
+    <article class="stat">
+      <app-nb-icon name="shield"></app-nb-icon>
+      <div><span>Billing link</span><strong>Planned</strong></div>
+    </article>
+  </div>
+
+  <div class="roadmap-grid">
+    <article class="roadmap-card">
+      <h2>Today</h2>
+      <p>Approve openings, manage customer status, and respond to Alerts.</p>
+      <a routerLink="/manager/approvals" class="btn btn--primary">Open approvals</a>
+    </article>
+    <article class="roadmap-card">
+      <h2>Reports</h2>
+      <p>View and schedule deposit, withdraw, and transfer summaries before Billing goes live.</p>
+      <a routerLink="/manager/reports" class="btn btn--ghost">Reports workspace</a>
+    </article>
+    <article class="roadmap-card">
+      <h2>Billing</h2>
+      <p>Settlements, invoices, and complaint queues attach here in the Billing System phase.</p>
+      <a routerLink="/manager/billing" class="btn btn--ghost">Billing preview</a>
+    </article>
+  </div>
+</section>
+
+<ng-template #shimmer>
+  <app-shimmer variant="admin-overview"></app-shimmer>
+</ng-template>

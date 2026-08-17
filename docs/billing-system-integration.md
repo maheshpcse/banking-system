@@ -79,6 +79,14 @@ flowchart TD
 
 ## Reporting cadence
 
+Managers schedule banking ledger reports on `/manager/reports`. Billing System later merges invoice / settlement graphs into the same cadence. See `docs/manager-portal-roadmap.md`.
+
+## Manager + Billing bridge
+
+- Manager portal pages (`/manager`, Approvals, Reports, Billing) are the UI shell until Billing APIs ship.
+- Shared settlement references connect banking transfers to Billing invoices.
+- Complaint accept / reject / escalate lands on the Manager Billing queue with Admin escalation.
+
 | Cadence | Banking view | Billing view |
 | --- | --- | --- |
 | Daily | Deposits, withdrawals, transfers, failed attempts | Settlements posted, open invoices |

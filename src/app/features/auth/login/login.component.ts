@@ -44,9 +44,11 @@ export class LoginComponent {
       next: () => {
         this.notifications.refresh().subscribe();
         const role = this.auth.currentUser?.role || 'customer';
-        const dest = role === 'admin' || role === 'manager' ? '/admin' : '/dashboard';
+        const dest =
+          role === 'admin' ? '/admin' : role === 'manager' ? '/manager' : '/dashboard';
         // Start shell boot before navigation so navbar + first page shimmer appear together.
         this.shellBoot.begin();
+        this.notifications.startRealtime();
         void this.router.navigateByUrl(dest).then((ok) => {
           this.loading = false;
           if (ok) {

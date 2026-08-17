@@ -437,3 +437,32 @@ a:focus {
     opacity: 1;
   }
 }
+
+/* Experience preferences — theme & font scale */
+html[data-nb-theme='midnight'] body {
+  --bg: #0f1720;
+  --text: #e8eef4;
+  --text-muted: #9aa8b8;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(95, 196, 176, 0.16), transparent 55%),
+    radial-gradient(900px 500px at 90% 0%, rgba(106, 168, 232, 0.14), transparent 50%),
+    #0f1720;
+}
+
+html[data-nb-theme='sand'] body {
+  --bg: #f6f1e8;
+  --text: #2a241c;
+  --text-muted: #7a6f62;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(212, 160, 23, 0.14), transparent 55%),
+    radial-gradient(900px 500px at 90% 0%, rgba(95, 196, 176, 0.12), transparent 50%),
+    #f6f1e8;
+}
+
+html[data-nb-font='compact'] body {
+  font-size: 14.5px;
+}
+
+html[data-nb-font='large'] body {
+  font-size: 17.5px;
+}

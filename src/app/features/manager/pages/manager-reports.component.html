@@ -1,0 +1,44 @@
+<section class="page">
+  <header class="admin-hero">
+    <div>
+      <p class="eyebrow">NovaBank</p>
+      <h1>Transaction reports</h1>
+      <p class="lede">
+        Manager workspace for banking ledger summaries. Billing System will attach invoice and settlement
+        graphs here.
+      </p>
+    </div>
+  </header>
+
+  <div class="report-layout">
+    <app-animated-card accent="sky" title="Schedule" subtitle="Cadence">
+      <form class="form" (ngSubmit)="schedule()">
+        <label>
+          <span>Report cadence</span>
+          <select [(ngModel)]="cadence" name="cadence">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="biweekly">Bi-weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </label>
+        <p class="hint">
+          Schedules are stored for the Billing report engine handoff. Delivery channels (email / desk)
+          arrive with Billing System integration.
+        </p>
+        <button class="btn btn--primary" type="submit">
+          {{ scheduled ? 'Schedule saved (local preview)' : 'Save schedule preview' }}
+        </button>
+      </form>
+    </app-animated-card>
+
+    <app-animated-card accent="mint" title="Coverage" subtitle="Banking → Billing">
+      <ul class="bullet-list">
+        <li>Deposits, withdrawals, and transfers by period</li>
+        <li>Pending openings and blocked accounts</li>
+        <li>Complaint volume once Billing queues go live</li>
+        <li>Shared settlement references with Billing invoices</li>
+      </ul>
+    </app-animated-card>
+  </div>
+</section>

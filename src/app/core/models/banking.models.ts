@@ -24,6 +24,8 @@ export interface UserSettings {
   hideBalance: boolean;
   compactLedger: boolean;
   marketingTips: boolean;
+  theme?: 'daylight' | 'midnight' | 'sand';
+  fontScale?: 'comfortable' | 'compact' | 'large';
 }
 
 export interface UserAddress {
@@ -35,13 +37,19 @@ export interface UserAddress {
   country: string;
 }
 
+export type CardBrand = 'novabank' | 'visa' | 'mastercard' | 'amex' | 'discover';
+export type CardAccountType = 'savings' | 'credit' | 'debit' | 'personal' | 'business' | 'other';
+
 export interface BankCard {
   holderName: string;
   number: string;
   expiryMonth: string;
   expiryYear: string;
   cvv: string;
-  brand: 'novabank' | 'visa' | 'mastercard';
+  brand: CardBrand;
+  accountType?: CardAccountType;
+  accountExpiryMonth?: string | null;
+  accountExpiryYear?: string | null;
   status: 'pending' | 'active' | 'blocked';
 }
 

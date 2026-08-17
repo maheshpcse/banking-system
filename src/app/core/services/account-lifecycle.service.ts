@@ -99,6 +99,10 @@ export class AccountLifecycleService {
       expiryMonth: string;
       expiryYear: string;
       cvv: string;
+      brand?: string;
+      accountType?: string;
+      accountExpiryMonth?: string;
+      accountExpiryYear?: string;
     };
   }): Observable<{ message: string; user: User }> {
     return this.http
