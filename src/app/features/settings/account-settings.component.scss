@@ -81,9 +81,45 @@
   justify-self: center;
 }
 
-.upload input[type='file'] {
+/* Match text-input chrome for the profile image file control */
+.form--avatar input.file-input[type='file'] {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background-color: rgba(255, 255, 255, 0.88);
+  border-radius: 0.85rem;
+  padding: 0.8rem 0.95rem;
+  color: var(--text);
+  outline: none;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.35;
+  min-height: 2.95rem;
   cursor: pointer;
-  padding: 0.65rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.form--avatar input.file-input[type='file']:hover {
+  background-color: rgba(232, 250, 247, 0.95);
+  border-color: rgba(95, 196, 176, 0.45);
+}
+
+.form--avatar input.file-input[type='file']:focus {
+  border-color: rgba(95, 196, 176, 0.8);
+  box-shadow: 0 0 0 4px rgba(95, 196, 176, 0.16);
+  background-color: #fff;
+}
+
+.form--avatar input.file-input[type='file']::file-selector-button {
+  margin-right: 0.75rem;
+  border: 0;
+  border-radius: 0.65rem;
+  padding: 0.35rem 0.75rem;
+  background: rgba(95, 196, 176, 0.18);
+  color: var(--text);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
 }
 
 .hero-avatar--mint,
@@ -223,11 +259,11 @@
 }
 
 .form--prefs {
-  gap: 0 !important;
+  gap: 0.55rem !important;
 }
 
 .form--prefs .toggle {
-  padding: 0;
+  padding: 0.15rem 0;
   margin: 0;
   min-height: 0;
   line-height: 1.35;
@@ -238,8 +274,9 @@
 }
 
 .form--prefs .btn {
-  margin-top: 0.85rem;
-  justify-self: start;
+  margin-top: 0.35rem;
+  width: 100%;
+  justify-self: stretch;
 }
 
 .form--prefs .toggle input[type='checkbox'] {

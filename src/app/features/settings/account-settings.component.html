@@ -71,9 +71,14 @@
             </ng-container>
           </div>
 
-          <label class="upload">
+          <label>
             <span>Profile image</span>
-            <input type="file" accept="image/png,image/jpeg,image/webp" (change)="onImageSelected($event)" />
+            <input
+              class="file-input"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              (change)="onImageSelected($event)"
+            />
           </label>
           <button type="button" class="btn btn--ghost" *ngIf="imagePreview" (click)="clearImage()">
             Remove photo

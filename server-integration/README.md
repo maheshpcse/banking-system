@@ -69,4 +69,43 @@ Standalone MongoDB rejects multi-document sessions:
 - Deposit / withdraw / transfer return 403 until an active account number exists
 - Admin approve issues `accountNumber` and writes an account notification
 
+## Roles & admin access
+
+Role-based access is already in place:
+
+| Role | How created | After login |
+| --- | --- | --- |
+| `customer` | Public **Sign up** (`POST /api/auth/register` always sets `role: 'customer'`) | `/dashboard` |
+| `manager` / `admin` | **Not** available in public signup. Seed or promote in MongoDB | `/admin` (same Login page) |
+
+- There is **no separate admin login page**. Use `/login` (or home login).
+- UI guard: `RoleGuard` on `/admin/*` allows only `admin` and `manager`.
+- API guard: `/api/admin/*` returns 403 for customers.
+
+### Seed default admin
+
+From the server repo (with `MONGODB_URI` in `.env`):
+
+```bash
+node scripts/seed-admin.js
+# or from this UI repo after copying the script:
+# node server-integration/scripts/seed-admin.js
+```
+
+Default credentials (override with env vars):
+
+- Username: `admin`
+- Email: `admin@novabank.local`
+- Password: `Admin@12345`
+- Role: `admin`
+
+Promote an existing user in MongoDB Compass / shell:
+
+```js
+db.users.updateOne(
+  { email: "you@example.com" },
+  { $set: { role: "admin" } }
+)
+```
+
 After you grant Cursor write access to `banking-system-server`, ask again and these can be pushed as a server PR automatically.
