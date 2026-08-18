@@ -80,7 +80,6 @@
               (change)="onImageSelected($event)"
             />
             <p class="file-meta" *ngIf="imageFileName">{{ imageFileName }}</p>
-            <p class="file-meta muted" *ngIf="!imageFileName">No file selected</p>
           </label>
           <button type="button" class="btn btn--ghost" *ngIf="imagePreview" (click)="clearImage($event)">
             Remove photo
