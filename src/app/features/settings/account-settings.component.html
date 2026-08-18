@@ -79,7 +79,6 @@
               accept="image/png,image/jpeg,image/webp"
               (change)="onImageSelected($event)"
             />
-            <p class="file-meta" *ngIf="imageFileName">{{ imageFileName }}</p>
           </label>
           <button type="button" class="btn btn--ghost" *ngIf="imagePreview" (click)="clearImage($event)">
             Remove photo
