@@ -28,6 +28,32 @@ export interface AdminCustomersPage {
   pagination: AdminPagination;
 }
 
+export interface AdminAnalyticsCustomers {
+  total: number;
+  active: number;
+  underReview: number;
+  blocked: number;
+}
+
+export interface AdminAnalyticsVolumeRow {
+  type: string;
+  total: number;
+  count: number;
+}
+
+export interface AdminAnalyticsDailyRow {
+  day: string;
+  type: string;
+  total: number;
+  count: number;
+}
+
+export interface AdminAnalytics {
+  customers: AdminAnalyticsCustomers;
+  volumeByType: AdminAnalyticsVolumeRow[];
+  dailyFlow: AdminAnalyticsDailyRow[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private readonly usersSubject = new BehaviorSubject<User[]>([]);
@@ -38,10 +64,14 @@ export class AdminService {
     total: 0,
     pages: 1
   });
+  private readonly staffPendingSubject = new BehaviorSubject<User[]>([]);
+  private readonly limitRequestsSubject = new BehaviorSubject<User[]>([]);
 
   readonly users$ = this.usersSubject.asObservable();
   readonly requests$ = this.requestsSubject.asObservable();
   readonly pagination$ = this.paginationSubject.asObservable();
+  readonly staffPending$ = this.staffPendingSubject.asObservable();
+  readonly limitRequests$ = this.limitRequestsSubject.asObservable();
 
   constructor(private readonly http: HttpClient) {}
 
@@ -128,6 +158,77 @@ export class AdminService {
     const { page, limit } = this.paginationSubject.value;
     await firstValueFrom(this.refreshCustomers(page, limit));
     await firstValueFrom(this.refreshRequests());
+    return res.user || null;
+  }
+
+  getAnalytics(): Observable<AdminAnalytics> {
+    return this.http.get<AdminAnalytics>(`${environment.apiUrl}/admin/analytics`);
+  }
+
+  listStaffPendingSnapshot(): User[] {
+    return this.staffPendingSubject.value;
+  }
+
+  /** Super Admin only — backend enforces requireSuperAdmin */
+  listStaffPending(): Observable<User[]> {
+    return this.http.get<{ items: User[] }>(`${environment.apiUrl}/admin/staff-pending`).pipe(
+      map((res) => res.items || []),
+      tap((items) => this.staffPendingSubject.next(items))
+    );
+  }
+
+  async approveStaff(userId: string): Promise<User | null> {
+    const res = await firstValueFrom(
+      this.http.post<{ message: string; user: User }>(
+        `${environment.apiUrl}/admin/staff/${userId}/approve`,
+        {}
+      )
+    );
+    await firstValueFrom(this.listStaffPending());
+    return res.user || null;
+  }
+
+  async rejectStaff(userId: string): Promise<User | null> {
+    const res = await firstValueFrom(
+      this.http.post<{ message: string; user: User }>(
+        `${environment.apiUrl}/admin/staff/${userId}/reject`,
+        {}
+      )
+    );
+    await firstValueFrom(this.listStaffPending());
+    return res.user || null;
+  }
+
+  listLimitRequestsSnapshot(): User[] {
+    return this.limitRequestsSubject.value;
+  }
+
+  listLimitRequests(): Observable<User[]> {
+    return this.http.get<{ items: User[] }>(`${environment.apiUrl}/admin/limit-requests`).pipe(
+      map((res) => res.items || []),
+      tap((items) => this.limitRequestsSubject.next(items))
+    );
+  }
+
+  async approveLimitRequest(userId: string, reviewNote?: string): Promise<User | null> {
+    const res = await firstValueFrom(
+      this.http.post<{ message: string; user: User }>(
+        `${environment.apiUrl}/admin/limit-requests/${userId}/approve`,
+        { reviewNote }
+      )
+    );
+    await firstValueFrom(this.listLimitRequests());
+    return res.user || null;
+  }
+
+  async rejectLimitRequest(userId: string, reviewNote?: string): Promise<User | null> {
+    const res = await firstValueFrom(
+      this.http.post<{ message: string; user: User }>(
+        `${environment.apiUrl}/admin/limit-requests/${userId}/reject`,
+        { reviewNote }
+      )
+    );
+    await firstValueFrom(this.listLimitRequests());
     return res.user || null;
   }
 }

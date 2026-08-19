@@ -6,6 +6,7 @@ import { AdminOverviewComponent } from './pages/admin-overview.component';
 import { AdminCustomersComponent } from './pages/admin-customers.component';
 import { AdminRequestsComponent } from './pages/admin-requests.component';
 import { AdminNotificationsComponent } from './pages/admin-notifications.component';
+import { AdminStaffComponent } from './pages/admin-staff.component';
 
 const routes: Routes = [
   {
@@ -15,6 +16,7 @@ const routes: Routes = [
       { path: '', component: AdminOverviewComponent },
       { path: 'customers', component: AdminCustomersComponent },
       { path: 'requests', component: AdminRequestsComponent },
+      { path: 'staff', component: AdminStaffComponent },
       { path: 'notifications', component: AdminNotificationsComponent }
     ]
   }
@@ -26,6 +28,7 @@ const routes: Routes = [
     AdminOverviewComponent,
     AdminCustomersComponent,
     AdminRequestsComponent,
+    AdminStaffComponent,
     AdminNotificationsComponent
   ],
   imports: [SharedModule, RouterModule.forChild(routes)]

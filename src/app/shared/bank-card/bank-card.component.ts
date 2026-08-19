@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { CardBrand } from '../../core/models/banking.models';
 
 @Component({
   selector: 'app-bank-card',
@@ -12,11 +13,35 @@ export class BankCardComponent {
   @Input() expiryYear = 'YY';
   @Input() cvv = '';
   @Input() flipped = false;
-  @Input() brand = 'NovaBank';
+  @Input() brand: CardBrand | string = 'visa';
+  /** When true, PAN/CVV use reveal controls instead of always showing */
+  @Input() secure = true;
 
-  get displayNumber(): string {
-    const digits = String(this.number || '').replace(/\D/g, '').padEnd(16, '•').slice(0, 16);
-    return digits.replace(/(.{4})/g, '$1 ').trim();
+  get brandKey(): string {
+    const raw = String(this.brand || 'visa').toLowerCase();
+    if (['visa', 'mastercard', 'amex', 'discover', 'novabank'].includes(raw)) {
+      return raw;
+    }
+    return 'visa';
+  }
+
+  get brandLabel(): string {
+    switch (this.brandKey) {
+      case 'mastercard':
+        return 'Mastercard';
+      case 'amex':
+        return 'American Express';
+      case 'discover':
+        return 'Discover';
+      case 'novabank':
+        return 'NovaBank';
+      default:
+        return 'Visa';
+    }
+  }
+
+  get displayName(): string {
+    return (this.holderName || 'CARD HOLDER').toUpperCase();
   }
 
   get displayExpiry(): string {
@@ -25,15 +50,11 @@ export class BankCardComponent {
     return `${mm}/${yy}`;
   }
 
-  get displayCvv(): string {
-    const raw = String(this.cvv || '');
-    if (!raw) {
-      return '•••';
-    }
-    return raw.padEnd(3, '•').slice(0, 3);
+  get rawNumber(): string {
+    return String(this.number || '').replace(/\D/g, '');
   }
 
-  get displayName(): string {
-    return (this.holderName || 'CARD HOLDER').toUpperCase();
+  get rawCvv(): string {
+    return String(this.cvv || '').replace(/\D/g, '');
   }
 }

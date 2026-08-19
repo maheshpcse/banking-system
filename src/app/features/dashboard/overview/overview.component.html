@@ -65,6 +65,40 @@
       <p class="balance-note">
         Track inflow and outflow in one place. Deposit and withdraw unlock after your account number is issued.
       </p>
+      <div class="limit-meters" *ngIf="summary.dailyUsage as usage">
+        <p class="section-label">Today’s limits</p>
+        <div class="limit-meter">
+          <div class="limit-meter__head">
+            <span>Deposit</span>
+            <span>{{ usage.deposit.used | currencyFormat }} / {{ usage.deposit.limit | currencyFormat }}</span>
+          </div>
+          <div class="limit-meter__track">
+            <span [style.width.%]="limitPct(usage.deposit.used, usage.deposit.limit)"></span>
+          </div>
+        </div>
+        <div class="limit-meter">
+          <div class="limit-meter__head">
+            <span>Withdraw</span>
+            <span>{{ usage.withdraw.used | currencyFormat }} / {{ usage.withdraw.limit | currencyFormat }}</span>
+          </div>
+          <div class="limit-meter__track">
+            <span [style.width.%]="limitPct(usage.withdraw.used, usage.withdraw.limit)"></span>
+          </div>
+        </div>
+        <div class="limit-meter">
+          <div class="limit-meter__head">
+            <span>Transfer</span>
+            <span>
+              {{ usage.transfer.used | currencyFormat }} / {{ usage.transfer.limit | currencyFormat }}
+              · {{ usage.transfer.count }}/{{ usage.transfer.countLimit }} sends
+            </span>
+          </div>
+          <div class="limit-meter__track">
+            <span [style.width.%]="limitPct(usage.transfer.used, usage.transfer.limit)"></span>
+          </div>
+        </div>
+        <a class="limit-meters__link" routerLink="/settings" [queryParams]="{ tab: 'limits' }">Request limit changes</a>
+      </div>
     </app-animated-card>
 
     <app-animated-card class="equal-card" accent="sky" title="Quick action" subtitle="Move money">

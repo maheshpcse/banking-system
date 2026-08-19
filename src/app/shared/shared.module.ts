@@ -9,6 +9,7 @@ import { ShimmerComponent } from './shimmer/shimmer.component';
 import { BankCardComponent } from './bank-card/bank-card.component';
 import { NbIconComponent } from './nb-icon/nb-icon.component';
 import { AccountNumberComponent } from './account-number/account-number.component';
+import { SecureSecretComponent } from './secure-secret/secure-secret.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { AccountNumberComponent } from './account-number/account-number.componen
     ShimmerComponent,
     BankCardComponent,
     NbIconComponent,
-    AccountNumberComponent
+    AccountNumberComponent,
+    SecureSecretComponent
   ],
   imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
   exports: [
@@ -32,7 +34,8 @@ import { AccountNumberComponent } from './account-number/account-number.componen
     ShimmerComponent,
     BankCardComponent,
     NbIconComponent,
-    AccountNumberComponent
+    AccountNumberComponent,
+    SecureSecretComponent
   ]
 })
 export class SharedModule {}

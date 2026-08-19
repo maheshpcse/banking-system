@@ -8,6 +8,8 @@ import {
   ApplicationStep,
   ApplicationStepStatus,
   BankCard,
+  CardControls,
+  LimitRequestProposal,
   User,
   UserAddress
 } from '../models/banking.models';
@@ -107,6 +109,18 @@ export class AccountLifecycleService {
   }): Observable<{ message: string; user: User }> {
     return this.http
       .post<{ message: string; user: User }>(`${environment.apiUrl}/account/application`, payload)
+      .pipe(tap((res) => this.auth.updateLocalUser(res.user)));
+  }
+
+  updateCardControls(partial: Partial<CardControls>): Observable<{ message: string; user: User }> {
+    return this.http
+      .patch<{ message: string; user: User }>(`${environment.apiUrl}/account/card-controls`, partial)
+      .pipe(tap((res) => this.auth.updateLocalUser(res.user)));
+  }
+
+  requestLimits(proposed: LimitRequestProposal): Observable<{ message: string; user: User }> {
+    return this.http
+      .post<{ message: string; user: User }>(`${environment.apiUrl}/account/limits/request`, proposed)
       .pipe(tap((res) => this.auth.updateLocalUser(res.user)));
   }
 

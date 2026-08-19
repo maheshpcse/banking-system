@@ -1,0 +1,51 @@
+<section class="page" *ngIf="!pageLoading; else shimmer">
+  <header class="admin-hero">
+    <div>
+      <p class="eyebrow">NovaBank</p>
+      <h1>Staff approvals</h1>
+      <p class="lede">
+        Super Admin only — activate or decline manager and admin registrations before they can sign in.
+      </p>
+    </div>
+  </header>
+
+  <div class="table-wrap" *ngIf="items.length; else empty">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th class="actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of items">
+          <td>
+            <strong>{{ user.fullName }}</strong>
+          </td>
+          <td>{{ user.username || '—' }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <span class="pill" [attr.data-status]="user.role">{{ user.role }}</span>
+          </td>
+          <td class="actions-col">
+            <div class="request-card__actions">
+              <button type="button" class="btn btn--ghost btn--compact" (click)="reject(user)">Decline</button>
+              <button type="button" class="btn btn--primary btn--compact" (click)="approve(user)">Activate</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #empty>
+    <p class="hint">No pending manager or admin registrations.</p>
+  </ng-template>
+</section>
+
+<ng-template #shimmer>
+  <app-shimmer variant="admin-customers"></app-shimmer>
+</ng-template>

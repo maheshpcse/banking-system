@@ -1,5 +1,8 @@
 export type UserRole = 'customer' | 'manager' | 'admin';
 
+/** Staff (manager/admin) approval lifecycle — customers are always 'active' */
+export type StaffStatus = 'active' | 'pending_approval' | 'rejected';
+
 export type AccountStatus =
   | 'pending'
   | 'address_required'
@@ -19,13 +22,16 @@ export interface UserAvatar {
   image?: string | null;
 }
 
+export type UserTheme = 'daylight' | 'midnight' | 'sand' | 'ocean' | 'graphite' | 'orchid';
+export type UserFontScale = 'comfortable' | 'compact' | 'large' | 'editorial' | 'technical';
+
 export interface UserSettings {
   emailAlerts: boolean;
   hideBalance: boolean;
   compactLedger: boolean;
   marketingTips: boolean;
-  theme?: 'daylight' | 'midnight' | 'sand';
-  fontScale?: 'comfortable' | 'compact' | 'large';
+  theme?: UserTheme;
+  fontScale?: UserFontScale;
 }
 
 export interface UserAddress {
@@ -40,6 +46,14 @@ export interface UserAddress {
 export type CardBrand = 'novabank' | 'visa' | 'mastercard' | 'amex' | 'discover';
 export type CardAccountType = 'savings' | 'credit' | 'debit' | 'personal' | 'business' | 'other';
 
+export interface CardControls {
+  frozen: boolean;
+  onlinePayments: boolean;
+  contactless: boolean;
+  international: boolean;
+  atmWithdrawals: boolean;
+}
+
 export interface BankCard {
   holderName: string;
   number: string;
@@ -50,7 +64,32 @@ export interface BankCard {
   accountType?: CardAccountType;
   accountExpiryMonth?: string | null;
   accountExpiryYear?: string | null;
-  status: 'pending' | 'active' | 'blocked';
+  status: 'pending' | 'active' | 'blocked' | 'frozen';
+  controls?: CardControls;
+}
+
+export type LimitRequestStatus = 'none' | 'pending' | 'approved' | 'rejected';
+
+export interface AccountLimits {
+  depositDaily: number;
+  withdrawDaily: number;
+  transferDaily: number;
+  transferCountDaily: number;
+}
+
+export interface LimitRequestProposal {
+  depositDaily: number;
+  withdrawDaily: number;
+  transferDaily: number;
+  transferCountDaily: number;
+}
+
+export interface PendingLimitRequest {
+  status: LimitRequestStatus;
+  requestedAt?: string | null;
+  decidedAt?: string | null;
+  reviewNote?: string | null;
+  proposed?: LimitRequestProposal | null;
 }
 
 export interface ApplicationStep {
@@ -81,12 +120,18 @@ export interface User {
   accountNumber: string | null;
   balance: number;
   role?: UserRole;
+  /** First seeded Super Admin only — unlocks staff approvals page */
+  isSuperAdmin?: boolean;
+  /** Manager/admin approval lifecycle; customers are always 'active' */
+  staffStatus?: StaffStatus;
   accountStatus?: AccountStatus;
   address?: UserAddress | null;
   card?: BankCard | null;
   application?: AccountApplication | null;
   avatar?: UserAvatar;
   settings?: UserSettings;
+  limits?: AccountLimits;
+  pendingLimitRequest?: PendingLimitRequest;
   createdAt?: string;
 }
 
@@ -99,6 +144,26 @@ export interface AuthResponse {
 export interface RegisterResponse {
   message: string;
   user: User;
+}
+
+export interface StaffRegisterResponse {
+  message: string;
+  user: {
+    id: string;
+    username?: string;
+    email: string;
+    role: UserRole;
+    staffStatus: StaffStatus;
+  };
+}
+
+export interface StaffStatusResponse {
+  found: boolean;
+  role: UserRole;
+  staffStatus: StaffStatus;
+  title: string;
+  detail: string;
+  canLogin: boolean;
 }
 
 export interface ForgotPasswordResponse {
@@ -128,6 +193,11 @@ export interface AccountSummary {
     withdrawals: { total: number; count: number };
     transfersIn: { total: number; count: number };
     transfersOut: { total: number; count: number };
+  };
+  dailyUsage?: {
+    deposit: { used: number; limit: number };
+    withdraw: { used: number; limit: number };
+    transfer: { used: number; limit: number; count: number; countLimit: number };
   };
 }
 

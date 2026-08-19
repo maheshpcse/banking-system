@@ -1,4 +1,4 @@
-<section class="auth-page auth-page--register">
+<section class="auth-page auth-page--staff">
   <div class="auth-page__stage">
     <div class="auth-page__mesh" aria-hidden="true"></div>
     <div class="auth-page__band auth-page__band--a" aria-hidden="true"></div>
@@ -6,11 +6,11 @@
 
     <div class="auth-page__copy">
       <p class="auth-page__brand">NovaBank</p>
-      <h1>Open your account</h1>
-      <p>Create credentials now — then sign in when you are ready.</p>
+      <h1>Join the operations desk</h1>
+      <p>Manager and admin access is reviewed by a Super Admin before it activates.</p>
     </div>
 
-    <app-animated-card class="auth-panel" title="Join NovaBank" subtitle="Register" accent="mint" [tilt]="false">
+    <app-animated-card class="auth-panel" title="Staff signup" subtitle="Manager / Admin" accent="sand" [tilt]="false">
       <form class="form" [formGroup]="form" (ngSubmit)="submit()">
         <label>
           <span>Full name</span>
@@ -28,8 +28,8 @@
           <p class="form__field-error" *ngIf="fieldError(form.controls.username, 'Username') as msg">{{ msg }}</p>
         </label>
         <label>
-          <span>Email</span>
-          <input type="email" formControlName="email" autocomplete="email" placeholder="you@email.com" />
+          <span>Work email</span>
+          <input type="email" formControlName="email" autocomplete="email" placeholder="you@novabank.local" />
           <p class="form__field-error" *ngIf="fieldError(form.controls.email, 'Email') as msg">{{ msg }}</p>
         </label>
         <label>
@@ -64,27 +64,39 @@
           <p class="form__field-error" *ngIf="fieldError(form.controls.password, 'Password') as msg">{{ msg }}</p>
         </label>
 
+        <p class="section-label">Requested role</p>
+        <div class="role-row" role="radiogroup" aria-label="Requested staff role">
+          <button
+            type="button"
+            class="role-chip"
+            *ngFor="let role of roles"
+            [class.is-active]="form.value.role === role.id"
+            (click)="form.patchValue({ role: role.id })"
+            [attr.aria-pressed]="form.value.role === role.id"
+          >
+            <strong>{{ role.label }}</strong>
+            <span>{{ role.hint }}</span>
+          </button>
+        </div>
+
         <p class="form__error" *ngIf="formError">{{ formError }}</p>
 
         <button class="btn btn--primary" type="submit" [disabled]="loading">
-          {{ loading ? 'Creating…' : 'Create account' }}
+          {{ loading ? 'Submitting…' : 'Request staff access' }}
         </button>
       </form>
 
       <p class="auth-switch">
-        Already banking with us?
-        <a routerLink="/auth/login">Sign in</a>
+        Already requested access?
+        <a routerLink="/auth/staff-status">Check status</a>
+      </p>
+      <p class="auth-switch">
+        Not staff?
+        <a routerLink="/auth/register">Create a customer account</a>
       </p>
       <p class="auth-switch auth-switch--home">
-        <a routerLink="/">Back to home</a>
+        <a routerLink="/auth/login">Back to sign in</a>
       </p>
     </app-animated-card>
-
-    <p class="auth-footnote">
-      Bank staff?
-      <a routerLink="/auth/staff-signup">Request manager/admin access</a>
-      ·
-      <a routerLink="/auth/staff-status">Check status</a>
-    </p>
   </div>
 </section>

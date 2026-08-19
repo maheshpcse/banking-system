@@ -5,11 +5,17 @@ import { AuthService } from '../../core/services/auth.service';
 import { AlertService } from '../../core/services/alert.service';
 import { AccountLifecycleService } from '../../core/services/account-lifecycle.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { AccountApplication, CardAccountType, CardBrand, User, UserAvatar } from '../../core/models/banking.models';
+import {
+  AccountApplication,
+  CardAccountType,
+  CardBrand,
+  User,
+  UserAvatar
+} from '../../core/models/banking.models';
 import { withShimmerDelay } from '../../core/utils/shimmer';
 import { fieldError } from '../../core/utils/form-errors';
 
-type SettingsTab = 'identity' | 'presence' | 'banking' | 'cardinfo' | 'security' | 'experience';
+type SettingsTab = 'identity' | 'presence' | 'banking' | 'cardinfo' | 'limits' | 'security' | 'experience';
 
 /** Loaded once for native <select> options — no custom popup UI */
 const US_STATES = [
@@ -81,6 +87,8 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   savingAvatar = false;
   savingPassword = false;
   savingPrefs = false;
+  savingCardControls = false;
+  savingLimits = false;
   showCurrent = false;
   showNew = false;
   showConfirm = false;
@@ -111,7 +119,8 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     { id: 'identity', label: 'Identity', hint: 'Profile details', staff: true },
     { id: 'presence', label: 'Presence', hint: 'Avatar & photo', staff: true },
     { id: 'banking', label: 'Banking', hint: 'Opening progress' },
-    { id: 'cardinfo', label: 'Card info', hint: 'Card & address' },
+    { id: 'cardinfo', label: 'Card info', hint: 'Card & controls' },
+    { id: 'limits', label: 'Limits', hint: 'Daily caps' },
     { id: 'security', label: 'Security', hint: 'Password', staff: true },
     { id: 'experience', label: 'Experience', hint: 'Preferences', staff: true }
   ];
@@ -176,6 +185,21 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     { validators: [cardExpiryNotPast, accountExpiryNotPast] }
   );
 
+  cardControlsForm = this.fb.group({
+    frozen: [false],
+    onlinePayments: [true],
+    contactless: [true],
+    international: [false],
+    atmWithdrawals: [true]
+  });
+
+  limitsForm = this.fb.group({
+    depositDaily: [5000, [Validators.required, Validators.min(1)]],
+    withdrawDaily: [2000, [Validators.required, Validators.min(1)]],
+    transferDaily: [3000, [Validators.required, Validators.min(1)]],
+    transferCountDaily: [10, [Validators.required, Validators.min(1)]]
+  });
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly auth: AuthService,
@@ -193,11 +217,35 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     return this.lifecycle.hasAccountNumber(this.user);
   }
 
+  get hasCard(): boolean {
+    return !!this.user?.card;
+  }
+
+  get currentLimits(): NonNullable<User['limits']> {
+    return (
+      this.user?.limits || {
+        depositDaily: 5000,
+        withdrawDaily: 2000,
+        transferDaily: 3000,
+        transferCountDaily: 10
+      }
+    );
+  }
+
+  get pendingLimitRequest(): User['pendingLimitRequest'] | null {
+    return this.user?.pendingLimitRequest || null;
+  }
+
+  get hasPendingLimitRequest(): boolean {
+    return this.pendingLimitRequest?.status === 'pending';
+  }
+
   ngOnInit(): void {
     const tab = this.route.snapshot.queryParamMap.get('tab');
     if (
       tab === 'banking' ||
       tab === 'cardinfo' ||
+      tab === 'limits' ||
       tab === 'identity' ||
       tab === 'presence' ||
       tab === 'security' ||
@@ -289,6 +337,10 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
         break;
       case 'cardinfo':
         this.patchBankingFromUser();
+        this.patchCardControlsFromUser();
+        break;
+      case 'limits':
+        this.patchLimitsFromUser();
         break;
       case 'experience':
         this.prefsForm.reset({
@@ -407,6 +459,82 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
         this.savingApplication = false;
         await this.alerts.error(err?.error?.message || 'Unable to submit application.');
       }
+    });
+  }
+
+  saveCardControls(): void {
+    if (this.savingCardControls || !this.hasCard) {
+      return;
+    }
+    this.savingCardControls = true;
+    const raw = this.cardControlsForm.getRawValue();
+    withShimmerDelay(
+      this.lifecycle.updateCardControls({
+        frozen: !!raw.frozen,
+        onlinePayments: !!raw.onlinePayments,
+        contactless: !!raw.contactless,
+        international: !!raw.international,
+        atmWithdrawals: !!raw.atmWithdrawals
+      }),
+      500
+    ).subscribe({
+      next: async (res) => {
+        this.applyUser(res.user);
+        this.savingCardControls = false;
+        await this.afterSaveSuccess(res.message || 'Card controls updated.');
+      },
+      error: async (err) => {
+        this.savingCardControls = false;
+        await this.alerts.error(err?.error?.message || 'Unable to update card controls.');
+      }
+    });
+  }
+
+  submitLimitsRequest(): void {
+    if (this.limitsForm.invalid || this.savingLimits || this.hasPendingLimitRequest) {
+      this.limitsForm.markAllAsTouched();
+      return;
+    }
+    this.savingLimits = true;
+    const raw = this.limitsForm.getRawValue();
+    withShimmerDelay(
+      this.lifecycle.requestLimits({
+        depositDaily: Number(raw.depositDaily),
+        withdrawDaily: Number(raw.withdrawDaily),
+        transferDaily: Number(raw.transferDaily),
+        transferCountDaily: Number(raw.transferCountDaily)
+      }),
+      500
+    ).subscribe({
+      next: async (res) => {
+        this.applyUser(res.user);
+        this.savingLimits = false;
+        await this.afterSaveSuccess(res.message || 'Limit change submitted for manager approval.');
+      },
+      error: async (err) => {
+        this.savingLimits = false;
+        await this.alerts.error(err?.error?.message || 'Unable to submit limit request.');
+      }
+    });
+  }
+
+  private patchCardControlsFromUser(): void {
+    const controls = this.user?.card?.controls;
+    this.cardControlsForm.reset({
+      frozen: !!controls?.frozen,
+      onlinePayments: controls?.onlinePayments !== false,
+      contactless: controls?.contactless !== false,
+      international: !!controls?.international,
+      atmWithdrawals: controls?.atmWithdrawals !== false
+    });
+  }
+
+  private patchLimitsFromUser(): void {
+    this.limitsForm.reset({
+      depositDaily: this.currentLimits.depositDaily,
+      withdrawDaily: this.currentLimits.withdrawDaily,
+      transferDaily: this.currentLimits.transferDaily,
+      transferCountDaily: this.currentLimits.transferCountDaily
     });
   }
 
@@ -616,6 +744,8 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     this.imageFileName = normalized.avatar?.image ? 'Current profile photo' : '';
     this.applyAppearance(normalized);
     this.patchBankingFromUser();
+    this.patchCardControlsFromUser();
+    this.patchLimitsFromUser();
   }
 
   private applyAppearance(user: User): void {

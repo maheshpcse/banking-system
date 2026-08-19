@@ -24,6 +24,12 @@
         >Operations</a>
         <a routerLink="/admin/customers" routerLinkActive="is-active" (click)="onNavClick()">Customers</a>
         <a routerLink="/admin/requests" routerLinkActive="is-active" (click)="onNavClick()">Requests</a>
+        <a
+          *ngIf="isSuperAdmin"
+          routerLink="/admin/staff"
+          routerLinkActive="is-active"
+          (click)="onNavClick()"
+        >Staff</a>
       </ng-container>
       <ng-container *ngIf="isManager">
         <a
@@ -34,6 +40,7 @@
         >Desk</a>
         <a routerLink="/manager/customers" routerLinkActive="is-active" (click)="onNavClick()">Customers</a>
         <a routerLink="/manager/approvals" routerLinkActive="is-active" (click)="onNavClick()">Approvals</a>
+        <a routerLink="/manager/limits" routerLinkActive="is-active" (click)="onNavClick()">Limits</a>
         <a routerLink="/manager/reports" routerLinkActive="is-active" (click)="onNavClick()">Reports</a>
         <a routerLink="/manager/billing" routerLinkActive="is-active" (click)="onNavClick()">Billing</a>
       </ng-container>

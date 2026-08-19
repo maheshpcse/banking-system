@@ -7,6 +7,8 @@ import {
   AuthResponse,
   ForgotPasswordResponse,
   RegisterResponse,
+  StaffRegisterResponse,
+  StaffStatusResponse,
   User,
   UserAvatar,
   UserSettings
@@ -32,6 +34,22 @@ export class AuthService {
     password: string;
   }): Observable<RegisterResponse> {
     return this.http.post<RegisterResponse>(`${environment.apiUrl}/auth/register`, payload);
+  }
+
+  /** Manager/admin self-signup — pending Super Admin approval before login unlocks. */
+  registerStaff(payload: {
+    fullName: string;
+    username: string;
+    email: string;
+    password: string;
+    role: 'manager' | 'admin';
+  }): Observable<StaffRegisterResponse> {
+    return this.http.post<StaffRegisterResponse>(`${environment.apiUrl}/auth/register-staff`, payload);
+  }
+
+  /** Public check for a pending/rejected/active staff registration — no auth required. */
+  checkStaffStatus(identifier: string): Observable<StaffStatusResponse> {
+    return this.http.post<StaffStatusResponse>(`${environment.apiUrl}/auth/staff-status`, { identifier });
   }
 
   login(payload: { identifier: string; password: string }): Observable<AuthResponse> {

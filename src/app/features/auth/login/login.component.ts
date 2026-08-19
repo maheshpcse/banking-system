@@ -60,7 +60,17 @@ export class LoginComponent {
       },
       error: (err) => {
         this.loading = false;
-        this.formError = err?.error?.message || 'Unable to sign in.';
+        const code = err?.error?.code;
+        const message = err?.error?.message || 'Unable to sign in.';
+        if (code === 'STAFF_PENDING') {
+          void this.alerts.info(message, 'Verification in progress');
+          return;
+        }
+        if (code === 'STAFF_REJECTED') {
+          void this.alerts.info(message, 'Registration not approved');
+          return;
+        }
+        this.formError = message;
       }
     });
   }

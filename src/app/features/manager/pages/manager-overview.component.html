@@ -28,11 +28,166 @@
     </article>
   </div>
 
+  <div class="analytics-grid">
+    <app-animated-card accent="mint" title="Customer states" subtitle="Directory mix">
+      <ng-container *ngIf="customerDonut.length; else noCustomers">
+        <div class="donut-layout" *ngIf="view === 'chart'; else customerTable">
+          <svg class="donut" viewBox="0 0 42 42" role="img" aria-label="Customer status distribution">
+            <circle
+              *ngFor="let seg of customerDonut"
+              class="donut__segment"
+              cx="21"
+              cy="21"
+              r="15.9155"
+              fill="transparent"
+              [attr.stroke]="seg.color"
+              stroke-width="6"
+              [attr.stroke-dasharray]="seg.dashArray"
+              [attr.stroke-dashoffset]="seg.dashOffset"
+            ></circle>
+            <text x="21" y="19.5" text-anchor="middle" class="donut__total">{{ customerTotal }}</text>
+            <text x="21" y="26" text-anchor="middle" class="donut__caption">customers</text>
+          </svg>
+          <ul class="legend">
+            <li *ngFor="let seg of customerDonut">
+              <span class="legend__dot" [style.background]="seg.color"></span>
+              <span class="legend__label">{{ seg.label }}</span>
+              <span class="legend__value">{{ seg.value }} · {{ seg.pct }}%</span>
+            </li>
+          </ul>
+        </div>
+        <ng-template #customerTable>
+          <table class="mini-table">
+            <thead>
+              <tr><th>Status</th><th>Customers</th><th>Share</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let seg of customerDonut">
+                <td><span class="legend__dot" [style.background]="seg.color"></span>{{ seg.label }}</td>
+                <td>{{ seg.value }}</td>
+                <td>{{ seg.pct }}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </ng-template>
+      </ng-container>
+      <ng-template #noCustomers>
+        <p class="hint">No customer accounts yet.</p>
+      </ng-template>
+    </app-animated-card>
+
+    <app-animated-card accent="sky" title="Transaction flow" subtitle="Volume &amp; 14-day trend">
+      <div class="flow-toolbar">
+        <div class="tools">
+          <button
+            type="button"
+            class="btn btn--ghost btn--compact"
+            *ngFor="let f of filters"
+            [class.is-active]="filter === f.id"
+            (click)="setFilter(f.id)"
+          >
+            {{ f.label }}
+          </button>
+        </div>
+        <button type="button" class="flip-btn" (click)="toggleView()">
+          <app-nb-icon name="transfer"></app-nb-icon>
+          {{ view === 'chart' ? 'Table view' : 'Chart view' }}
+        </button>
+      </div>
+
+      <ng-container *ngIf="view === 'chart'; else flowTable">
+        <div class="chart-block">
+          <p class="chart-block__title">Volume by type <span>({{ filterLabel }} highlighted)</span></p>
+          <div class="bar-chart">
+            <div
+              class="bar-chart__col"
+              *ngFor="let cat of volumeCategories"
+              [class.is-dim]="!isFilterActive(cat.key)"
+            >
+              <span class="bar-chart__value">{{ cat.total | currencyFormat }}</span>
+              <div class="bar-chart__track">
+                <div
+                  class="bar-chart__fill"
+                  [style.height.%]="barHeightPct(cat)"
+                  [style.background]="cat.color"
+                ></div>
+              </div>
+              <span class="bar-chart__label">{{ cat.label }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-block">
+          <p class="chart-block__title">Daily flow <span>(last 14 days)</span></p>
+          <svg class="line-chart" viewBox="0 0 100 42" preserveAspectRatio="none" role="img" aria-label="Daily transaction flow, last 14 days">
+            <polyline
+              class="line-chart__grid"
+              points="0,2 100,2 100,40 0,40"
+              fill="none"
+            ></polyline>
+            <path class="line-chart__area" [attr.d]="areaPath"></path>
+            <path class="line-chart__line" [attr.d]="linePath"></path>
+            <circle
+              *ngFor="let point of dailyPoints; let i = index"
+              class="line-chart__point"
+              [attr.cx]="pointX(i)"
+              [attr.cy]="pointY(point.total)"
+              r="1.4"
+            >
+              <title>{{ point.label }}: {{ point.total | currencyFormat }}</title>
+            </circle>
+          </svg>
+          <div class="line-chart__axis">
+            <span>{{ dailyPoints[0].label }}</span>
+            <span>{{ dailyPoints[dailyPoints.length - 1].label }}</span>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #flowTable>
+        <div class="chart-block">
+          <p class="chart-block__title">Volume by type</p>
+          <table class="mini-table">
+            <thead>
+              <tr><th>Type</th><th>Total</th><th>Count</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let cat of volumeCategories" [class.is-dim]="!isFilterActive(cat.key)">
+                <td><span class="legend__dot" [style.background]="cat.color"></span>{{ cat.label }}</td>
+                <td>{{ cat.total | currencyFormat }}</td>
+                <td>{{ cat.count }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="chart-block">
+          <p class="chart-block__title">Daily flow ({{ filterLabel }})</p>
+          <table class="mini-table mini-table--scroll">
+            <thead>
+              <tr><th>Day</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let point of dailyPoints">
+                <td>{{ point.label }}</td>
+                <td>{{ point.total | currencyFormat }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-template>
+    </app-animated-card>
+  </div>
+
   <div class="roadmap-grid">
     <article class="roadmap-card">
       <h2>Today</h2>
       <p>Approve openings, manage customer status, and respond to Alerts.</p>
       <a routerLink="/manager/approvals" class="btn btn--primary">Open approvals</a>
+    </article>
+    <article class="roadmap-card">
+      <h2>Limits</h2>
+      <p>Review customer daily deposit, withdraw, and transfer limit requests.</p>
+      <a routerLink="/manager/limits" class="btn btn--primary">Review limit requests</a>
     </article>
     <article class="roadmap-card">
       <h2>Reports</h2>

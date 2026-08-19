@@ -32,6 +32,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return this.role === 'manager';
   }
 
+  get isSuperAdmin(): boolean {
+    return !!this.auth.currentUser?.isSuperAdmin;
+  }
+
   get homeLink(): string {
     if (this.isAdmin) {
       return '/admin';
