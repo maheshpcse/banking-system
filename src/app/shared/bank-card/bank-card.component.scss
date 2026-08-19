@@ -35,19 +35,62 @@
 }
 
 .bank-card__face--front {
-  background:
-    radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.28), transparent 40%),
-    linear-gradient(145deg, #1d3a45 0%, #2f6f68 48%, #3d7ea8 100%);
   color: #f4fbfd;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
+.bank-card[data-brand='visa'] .bank-card__face--front {
+  background:
+    radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.28), transparent 40%),
+    linear-gradient(145deg, #0b2a6b 0%, #1a4fa0 45%, #2f7dd1 100%);
+}
+
+.bank-card[data-brand='mastercard'] .bank-card__face--front {
+  background:
+    radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.22), transparent 40%),
+    linear-gradient(145deg, #1f1f1f 0%, #3a3a3a 40%, #eb001b 100%);
+}
+
+.bank-card[data-brand='amex'] .bank-card__face--front {
+  background:
+    radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.25), transparent 40%),
+    linear-gradient(145deg, #016fd0 0%, #2a8fe0 50%, #6eb6f0 100%);
+}
+
+.bank-card[data-brand='discover'] .bank-card__face--front {
+  background:
+    radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.22), transparent 40%),
+    linear-gradient(145deg, #4a1c0a 0%, #a34018 45%, #f47216 100%);
+}
+
+.bank-card[data-brand='novabank'] .bank-card__face--front {
+  background:
+    radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.28), transparent 40%),
+    linear-gradient(145deg, #1d3a45 0%, #2f6f68 48%, #3d7ea8 100%);
+}
+
 .bank-card__face--back {
   transform: rotateY(180deg);
   background: linear-gradient(160deg, #243743 0%, #355a66 55%, #2f6f68 100%);
   color: #eef7fa;
+}
+
+.bank-card[data-brand='visa'] .bank-card__face--back {
+  background: linear-gradient(160deg, #0b2a6b 0%, #1a4fa0 60%, #163a70 100%);
+}
+
+.bank-card[data-brand='mastercard'] .bank-card__face--back {
+  background: linear-gradient(160deg, #1f1f1f 0%, #4a1010 60%, #2a2a2a 100%);
+}
+
+.bank-card[data-brand='amex'] .bank-card__face--back {
+  background: linear-gradient(160deg, #0154a0 0%, #016fd0 60%, #0a3d70 100%);
+}
+
+.bank-card[data-brand='discover'] .bank-card__face--back {
+  background: linear-gradient(160deg, #4a1c0a 0%, #a34018 60%, #3a1508 100%);
 }
 
 .bank-card__top {
@@ -71,8 +114,22 @@
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
 }
 
-.bank-card__number {
+.bank-card__number-row {
   margin: 0.35rem 0 0;
+}
+
+.bank-card__number-row ::ng-deep .secure__value {
+  color: #f4fbfd;
+  font-size: clamp(1.05rem, 2.6vw, 1.35rem);
+  letter-spacing: 0.12em;
+}
+
+.bank-card__number-row ::ng-deep .secure__toggle {
+  color: rgba(244, 251, 253, 0.85);
+}
+
+.bank-card__number {
+  margin: 0;
   font-family: var(--font-mono);
   font-size: clamp(1.05rem, 2.6vw, 1.35rem);
   letter-spacing: 0.12em;
@@ -101,6 +158,31 @@
   letter-spacing: 0.02em;
 }
 
+.bank-card__network {
+  position: absolute;
+  right: 1.2rem;
+  bottom: 1.1rem;
+  opacity: 0.9;
+}
+
+.bank-card__mark {
+  display: inline-block;
+  width: 2.6rem;
+  height: 1.6rem;
+  border-radius: 0.35rem;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.bank-card[data-brand='mastercard'] .bank-card__mark {
+  background: radial-gradient(circle at 35% 50%, #eb001b 0 42%, transparent 43%),
+    radial-gradient(circle at 65% 50%, #f79e1b 0 42%, transparent 43%);
+}
+
+.bank-card[data-brand='visa'] .bank-card__mark {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.55));
+}
+
 .bank-card__stripe {
   height: 2.4rem;
   margin: 0.85rem -1.35rem 1.1rem;
@@ -116,6 +198,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
 }
 
 .bank-card__cvv-panel span {
@@ -125,8 +208,8 @@
   color: #6b7c8f;
 }
 
-.bank-card__cvv-panel strong {
-  font-family: var(--font-mono);
+.bank-card__cvv-panel ::ng-deep .secure__value {
+  color: #1d2a36;
   letter-spacing: 0.2em;
 }
 

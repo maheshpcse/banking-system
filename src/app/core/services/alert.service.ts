@@ -71,10 +71,10 @@ export class AlertService {
     });
   }
 
-  success(text?: string): Promise<SweetAlertResult> {
+  success(text?: string, title: string = ALERT_TITLES.success): Promise<SweetAlertResult> {
     return Swal.fire({
       icon: 'success',
-      title: ALERT_TITLES.success,
+      title,
       text,
       confirmButtonText: 'Continue',
       ...this.theme,
@@ -111,10 +111,10 @@ export class AlertService {
     });
   }
 
-  info(text?: string): Promise<SweetAlertResult> {
+  info(text?: string, title: string = ALERT_TITLES.info): Promise<SweetAlertResult> {
     return Swal.fire({
       icon: 'info',
-      title: ALERT_TITLES.info,
+      title,
       text,
       confirmButtonText: 'OK',
       ...this.theme,

@@ -157,6 +157,7 @@
                 [expiryMonth]="bankingForm.value.expiryMonth || user?.card?.expiryMonth || 'MM'"
                 [expiryYear]="bankingForm.value.expiryYear || user?.card?.expiryYear || 'YY'"
                 [cvv]="bankingForm.value.cvv || user?.card?.cvv || ''"
+                [brand]="bankingForm.value.brand || 'visa'"
                 [flipped]="cardFlipped"
               ></app-bank-card>
             </div>
@@ -309,6 +310,114 @@
       </app-animated-card>
 
       <app-animated-card
+        *ngIf="activeTab === 'cardinfo' && hasCard"
+        accent="rose"
+        title="Card controls"
+        subtitle="Live protections"
+      >
+        <form class="form form--prefs card-controls" [formGroup]="cardControlsForm" (ngSubmit)="saveCardControls()">
+          <label class="toggle toggle--danger">
+            <input type="checkbox" formControlName="frozen" />
+            <span>Freeze card — pause all money movement immediately</span>
+          </label>
+          <label class="toggle">
+            <input type="checkbox" formControlName="onlinePayments" />
+            <span>Allow online &amp; e-commerce payments</span>
+          </label>
+          <label class="toggle">
+            <input type="checkbox" formControlName="contactless" />
+            <span>Allow contactless / tap-to-pay</span>
+          </label>
+          <label class="toggle">
+            <input type="checkbox" formControlName="international" />
+            <span>Allow international transactions</span>
+          </label>
+          <label class="toggle">
+            <input type="checkbox" formControlName="atmWithdrawals" />
+            <span>Allow ATM withdrawals</span>
+          </label>
+          <p class="form__hint" *ngIf="cardControlsForm.value.frozen">
+            Your card is frozen — deposits, withdrawals, and transfers are paused until you unfreeze it.
+          </p>
+          <button class="btn btn--primary" type="submit" [disabled]="savingCardControls">
+            {{ savingCardControls ? 'Saving…' : 'Save card controls' }}
+          </button>
+        </form>
+      </app-animated-card>
+
+      <app-animated-card
+        *ngIf="activeTab === 'limits'"
+        accent="mint"
+        title="Daily limits"
+        subtitle="Deposit, withdraw & transfer caps"
+      >
+        <div class="limits-current">
+          <p class="section-label">Current daily limits</p>
+          <dl class="meta-grid meta-grid--cols">
+            <div><dt>Deposit</dt><dd>{{ currentLimits.depositDaily | currencyFormat }}</dd></div>
+            <div><dt>Withdraw</dt><dd>{{ currentLimits.withdrawDaily | currencyFormat }}</dd></div>
+            <div><dt>Transfer</dt><dd>{{ currentLimits.transferDaily | currencyFormat }}</dd></div>
+            <div><dt>Transfers / day</dt><dd>{{ currentLimits.transferCountDaily }}</dd></div>
+          </dl>
+        </div>
+
+        <div class="limits-pending" *ngIf="pendingLimitRequest?.status === 'pending'">
+          <p class="limits-pending__title">
+            <app-nb-icon name="clock"></app-nb-icon>
+            <span>Awaiting manager review</span>
+          </p>
+          <div class="limits-pending__bar" aria-hidden="true">
+            <span></span>
+          </div>
+          <dl class="meta-grid meta-grid--cols">
+            <div><dt>Proposed deposit</dt><dd>{{ pendingLimitRequest?.proposed?.depositDaily | currencyFormat }}</dd></div>
+            <div><dt>Proposed withdraw</dt><dd>{{ pendingLimitRequest?.proposed?.withdrawDaily | currencyFormat }}</dd></div>
+            <div><dt>Proposed transfer</dt><dd>{{ pendingLimitRequest?.proposed?.transferDaily | currencyFormat }}</dd></div>
+            <div><dt>Proposed count/day</dt><dd>{{ pendingLimitRequest?.proposed?.transferCountDaily }}</dd></div>
+          </dl>
+        </div>
+
+        <p class="limits-decision" *ngIf="pendingLimitRequest?.status === 'rejected'">
+          Your last limit request was not approved{{ pendingLimitRequest?.reviewNote ? ': ' + pendingLimitRequest?.reviewNote : '.' }}
+        </p>
+        <p class="limits-decision limits-decision--ok" *ngIf="pendingLimitRequest?.status === 'approved'">
+          Your last limit request was approved{{ pendingLimitRequest?.reviewNote ? ': ' + pendingLimitRequest?.reviewNote : '.' }}
+        </p>
+
+        <form
+          class="form limits-form"
+          [formGroup]="limitsForm"
+          (ngSubmit)="submitLimitsRequest()"
+          [class.is-disabled]="hasPendingLimitRequest"
+        >
+          <p class="section-label">Request new limits</p>
+          <div class="form-row form-row--2">
+            <label>
+              <span>Deposit / day</span>
+              <input type="number" min="1" step="1" formControlName="depositDaily" />
+            </label>
+            <label>
+              <span>Withdraw / day</span>
+              <input type="number" min="1" step="1" formControlName="withdrawDaily" />
+            </label>
+          </div>
+          <div class="form-row form-row--2">
+            <label>
+              <span>Transfer / day</span>
+              <input type="number" min="1" step="1" formControlName="transferDaily" />
+            </label>
+            <label>
+              <span>Transfers count / day</span>
+              <input type="number" min="1" step="1" formControlName="transferCountDaily" />
+            </label>
+          </div>
+          <button class="btn btn--primary" type="submit" [disabled]="savingLimits || hasPendingLimitRequest">
+            {{ hasPendingLimitRequest ? 'Request pending review' : (savingLimits ? 'Submitting…' : 'Request new limits') }}
+          </button>
+        </form>
+      </app-animated-card>
+
+      <app-animated-card
         *ngIf="activeTab === 'security'"
         accent="sand"
         title="Password"
@@ -449,6 +558,9 @@
               <option value="daylight">Daylight</option>
               <option value="midnight">Midnight</option>
               <option value="sand">Sand</option>
+              <option value="ocean">Ocean</option>
+              <option value="graphite">Graphite</option>
+              <option value="orchid">Orchid</option>
             </select>
           </label>
           <label>
@@ -457,6 +569,8 @@
               <option value="comfortable">Comfortable</option>
               <option value="compact">Compact</option>
               <option value="large">Large</option>
+              <option value="editorial">Editorial</option>
+              <option value="technical">Technical</option>
             </select>
           </label>
           <button class="btn btn--primary" type="submit" [disabled]="savingPrefs">

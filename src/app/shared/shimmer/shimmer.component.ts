@@ -26,6 +26,7 @@ export class ShimmerComponent {
     | 'presence'
     | 'banking'
     | 'cardinfo'
+    | 'limits'
     | 'security'
     | 'experience'
     | '' = '';

@@ -51,6 +51,13 @@ export class OverviewComponent implements OnInit {
     return this.lifecycle.applicationFor(this.summary?.user || null);
   }
 
+  limitPct(used: number, limit: number): number {
+    if (!limit || limit <= 0) {
+      return 0;
+    }
+    return Math.min(100, Math.round((Number(used || 0) / limit) * 100));
+  }
+
   ngOnInit(): void {
     this.loadSummary(true);
   }

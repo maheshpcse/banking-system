@@ -1,0 +1,42 @@
+<section class="auth-page auth-page--status">
+  <div class="auth-page__stage">
+    <div class="auth-page__mesh" aria-hidden="true"></div>
+
+    <div class="auth-page__copy">
+      <p class="auth-page__brand">NovaBank</p>
+      <h1>Check staff access status</h1>
+      <p>Enter the username or email used during staff signup.</p>
+    </div>
+
+    <app-animated-card class="auth-panel" title="Staff status" subtitle="Verification" accent="sky" [tilt]="false">
+      <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+        <label>
+          <span>Username or email</span>
+          <input
+            type="text"
+            formControlName="identifier"
+            autocomplete="username"
+            placeholder="alex.rivera or you@novabank.local"
+          />
+          <p class="form__field-error" *ngIf="fieldError(form.controls.identifier, 'Username or email') as msg">
+            {{ msg }}
+          </p>
+        </label>
+
+        <p class="form__error" *ngIf="formError">{{ formError }}</p>
+
+        <button class="btn btn--primary" type="submit" [disabled]="loading">
+          {{ loading ? 'Checking…' : 'Check status' }}
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        Need staff access?
+        <a routerLink="/auth/staff-signup">Request it</a>
+      </p>
+      <p class="auth-switch auth-switch--home">
+        <a routerLink="/auth/login">Back to sign in</a>
+      </p>
+    </app-animated-card>
+  </div>
+</section>

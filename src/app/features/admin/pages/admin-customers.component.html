@@ -167,6 +167,14 @@
         <div><dt>Holder</dt><dd>{{ card.holderName }}</dd></div>
         <div><dt>Status</dt><dd>{{ card.status }}</dd></div>
         <div><dt>Expiry</dt><dd>{{ card.expiryMonth }}/{{ card.expiryYear }}</dd></div>
+        <div>
+          <dt>Card number</dt>
+          <dd><app-secure-secret [value]="card.number" mode="card" variant="badge"></app-secure-secret></dd>
+        </div>
+        <div>
+          <dt>CVV</dt>
+          <dd><app-secure-secret [value]="card.cvv" mode="cvv" variant="badge"></app-secure-secret></dd>
+        </div>
       </dl>
     </section>
   </div>

@@ -1,0 +1,121 @@
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem 1.25rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-page--status {
+  background: linear-gradient(200deg, #eaf6fb 0%, #f2f8fc 52%, #e8f1f8 100%);
+}
+
+.auth-page__stage {
+  position: relative;
+  z-index: 1;
+  width: min(420px, 100%);
+  display: grid;
+  gap: 1.35rem;
+}
+
+.auth-page__mesh {
+  position: absolute;
+  pointer-events: none;
+  inset: -20%;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(106, 168, 232, 0.24), transparent 42%),
+    radial-gradient(circle at 82% 18%, rgba(95, 196, 176, 0.2), transparent 40%);
+  animation: auth-mesh 14s ease-in-out infinite;
+}
+
+.auth-page__copy {
+  text-align: center;
+  animation: auth-fade 0.7s var(--ease-out);
+}
+
+.auth-page__brand {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  color: var(--text);
+}
+
+.auth-page__copy h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.8vw, 1.55rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.auth-page__copy p {
+  margin: 0.45rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.auth-panel {
+  display: block;
+  animation: auth-fade 0.85s var(--ease-out);
+}
+
+:host ::ng-deep app-animated-card.auth-panel,
+:host ::ng-deep app-animated-card.auth-panel .card,
+:host ::ng-deep app-animated-card.auth-panel .card__face,
+:host ::ng-deep app-animated-card.auth-panel .scene {
+  perspective: none !important;
+  transform: none !important;
+  transform-style: flat !important;
+  animation: none !important;
+}
+
+.auth-switch {
+  margin: 1.1rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  text-align: center;
+}
+
+.auth-switch--home {
+  margin-top: 0.55rem;
+}
+
+.auth-switch a {
+  color: var(--accent-deep);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+@keyframes auth-mesh {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.78;
+  }
+}
+
+@keyframes auth-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-page__mesh {
+    animation: none;
+  }
+}

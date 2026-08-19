@@ -1,0 +1,39 @@
+<section class="page" *ngIf="!pageLoading; else shimmer">
+  <header class="admin-hero">
+    <div>
+      <p class="eyebrow">NovaBank</p>
+      <h1>Limit requests</h1>
+      <p class="lede">
+        Customers request higher deposit, withdraw, and transfer caps. Approve only after risk review.
+      </p>
+    </div>
+  </header>
+
+  <div class="request-list" *ngIf="items.length; else empty">
+    <article class="request-card" *ngFor="let user of items">
+      <div class="request-card__copy">
+        <strong>{{ user.fullName }}</strong>
+        <p>{{ user.email }} · {{ user.pendingLimitRequest?.requestedAt | date: 'medium' }}</p>
+        <p class="muted">
+          Deposit {{ user.pendingLimitRequest?.proposed?.depositDaily | currencyFormat }} · Withdraw
+          {{ user.pendingLimitRequest?.proposed?.withdrawDaily | currencyFormat }} · Transfer
+          {{ user.pendingLimitRequest?.proposed?.transferDaily | currencyFormat }} ·
+          {{ user.pendingLimitRequest?.proposed?.transferCountDaily }} transfers/day
+        </p>
+        <span class="pill" data-status="under_review">pending</span>
+      </div>
+      <div class="request-card__actions">
+        <button type="button" class="btn btn--ghost btn--compact" (click)="reject(user)">Reject</button>
+        <button type="button" class="btn btn--primary btn--compact" (click)="approve(user)">Approve</button>
+      </div>
+    </article>
+  </div>
+
+  <ng-template #empty>
+    <p class="hint">No pending daily-limit requests.</p>
+  </ng-template>
+</section>
+
+<ng-template #shimmer>
+  <app-shimmer variant="admin-requests"></app-shimmer>
+</ng-template>

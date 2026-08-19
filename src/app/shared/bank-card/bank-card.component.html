@@ -1,11 +1,26 @@
-<div class="bank-card" [class.is-flipped]="flipped" aria-label="NovaBank card preview">
+<div
+  class="bank-card"
+  [class.is-flipped]="flipped"
+  [attr.data-brand]="brandKey"
+  [attr.aria-label]="brandLabel + ' card preview'"
+>
   <div class="bank-card__inner">
     <div class="bank-card__face bank-card__face--front">
       <div class="bank-card__top">
-        <span class="bank-card__brand">{{ brand }}</span>
+        <span class="bank-card__brand">{{ brandLabel }}</span>
         <span class="bank-card__chip" aria-hidden="true"></span>
       </div>
-      <p class="bank-card__number">{{ displayNumber }}</p>
+      <div class="bank-card__number-row">
+        <app-secure-secret
+          *ngIf="secure; else plainNumber"
+          [value]="rawNumber"
+          mode="card"
+          variant="inline"
+        ></app-secure-secret>
+        <ng-template #plainNumber>
+          <p class="bank-card__number">{{ rawNumber | slice:0:16 }}</p>
+        </ng-template>
+      </div>
       <div class="bank-card__meta">
         <div>
           <span>Card holder</span>
@@ -16,14 +31,25 @@
           <strong>{{ displayExpiry }}</strong>
         </div>
       </div>
+      <div class="bank-card__network" aria-hidden="true">
+        <span class="bank-card__mark"></span>
+      </div>
     </div>
     <div class="bank-card__face bank-card__face--back">
       <div class="bank-card__stripe" aria-hidden="true"></div>
       <div class="bank-card__cvv-panel">
         <span>CVV</span>
-        <strong>{{ displayCvv }}</strong>
+        <app-secure-secret
+          *ngIf="secure; else plainCvv"
+          [value]="rawCvv"
+          mode="cvv"
+          variant="inline"
+        ></app-secure-secret>
+        <ng-template #plainCvv>
+          <strong>{{ rawCvv || '•••' }}</strong>
+        </ng-template>
       </div>
-      <p class="bank-card__back-note">Authorized signature panel · NovaBank secure card</p>
+      <p class="bank-card__back-note">Authorized signature panel · {{ brandLabel }} secure card</p>
     </div>
   </div>
 </div>
