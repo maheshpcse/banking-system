@@ -13,6 +13,7 @@ import {
   UserAvatar,
   UserSettings
 } from '../models/banking.models';
+import { ShellBootService } from './shell-boot.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +25,11 @@ export class AuthService {
 
   readonly user$ = this.userSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private shellBoot: ShellBootService
+  ) {}
 
   /** Creates an account without signing the user in. */
   register(payload: {
@@ -107,7 +112,19 @@ export class AuthService {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     this.userSubject.next(null);
+    this.shellBoot.complete();
     void this.router.navigateByUrl('/');
+  }
+
+  /** True when the user has chosen a transaction currency (required before money actions). */
+  hasCurrencyConfigured(user: User | null | undefined = this.currentUser): boolean {
+    const code = String(user?.settings?.currency || '').trim().toUpperCase();
+    return !!code && code !== 'NONE';
+  }
+
+  preferredCurrency(user: User | null | undefined = this.currentUser): string {
+    const code = String(user?.settings?.currency || '').trim().toUpperCase();
+    return code && code !== 'NONE' ? code : 'USD';
   }
 
   getToken(): string | null {

@@ -36,6 +36,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return !!this.auth.currentUser?.isSuperAdmin;
   }
 
+  get isDarkMode(): boolean {
+    return this.auth.currentUser?.settings?.colorMode === 'dark';
+  }
+
   get homeLink(): string {
     if (this.isAdmin) {
       return '/admin';
@@ -51,6 +55,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.unreadCount = this.notifications.unreadCount;
     });
     this.unreadCount = this.notifications.unreadCount;
+    this.applyColorMode(this.isDarkMode ? 'dark' : 'light');
   }
 
   ngOnDestroy(): void {
@@ -71,8 +76,35 @@ export class NavbarComponent implements OnInit, OnDestroy {
     document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }
 
+  toggleColorMode(): void {
+    const next = this.isDarkMode ? 'light' : 'dark';
+    this.applyColorMode(next);
+    const current = this.auth.currentUser?.settings;
+    this.auth
+      .updateProfile({
+        settings: {
+          emailAlerts: current?.emailAlerts !== false,
+          hideBalance: !!current?.hideBalance,
+          compactLedger: !!current?.compactLedger,
+          marketingTips: !!current?.marketingTips,
+          theme: current?.theme || 'daylight',
+          fontScale: current?.fontScale || 'comfortable',
+          currency: current?.currency || null,
+          colorMode: next
+        }
+      })
+      .subscribe({ error: () => undefined });
+  }
+
   logout(): void {
     this.closeMenu();
     this.auth.logout();
+  }
+
+  private applyColorMode(mode: 'light' | 'dark'): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    document.documentElement.dataset['nbMode'] = mode;
   }
 }

@@ -50,6 +50,7 @@ export interface AdminAnalyticsDailyRow {
 
 export interface AdminAnalytics {
   customers: AdminAnalyticsCustomers;
+  staff?: { managers: number; admins: number; pending: number };
   volumeByType: AdminAnalyticsVolumeRow[];
   dailyFlow: AdminAnalyticsDailyRow[];
 }
@@ -87,8 +88,14 @@ export class AdminService {
     return this.paginationSubject.value;
   }
 
-  refreshCustomers(page = 1, limit = 5): Observable<AdminCustomersPage> {
-    const params = new HttpParams().set('page', String(page)).set('limit', String(limit));
+  refreshCustomers(page = 1, limit = 5, opts?: { scope?: 'all' | 'customers'; role?: string }): Observable<AdminCustomersPage> {
+    let params = new HttpParams().set('page', String(page)).set('limit', String(limit));
+    if (opts?.scope === 'all') {
+      params = params.set('scope', 'all');
+    }
+    if (opts?.role) {
+      params = params.set('role', opts.role);
+    }
     return this.http
       .get<AdminCustomersPage>(`${environment.apiUrl}/admin/customers`, { params })
       .pipe(
@@ -101,6 +108,22 @@ export class AdminService {
           this.paginationSubject.next(res.pagination);
         })
       );
+  }
+
+  getCustomerTransactions(
+    userId: string,
+    opts?: { page?: number; limit?: number; type?: string }
+  ): Observable<{ items: import('../models/banking.models').Transaction[]; pagination: AdminPagination }> {
+    let params = new HttpParams()
+      .set('page', String(opts?.page || 1))
+      .set('limit', String(opts?.limit || 20));
+    if (opts?.type) {
+      params = params.set('type', opts.type);
+    }
+    return this.http.get<{ items: import('../models/banking.models').Transaction[]; pagination: AdminPagination }>(
+      `${environment.apiUrl}/admin/customers/${userId}/transactions`,
+      { params }
+    );
   }
 
   getCustomer(userId: string): Observable<User> {
@@ -169,12 +192,18 @@ export class AdminService {
     return this.staffPendingSubject.value;
   }
 
-  /** Super Admin only — backend enforces requireSuperAdmin */
-  listStaffPending(): Observable<User[]> {
-    return this.http.get<{ items: User[] }>(`${environment.apiUrl}/admin/staff-pending`).pipe(
+  /** Super Admin — full staff directory (keeps activated users) */
+  listStaff(status: 'all' | 'pending_approval' | 'active' | 'rejected' = 'all'): Observable<User[]> {
+    const params = new HttpParams().set('status', status);
+    return this.http.get<{ items: User[] }>(`${environment.apiUrl}/admin/staff`, { params }).pipe(
       map((res) => res.items || []),
       tap((items) => this.staffPendingSubject.next(items))
     );
+  }
+
+  /** @deprecated prefer listStaff — kept for compatibility */
+  listStaffPending(): Observable<User[]> {
+    return this.listStaff('pending_approval');
   }
 
   async approveStaff(userId: string): Promise<User | null> {
@@ -184,7 +213,7 @@ export class AdminService {
         {}
       )
     );
-    await firstValueFrom(this.listStaffPending());
+    await firstValueFrom(this.listStaff('all'));
     return res.user || null;
   }
 
@@ -195,7 +224,7 @@ export class AdminService {
         {}
       )
     );
-    await firstValueFrom(this.listStaffPending());
+    await firstValueFrom(this.listStaff('all'));
     return res.user || null;
   }
 

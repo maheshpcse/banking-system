@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ShellBootService } from '../../core/services/shell-boot.service';
 
 @Component({
   selector: 'app-manager-shell',
@@ -18,4 +19,11 @@ import { Component } from '@angular/core';
     `
   ]
 })
-export class ManagerShellComponent {}
+export class ManagerShellComponent implements OnInit {
+  constructor(private readonly shellBoot: ShellBootService) {}
+
+  ngOnInit(): void {
+    // Mirror admin shell — login begins boot; without complete() the global shimmer never clears.
+    this.shellBoot.complete();
+  }
+}

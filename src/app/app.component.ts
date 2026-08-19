@@ -56,7 +56,15 @@ export class AppComponent implements OnInit, OnDestroy {
     );
 
     this.subs.add(
-      this.auth.user$.subscribe(() => this.syncChrome(this.router.url))
+      this.auth.user$.subscribe((user) => {
+        this.syncChrome(this.router.url);
+        if (user && typeof document !== 'undefined') {
+          document.documentElement.dataset['nbTheme'] = user.settings?.theme || 'daylight';
+          document.documentElement.dataset['nbFont'] = user.settings?.fontScale || 'comfortable';
+          document.documentElement.dataset['nbMode'] =
+            user.settings?.colorMode === 'dark' ? 'dark' : 'light';
+        }
+      })
     );
 
     this.syncChrome(this.router.url);

@@ -3,6 +3,9 @@ import { Subscription } from 'rxjs';
 import { AdminRequestRow, AdminService } from '../../../core/services/admin.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { formatStatusLabel } from '../../../core/utils/status-label';
+
+type RequestFilter = 'all' | 'under_review' | 'active' | 'rejected' | 'blocked' | 'deactivated';
 
 @Component({
   selector: 'app-admin-requests',
@@ -12,9 +15,29 @@ import { withShimmerDelay } from '../../../core/utils/shimmer';
 export class AdminRequestsComponent implements OnInit, OnDestroy {
   requests: AdminRequestRow[] = [];
   pageLoading = true;
+  statusFilter: RequestFilter = 'under_review';
+  readonly filters: { id: RequestFilter; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'under_review', label: 'Under Review' },
+    { id: 'active', label: 'Active' },
+    { id: 'rejected', label: 'Rejected' },
+    { id: 'blocked', label: 'Blocked' },
+    { id: 'deactivated', label: 'Deactivated' }
+  ];
+  readonly formatStatus = formatStatusLabel;
   private sub?: Subscription;
 
   constructor(private readonly admin: AdminService, private readonly alerts: AlertService) {}
+
+  get filtered(): AdminRequestRow[] {
+    if (this.statusFilter === 'all') {
+      return this.requests;
+    }
+    if (this.statusFilter === 'active') {
+      return this.requests.filter((r) => r.status === 'active' || r.status === 'approved');
+    }
+    return this.requests.filter((r) => r.status === this.statusFilter);
+  }
 
   ngOnInit(): void {
     this.sub = this.admin.requests$.subscribe((rows) => (this.requests = rows));
@@ -31,6 +54,10 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+  }
+
+  setFilter(id: RequestFilter): void {
+    this.statusFilter = id;
   }
 
   async approve(row: AdminRequestRow): Promise<void> {

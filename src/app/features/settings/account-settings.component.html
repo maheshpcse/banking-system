@@ -559,17 +559,36 @@
             <input type="checkbox" formControlName="marketingTips" />
             <span>Occasional product tips from NovaBank</span>
           </label>
+
+          <p class="section-label">Transaction currency</p>
+          <p class="form__hint" *ngIf="!prefsForm.value.currency">
+            Required before deposits, withdrawals, and transfers. No approval needed.
+          </p>
           <label>
-            <span>Theme</span>
-            <select formControlName="theme">
-              <option value="daylight">Daylight</option>
-              <option value="midnight">Midnight</option>
-              <option value="sand">Sand</option>
-              <option value="ocean">Ocean</option>
-              <option value="graphite">Graphite</option>
-              <option value="orchid">Orchid</option>
+            <span>Currency</span>
+            <select formControlName="currency">
+              <option value="" disabled>Select currency</option>
+              <option *ngFor="let code of currencies" [value]="code">{{ code }}</option>
             </select>
           </label>
+
+          <p class="section-label">Theme</p>
+          <div class="theme-cards" role="listbox" aria-label="Theme cards">
+            <button
+              type="button"
+              class="theme-card"
+              *ngFor="let card of themeCards"
+              [class.is-active]="prefsForm.value.theme === card.id"
+              (click)="selectTheme(card.id)"
+              [attr.aria-selected]="prefsForm.value.theme === card.id"
+            >
+              <span class="theme-card__swatches" aria-hidden="true">
+                <i *ngFor="let color of card.swatch" [style.background]="color"></i>
+              </span>
+              <strong>{{ card.label }}</strong>
+            </button>
+          </div>
+
           <label>
             <span>Font size</span>
             <select formControlName="fontScale">

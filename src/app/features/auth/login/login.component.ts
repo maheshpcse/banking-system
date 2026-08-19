@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -12,7 +13,7 @@ import { fieldError } from '../../../core/utils/form-errors';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit, OnDestroy {
   loading = false;
   showPassword = false;
   formError = '';
@@ -22,6 +23,7 @@ export class LoginComponent {
   });
 
   readonly fieldError = fieldError;
+  private formSub?: Subscription;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -32,6 +34,18 @@ export class LoginComponent {
     private readonly notifications: NotificationService
   ) {}
 
+  ngOnInit(): void {
+    this.formSub = this.form.valueChanges.subscribe(() => {
+      if (this.formError) {
+        this.formError = '';
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.formSub?.unsubscribe();
+  }
+
   submit(): void {
     if (this.form.invalid || this.loading) {
       this.form.markAllAsTouched();
@@ -40,13 +54,13 @@ export class LoginComponent {
 
     this.loading = true;
     this.formError = '';
-    this.auth.login(this.form.getRawValue() as { identifier: string; password: string }).subscribe({
+    const payload = this.form.getRawValue() as { identifier: string; password: string };
+    this.auth.login(payload).subscribe({
       next: () => {
         this.notifications.refresh().subscribe();
         const role = this.auth.currentUser?.role || 'customer';
         const dest =
           role === 'admin' ? '/admin' : role === 'manager' ? '/manager' : '/dashboard';
-        // Start shell boot before navigation so navbar + first page shimmer appear together.
         this.shellBoot.begin();
         this.notifications.startRealtime();
         void this.router.navigateByUrl(dest).then((ok) => {
@@ -58,12 +72,22 @@ export class LoginComponent {
           }
         });
       },
-      error: (err) => {
+      error: async (err) => {
         this.loading = false;
         const code = err?.error?.code;
         const message = err?.error?.message || 'Unable to sign in.';
         if (code === 'STAFF_PENDING') {
-          void this.alerts.info(message, 'Verification in progress');
+          const identifier = encodeURIComponent(String(payload.identifier || '').trim());
+          const goStatus = await this.alerts.infoWithAction({
+            title: 'Verification in progress',
+            text: message,
+            confirmText: 'Check status',
+            cancelText: 'Close',
+            actionHint: 'Already requested access? Check status'
+          });
+          if (goStatus) {
+            void this.router.navigateByUrl(`/auth/staff-status?identifier=${identifier}`);
+          }
           return;
         }
         if (code === 'STAFF_REJECTED') {

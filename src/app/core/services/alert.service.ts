@@ -122,6 +122,35 @@ export class AlertService {
     });
   }
 
+  /** Info modal with a secondary navigation action (e.g. Check status). */
+  async infoWithAction(options: {
+    title?: string;
+    text?: string;
+    confirmText?: string;
+    cancelText?: string;
+    actionHint?: string;
+  }): Promise<boolean> {
+    const result = await Swal.fire({
+      icon: 'info',
+      title: options.title || ALERT_TITLES.info,
+      html: `
+        <p class="nb-alert__text">${options.text || ''}</p>
+        ${
+          options.actionHint
+            ? `<p class="nb-alert__hint" style="margin:0.85rem 0 0;color:#5f7a8c;font-size:0.92rem;">${options.actionHint}</p>`
+            : ''
+        }
+      `,
+      showCancelButton: true,
+      confirmButtonText: options.confirmText || 'Continue',
+      cancelButtonText: options.cancelText || 'Close',
+      reverseButtons: true,
+      ...this.theme,
+      customClass: this.alertClasses
+    });
+    return !!result.isConfirmed;
+  }
+
   confirm(options: {
     text?: string;
     confirmText?: string;

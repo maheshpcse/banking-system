@@ -7,13 +7,24 @@
     </div>
   </header>
 
-  <div class="request-list" *ngIf="requests.length; else empty">
-    <article class="request-card" *ngFor="let row of requests">
+  <div class="filters">
+    <button
+      type="button"
+      *ngFor="let kind of filters"
+      [class.is-active]="statusFilter === kind.id"
+      (click)="setFilter(kind.id)"
+    >
+      {{ kind.label }}
+    </button>
+  </div>
+
+  <div class="request-list" *ngIf="filtered.length; else empty">
+    <article class="request-card" *ngFor="let row of filtered">
       <div class="request-card__copy">
         <strong>{{ row.fullName }}</strong>
         <p>{{ row.email }} · {{ row.submittedAt | date: 'medium' }}</p>
         <p class="muted">{{ row.address?.line1 }}, {{ row.address?.city }} {{ row.address?.postalCode }}</p>
-        <span class="pill" [attr.data-status]="row.status">{{ row.status }}</span>
+        <span class="pill" [attr.data-status]="row.status">{{ formatStatus(row.status) }}</span>
       </div>
       <div class="request-card__actions" *ngIf="row.status === 'under_review'">
         <button type="button" class="btn btn--ghost btn--compact" (click)="reject(row)">Reject</button>
@@ -24,7 +35,7 @@
 </section>
 
 <ng-template #empty>
-  <p class="hint">No opening requests yet. Customers submit from Account → Card info.</p>
+  <p class="hint">No opening requests for this filter.</p>
 </ng-template>
 
 <ng-template #requestsShimmer>
