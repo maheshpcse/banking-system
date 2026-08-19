@@ -2,6 +2,9 @@
 
 NovaBank uses role-based access control (`customer` | `manager` | `admin`).
 
+**Canonical API:** [`maheshpcse/banking-system-server`](https://github.com/maheshpcse/banking-system-server)  
+(`server-integration/` in this UI repo is a reference mirror only.)
+
 ## How it works
 
 - Public **Sign up** (`/auth/register`) always creates a **`customer`**.
@@ -12,12 +15,16 @@ NovaBank uses role-based access control (`customer` | `manager` | `admin`).
   - Customers → `/dashboard`
   - `manager` → `/manager`
   - `admin` → `/admin`
+  - Super Admin may also open `/manager` (including Limits) as an override
 
 ## Creating the Super Admin (seed only)
 
 ```bash
 # From banking-system-server (MONGODB_URI required)
-ADMIN_ROLE=admin node scripts/seed-admin.js
+npm run seed:admin
+# Equivalent:
+#   node src/config/scripts/seed-admin.js
+#   node scripts/seed-admin.js
 ```
 
 | Field | Value |
@@ -37,14 +44,20 @@ Do **not** use public signup for the first admin.
 4. Super Admin opens **Staff** in the admin navbar → Activate or Decline.
 5. Applicant can poll `/auth/staff-status` for polished status messaging (≈24h verification copy).
 
-## Daily limits
+## Card controls & secrets
+
+- Customer Account → Card controls: freeze, online, contactless, international, ATM.
+- API `moneyGate` enforces **all** flags by channel (`online` / `atm` / `contactless` / `international`).
+- PAN/CVV are **encrypted at rest** (AES-256-GCM); UI reveal is masking + controlled decrypt for authorized views — not “encryption by hiding.”
+- Unique `card.comboHash` index prevents duplicate Card Number + CVV races.
+
+## 24-hour limits
 
 - Customers request deposit / withdraw / transfer caps under Account → **Limits**.
-- Manager reviews on `/manager/limits`.
-- Money APIs enforce card + account status/expiry and daily caps via `banking-rules`.
+- Usage is a **rolling 24-hour** window (not calendar midnight).
+- Manager reviews on `/manager/limits` (Super Admin override allowed).
+- Money APIs enforce card + account status/expiry, controls, and caps via `banking-rules`.
 
 ## Manager portal
 
 See **`docs/manager-portal-roadmap.md`** for desk charts, Billing bridge, and workflow phases.
-
-Copy `server-integration` into `banking-system-server` and redeploy the API.

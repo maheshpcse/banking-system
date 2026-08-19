@@ -86,6 +86,69 @@ export class AccountLifecycleService {
     return status === 'active' || status === 'approved';
   }
 
+  /**
+   * Client-side mirror of server moneyGate. Server remains source of truth.
+   * Channels: online (deposit/transfer), atm (withdraw), contactless, international.
+   */
+  moneyBlockReason(
+    user: User | null | undefined,
+    channel: 'online' | 'atm' | 'contactless' | 'international' = 'online'
+  ): string | null {
+    if (!this.canMoveMoney(user)) {
+      return 'Account number is required before this action. Complete account opening first.';
+    }
+    if (!this.isExpiryCurrentOrFuture(user?.card?.accountExpiryMonth, user?.card?.accountExpiryYear)) {
+      return 'Account number validity has expired. Update Card info and wait for review.';
+    }
+    if (!user?.card?.number || !user?.card?.cvv) {
+      return 'Card details are required before money movement.';
+    }
+    if (!this.isExpiryCurrentOrFuture(user.card.expiryMonth, user.card.expiryYear)) {
+      return 'Card expiry is in the past. Update your card details.';
+    }
+    const cardStatus = user.card.status || 'pending';
+    const controls = user.card.controls || {
+      frozen: false,
+      onlinePayments: true,
+      contactless: true,
+      international: false,
+      atmWithdrawals: true
+    };
+    if (cardStatus === 'blocked' || cardStatus === 'frozen' || controls.frozen) {
+      return 'Your ATM card is frozen or blocked. Unfreeze it from Account → Card controls.';
+    }
+    if (cardStatus !== 'active') {
+      return 'Your ATM card must be active before money movement. Complete opening or unfreeze the card.';
+    }
+    if (channel === 'atm') {
+      if (controls.atmWithdrawals === false) {
+        return 'ATM withdrawals are disabled on your card controls.';
+      }
+    } else if (channel === 'contactless') {
+      if (controls.contactless === false) {
+        return 'Contactless payments are disabled on your card controls.';
+      }
+    } else if (channel === 'international') {
+      if (!controls.international) {
+        return 'International transactions are disabled on your card controls.';
+      }
+    } else if (controls.onlinePayments === false) {
+      return 'Online payments are disabled on your card controls. Enable them under Account → Card controls.';
+    }
+    return null;
+  }
+
+  isExpiryCurrentOrFuture(month?: string | null, year?: string | null): boolean {
+    const mm = String(month || '');
+    const yy = String(year || '');
+    if (!/^(0[1-9]|1[0-2])$/.test(mm) || !/^[0-9]{2}$/.test(yy)) {
+      return false;
+    }
+    const now = new Date();
+    const expEnd = new Date(2000 + Number(yy), Number(mm), 0, 23, 59, 59, 999);
+    return expEnd.getTime() >= now.getTime();
+  }
+
   applicationFor(user: User | null): AccountApplication | null {
     if (!user) {
       return null;

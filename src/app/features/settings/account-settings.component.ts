@@ -175,7 +175,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       holderName: ['', [Validators.required, Validators.minLength(2)]],
       brand: ['visa' as CardBrand, [Validators.required]],
       accountType: ['personal' as CardAccountType, [Validators.required]],
-      cardNumber: ['', [Validators.required, Validators.minLength(16), Validators.maxLength(19)]],
+      cardNumber: ['', [Validators.required, Validators.minLength(16), Validators.maxLength(16)]],
       expiryMonth: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])$/)]],
       expiryYear: ['', [Validators.required, Validators.pattern(/^[0-9]{2}$/)]],
       cvv: ['', [Validators.required, Validators.pattern(/^[0-9]{3,4}$/)]],
@@ -357,9 +357,9 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
 
   onCardNumberInput(): void {
     const ctrl = this.bankingForm.controls.cardNumber;
+    // Digits only — input is password-masked; spaces are not shown while typing
     const digits = String(ctrl.value || '').replace(/\D/g, '').slice(0, 16);
-    const grouped = digits.replace(/(.{4})/g, '$1 ').trim();
-    ctrl.setValue(grouped, { emitEvent: false });
+    ctrl.setValue(digits, { emitEvent: false });
     this.cardFlipped = false;
   }
 
@@ -390,7 +390,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       cvv += String(Math.floor(Math.random() * 10));
     }
     this.bankingForm.patchValue({
-      cardNumber: digits.replace(/(.{4})/g, '$1 ').trim(),
+      cardNumber: digits,
       expiryMonth: expMonth,
       expiryYear: expYear,
       cvv,
@@ -551,7 +551,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       holderName: card?.holderName || this.user?.fullName || '',
       brand: (card?.brand as CardBrand) || 'visa',
       accountType: (card?.accountType as CardAccountType) || 'personal',
-      cardNumber: card?.number ? String(card.number).replace(/(\d{4})(?=\d)/g, '$1 ').trim() : '',
+      cardNumber: card?.number ? String(card.number).replace(/\D/g, '').slice(0, 16) : '',
       expiryMonth: card?.expiryMonth || '',
       expiryYear: card?.expiryYear || '',
       cvv: card?.cvv || '',

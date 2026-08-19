@@ -94,8 +94,10 @@ export class OverviewComponent implements OnInit {
   }
 
   async submitAction(): Promise<void> {
-    if (!this.canMoveMoney) {
-      await this.alerts.warning('Account number is required before deposit or withdraw.');
+    const channel = this.mode === 'withdraw' ? 'atm' : 'online';
+    const gate = this.lifecycle.moneyBlockReason(this.summary?.user || this.auth.currentUser, channel);
+    if (gate) {
+      await this.alerts.warning(gate);
       return;
     }
     if (this.actionForm.invalid) {

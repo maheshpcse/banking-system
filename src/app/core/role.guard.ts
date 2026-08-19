@@ -13,15 +13,19 @@ export class RoleGuard implements CanActivate {
     }
     const role = this.auth.currentUser?.role || 'customer';
     const allowed: UserRole[] = (route.data?.['roles'] as UserRole[]) || ['admin', 'manager'];
-    if (!allowed.includes(role)) {
-      if (role === 'manager') {
-        return this.router.parseUrl('/manager');
-      }
-      if (role === 'admin') {
-        return this.router.parseUrl('/admin');
-      }
-      return this.router.parseUrl('/dashboard');
+    const allowSuperAdmin = !!route.data?.['allowSuperAdmin'];
+    if (allowed.includes(role)) {
+      return true;
     }
-    return true;
+    if (allowSuperAdmin && this.auth.currentUser?.isSuperAdmin) {
+      return true;
+    }
+    if (role === 'manager') {
+      return this.router.parseUrl('/manager');
+    }
+    if (role === 'admin') {
+      return this.router.parseUrl('/admin');
+    }
+    return this.router.parseUrl('/dashboard');
   }
 }
