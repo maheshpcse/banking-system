@@ -2,14 +2,25 @@
   <header class="admin-hero">
     <div>
       <p class="eyebrow">NovaBank</p>
-      <h1>Staff approvals</h1>
+      <h1>Staff directory</h1>
       <p class="lede">
-        Super Admin only — activate or decline manager and admin registrations before they can sign in.
+        Super Admin only — review manager and admin registrations, then activate or decline access.
       </p>
     </div>
   </header>
 
-  <div class="table-wrap" *ngIf="items.length; else empty">
+  <div class="filters">
+    <button
+      type="button"
+      *ngFor="let kind of filters"
+      [class.is-active]="statusFilter === kind.id"
+      (click)="setFilter(kind.id)"
+    >
+      {{ kind.label }}
+    </button>
+  </div>
+
+  <div class="table-wrap" *ngIf="filtered.length; else empty">
     <table class="data-table">
       <thead>
         <tr>
@@ -17,24 +28,31 @@
           <th>Username</th>
           <th>Email</th>
           <th>Role</th>
+          <th>Status</th>
           <th class="actions-col">Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let user of items">
+        <tr *ngFor="let user of filtered">
           <td>
             <strong>{{ user.fullName }}</strong>
           </td>
           <td>{{ user.username || '—' }}</td>
           <td>{{ user.email }}</td>
           <td>
-            <span class="pill" [attr.data-status]="user.role">{{ user.role }}</span>
+            <span class="pill" [attr.data-status]="user.role">{{ formatStatus(user.role) }}</span>
+          </td>
+          <td>
+            <span class="pill" [attr.data-status]="user.staffStatus || 'active'">
+              {{ formatStatus(user.staffStatus || 'active') }}
+            </span>
           </td>
           <td class="actions-col">
-            <div class="request-card__actions">
+            <div class="request-card__actions" *ngIf="(user.staffStatus || 'active') === 'pending_approval'">
               <button type="button" class="btn btn--ghost btn--compact" (click)="reject(user)">Decline</button>
               <button type="button" class="btn btn--primary btn--compact" (click)="approve(user)">Activate</button>
             </div>
+            <span class="muted" *ngIf="(user.staffStatus || 'active') !== 'pending_approval'">—</span>
           </td>
         </tr>
       </tbody>
@@ -42,7 +60,7 @@
   </div>
 
   <ng-template #empty>
-    <p class="hint">No pending manager or admin registrations.</p>
+    <p class="hint">No staff users for this filter.</p>
   </ng-template>
 </section>
 

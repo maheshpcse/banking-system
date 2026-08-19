@@ -49,6 +49,15 @@
         Alerts
         <span class="nav__badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
       </a>
+      <button
+        class="nav__mode"
+        type="button"
+        (click)="toggleColorMode()"
+        [attr.aria-label]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+        [title]="isDarkMode ? 'Light mode' : 'Dark mode'"
+      >
+        {{ isDarkMode ? 'Light' : 'Dark' }}
+      </button>
       <button class="nav__logout" type="button" (click)="logout()">Sign out</button>
     </nav>
   </div>

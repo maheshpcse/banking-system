@@ -2,16 +2,28 @@
   <header class="admin-hero">
     <div>
       <p class="eyebrow">NovaBank</p>
-      <h1>Customers</h1>
-      <p class="lede">Activate, block, deactivate, or remove accounts.</p>
+      <h1>{{ pageTitle }}</h1>
+      <p class="lede">{{ pageLede }}</p>
     </div>
   </header>
+
+  <div class="filters" *ngIf="isSuperAdmin">
+    <button
+      type="button"
+      *ngFor="let kind of roleFilters"
+      [class.is-active]="roleFilter === kind.id"
+      (click)="setRoleFilter(kind.id)"
+    >
+      {{ kind.label }}
+    </button>
+  </div>
 
   <div class="table-wrap" [class.is-menu-open]="!!menuOpenId" *ngIf="users.length; else emptyCustomers">
     <table class="data-table">
       <thead>
         <tr>
-          <th>Customer</th>
+          <th>User</th>
+          <th>Role</th>
           <th>Account</th>
           <th>Status</th>
           <th>Balance</th>
@@ -25,6 +37,9 @@
             <span>{{ user.email }}</span>
           </td>
           <td>
+            <span class="pill" [attr.data-status]="user.role || 'customer'">{{ roleLabel(user.role) }}</span>
+          </td>
+          <td>
             <app-account-number
               variant="inline"
               [value]="user.accountNumber"
@@ -33,7 +48,7 @@
           </td>
           <td>
             <span class="pill" [attr.data-status]="user.accountStatus">
-              {{ user.accountStatus || 'pending' }}
+              {{ formatStatus(user.accountStatus || 'pending') }}
             </span>
           </td>
           <td>{{ user.balance | currencyFormat }}</td>
@@ -47,7 +62,7 @@
                 <span>View</span>
               </button>
 
-              <div class="menu" [class.is-open]="menuOpenId === user.id">
+              <div class="menu" [class.is-open]="menuOpenId === user.id" *ngIf="(user.role || 'customer') === 'customer'">
                 <button
                   type="button"
                   class="icon-btn icon-btn--more"
@@ -62,7 +77,13 @@
                   </svg>
                 </button>
                 <div class="menu__panel" *ngIf="menuOpenId === user.id">
-                  <button type="button" (click)="setStatus(user, 'active')">Activate</button>
+                  <button
+                    type="button"
+                    *ngIf="user.accountStatus !== 'active' && user.accountStatus !== 'approved'"
+                    (click)="setStatus(user, 'active')"
+                  >
+                    Activate
+                  </button>
                   <button type="button" (click)="setStatus(user, 'blocked')">Block</button>
                   <button type="button" (click)="setStatus(user, 'deactivated')">Deactivate</button>
                   <button type="button" class="is-danger" (click)="remove(user)">Delete</button>
@@ -92,7 +113,7 @@
 </section>
 
 <ng-template #emptyCustomers>
-  <p class="hint">No customers found.</p>
+  <p class="hint">No users found for this filter.</p>
 </ng-template>
 
 <ng-template #customersShimmer>
@@ -111,11 +132,11 @@
   [class.is-open]="drawerOpen"
   role="dialog"
   aria-modal="true"
-  aria-label="Customer profile"
+  aria-label="User profile"
 >
   <header class="drawer__head">
     <div>
-      <p class="drawer__eyebrow">Customer profile</p>
+      <p class="drawer__eyebrow">{{ roleLabel(user.role) }} profile</p>
       <h2>{{ user.fullName }}</h2>
     </div>
     <button type="button" class="icon-btn icon-btn--close" (click)="closeView()" aria-label="Close profile">
@@ -127,12 +148,12 @@
 
   <div class="drawer__body">
     <section class="drawer__section">
-      <h3>Profile</h3>
+      <h3><app-nb-icon name="user"></app-nb-icon><span>Profile</span></h3>
       <dl class="meta-grid">
         <div><dt>Email</dt><dd>{{ user.email }}</dd></div>
         <div><dt>Username</dt><dd>{{ user.username || '—' }}</dd></div>
-        <div><dt>Role</dt><dd>{{ user.role || 'customer' }}</dd></div>
-        <div><dt>Status</dt><dd>{{ user.accountStatus || 'pending' }}</dd></div>
+        <div><dt>Role</dt><dd>{{ roleLabel(user.role) }}</dd></div>
+        <div><dt>Status</dt><dd>{{ formatStatus(user.accountStatus || 'pending') }}</dd></div>
         <div><dt>Balance</dt><dd>{{ user.balance | currencyFormat }}</dd></div>
         <div>
           <dt>Account</dt>
@@ -147,25 +168,22 @@
       </dl>
     </section>
 
-    <section class="drawer__section">
-      <h3>Address</h3>
-      <ng-container *ngIf="user.address; else noAddress">
-        <p>{{ user.address.line1 }}</p>
-        <p *ngIf="user.address.line2">{{ user.address.line2 }}</p>
-        <p>
-          {{ user.address.city }}{{ user.address.state ? ', ' + user.address.state : '' }}
-          {{ user.address.postalCode }}
-        </p>
-        <p>{{ user.address.country }}</p>
-      </ng-container>
-      <ng-template #noAddress><p class="muted">No address on file.</p></ng-template>
+    <section class="drawer__section" *ngIf="user.address">
+      <h3><app-nb-icon name="shield"></app-nb-icon><span>Address</span></h3>
+      <p>{{ user.address.line1 }}</p>
+      <p *ngIf="user.address.line2">{{ user.address.line2 }}</p>
+      <p>
+        {{ user.address.city }}{{ user.address.state ? ', ' + user.address.state : '' }}
+        {{ user.address.postalCode }}
+      </p>
+      <p>{{ user.address.country }}</p>
     </section>
 
     <section class="drawer__section" *ngIf="user.card as card">
-      <h3>Card</h3>
+      <h3><app-nb-icon name="card"></app-nb-icon><span>Card</span></h3>
       <dl class="meta-grid">
         <div><dt>Holder</dt><dd>{{ card.holderName }}</dd></div>
-        <div><dt>Status</dt><dd>{{ card.status }}</dd></div>
+        <div><dt>Status</dt><dd>{{ formatStatus(card.status) }}</dd></div>
         <div><dt>Expiry</dt><dd>{{ card.expiryMonth }}/{{ card.expiryYear }}</dd></div>
         <div>
           <dt>Card number</dt>
@@ -176,6 +194,66 @@
           <dd><app-secure-secret [value]="card.cvv" mode="cvv" variant="badge"></app-secure-secret></dd>
         </div>
       </dl>
+    </section>
+
+    <section class="drawer__section" *ngIf="(user.role || 'customer') === 'customer'">
+      <h3><app-nb-icon name="chart"></app-nb-icon><span>Transactions</span></h3>
+      <div class="filters">
+        <button
+          type="button"
+          *ngFor="let kind of txFilters"
+          [class.is-active]="txFilter === kind.id"
+          (click)="setTxFilter(kind.id)"
+        >
+          {{ kind.label }}
+        </button>
+      </div>
+      <div class="tools" style="display:flex;gap:0.4rem;margin:0 0 0.85rem;flex-wrap:wrap;">
+        <button type="button" class="btn btn--ghost btn--compact" [class.is-active]="txView === 'timeline'" (click)="setTxView('timeline')">Timeline</button>
+        <button type="button" class="btn btn--ghost btn--compact" [class.is-active]="txView === 'chart'" (click)="setTxView('chart')">Chart</button>
+        <button type="button" class="btn btn--ghost btn--compact" [class.is-active]="txView === 'table'" (click)="setTxView('table')">Table</button>
+      </div>
+
+      <p class="muted" *ngIf="txLoading">Loading activity…</p>
+      <p class="muted" *ngIf="!txLoading && !txItems.length">No transactions for this filter.</p>
+
+      <div class="tx-chart" *ngIf="!txLoading && txView === 'chart' && txItems.length">
+        <div class="tx-chart__row" *ngFor="let bar of chartBars">
+          <span>{{ bar.label }}</span>
+          <div class="tx-chart__track"><span [style.width.%]="bar.pct"></span></div>
+          <strong>{{ bar.total | currencyFormat }}</strong>
+        </div>
+      </div>
+
+      <ul class="tx-timeline" *ngIf="!txLoading && txView === 'timeline' && txItems.length">
+        <li *ngFor="let tx of txItems">
+          <span class="tx-timeline__dot" [attr.data-type]="tx.type"></span>
+          <div>
+            <strong>{{ formatStatus(tx.type) }} · {{ tx.amount | currencyFormat }}</strong>
+            <p>{{ tx.description || '—' }}</p>
+            <time>{{ tx.createdAt | date: 'medium' }}</time>
+          </div>
+        </li>
+      </ul>
+
+      <div class="table-wrap" *ngIf="!txLoading && txView === 'table' && txItems.length">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>When</th>
+              <th>Type</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tx of txItems">
+              <td>{{ tx.createdAt | date: 'short' }}</td>
+              <td>{{ formatStatus(tx.type) }}</td>
+              <td>{{ tx.amount | currencyFormat }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
   </div>
 </aside>

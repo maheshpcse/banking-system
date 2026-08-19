@@ -161,8 +161,24 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     compactLedger: [false],
     marketingTips: [false],
     theme: ['daylight' as NonNullable<User['settings']>['theme']],
-    fontScale: ['comfortable' as NonNullable<User['settings']>['fontScale']]
+    fontScale: ['comfortable' as NonNullable<User['settings']>['fontScale']],
+    currency: ['' as string]
   });
+
+  readonly themeCards: { id: NonNullable<User['settings']>['theme']; label: string; swatch: string[] }[] = [
+    { id: 'daylight', label: 'Daylight', swatch: ['#eef7fb', '#5fc4b0', '#3b9fd8'] },
+    { id: 'midnight', label: 'Midnight', swatch: ['#0f1720', '#5fc4b0', '#6aa8e8'] },
+    { id: 'sand', label: 'Sand', swatch: ['#f6f1e8', '#d4a017', '#5fc4b0'] },
+    { id: 'ocean', label: 'Ocean', swatch: ['#eef7fb', '#38a0d2', '#5fc4b0'] },
+    { id: 'graphite', label: 'Graphite', swatch: ['#1b222b', '#94a3b8', '#5fc4b0'] },
+    { id: 'orchid', label: 'Orchid', swatch: ['#f8f2f8', '#ba78b4', '#5fc4b0'] },
+    { id: 'aurora', label: 'Aurora', swatch: ['#ecf8f4', '#34d399', '#60a5fa'] },
+    { id: 'forest', label: 'Forest', swatch: ['#edf6ef', '#2f7d4b', '#8fbc8f'] },
+    { id: 'ember', label: 'Ember', swatch: ['#fbf3ee', '#d97757', '#f59e0b'] },
+    { id: 'mist', label: 'Mist', swatch: ['#f3f6fb', '#64748b', '#93c5fd'] }
+  ];
+
+  readonly currencies = ['USD', 'EUR', 'GBP', 'INR', 'AED', 'JPY', 'CAD', 'AUD'];
 
   bankingForm = this.fb.group(
     {
@@ -349,7 +365,8 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
           compactLedger: !!this.user?.settings?.compactLedger,
           marketingTips: !!this.user?.settings?.marketingTips,
           theme: this.user?.settings?.theme || 'daylight',
-          fontScale: this.user?.settings?.fontScale || 'comfortable'
+          fontScale: this.user?.settings?.fontScale || 'comfortable',
+          currency: this.user?.settings?.currency || ''
         });
         break;
     }
@@ -683,12 +700,17 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     });
   }
 
+  selectTheme(themeId: NonNullable<User['settings']>['theme']): void {
+    this.prefsForm.patchValue({ theme: themeId });
+  }
+
   savePrefs(): void {
     if (this.savingPrefs) {
       return;
     }
     this.savingPrefs = true;
     const raw = this.prefsForm.getRawValue();
+    const currency = String(raw.currency || '').trim().toUpperCase();
     withShimmerDelay(
       this.auth.updateProfile({
         settings: {
@@ -697,7 +719,8 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
           compactLedger: !!raw.compactLedger,
           marketingTips: !!raw.marketingTips,
           theme: (raw.theme || 'daylight') as NonNullable<User['settings']>['theme'],
-          fontScale: (raw.fontScale || 'comfortable') as NonNullable<User['settings']>['fontScale']
+          fontScale: (raw.fontScale || 'comfortable') as NonNullable<User['settings']>['fontScale'],
+          currency: (currency || null) as NonNullable<User['settings']>['currency'] | null
         }
       }),
       500
@@ -739,7 +762,8 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       compactLedger: !!normalized.settings?.compactLedger,
       marketingTips: !!normalized.settings?.marketingTips,
       theme: normalized.settings?.theme || 'daylight',
-      fontScale: normalized.settings?.fontScale || 'comfortable'
+      fontScale: normalized.settings?.fontScale || 'comfortable',
+      currency: normalized.settings?.currency || ''
     });
     this.imageFileName = normalized.avatar?.image ? 'Current profile photo' : '';
     this.applyAppearance(normalized);
@@ -755,5 +779,6 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     const root = document.documentElement;
     root.dataset['nbTheme'] = user.settings?.theme || 'daylight';
     root.dataset['nbFont'] = user.settings?.fontScale || 'comfortable';
+    root.dataset['nbMode'] = user.settings?.colorMode === 'dark' ? 'dark' : 'light';
   }
 }

@@ -22,8 +22,20 @@ export interface UserAvatar {
   image?: string | null;
 }
 
-export type UserTheme = 'daylight' | 'midnight' | 'sand' | 'ocean' | 'graphite' | 'orchid';
+export type UserTheme =
+  | 'daylight'
+  | 'midnight'
+  | 'sand'
+  | 'ocean'
+  | 'graphite'
+  | 'orchid'
+  | 'aurora'
+  | 'forest'
+  | 'ember'
+  | 'mist';
 export type UserFontScale = 'comfortable' | 'compact' | 'large' | 'editorial' | 'technical';
+export type UserColorMode = 'light' | 'dark';
+export type UserCurrency = 'USD' | 'EUR' | 'GBP' | 'INR' | 'AED' | 'JPY' | 'CAD' | 'AUD';
 
 export interface UserSettings {
   emailAlerts: boolean;
@@ -32,6 +44,9 @@ export interface UserSettings {
   marketingTips: boolean;
   theme?: UserTheme;
   fontScale?: UserFontScale;
+  colorMode?: UserColorMode;
+  /** null / missing = not configured; required before money actions */
+  currency?: UserCurrency | null;
 }
 
 export interface UserAddress {

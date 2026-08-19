@@ -1,9 +1,15 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { AccountStatus, User } from '../../../core/models/banking.models';
+import { AccountStatus, Transaction, User, UserRole } from '../../../core/models/banking.models';
 import { AdminPagination, AdminService } from '../../../core/services/admin.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { formatStatusLabel } from '../../../core/utils/status-label';
+
+type RoleFilter = 'all' | 'customer' | 'manager' | 'admin';
+type TxFilter = 'all' | 'deposit' | 'withdraw' | 'transfer_in' | 'transfer_out';
+type TxView = 'timeline' | 'chart' | 'table';
 
 @Component({
   selector: 'app-admin-customers',
@@ -17,15 +23,75 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   menuOpenId: string | null = null;
   viewing: User | null = null;
   drawerOpen = false;
+  roleFilter: RoleFilter = 'customer';
+  readonly roleFilters: { id: RoleFilter; label: string }[] = [
+    { id: 'all', label: 'All Roles' },
+    { id: 'customer', label: 'Customers' },
+    { id: 'manager', label: 'Managers' },
+    { id: 'admin', label: 'Admins' }
+  ];
+
+  txItems: Transaction[] = [];
+  txLoading = false;
+  txFilter: TxFilter = 'all';
+  txView: TxView = 'timeline';
+  readonly txFilters: { id: TxFilter; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'deposit', label: 'Deposits' },
+    { id: 'withdraw', label: 'Withdrawals' },
+    { id: 'transfer_out', label: 'Sent' },
+    { id: 'transfer_in', label: 'Received' }
+  ];
+
+  readonly formatStatus = formatStatusLabel;
   private drawerCloseTimer: ReturnType<typeof setTimeout> | null = null;
   private subUsers?: Subscription;
   private subPage?: Subscription;
 
-  constructor(private readonly admin: AdminService, private readonly alerts: AlertService) {}
+  constructor(
+    protected readonly admin: AdminService,
+    protected readonly alerts: AlertService,
+    protected readonly auth: AuthService
+  ) {}
+
+  get isSuperAdmin(): boolean {
+    return !!this.auth.currentUser?.isSuperAdmin;
+  }
+
+  get pageTitle(): string {
+    return this.isSuperAdmin ? 'Directory' : 'Customers';
+  }
+
+  get pageLede(): string {
+    return this.isSuperAdmin
+      ? 'View and control customers, managers, and admins across NovaBank.'
+      : 'Activate, block, deactivate, or remove customer accounts.';
+  }
+
+  get chartBars(): { label: string; total: number; pct: number }[] {
+    const buckets: Record<string, number> = {
+      deposit: 0,
+      withdraw: 0,
+      transfer_in: 0,
+      transfer_out: 0
+    };
+    this.txItems.forEach((tx) => {
+      buckets[tx.type] = (buckets[tx.type] || 0) + Number(tx.amount || 0);
+    });
+    const max = Math.max(1, ...Object.values(buckets));
+    return Object.entries(buckets).map(([label, total]) => ({
+      label: this.formatStatus(label),
+      total,
+      pct: Math.round((total / max) * 100)
+    }));
+  }
 
   ngOnInit(): void {
     this.subUsers = this.admin.users$.subscribe((users) => (this.users = users));
     this.subPage = this.admin.pagination$.subscribe((pagination) => (this.pagination = pagination));
+    if (this.isSuperAdmin) {
+      this.roleFilter = 'all';
+    }
     this.loadPage(1, true);
   }
 
@@ -49,13 +115,24 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     }
   }
 
+  setRoleFilter(id: RoleFilter): void {
+    this.roleFilter = id;
+    this.loadPage(1);
+  }
+
   loadPage(page: number, initial = false): void {
     if (initial) {
       this.pageLoading = true;
     }
+    const opts =
+      this.isSuperAdmin && this.roleFilter === 'all'
+        ? { scope: 'all' as const }
+        : this.isSuperAdmin
+          ? { role: this.roleFilter }
+          : undefined;
     const request$ = initial
-      ? withShimmerDelay(this.admin.refreshCustomers(page, 5), 500)
-      : this.admin.refreshCustomers(page, 5);
+      ? withShimmerDelay(this.admin.refreshCustomers(page, 5, opts), 500)
+      : this.admin.refreshCustomers(page, 5, opts);
 
     request$.subscribe({
       next: () => {
@@ -64,7 +141,7 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
       },
       error: async (err) => {
         this.pageLoading = false;
-        await this.alerts.error(err?.error?.message || 'Unable to load customers');
+        await this.alerts.error(err?.error?.message || 'Unable to load directory');
       }
     });
   }
@@ -86,9 +163,38 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
       this.viewing = user;
     }
     this.drawerOpen = false;
+    this.txFilter = 'all';
+    this.txView = 'timeline';
+    this.loadTransactions(user.id);
     requestAnimationFrame(() => {
       this.drawerOpen = true;
     });
+  }
+
+  loadTransactions(userId: string): void {
+    this.txLoading = true;
+    const type = this.txFilter === 'all' ? undefined : this.txFilter;
+    this.admin.getCustomerTransactions(userId, { limit: 30, type }).subscribe({
+      next: (res) => {
+        this.txItems = res.items || [];
+        this.txLoading = false;
+      },
+      error: () => {
+        this.txItems = [];
+        this.txLoading = false;
+      }
+    });
+  }
+
+  setTxFilter(id: TxFilter): void {
+    this.txFilter = id;
+    if (this.viewing) {
+      this.loadTransactions(this.viewing.id);
+    }
+  }
+
+  setTxView(view: TxView): void {
+    this.txView = view;
   }
 
   closeView(): void {
@@ -98,6 +204,7 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     }
     this.drawerCloseTimer = setTimeout(() => {
       this.viewing = null;
+      this.txItems = [];
       this.drawerCloseTimer = null;
     }, 280);
   }
@@ -105,11 +212,11 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   async setStatus(user: User, status: AccountStatus): Promise<void> {
     this.menuOpenId = null;
     await this.alerts.confirmAction({
-      text: `Set ${user.fullName} to ${status}?`,
+      text: `Set ${user.fullName} to ${this.formatStatus(status)}?`,
       confirmText: 'Update',
       loadingText: 'Updating status…',
       action: async () => this.admin.setStatus(user.id, status),
-      successMessage: () => `Status updated to ${status}.`,
+      successMessage: () => `Status updated to ${this.formatStatus(status)}.`,
       errorMessage: (err) =>
         (err as { error?: { message?: string } })?.error?.message || 'Unable to update status'
     });
@@ -120,14 +227,14 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     await this.alerts.confirmAction({
       text: `Delete ${user.fullName} from the operations directory?`,
       confirmText: 'Delete',
-      loadingText: 'Removing customer…',
+      loadingText: 'Removing user…',
       action: async () => {
         await this.admin.removeUser(user.id);
         return true;
       },
-      successMessage: 'Customer removed from directory.',
+      successMessage: 'User removed from directory.',
       errorMessage: (err) =>
-        (err as { error?: { message?: string } })?.error?.message || 'Unable to remove customer'
+        (err as { error?: { message?: string } })?.error?.message || 'Unable to remove user'
     });
   }
 
@@ -141,5 +248,9 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     if (this.pagination.page < this.pagination.pages) {
       this.loadPage(this.pagination.page + 1);
     }
+  }
+
+  roleLabel(role?: UserRole | string): string {
+    return this.formatStatus(role || 'customer');
   }
 }
