@@ -47,4 +47,4 @@ Do **not** use public signup for the first admin.
 
 See **`docs/manager-portal-roadmap.md`** for desk charts, Billing bridge, and workflow phases.
 
-Copy `server-integration` into `banking-system-server` and redeploy the API.
+Apply `server-integration` into [`banking-system-api`](https://github.com/maheshpcse/banking-system-api) and redeploy the API.
