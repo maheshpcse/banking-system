@@ -27,6 +27,7 @@ flowchart TB
 | Signup (self-service) | Yes | No (seed / promote) | No (seed / promote) |
 | Money movement | Own account | No | No |
 | Approve openings | — | Yes | Yes |
+| Approve limit changes | — | Yes (primary) | Super Admin override |
 | Customer status / delete | — | Yes | Yes |
 | Transaction report schedules | — | Own desk | Ops overview |
 | Billing settlements / complaints | File later | Review queue | Escalate / policy |
@@ -36,7 +37,8 @@ flowchart TB
 
 - Same `/auth/login` for everyone.
 - Redirect: `customer` → `/dashboard`, `manager` → `/manager`, `admin` → `/admin`.
-- Seed a manager: `ADMIN_ROLE=manager node scripts/seed-admin.js` (see `docs/roles-and-admin.md`).
+- Seed a manager: `ADMIN_ROLE=manager npm run seed:admin` in **banking-system-server** (see `docs/roles-and-admin.md`).
+- Limit usage is a **rolling 24-hour** window enforced by the API.
 
 ## Manager pages (shipped UI)
 
@@ -45,8 +47,9 @@ flowchart TB
 | `/manager` | Desk overview — customers, pending approvals, alerts, Billing preview |
 | `/manager/customers` | Customer directory (pagination, view drawer, status actions) |
 | `/manager/approvals` | Opening request approve / reject |
+| `/manager/limits` | Approve / reject customer 24h limit change requests |
 | `/manager/reports` | Cadence scheduler preview for banking ledger reports |
-| `/manager/billing` | Billing bridge phases until the Billing API is live |
+| `/manager/billing` | Billing bridge phases until the Billing API is live (placeholder — no fake APIs) |
 | `/settings` | Shared profile, presence, security, experience (theme / font) |
 | `/notifications` | Alerts inbox (view only; no deep-link navigation) |
 

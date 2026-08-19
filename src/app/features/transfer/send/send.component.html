@@ -10,8 +10,8 @@
   <div class="layout">
     <app-animated-card accent="sky" title="New transfer" subtitle="Secure">
       <div class="locked-note" *ngIf="!canTransfer">
-        <p>Transfers unlock after your account number is generated and activated.</p>
-        <a class="btn btn--ghost" routerLink="/settings" [queryParams]="{ tab: 'cardinfo' }">Open account application</a>
+        <p>Transfers unlock after your account is active and online payments are enabled.</p>
+        <a class="btn btn--ghost" routerLink="/settings" [queryParams]="{ tab: 'cardinfo' }">Open card controls</a>
       </div>
       <form *ngIf="canTransfer" class="form" [formGroup]="form" (ngSubmit)="submit()">
         <label class="autocomplete" #recipientField>
@@ -58,6 +58,29 @@
     </app-animated-card>
 
     <aside class="tips">
+      <div class="limit-meters" *ngIf="dailyUsage as usage">
+        <p class="section-label">Last 24 hours</p>
+        <div class="limit-meter">
+          <div class="limit-meter__head">
+            <span>Transfer amount</span>
+            <span>{{ usage.transfer.used | currencyFormat }} / {{ usage.transfer.limit | currencyFormat }}</span>
+          </div>
+          <div class="limit-meter__track">
+            <span [style.width.%]="limitPct(usage.transfer.used, usage.transfer.limit)"></span>
+          </div>
+        </div>
+        <div class="limit-meter">
+          <div class="limit-meter__head">
+            <span>Transfer count</span>
+            <span>{{ usage.transfer.count }} / {{ usage.transfer.countLimit }}</span>
+          </div>
+          <div class="limit-meter__track">
+            <span [style.width.%]="limitPct(usage.transfer.count, usage.transfer.countLimit)"></span>
+          </div>
+        </div>
+        <a class="limit-meters__link" routerLink="/settings" [queryParams]="{ tab: 'limits' }">Request higher limits</a>
+      </div>
+
       <div class="tips__panel">
         <h2>How it works</h2>
         <ol>

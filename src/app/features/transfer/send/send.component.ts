@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { AccountLifecycleService } from '../../../core/services/account-lifecycle.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AccountSummary } from '../../../core/models/banking.models';
 import { fieldError } from '../../../core/utils/form-errors';
 
 @Component({
@@ -19,6 +20,7 @@ export class SendComponent implements OnInit, OnDestroy {
   suggestions: AccountDirectoryItem[] = [];
   showSuggestions = false;
   highlightIndex = -1;
+  dailyUsage: AccountSummary['dailyUsage'] | null = null;
   private recipientSub?: Subscription;
 
   @ViewChild('recipientField') recipientField?: ElementRef<HTMLInputElement>;
@@ -44,12 +46,29 @@ export class SendComponent implements OnInit, OnDestroy {
     return this.lifecycle.canMoveMoney(this.auth.currentUser);
   }
 
+  limitPct(used: number, limit: number): number {
+    if (!limit || limit <= 0) {
+      return 0;
+    }
+    return Math.min(100, Math.round((Number(used || 0) / limit) * 100));
+  }
+
   ngOnInit(): void {
     of(true)
       .pipe(delay(500))
       .subscribe(() => {
         this.pageLoading = false;
       });
+
+    this.accountService.getSummary().subscribe({
+      next: (summary) => {
+        this.dailyUsage = summary.dailyUsage || null;
+        this.auth.updateLocalUser(summary.user);
+      },
+      error: () => {
+        this.dailyUsage = null;
+      }
+    });
 
     this.recipientSub = this.form.controls.toAccountNumber.valueChanges
       .pipe(
@@ -128,8 +147,9 @@ export class SendComponent implements OnInit, OnDestroy {
   }
 
   async submit(): Promise<void> {
-    if (!this.canTransfer) {
-      await this.alerts.warning('Your account number must be issued before transfers.');
+    const gate = this.lifecycle.moneyBlockReason(this.auth.currentUser, 'online');
+    if (gate) {
+      await this.alerts.warning(gate);
       return;
     }
     if (this.form.invalid) {
@@ -153,7 +173,6 @@ export class SendComponent implements OnInit, OnDestroy {
           .pipe(
             tap((res) => {
               this.auth.updateLocalUser(res.user);
-              // Transfer notifications are persisted by the API for sender + recipient.
               this.notifications.refresh().subscribe();
             })
           ),
@@ -166,6 +185,11 @@ export class SendComponent implements OnInit, OnDestroy {
       this.form.reset({ toAccountNumber: '', amount: null, description: '' });
       this.suggestions = [];
       this.showSuggestions = false;
+      this.accountService.getSummary().subscribe({
+        next: (summary) => {
+          this.dailyUsage = summary.dailyUsage || null;
+        }
+      });
     }
   }
 }

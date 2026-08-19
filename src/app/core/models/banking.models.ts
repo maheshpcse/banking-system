@@ -195,6 +195,7 @@ export interface AccountSummary {
     transfersOut: { total: number; count: number };
   };
   dailyUsage?: {
+    window?: 'rolling_24h' | 'calendar_day';
     deposit: { used: number; limit: number };
     withdraw: { used: number; limit: number };
     transfer: { used: number; limit: number; count: number; countLimit: number };

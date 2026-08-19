@@ -209,13 +209,15 @@
             <label>
               <span>Card number</span>
               <input
-                type="text"
+                type="password"
                 inputmode="numeric"
+                autocomplete="cc-number"
                 formControlName="cardNumber"
-                placeholder="XXXX XXXX XXXX XXXX"
+                placeholder="•••• •••• •••• ••••"
                 (input)="onCardNumberInput()"
                 (focus)="cardFlipped = false"
               />
+              <p class="form__hint">Masked while typing — preview uses reveal controls on the card face.</p>
               <p class="form__field-error" *ngIf="fieldError(bankingForm.controls.cardNumber, 'Card number') as msg">{{ msg }}</p>
             </label>
             <div class="form-row form-row--3">
@@ -322,20 +324,24 @@
           </label>
           <label class="toggle">
             <input type="checkbox" formControlName="onlinePayments" />
-            <span>Allow online &amp; e-commerce payments</span>
+            <span>Allow online payments (app deposits &amp; transfers)</span>
           </label>
           <label class="toggle">
             <input type="checkbox" formControlName="contactless" />
-            <span>Allow contactless / tap-to-pay</span>
+            <span>Allow contactless / tap-to-pay channel</span>
           </label>
           <label class="toggle">
             <input type="checkbox" formControlName="international" />
-            <span>Allow international transactions</span>
+            <span>Allow international channel</span>
           </label>
           <label class="toggle">
             <input type="checkbox" formControlName="atmWithdrawals" />
             <span>Allow ATM withdrawals</span>
           </label>
+          <p class="form__hint">
+            These flags are enforced by the API on every money action. Online gates deposits/transfers; ATM gates withdrawals.
+            Contactless and international apply when that channel is selected.
+          </p>
           <p class="form__hint" *ngIf="cardControlsForm.value.frozen">
             Your card is frozen — deposits, withdrawals, and transfers are paused until you unfreeze it.
           </p>
@@ -348,17 +354,18 @@
       <app-animated-card
         *ngIf="activeTab === 'limits'"
         accent="mint"
-        title="Daily limits"
-        subtitle="Deposit, withdraw & transfer caps"
+        title="24-hour limits"
+        subtitle="Rolling window · deposit, withdraw & transfer caps"
       >
         <div class="limits-current">
-          <p class="section-label">Current daily limits</p>
+          <p class="section-label">Current 24-hour limits</p>
           <dl class="meta-grid meta-grid--cols">
             <div><dt>Deposit</dt><dd>{{ currentLimits.depositDaily | currencyFormat }}</dd></div>
             <div><dt>Withdraw</dt><dd>{{ currentLimits.withdrawDaily | currencyFormat }}</dd></div>
             <div><dt>Transfer</dt><dd>{{ currentLimits.transferDaily | currencyFormat }}</dd></div>
-            <div><dt>Transfers / day</dt><dd>{{ currentLimits.transferCountDaily }}</dd></div>
+            <div><dt>Transfers / 24h</dt><dd>{{ currentLimits.transferCountDaily }}</dd></div>
           </dl>
+          <p class="form__hint">Usage resets on a rolling 24-hour window (not calendar midnight).</p>
         </div>
 
         <div class="limits-pending" *ngIf="pendingLimitRequest?.status === 'pending'">

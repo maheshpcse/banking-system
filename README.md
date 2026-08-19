@@ -7,17 +7,18 @@ Backend API lives in a separate repository: [`maheshpcse/banking-system-server`]
 ## Features
 
 - Register / login (JWT via API)
-- Dashboard with balance and monthly totals
-- Deposit & withdraw
-- Instant transfers
+- Dashboard with balance, monthly totals, and rolling 24h limit meters
+- Deposit & withdraw (card controls + moneyGate enforced)
+- Instant transfers with recipient autocomplete and transfer usage meters
 - Paginated transaction history
+- Staff signup / Super Admin approval / Manager analytics
 - Light premium UI with soft motion
 
 ## Requirements
 
 - Node.js **16.20+** (recommended for Angular 14)
 - npm 8+
-- Running banking API (see server repo)
+- Running banking API: [`maheshpcse/banking-system-server`](https://github.com/maheshpcse/banking-system-server)
 
 ## Quick start
 
@@ -53,22 +54,9 @@ docker compose up -d --build
 
 Frontend: [http://localhost:8080](http://localhost:8080)
 
-## Publish backend repo
+## Docs
 
-The Express API export lives on branch [`cursor/server-export-cb7f`](https://github.com/maheshpcse/banking-system/tree/cursor/server-export-cb7f).
-
-**Option A — local push**
-
-```bash
-git clone --branch cursor/server-export-cb7f --single-branch https://github.com/maheshpcse/banking-system.git banking-system-server-tmp
-cd banking-system-server-tmp
-git checkout -B main
-git remote set-url origin https://github.com/maheshpcse/banking-system-server.git
-git push -u origin main
-```
-
-**Option B — GitHub Actions mirror**
-
-1. Add repo secret `BANKING_SYSTEM_SERVER_PUSH_TOKEN` (PAT with write access to `banking-system-server`)
-2. Run workflow **Mirror backend to banking-system-server**
+- `docs/roles-and-admin.md` — staff seed, limits, card security
+- `docs/manager-portal-roadmap.md` — Manager desk + Billing bridge (Billing remains roadmap-only)
+- `server-integration/` — reference mirror of API patches; **live API is banking-system-server**
 
