@@ -98,4 +98,4 @@ sequenceDiagram
 
 - Manager Customers / Approvals reuse the Admin page templates and `AdminService` APIs.
 - Billing APIs are not live yet — see `docs/billing-system-integration.md`.
-- Copy `server-integration` routes (directory lookup, card metadata, settings theme/font) into `banking-system-server` when deploying.
+- Apply `server-integration` routes into [`banking-system-api`](https://github.com/maheshpcse/banking-system-api) when deploying.

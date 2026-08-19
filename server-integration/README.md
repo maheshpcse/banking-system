@@ -7,7 +7,7 @@
 | Super Admin | **Seed only** (`seed-admin.js`, `isSuperAdmin: true`) | `/admin` |
 
 - Pending staff cannot log in; they use `/auth/staff-status`.
-- Copy `server-integration` routes/utils/models into `banking-system-server` and redeploy.
+- Apply `server-integration` overlays into [`banking-system-api`](https://github.com/maheshpcse/banking-system-api) and redeploy.
 
 ### Seed Super Admin
 

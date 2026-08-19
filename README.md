@@ -2,7 +2,8 @@
 
 Angular frontend for the NovaBank minimal banking system.
 
-Backend API lives in a separate repository: [`maheshpcse/banking-system-server`](https://github.com/maheshpcse/banking-system-server).
+Backend API lives in a separate repository: [`maheshpcse/banking-system-api`](https://github.com/maheshpcse/banking-system-api)  
+(legacy mirror: [`banking-system-server`](https://github.com/maheshpcse/banking-system-server)).
 
 ## Features
 
@@ -53,22 +54,11 @@ docker compose up -d --build
 
 Frontend: [http://localhost:8080](http://localhost:8080)
 
-## Publish backend repo
+## Backend repository
 
-The Express API export lives on branch [`cursor/server-export-cb7f`](https://github.com/maheshpcse/banking-system/tree/cursor/server-export-cb7f).
+Canonical API: [`maheshpcse/banking-system-api`](https://github.com/maheshpcse/banking-system-api)
 
-**Option A — local push**
+Legacy: [`maheshpcse/banking-system-server`](https://github.com/maheshpcse/banking-system-server)
 
-```bash
-git clone --branch cursor/server-export-cb7f --single-branch https://github.com/maheshpcse/banking-system.git banking-system-server-tmp
-cd banking-system-server-tmp
-git checkout -B main
-git remote set-url origin https://github.com/maheshpcse/banking-system-server.git
-git push -u origin main
-```
-
-**Option B — GitHub Actions mirror**
-
-1. Add repo secret `BANKING_SYSTEM_SERVER_PUSH_TOKEN` (PAT with write access to `banking-system-server`)
-2. Run workflow **Mirror backend to banking-system-server**
+Point UI `environment.apiUrl` at the deployed `banking-system-api` service.
 
