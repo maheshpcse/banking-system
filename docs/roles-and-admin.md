@@ -16,8 +16,9 @@ NovaBank uses role-based access control (`customer` | `manager` | `admin`).
 ## Creating the Super Admin (seed only)
 
 ```bash
-# From banking-system-server (MONGODB_URI required)
+# From banking-system-api (MONGODB_URI required)
 ADMIN_ROLE=admin node scripts/seed-admin.js
+# or: node src/config/scripts/seed-admin.js
 ```
 
 | Field | Value |
