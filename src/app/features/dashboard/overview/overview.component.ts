@@ -7,7 +7,7 @@ import { ShellBootService } from '../../../core/services/shell-boot.service';
 import { AccountLifecycleService } from '../../../core/services/account-lifecycle.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AccountApplication, AccountSummary, Transaction } from '../../../core/models/banking.models';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 import { fieldError } from '../../../core/utils/form-errors';
 import { map } from 'rxjs/operators';
 
@@ -68,7 +68,7 @@ export class OverviewComponent implements OnInit {
       this.loading = true;
     }
     const request$ = withPageShimmer
-      ? withShimmerDelay(this.accountService.getSummary(), 500)
+      ? withShimmerDelay(this.accountService.getSummary(), SHIMMER_MS)
       : this.accountService.getSummary();
 
     request$.subscribe({

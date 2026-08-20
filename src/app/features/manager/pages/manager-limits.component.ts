@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { User } from '../../../core/models/banking.models';
 import { AdminService } from '../../../core/services/admin.service';
 import { AlertService } from '../../../core/services/alert.service';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
   selector: 'app-manager-limits',
@@ -16,7 +16,7 @@ export class ManagerLimitsComponent implements OnInit {
   constructor(private readonly admin: AdminService, private readonly alerts: AlertService) {}
 
   ngOnInit(): void {
-    withShimmerDelay(this.admin.listLimitRequests(), 450).subscribe({
+    withShimmerDelay(this.admin.listLimitRequests(), SHIMMER_MS).subscribe({
       next: (items) => {
         this.items = items;
         this.pageLoading = false;

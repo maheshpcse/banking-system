@@ -20,44 +20,46 @@
     </button>
   </div>
 
-  <div class="table-wrap" *ngIf="filtered.length; else empty">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Username</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Status</th>
-          <th class="actions-col">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let user of filtered">
-          <td>
-            <strong>{{ user.fullName }}</strong>
-          </td>
-          <td>{{ user.username || '—' }}</td>
-          <td>{{ user.email }}</td>
-          <td>
-            <span class="pill" [attr.data-status]="user.role">{{ formatStatus(user.role) }}</span>
-          </td>
-          <td>
-            <span class="pill" [attr.data-status]="user.staffStatus || 'active'">
-              {{ formatStatus(user.staffStatus || 'active') }}
-            </span>
-          </td>
-          <td class="actions-col">
-            <div class="request-card__actions" *ngIf="(user.staffStatus || 'active') === 'pending_approval'">
-              <button type="button" class="btn btn--ghost btn--compact" (click)="reject(user)">Decline</button>
-              <button type="button" class="btn btn--primary btn--compact" (click)="approve(user)">Activate</button>
-            </div>
-            <span class="muted" *ngIf="(user.staffStatus || 'active') !== 'pending_approval'">—</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <ng-container *ngIf="!listLoading; else listShimmer">
+    <div class="table-wrap" *ngIf="filtered.length; else empty">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of filtered">
+            <td>
+              <strong>{{ user.fullName }}</strong>
+            </td>
+            <td>{{ user.username || '—' }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              <span class="pill" [attr.data-status]="user.role">{{ formatStatus(user.role) }}</span>
+            </td>
+            <td>
+              <span class="pill" [attr.data-status]="user.staffStatus || 'active'">
+                {{ formatStatus(user.staffStatus || 'active') }}
+              </span>
+            </td>
+            <td class="actions-col">
+              <div class="request-card__actions" *ngIf="(user.staffStatus || 'active') === 'pending_approval'">
+                <button type="button" class="btn btn--ghost btn--compact" (click)="reject(user)">Decline</button>
+                <button type="button" class="btn btn--primary btn--compact" (click)="approve(user)">Activate</button>
+              </div>
+              <span class="muted" *ngIf="(user.staffStatus || 'active') !== 'pending_approval'">—</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
 
   <ng-template #empty>
     <p class="hint">No staff users for this filter.</p>
@@ -66,4 +68,8 @@
 
 <ng-template #shimmer>
   <app-shimmer variant="admin-customers"></app-shimmer>
+</ng-template>
+
+<ng-template #listShimmer>
+  <app-shimmer variant="admin-customers-table"></app-shimmer>
 </ng-template>

@@ -1,10 +1,10 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { AccountStatus, Transaction, User, UserRole } from '../../../core/models/banking.models';
 import { AdminPagination, AdminService } from '../../../core/services/admin.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 import { formatStatusLabel } from '../../../core/utils/status-label';
 
 type RoleFilter = 'all' | 'customer' | 'manager' | 'admin';
@@ -20,9 +20,12 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   users: User[] = [];
   pagination: AdminPagination = { page: 1, limit: 5, total: 0, pages: 1 };
   pageLoading = true;
+  /** Table-area shimmer when role filters / paging change after first paint */
+  listLoading = false;
   menuOpenId: string | null = null;
   viewing: User | null = null;
   drawerOpen = false;
+  drawerLoading = false;
   roleFilter: RoleFilter = 'customer';
   readonly roleFilters: { id: RoleFilter; label: string }[] = [
     { id: 'all', label: 'All Roles' },
@@ -90,8 +93,6 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Safety net — the API already excludes the Super Admin seed account, but
-    // never surface it in a directory table even if that filter regresses.
     this.subUsers = this.admin.users$.subscribe(
       (users) => (this.users = users.filter((u) => !u.isSuperAdmin))
     );
@@ -131,13 +132,18 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   }
 
   setRoleFilter(id: RoleFilter): void {
+    if (this.roleFilter === id) {
+      return;
+    }
     this.roleFilter = id;
-    this.loadPage(1);
+    this.loadPage(1, false);
   }
 
   loadPage(page: number, initial = false): void {
     if (initial) {
       this.pageLoading = true;
+    } else {
+      this.listLoading = true;
     }
     const opts =
       this.isSuperAdmin && this.roleFilter === 'all'
@@ -145,17 +151,15 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
         : this.isSuperAdmin
           ? { role: this.roleFilter }
           : undefined;
-    const request$ = initial
-      ? withShimmerDelay(this.admin.refreshCustomers(page, 5, opts), 500)
-      : this.admin.refreshCustomers(page, 5, opts);
-
-    request$.subscribe({
+    withShimmerDelay(this.admin.refreshCustomers(page, 5, opts), SHIMMER_MS).subscribe({
       next: () => {
         this.pageLoading = false;
+        this.listLoading = false;
         this.menuOpenId = null;
       },
       error: async (err) => {
         this.pageLoading = false;
+        this.listLoading = false;
         await this.alerts.error(err?.error?.message || 'Unable to load directory');
       }
     });
@@ -166,26 +170,32 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     this.menuOpenId = this.menuOpenId === userId ? null : userId;
   }
 
-  async viewUser(user: User): Promise<void> {
+  /** Open drawer instantly with row data, then shimmer while detail loads. */
+  viewUser(user: User): void {
     this.menuOpenId = null;
     if (this.drawerCloseTimer) {
       clearTimeout(this.drawerCloseTimer);
       this.drawerCloseTimer = null;
     }
-    try {
-      this.viewing = await firstValueFrom(this.admin.getCustomer(user.id));
-    } catch {
-      this.viewing = user;
-    }
-    this.drawerOpen = false;
+    this.viewing = { ...user };
+    this.drawerLoading = true;
+    this.drawerOpen = true;
     this.setDrawerBodyClass(true);
-    requestAnimationFrame(() => {
-      this.drawerOpen = true;
+
+    this.admin.getCustomer(user.id).subscribe({
+      next: (detail) => {
+        this.viewing = detail;
+        this.drawerLoading = false;
+      },
+      error: () => {
+        this.drawerLoading = false;
+      }
     });
   }
 
   closeView(): void {
     this.drawerOpen = false;
+    this.drawerLoading = false;
     this.setDrawerBodyClass(false);
     if (this.drawerCloseTimer) {
       clearTimeout(this.drawerCloseTimer);
@@ -206,11 +216,8 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     this.txFilter = 'all';
     this.txView = 'timeline';
     this.loadTransactions(user.id);
-    this.txModalOpen = false;
+    this.txModalOpen = true;
     this.setDrawerBodyClass(true);
-    requestAnimationFrame(() => {
-      this.txModalOpen = true;
-    });
   }
 
   closeTxModal(): void {
@@ -229,7 +236,10 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   loadTransactions(userId: string): void {
     this.txLoading = true;
     const type = this.txFilter === 'all' ? undefined : this.txFilter;
-    this.admin.getCustomerTransactions(userId, { limit: 30, type }).subscribe({
+    withShimmerDelay(
+      this.admin.getCustomerTransactions(userId, { limit: 30, type }),
+      SHIMMER_MS
+    ).subscribe({
       next: (res) => {
         this.txItems = res.items || [];
         this.txLoading = false;
@@ -242,6 +252,9 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   }
 
   setTxFilter(id: TxFilter): void {
+    if (this.txFilter === id) {
+      return;
+    }
     this.txFilter = id;
     if (this.txModalUser) {
       this.loadTransactions(this.txModalUser.id);
@@ -252,7 +265,7 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     this.txView = view;
   }
 
-  /** Sticky nav shrinks while any drawer/modal overlay is open so its close control stays on top. */
+  /** Body class tracks overlay state — NavBar stays visible (overlays stack above it). */
   private setDrawerBodyClass(open: boolean): void {
     if (typeof document === 'undefined') {
       return;
@@ -308,13 +321,13 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
 
   prev(): void {
     if (this.pagination.page > 1) {
-      this.loadPage(this.pagination.page - 1);
+      this.loadPage(this.pagination.page - 1, false);
     }
   }
 
   next(): void {
     if (this.pagination.page < this.pagination.pages) {
-      this.loadPage(this.pagination.page + 1);
+      this.loadPage(this.pagination.page + 1, false);
     }
   }
 

@@ -3,7 +3,7 @@ import { forkJoin } from 'rxjs';
 import { AdminAnalytics, AdminRequestRow, AdminService } from '../../../core/services/admin.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AlertService } from '../../../core/services/alert.service';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/shimmer';
 
 export type FlowFilter = 'all' | 'deposit' | 'withdraw' | 'transfer';
 export type FlowCategoryKey = 'deposit' | 'withdraw' | 'transfer';
@@ -54,6 +54,8 @@ function categoryForType(type: string): FlowCategoryKey | null {
 })
 export class ManagerOverviewComponent implements OnInit {
   pageLoading = true;
+  /** Chart / table content shimmer when filters or range change */
+  flowLoading = false;
   customers = 0;
   pending = 0;
   unread = 0;
@@ -96,7 +98,7 @@ export class ManagerOverviewComponent implements OnInit {
         requests: this.admin.refreshRequests(),
         analytics: this.admin.getAnalytics()
       }),
-      500
+      SHIMMER_MS
     ).subscribe({
       next: ({ customers, requests, analytics }) => {
         this.customers = customers.pagination.total;
@@ -113,11 +115,16 @@ export class ManagerOverviewComponent implements OnInit {
   }
 
   setFilter(filter: FlowFilter): void {
+    if (this.filter === filter) {
+      return;
+    }
     this.filter = filter;
+    this.flashFlow();
   }
 
   toggleView(): void {
     this.view = this.view === 'chart' ? 'table' : 'chart';
+    this.flashFlow();
   }
 
   onRangeChange(value: string): void {
@@ -129,10 +136,18 @@ export class ManagerOverviewComponent implements OnInit {
       this.customEnd = this.isoDay(end);
       this.customStart = this.isoDay(start);
     }
+    this.flashFlow();
   }
 
   onCustomRangeChange(): void {
-    // Getter re-derives dayLabels from customStart/customEnd on next read.
+    this.flashFlow();
+  }
+
+  private flashFlow(): void {
+    this.flowLoading = true;
+    shimmerPause(SHIMMER_MS).subscribe(() => {
+      this.flowLoading = false;
+    });
   }
 
   get rangeLabel(): string {
@@ -173,8 +188,6 @@ export class ManagerOverviewComponent implements OnInit {
     let cumulativeBefore = 0;
     return raw.map((seg) => {
       const pct = (seg.value / total) * 100;
-      // Donut trick: r=15.9155 makes circumference ≈ 100, so dasharray/offset
-      // can be expressed directly as percentages. Offset 25 starts at 12 o'clock.
       const dashArray = `${pct} ${100 - pct}`;
       const dashOffset = 25 - cumulativeBefore;
       cumulativeBefore += pct;
@@ -204,7 +217,11 @@ export class ManagerOverviewComponent implements OnInit {
       base[cat].total += row.total;
       base[cat].count += row.count;
     });
-    return [base.deposit, base.withdraw, base.transfer];
+    const all = [base.deposit, base.withdraw, base.transfer];
+    if (this.filter === 'all') {
+      return all;
+    }
+    return all.filter((c) => c.key === this.filter);
   }
 
   get maxVolumeTotal(): number {
@@ -305,7 +322,6 @@ export class ManagerOverviewComponent implements OnInit {
     return days;
   }
 
-  /** Custom range — bounded so a mistyped date span can't render a huge chart. */
   private buildDayRange(startStr: string, endStr: string): string[] {
     const start = new Date(`${startStr}T00:00:00`);
     const end = new Date(`${endStr}T00:00:00`);

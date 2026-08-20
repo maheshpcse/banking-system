@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AppNotification, NotificationKind } from '../../core/models/banking.models';
 import { NotificationService } from '../../core/services/notification.service';
+import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../core/utils/shimmer';
 
 @Component({
   selector: 'app-notifications',
@@ -13,6 +14,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   view: 'list' | 'grid' | 'table' = 'list';
   kindFilter: '' | NotificationKind = '';
   pageLoading = true;
+  listLoading = false;
   private sub?: Subscription;
 
   readonly kinds: Array<{ id: '' | NotificationKind; label: string }> = [
@@ -35,7 +37,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.sub = this.notifications.notifications$.subscribe((items) => (this.items = items));
-    this.notifications.refresh().subscribe(() => {
+    withShimmerDelay(this.notifications.refresh(), SHIMMER_MS).subscribe(() => {
       this.pageLoading = false;
     });
   }
@@ -45,7 +47,25 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   setKind(kind: '' | NotificationKind): void {
+    if (this.kindFilter === kind) {
+      return;
+    }
     this.kindFilter = kind;
+    this.listLoading = true;
+    shimmerPause(SHIMMER_MS).subscribe(() => {
+      this.listLoading = false;
+    });
+  }
+
+  setView(view: 'list' | 'grid' | 'table'): void {
+    if (this.view === view) {
+      return;
+    }
+    this.view = view;
+    this.listLoading = true;
+    shimmerPause(SHIMMER_MS).subscribe(() => {
+      this.listLoading = false;
+    });
   }
 
   markRead(item: AppNotification): void {

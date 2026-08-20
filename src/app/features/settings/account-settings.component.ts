@@ -12,7 +12,7 @@ import {
   User,
   UserAvatar
 } from '../../core/models/banking.models';
-import { withShimmerDelay } from '../../core/utils/shimmer';
+import { SHIMMER_MS, withShimmerDelay } from '../../core/utils/shimmer';
 import { fieldError } from '../../core/utils/form-errors';
 
 type SettingsTab = 'identity' | 'presence' | 'banking' | 'cardinfo' | 'limits' | 'security' | 'experience';
@@ -286,7 +286,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     ) {
       this.activeTab = tab;
     }
-    withShimmerDelay(this.auth.refreshMe(), 500).subscribe({
+    withShimmerDelay(this.auth.refreshMe(), SHIMMER_MS).subscribe({
       next: (res) => {
         this.applyUser(res.user);
         this.loading = false;
@@ -325,7 +325,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     this.panelTimer = setTimeout(() => {
       this.panelLoading = false;
       this.panelTimer = null;
-    }, 480);
+    }, SHIMMER_MS);
   }
 
   private async afterSaveSuccess(message: string): Promise<void> {
@@ -477,7 +477,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
           accountExpiryYear: String(raw.accountExpiryYear)
         }
       }),
-      500
+      SHIMMER_MS
     ).subscribe({
       next: async (res) => {
         this.applyUser(res.user);
@@ -510,7 +510,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
         international: !!raw.international,
         atmWithdrawals: !!raw.atmWithdrawals
       }),
-      500
+      SHIMMER_MS
     ).subscribe({
       next: async (res) => {
         this.applyUser(res.user);
@@ -537,7 +537,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       this.auth.updateProfile({
         settings: { currency: currency as NonNullable<User['settings']>['currency'] }
       }),
-      500
+      SHIMMER_MS
     ).subscribe({
       next: async (res) => {
         this.applyUser(res.user);
@@ -565,7 +565,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
         transferDaily: Number(raw.transferDaily),
         transferCountDaily: Number(raw.transferCountDaily)
       }),
-      500
+      SHIMMER_MS
     ).subscribe({
       next: async (res) => {
         this.applyUser(res.user);
@@ -674,7 +674,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
         username: String(raw.username).trim().toLowerCase(),
         email: String(raw.email).trim().toLowerCase()
       }),
-      500
+      SHIMMER_MS
     ).subscribe({
       next: async (res) => {
         this.applyUser(res.user);
@@ -703,7 +703,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
           image: this.imagePreview
         }
       }),
-      500
+      SHIMMER_MS
     ).subscribe({
       next: async (res) => {
         this.applyUser(res.user);
@@ -730,7 +730,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
         newPassword: String(raw.newPassword),
         confirmPassword: String(raw.confirmPassword)
       }),
-      500
+      SHIMMER_MS
     ).subscribe({
       next: async (res) => {
         this.savingPassword = false;
@@ -762,10 +762,12 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
           compactLedger: !!raw.compactLedger,
           marketingTips: !!raw.marketingTips,
           theme: (raw.theme || 'daylight') as NonNullable<User['settings']>['theme'],
-          fontScale: (raw.fontScale || 'comfortable') as NonNullable<User['settings']>['fontScale']
+          fontScale: (raw.fontScale || 'comfortable') as NonNullable<User['settings']>['fontScale'],
+          currency: this.user?.settings?.currency || null,
+          colorMode: this.user?.settings?.colorMode === 'dark' ? 'dark' : 'light'
         }
       }),
-      500
+      SHIMMER_MS
     ).subscribe({
       next: async (res) => {
         this.applyUser(res.user);

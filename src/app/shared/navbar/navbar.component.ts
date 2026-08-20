@@ -37,6 +37,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   get isDarkMode(): boolean {
+    if (typeof document !== 'undefined' && document.documentElement.dataset['nbMode']) {
+      return document.documentElement.dataset['nbMode'] === 'dark';
+    }
     return this.auth.currentUser?.settings?.colorMode === 'dark';
   }
 
@@ -55,7 +58,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.unreadCount = this.notifications.unreadCount;
     });
     this.unreadCount = this.notifications.unreadCount;
-    this.applyColorMode(this.isDarkMode ? 'dark' : 'light');
+    this.applyColorMode(this.resolveInitialMode());
   }
 
   ngOnDestroy(): void {
@@ -106,5 +109,29 @@ export class NavbarComponent implements OnInit, OnDestroy {
       return;
     }
     document.documentElement.dataset['nbMode'] = mode;
+    try {
+      localStorage.setItem('nb-color-mode', mode);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  private resolveInitialMode(): 'light' | 'dark' {
+    const fromUser = this.auth.currentUser?.settings?.colorMode;
+    if (fromUser === 'dark' || fromUser === 'light') {
+      return fromUser;
+    }
+    try {
+      const stored = localStorage.getItem('nb-color-mode');
+      if (stored === 'dark' || stored === 'light') {
+        return stored;
+      }
+    } catch {
+      /* ignore */
+    }
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    return 'light';
   }
 }

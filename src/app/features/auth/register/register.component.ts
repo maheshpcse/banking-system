@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Subscription, of } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { fieldError } from '../../../core/utils/form-errors';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
 function usernameValidator(control: AbstractControl): ValidationErrors | null {
   const value = String(control.value || '').trim().toLowerCase();
@@ -49,7 +49,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
         this.formError = '';
       }
     });
-    withShimmerDelay(of(true), 220).subscribe(() => {
+    withShimmerDelay(of(true), SHIMMER_MS).subscribe(() => {
       this.pageLoading = false;
     });
   }

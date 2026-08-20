@@ -214,3 +214,39 @@
     animation: none;
   }
 }
+
+.unlock-box {
+  margin: 0.35rem 0 0.85rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(196, 91, 108, 0.28);
+  background: rgba(196, 91, 108, 0.08);
+  display: grid;
+  gap: 0.65rem;
+}
+
+.unlock-box__lede {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.unlock-box textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 3.2rem;
+  border-radius: 0.7rem;
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.3));
+  background: var(--input-bg, rgba(255, 255, 255, 0.95));
+  color: var(--text);
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+}
+
+.unlock-box__ok {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--success, #1f8a6e);
+  font-weight: 650;
+}

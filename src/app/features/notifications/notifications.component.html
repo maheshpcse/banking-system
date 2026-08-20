@@ -6,9 +6,9 @@
       <p class="lede">Transfers, account decisions, and operations alerts in one timeline.</p>
     </div>
     <div class="tools">
-      <button type="button" class="btn btn--ghost" [class.is-active]="view === 'list'" (click)="view = 'list'">List</button>
-      <button type="button" class="btn btn--ghost" [class.is-active]="view === 'grid'" (click)="view = 'grid'">Grid</button>
-      <button type="button" class="btn btn--ghost" [class.is-active]="view === 'table'" (click)="view = 'table'">Table</button>
+      <button type="button" class="btn btn--ghost" [class.is-active]="view === 'list'" (click)="setView('list')">List</button>
+      <button type="button" class="btn btn--ghost" [class.is-active]="view === 'grid'" (click)="setView('grid')">Grid</button>
+      <button type="button" class="btn btn--ghost" [class.is-active]="view === 'table'" (click)="setView('table')">Table</button>
       <button type="button" class="btn btn--ghost" (click)="markAll()">Mark all read</button>
     </div>
   </header>
@@ -24,47 +24,49 @@
     </button>
   </div>
 
-  <ng-container *ngIf="filtered.length; else empty">
-    <div class="table-wrap" *ngIf="view === 'table'">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>When</th>
-            <th>Kind</th>
-            <th>Title</th>
-            <th>Detail</th>
-            <th>Read</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of filtered" (click)="markRead(item)" [class.is-unread]="!item.read">
-            <td>{{ item.createdAt | date: 'short' }}</td>
-            <td>{{ item.kind }}</td>
-            <td>{{ item.title }}</td>
-            <td>{{ item.body }}</td>
-            <td>{{ item.read ? 'Yes' : 'No' }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <ng-container *ngIf="!listLoading; else listShimmer">
+    <ng-container *ngIf="filtered.length; else empty">
+      <div class="table-wrap" *ngIf="view === 'table'">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>When</th>
+              <th>Kind</th>
+              <th>Title</th>
+              <th>Detail</th>
+              <th>Read</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filtered" (click)="markRead(item)" [class.is-unread]="!item.read">
+              <td>{{ item.createdAt | date: 'short' }}</td>
+              <td>{{ item.kind }}</td>
+              <td>{{ item.title }}</td>
+              <td>{{ item.body }}</td>
+              <td>{{ item.read ? 'Yes' : 'No' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-    <div [class]="view === 'grid' ? 'notif-grid' : 'notif-list'" *ngIf="view !== 'table'">
-      <article
-        class="notif-card"
-        *ngFor="let item of filtered"
-        [class.is-unread]="!item.read"
-        (click)="markRead(item)"
-      >
-        <div class="notif-card__icon" [attr.data-kind]="item.kind">
-          <app-nb-icon [name]="item.kind === 'transfer' ? 'transfer' : item.kind === 'account' ? 'card' : 'bell'"></app-nb-icon>
-        </div>
-        <div>
-          <strong>{{ item.title }}</strong>
-          <p>{{ item.body }}</p>
-          <time>{{ item.createdAt | date: 'medium' }}</time>
-        </div>
-      </article>
-    </div>
+      <div [class]="view === 'grid' ? 'notif-grid' : 'notif-list'" *ngIf="view !== 'table'">
+        <article
+          class="notif-card"
+          *ngFor="let item of filtered"
+          [class.is-unread]="!item.read"
+          (click)="markRead(item)"
+        >
+          <div class="notif-card__icon" [attr.data-kind]="item.kind">
+            <app-nb-icon [name]="item.kind === 'transfer' ? 'transfer' : item.kind === 'account' ? 'card' : 'bell'"></app-nb-icon>
+          </div>
+          <div>
+            <strong>{{ item.title }}</strong>
+            <p>{{ item.body }}</p>
+            <time>{{ item.createdAt | date: 'medium' }}</time>
+          </div>
+        </article>
+      </div>
+    </ng-container>
   </ng-container>
 
   <ng-template #empty>
@@ -74,4 +76,8 @@
 
 <ng-template #alertsShimmer>
   <app-shimmer variant="notifications"></app-shimmer>
+</ng-template>
+
+<ng-template #listShimmer>
+  <app-shimmer variant="history-ledger"></app-shimmer>
 </ng-template>

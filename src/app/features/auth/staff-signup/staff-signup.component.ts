@@ -5,7 +5,7 @@ import { Subscription, of } from 'rxjs';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { fieldError } from '../../../core/utils/form-errors';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
 function usernameValidator(control: AbstractControl): ValidationErrors | null {
   const value = String(control.value || '').trim().toLowerCase();
@@ -56,7 +56,7 @@ export class StaffSignupComponent implements OnInit, OnDestroy {
         this.formError = '';
       }
     });
-    withShimmerDelay(of(true), 220).subscribe(() => {
+    withShimmerDelay(of(true), SHIMMER_MS).subscribe(() => {
       this.pageLoading = false;
     });
   }

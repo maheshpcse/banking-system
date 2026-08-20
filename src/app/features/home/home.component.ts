@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
-import { withShimmerDelay } from '../../core/utils/shimmer';
+import { SHIMMER_MS, withShimmerDelay } from '../../core/utils/shimmer';
 
 @Component({
   selector: 'app-home',
@@ -29,7 +29,7 @@ export class HomeComponent implements OnInit {
       this.signupComplete = params.get('registered') === '1';
     });
 
-    withShimmerDelay(of(true), 220).subscribe(() => {
+    withShimmerDelay(of(true), SHIMMER_MS).subscribe(() => {
       this.pageLoading = false;
     });
   }

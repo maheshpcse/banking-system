@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { User } from '../../../core/models/banking.models';
 import { AdminService } from '../../../core/services/admin.service';
 import { AlertService } from '../../../core/services/alert.service';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/shimmer';
 import { formatStatusLabel } from '../../../core/utils/status-label';
 
 type StaffFilter = 'all' | 'pending_approval' | 'active' | 'rejected';
@@ -14,6 +14,7 @@ type StaffFilter = 'all' | 'pending_approval' | 'active' | 'rejected';
 })
 export class AdminStaffComponent implements OnInit {
   pageLoading = true;
+  listLoading = false;
   items: User[] = [];
   statusFilter: StaffFilter = 'all';
   readonly filters: { id: StaffFilter; label: string }[] = [
@@ -38,23 +39,31 @@ export class AdminStaffComponent implements OnInit {
   }
 
   setFilter(id: StaffFilter): void {
+    if (this.statusFilter === id) {
+      return;
+    }
     this.statusFilter = id;
+    this.listLoading = true;
+    shimmerPause(SHIMMER_MS).subscribe(() => {
+      this.listLoading = false;
+    });
   }
 
   reload(initial = false): void {
     if (initial) {
       this.pageLoading = true;
+    } else {
+      this.listLoading = true;
     }
-    const request$ = initial
-      ? withShimmerDelay(this.admin.listStaff('all'), 450)
-      : this.admin.listStaff('all');
-    request$.subscribe({
+    withShimmerDelay(this.admin.listStaff('all'), SHIMMER_MS).subscribe({
       next: (items) => {
         this.items = items;
         this.pageLoading = false;
+        this.listLoading = false;
       },
       error: async (err) => {
         this.pageLoading = false;
+        this.listLoading = false;
         await this.alerts.error(
           err?.error?.message || 'Unable to load staff. Super Admin access is required.'
         );
@@ -79,7 +88,7 @@ export class AdminStaffComponent implements OnInit {
     await this.alerts.confirmAction({
       text: `Decline registration for ${user.fullName}? They will not be able to sign in.`,
       confirmText: 'Decline',
-      loadingText: 'Updating registration…',
+      loadingText: 'Declining…',
       action: async () => this.admin.rejectStaff(user.id),
       successMessage: 'Staff registration declined.',
       errorMessage: (err) =>

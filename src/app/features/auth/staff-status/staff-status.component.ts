@@ -5,7 +5,7 @@ import { Subscription, of } from 'rxjs';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { fieldError } from '../../../core/utils/form-errors';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
   selector: 'app-staff-status',
@@ -41,7 +41,7 @@ export class StaffStatusComponent implements OnInit, OnDestroy {
         this.formError = '';
       }
     });
-    withShimmerDelay(of(true), 220).subscribe(() => {
+    withShimmerDelay(of(true), SHIMMER_MS).subscribe(() => {
       this.pageLoading = false;
     });
   }

@@ -7,7 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ShellBootService } from '../../../core/services/shell-boot.service';
 import { fieldError } from '../../../core/utils/form-errors';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
   selector: 'app-login',
@@ -17,11 +17,17 @@ import { withShimmerDelay } from '../../../core/utils/shimmer';
 export class LoginComponent implements OnInit, OnDestroy {
   pageLoading = true;
   loading = false;
+  unlockLoading = false;
   showPassword = false;
   formError = '';
+  unlockNotice = '';
+  locked = false;
   form = this.fb.group({
     identifier: ['', [Validators.required, Validators.minLength(3)]],
     password: ['', [Validators.required, Validators.minLength(6)]]
+  });
+  unlockForm = this.fb.group({
+    message: ['', [Validators.maxLength(500)]]
   });
 
   readonly fieldError = fieldError;
@@ -41,8 +47,11 @@ export class LoginComponent implements OnInit, OnDestroy {
       if (this.formError) {
         this.formError = '';
       }
+      if (this.unlockNotice) {
+        this.unlockNotice = '';
+      }
     });
-    withShimmerDelay(of(true), 220).subscribe(() => {
+    withShimmerDelay(of(true), SHIMMER_MS).subscribe(() => {
       this.pageLoading = false;
     });
   }
@@ -59,6 +68,8 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.loading = true;
     this.formError = '';
+    this.unlockNotice = '';
+    this.locked = false;
     const payload = this.form.getRawValue() as { identifier: string; password: string };
     this.auth.login(payload).subscribe({
       next: () => {
@@ -99,7 +110,38 @@ export class LoginComponent implements OnInit, OnDestroy {
           void this.alerts.info(message, 'Registration not approved');
           return;
         }
+        if (code === 'LOGIN_LOCKED') {
+          this.locked = true;
+          this.formError = message;
+          return;
+        }
         this.formError = message;
+      }
+    });
+  }
+
+  requestUnlock(): void {
+    if (this.unlockLoading) {
+      return;
+    }
+    const identifier = String(this.form.value.identifier || '').trim();
+    if (!identifier) {
+      this.form.controls.identifier.markAsTouched();
+      this.formError = 'Enter your username or email, then send the unlock request.';
+      return;
+    }
+    this.unlockLoading = true;
+    this.unlockNotice = '';
+    const message = String(this.unlockForm.value.message || '').trim();
+    this.auth.requestUnlock({ identifier, message: message || undefined }).subscribe({
+      next: (res) => {
+        this.unlockLoading = false;
+        this.unlockNotice = res.message || 'Unlock request sent to Super Admin.';
+        this.unlockForm.reset({ message: '' });
+      },
+      error: (err) => {
+        this.unlockLoading = false;
+        this.formError = err?.error?.message || 'Unable to send unlock request.';
       }
     });
   }
