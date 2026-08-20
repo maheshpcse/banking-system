@@ -573,9 +573,16 @@ html[data-nb-app='1'][data-nb-theme='mist'] body {
     #f3f6fb;
 }
 
-/* Keep navbar visible while drawers/modals are open — overlays sit above it (z-index). */
+/* Drawer / account modal are routed inside <main>, which normally sits under
+   the fixed navbar (main z-index: 1, nav z-index: 200). While an overlay is
+   open, lift <main> above the nav so drawer headers and close controls win. */
+body.nb-drawer-open main {
+  z-index: 300 !important;
+  isolation: isolate;
+}
+
 body.nb-drawer-open .nav {
-  /* previously: translateY(-100%) — removed so NavBar stays on screen */
+  z-index: 50 !important;
 }
 
 /*

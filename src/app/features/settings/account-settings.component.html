@@ -640,6 +640,7 @@
               </span>
               <strong>{{ card.label }}</strong>
               <em class="theme-card__hint" *ngIf="card.hint">{{ card.hint }}</em>
+              <em class="theme-card__hint" *ngIf="!card.hint && prefsForm.value.theme === card.id">Selected</em>
             </button>
           </div>
 

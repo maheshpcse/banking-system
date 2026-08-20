@@ -1,8 +1,8 @@
 import { Observable, of, timer } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-/** Site-wide shimmer floor — ~0.6s so loaders are visible but snappy. */
-export const SHIMMER_MS = 600;
+/** Site-wide shimmer floor — 0.5s everywhere (nav page boots, filters, panels). */
+export const SHIMMER_MS = 500;
 
 /**
  * Keep shimmer at least `minMs` total so filters/page boots show a brief

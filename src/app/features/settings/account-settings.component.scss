@@ -752,18 +752,6 @@
   transform: translateY(-1px);
 }
 
-.theme-card.is-active::after {
-  content: '';
-  position: absolute;
-  top: 0.45rem;
-  right: 0.45rem;
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 999px;
-  background: var(--accent-deep, #2f8f7f);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
-}
-
 .theme-card__swatches {
   display: inline-flex;
   gap: 0.25rem;
