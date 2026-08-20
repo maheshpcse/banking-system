@@ -58,30 +58,12 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subs.add(
       this.auth.user$.subscribe((user) => {
         this.syncChrome(this.router.url);
-        if (typeof document !== 'undefined') {
-          if (user) {
-            document.documentElement.dataset['nbTheme'] = user.settings?.theme || 'daylight';
-            document.documentElement.dataset['nbFont'] = user.settings?.fontScale || 'comfortable';
-          }
-          // Dark/light mode parked as a future enhancement — keep light chrome only.
-          document.documentElement.dataset['nbMode'] = 'light';
-          /*
-          const mode = user?.settings?.colorMode === 'dark' ? 'dark' : 'light';
-          document.documentElement.dataset['nbMode'] = mode;
-          try {
-            localStorage.setItem('nb-color-mode', mode);
-          } catch {}
-          */
-          try {
-            localStorage.setItem('nb-color-mode', 'light');
-          } catch {
-            /* ignore */
-          }
-        }
+        this.applyAppearance(user);
       })
     );
 
     this.syncChrome(this.router.url);
+    this.applyAppearance(this.auth.currentUser);
   }
 
   ngOnDestroy(): void {
@@ -96,6 +78,35 @@ export class AppComponent implements OnInit, OnDestroy {
       this.auth.isAuthenticated() &&
       (!this.isMarketingSurface || this.shellBoot.isBootstrapping);
     this.bootVariant = this.variantForUrl(path);
+    this.applyAppearance(this.auth.currentUser);
+  }
+
+  /**
+   * Theme/font tokens apply only inside authenticated app pages.
+   * Marketing/auth surfaces always use the default (Daylight) chrome.
+   */
+  private applyAppearance(user: { settings?: { theme?: string; fontScale?: string } } | null): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const root = document.documentElement;
+    root.dataset['nbMode'] = 'light';
+    try {
+      localStorage.setItem('nb-color-mode', 'light');
+    } catch {
+      /* ignore */
+    }
+
+    const inApp = !!user && this.auth.isAuthenticated() && !this.isMarketingSurface;
+    if (inApp) {
+      root.dataset['nbTheme'] = user?.settings?.theme || 'daylight';
+      root.dataset['nbFont'] = user?.settings?.fontScale || 'comfortable';
+      root.dataset['nbApp'] = '1';
+    } else {
+      delete root.dataset['nbTheme'];
+      delete root.dataset['nbFont'];
+      delete root.dataset['nbApp'];
+    }
   }
 
   private variantForUrl(url: string): 'dashboard' | 'history' | 'transfer' | 'settings' | 'form' {

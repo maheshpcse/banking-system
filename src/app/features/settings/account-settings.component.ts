@@ -171,8 +171,8 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     fontScale: ['comfortable' as NonNullable<User['settings']>['fontScale']]
   });
 
-  readonly themeCards: { id: NonNullable<User['settings']>['theme']; label: string; swatch: string[] }[] = [
-    { id: 'daylight', label: 'Daylight', swatch: ['#eef7fb', '#5fc4b0', '#3b9fd8'] },
+  readonly themeCards: { id: NonNullable<User['settings']>['theme']; label: string; swatch: string[]; hint?: string }[] = [
+    { id: 'daylight', label: 'Daylight', hint: 'Default', swatch: ['#eef7fb', '#5fc4b0', '#3b9fd8'] },
     { id: 'midnight', label: 'Midnight', swatch: ['#0f1720', '#5fc4b0', '#6aa8e8'] },
     { id: 'sand', label: 'Sand', swatch: ['#f6f1e8', '#d4a017', '#5fc4b0'] },
     { id: 'ocean', label: 'Ocean', swatch: ['#eef7fb', '#38a0d2', '#5fc4b0'] },
@@ -822,10 +822,11 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       return;
     }
     const root = document.documentElement;
+    // Themes only apply inside authenticated app pages (app shell sets data-nb-app).
+    root.dataset['nbApp'] = '1';
     root.dataset['nbTheme'] = user.settings?.theme || 'daylight';
     root.dataset['nbFont'] = user.settings?.fontScale || 'comfortable';
     // Dark/light mode parked as a future enhancement — keep light chrome only.
     root.dataset['nbMode'] = 'light';
-    // root.dataset['nbMode'] = user.settings?.colorMode === 'dark' ? 'dark' : 'light';
   }
 }

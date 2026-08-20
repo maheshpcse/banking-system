@@ -137,7 +137,7 @@
 </ng-template>
 
 <ng-template #listShimmer>
-  <app-shimmer variant="admin-customers-table"></app-shimmer>
+  <app-shimmer variant="history-ledger"></app-shimmer>
 </ng-template>
 
 <div
@@ -270,11 +270,11 @@
       <button type="button" class="btn btn--ghost btn--compact" [class.is-active]="txView === 'table'" (click)="setTxView('table')">Table</button>
     </div>
 
-    <app-shimmer *ngIf="txLoading" variant="history-ledger"></app-shimmer>
+    <app-shimmer *ngIf="txLoading || txViewLoading" variant="history-ledger"></app-shimmer>
 
-    <p class="muted" *ngIf="!txLoading && !txItems.length">No transactions for this filter.</p>
+    <p class="muted" *ngIf="!txLoading && !txViewLoading && !txItems.length">No transactions for this filter.</p>
 
-    <div class="tx-chart" *ngIf="!txLoading && txView === 'chart' && txItems.length">
+    <div class="tx-chart" *ngIf="!txLoading && !txViewLoading && txView === 'chart' && txItems.length">
       <div class="tx-chart__row" *ngFor="let bar of chartBars">
         <span>{{ bar.label }}</span>
         <div class="tx-chart__track"><span [style.width.%]="bar.pct"></span></div>
@@ -282,7 +282,7 @@
       </div>
     </div>
 
-    <ul class="tx-timeline" *ngIf="!txLoading && txView === 'timeline' && txItems.length">
+    <ul class="tx-timeline" *ngIf="!txLoading && !txViewLoading && txView === 'timeline' && txItems.length">
       <li *ngFor="let tx of txItems">
         <span class="tx-timeline__dot" [attr.data-type]="tx.type"></span>
         <div>
@@ -293,7 +293,7 @@
       </li>
     </ul>
 
-    <div class="table-wrap" *ngIf="!txLoading && txView === 'table' && txItems.length">
+    <div class="table-wrap" *ngIf="!txLoading && !txViewLoading && txView === 'table' && txItems.length">
       <table class="data-table">
         <thead>
           <tr>
