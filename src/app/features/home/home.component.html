@@ -1,4 +1,4 @@
-<section class="home" *ngIf="!pageLoading; else homeShimmer">
+<section class="home home--enter">
   <div class="home__canvas" aria-hidden="true">
     <div class="home__glow home__glow--mint"></div>
     <div class="home__glow home__glow--sky"></div>
@@ -8,7 +8,7 @@
   </div>
 
   <div class="home__frame">
-    <div class="home__notice" *ngIf="signupComplete" role="status">
+    <div class="home__notice home__reveal home__reveal--notice" *ngIf="signupComplete" role="status">
       <div class="home__notice-copy">
         <strong>Signup complete</strong>
         <p>Your NovaBank account is ready. Sign in whenever you want to open your vault.</p>
@@ -19,19 +19,17 @@
       </div>
     </div>
 
-    <p class="home__brand">NovaBank</p>
-    <h1 class="home__headline">Banking that feels clear the moment you arrive.</h1>
-    <p class="home__lede">
+    <p class="home__brand home__reveal home__reveal--brand">NovaBank</p>
+    <h1 class="home__headline home__reveal home__reveal--headline">
+      Banking that feels clear the moment you arrive.
+    </h1>
+    <p class="home__lede home__reveal home__reveal--lede">
       A calm vault for balances, instant transfers, and a ledger you can trust.
     </p>
 
-    <div class="home__actions">
+    <div class="home__actions home__reveal home__reveal--actions">
       <a class="home__cta home__cta--primary" routerLink="/auth/login">Login</a>
       <a class="home__cta home__cta--secondary" routerLink="/auth/register">Signup</a>
     </div>
   </div>
 </section>
-
-<ng-template #homeShimmer>
-  <app-shimmer variant="home"></app-shimmer>
-</ng-template>
