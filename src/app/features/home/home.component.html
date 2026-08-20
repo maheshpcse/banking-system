@@ -1,4 +1,4 @@
-<section class="home">
+<section class="home" *ngIf="!pageLoading; else homeShimmer">
   <div class="home__canvas" aria-hidden="true">
     <div class="home__glow home__glow--mint"></div>
     <div class="home__glow home__glow--sky"></div>
@@ -31,3 +31,7 @@
     </div>
   </div>
 </section>
+
+<ng-template #homeShimmer>
+  <app-shimmer variant="home"></app-shimmer>
+</ng-template>

@@ -430,6 +430,23 @@
   border-radius: 0.7rem;
 }
 
+.shimmer__grid--manager-analytics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.shimmer-card--analytics {
+  min-height: 16rem;
+}
+
+.shimmer__grid--roadmap {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 0;
+}
+
+.shimmer-card--roadmap {
+  min-height: 8rem;
+}
+
 .shimmer-request-list {
   display: grid;
   gap: 0.75rem;
@@ -482,7 +499,9 @@
 }
 
 @media (max-width: 900px) {
-  .shimmer__grid--admin-stats {
+  .shimmer__grid--admin-stats,
+  .shimmer__grid--manager-analytics,
+  .shimmer__grid--roadmap {
     grid-template-columns: 1fr 1fr;
   }
 

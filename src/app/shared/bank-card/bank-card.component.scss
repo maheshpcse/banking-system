@@ -1,5 +1,6 @@
 .bank-card {
   perspective: 1400px;
+  -webkit-perspective: 1400px;
   width: 100%;
   max-width: 380px;
   aspect-ratio: 1.586 / 1;
@@ -16,6 +17,7 @@
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
   transition: transform 0.7s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
@@ -29,9 +31,13 @@
   border-radius: 1.15rem;
   padding: 1.25rem 1.35rem;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.35);
   box-shadow: 0 22px 48px rgba(30, 60, 90, 0.22);
+  /* backface-visibility alone still ghosts on some WebKit builds mid-flip —
+     drop visibility once the face has rotated past the perpendicular point. */
+  transition: visibility 0s linear 0.35s;
 }
 
 .bank-card__face--front {
@@ -39,6 +45,18 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.bank-card.is-flipped .bank-card__face--front {
+  visibility: hidden;
+}
+
+.bank-card__face--back {
+  visibility: hidden;
+}
+
+.bank-card.is-flipped .bank-card__face--back {
+  visibility: visible;
 }
 
 .bank-card[data-brand='visa'] .bank-card__face--front {

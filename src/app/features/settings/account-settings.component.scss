@@ -412,15 +412,27 @@
   background: rgba(196, 91, 108, 0.16);
 }
 
+.banking-form-wrap {
+  overflow: visible;
+  max-height: none;
+}
+
+/* Card preview (top-left) is shorter than the field columns, so the address
+   section sits directly beneath it — filling that gap — while the ATM card
+   detail fields form a single tall column on the right. */
 .banking-layout {
   display: grid;
   grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  grid-template-areas:
+    'card fields'
+    'address fields';
   gap: 1.35rem;
   align-items: start;
   overflow: visible;
 }
 
 .banking-layout__card {
+  grid-area: card;
   display: grid;
   gap: 0.75rem;
   align-content: start;
@@ -428,9 +440,18 @@
   position: static;
 }
 
-.banking-form {
-  overflow: visible;
-  max-height: none;
+.banking-layout__address {
+  grid-area: address;
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+}
+
+.banking-layout__fields {
+  grid-area: fields;
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
 }
 
 .card-stage {
@@ -537,6 +558,17 @@
   .form-row--3 {
     grid-template-columns: 1fr;
   }
+
+  .banking-layout {
+    grid-template-areas:
+      'card'
+      'fields'
+      'address';
+  }
+}
+
+.card-controls-card {
+  margin-top: 1.25rem;
 }
 
 .card-controls .toggle {
@@ -580,7 +612,29 @@
 }
 
 .limits-current {
-  margin-bottom: 0.35rem;
+  margin-bottom: 1.25rem;
+}
+
+.limits-currency {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.limits-currency__row {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.limits-currency__row select {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.limits-currency__row .btn {
+  flex: 0 0 auto;
 }
 
 .limits-pending {

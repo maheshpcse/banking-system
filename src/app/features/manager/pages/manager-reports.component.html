@@ -1,4 +1,4 @@
-<section class="page">
+<section class="page" *ngIf="!pageLoading; else reportsShimmer">
   <header class="admin-hero">
     <div>
       <p class="eyebrow">NovaBank</p>
@@ -42,3 +42,7 @@
     </app-animated-card>
   </div>
 </section>
+
+<ng-template #reportsShimmer>
+  <app-shimmer variant="manager-reports"></app-shimmer>
+</ng-template>

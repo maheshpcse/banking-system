@@ -148,152 +148,67 @@
         title="Card & address"
         subtitle="Card info"
       >
-        <div class="banking-layout">
-          <aside class="banking-layout__card">
-            <div class="card-stage">
-              <app-bank-card
-                [holderName]="bankingForm.value.holderName || user?.card?.holderName || 'CARD HOLDER'"
-                [number]="bankingForm.value.cardNumber || user?.card?.number || ''"
-                [expiryMonth]="bankingForm.value.expiryMonth || user?.card?.expiryMonth || 'MM'"
-                [expiryYear]="bankingForm.value.expiryYear || user?.card?.expiryYear || 'YY'"
-                [cvv]="bankingForm.value.cvv || user?.card?.cvv || ''"
-                [brand]="bankingForm.value.brand || 'visa'"
-                [flipped]="cardFlipped"
-              ></app-bank-card>
-            </div>
+        <form class="form banking-form-wrap" [formGroup]="bankingForm" (ngSubmit)="submitBankingApplication()">
+          <div class="banking-layout">
+            <aside class="banking-layout__card">
+              <div class="card-stage">
+                <app-bank-card
+                  [holderName]="bankingForm.value.holderName || user?.card?.holderName || 'CARD HOLDER'"
+                  [number]="bankingForm.value.cardNumber || user?.card?.number || ''"
+                  [expiryMonth]="bankingForm.value.expiryMonth || user?.card?.expiryMonth || 'MM'"
+                  [expiryYear]="bankingForm.value.expiryYear || user?.card?.expiryYear || 'YY'"
+                  [cvv]="bankingForm.value.cvv || user?.card?.cvv || ''"
+                  [brand]="bankingForm.value.brand || 'visa'"
+                  [flipped]="cardFlipped"
+                ></app-bank-card>
+              </div>
 
-            <div class="issued-bar" *ngIf="hasAccountNumber">
-              <p class="issued-bar__status">
-                <app-nb-icon name="check"></app-nb-icon>
-                <span>Account active · ATM card {{ user?.card?.status || 'pending' }}</span>
+              <div class="issued-bar" *ngIf="hasAccountNumber">
+                <p class="issued-bar__status">
+                  <app-nb-icon name="check"></app-nb-icon>
+                  <span>Account active · ATM card {{ user?.card?.status || 'pending' }}</span>
+                </p>
+                <button type="button" class="btn btn--ghost issued-bar__flip" (click)="cardFlipped = !cardFlipped">
+                  {{ cardFlipped ? 'Show front' : 'Show CVV side' }}
+                </button>
+              </div>
+              <p class="card-hint" *ngIf="!hasAccountNumber">
+                Card preview updates as you type. Focus CVV to flip the card.
               </p>
-              <button type="button" class="btn btn--ghost issued-bar__flip" (click)="cardFlipped = !cardFlipped">
-                {{ cardFlipped ? 'Show front' : 'Show CVV side' }}
-              </button>
-            </div>
-            <p class="card-hint" *ngIf="!hasAccountNumber">
-              Card preview updates as you type. Focus CVV to flip the card.
-            </p>
-          </aside>
+            </aside>
 
-          <form class="form banking-form" [formGroup]="bankingForm" (ngSubmit)="submitBankingApplication()">
-            <div class="section-head">
-              <p class="section-label">ATM card details</p>
-              <button type="button" class="btn btn--ghost btn--compact" (click)="generateCardDetails()">
-                Auto-generate
-              </button>
-            </div>
-            <label>
-              <span>Name on card</span>
-              <input type="text" formControlName="holderName" (focus)="cardFlipped = false" />
-              <p class="form__field-error" *ngIf="fieldError(bankingForm.controls.holderName, 'Name on card') as msg">{{ msg }}</p>
-            </label>
-            <div class="form-row form-row--2">
+            <!-- Fills the space left under the (shorter) card preview on wide screens. -->
+            <div class="banking-layout__address">
+              <p class="section-label">Residential address</p>
               <label>
-                <span>Card type</span>
-                <select formControlName="brand">
-                  <option value="" disabled>Select card type</option>
-                  <option *ngFor="let brand of cardBrands" [value]="brand.id">{{ brand.label }}</option>
-                </select>
-                <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.brand, 'Card type') as msg">{{ msg }}</p>
+                <span>Address line 1</span>
+                <input type="text" formControlName="line1" autocomplete="address-line1" />
+                <p class="form__field-error" *ngIf="fieldError(bankingForm.controls.line1, 'Address') as msg">{{ msg }}</p>
               </label>
               <label>
-                <span>Account type</span>
-                <select formControlName="accountType">
-                  <option value="" disabled>Select account type</option>
-                  <option *ngFor="let type of accountTypes" [value]="type.id">{{ type.label }}</option>
-                </select>
-                <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.accountType, 'Account type') as msg">{{ msg }}</p>
+                <span>Address line 2</span>
+                <input type="text" formControlName="line2" autocomplete="address-line2" />
               </label>
-            </div>
-            <label>
-              <span>Card number</span>
-              <input
-                type="password"
-                inputmode="numeric"
-                autocomplete="cc-number"
-                formControlName="cardNumber"
-                placeholder="•••• •••• •••• ••••"
-                (input)="onCardNumberInput()"
-                (focus)="cardFlipped = false"
-              />
-              <p class="form__hint">Masked while typing — preview uses reveal controls on the card face.</p>
-              <p class="form__field-error" *ngIf="fieldError(bankingForm.controls.cardNumber, 'Card number') as msg">{{ msg }}</p>
-            </label>
-            <div class="form-row form-row--3">
-              <label>
-                <span>Expiry MM</span>
-                <input type="text" formControlName="expiryMonth" maxlength="2" placeholder="MM" (focus)="cardFlipped = false" />
-                <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.expiryMonth, 'Month') as msg">{{ msg }}</p>
-              </label>
-              <label>
-                <span>Expiry YY</span>
-                <input type="text" formControlName="expiryYear" maxlength="2" placeholder="YY" (focus)="cardFlipped = false" />
-                <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.expiryYear, 'Year') as msg">{{ msg }}</p>
-              </label>
-              <label>
-                <span>CVV</span>
-                <input
-                  type="password"
-                  formControlName="cvv"
-                  maxlength="4"
-                  placeholder="•••"
-                  (focus)="onCvvFocus()"
-                  (blur)="onCvvBlur()"
-                />
-                <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.cvv, 'CVV') as msg">{{ msg }}</p>
-              </label>
-            </div>
-            <p class="form__error" *ngIf="bankingForm.hasError('expiryPast') && bankingForm.touched">
-              Card expiry must be the current month or a future date.
-            </p>
-
-            <p class="section-label">Account number validity</p>
-            <div class="form-row form-row--2">
-              <label>
-                <span>Account expiry MM</span>
-                <input type="text" formControlName="accountExpiryMonth" maxlength="2" placeholder="MM" />
-                <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.accountExpiryMonth, 'Month') as msg">{{ msg }}</p>
-              </label>
-              <label>
-                <span>Account expiry YY</span>
-                <input type="text" formControlName="accountExpiryYear" maxlength="2" placeholder="YY" />
-                <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.accountExpiryYear, 'Year') as msg">{{ msg }}</p>
-              </label>
-            </div>
-            <p class="form__error" *ngIf="bankingForm.hasError('accountExpiryPast') && bankingForm.touched">
-              Account expiry must be the current month or a future date.
-            </p>
-
-            <p class="section-label">Residential address</p>
-            <label>
-              <span>Address line 1</span>
-              <input type="text" formControlName="line1" autocomplete="address-line1" />
-              <p class="form__field-error" *ngIf="fieldError(bankingForm.controls.line1, 'Address') as msg">{{ msg }}</p>
-            </label>
-            <label>
-              <span>Address line 2</span>
-              <input type="text" formControlName="line2" autocomplete="address-line2" />
-            </label>
-            <div class="form-row form-row--2">
               <label>
                 <span>City</span>
                 <input type="text" formControlName="city" autocomplete="address-level2" />
                 <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.city, 'City') as msg">{{ msg }}</p>
               </label>
-              <label>
-                <span>State</span>
-                <select formControlName="state" autocomplete="address-level1">
-                  <option value="" disabled>Select state</option>
-                  <option *ngFor="let state of usStates" [value]="state">{{ state }}</option>
-                </select>
-                <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.state, 'State') as msg">{{ msg }}</p>
-              </label>
-              <label>
-                <span>Postal code</span>
-                <input type="text" formControlName="postalCode" autocomplete="postal-code" />
-                <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.postalCode, 'Postal code') as msg">{{ msg }}</p>
-              </label>
+              <div class="form-row form-row--2">
+                <label>
+                  <span>State</span>
+                  <select formControlName="state" autocomplete="address-level1">
+                    <option value="" disabled>Select state</option>
+                    <option *ngFor="let state of usStates" [value]="state">{{ state }}</option>
+                  </select>
+                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.state, 'State') as msg">{{ msg }}</p>
+                </label>
+                <label>
+                  <span>Postal code</span>
+                  <input type="text" formControlName="postalCode" autocomplete="postal-code" />
+                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.postalCode, 'Postal code') as msg">{{ msg }}</p>
+                </label>
+              </div>
               <label>
                 <span>Country</span>
                 <select formControlName="country" autocomplete="country-name">
@@ -304,15 +219,141 @@
               </label>
             </div>
 
-            <button class="btn btn--primary" type="submit" [disabled]="savingApplication">
-              {{ savingApplication ? 'Submitting…' : (hasAccountNumber ? 'Update card & address' : 'Submit for verification') }}
-            </button>
-          </form>
-        </div>
+            <div class="banking-layout__fields">
+              <div class="section-head">
+                <p class="section-label">ATM card details</p>
+                <button type="button" class="btn btn--ghost btn--compact" (click)="generateCardDetails()">
+                  Auto-generate
+                </button>
+              </div>
+              <label>
+                <span>Name on card</span>
+                <input type="text" formControlName="holderName" (focus)="cardFlipped = false" />
+                <p class="form__field-error" *ngIf="fieldError(bankingForm.controls.holderName, 'Name on card') as msg">{{ msg }}</p>
+              </label>
+              <div class="form-row form-row--2">
+                <label>
+                  <span>Card type</span>
+                  <select formControlName="brand">
+                    <option value="" disabled>Select card type</option>
+                    <option *ngFor="let brand of cardBrands" [value]="brand.id">{{ brand.label }}</option>
+                  </select>
+                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.brand, 'Card type') as msg">{{ msg }}</p>
+                </label>
+                <label>
+                  <span>Account type</span>
+                  <select formControlName="accountType">
+                    <option value="" disabled>Select account type</option>
+                    <option *ngFor="let type of accountTypes" [value]="type.id">{{ type.label }}</option>
+                  </select>
+                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.accountType, 'Account type') as msg">{{ msg }}</p>
+                </label>
+              </div>
+              <label>
+                <span>Card number</span>
+                <div class="password-field">
+                  <input
+                    [type]="showCardNumber ? 'text' : 'password'"
+                    inputmode="numeric"
+                    autocomplete="cc-number"
+                    formControlName="cardNumber"
+                    placeholder="•••• •••• •••• ••••"
+                    (input)="onCardNumberInput()"
+                    (focus)="cardFlipped = false"
+                  />
+                  <button
+                    type="button"
+                    class="password-field__toggle"
+                    (mousedown)="$event.preventDefault()"
+                    (click)="showCardNumber = !showCardNumber"
+                    [attr.aria-label]="showCardNumber ? 'Hide card number' : 'Show card number'"
+                  >
+                    <app-nb-icon [name]="showCardNumber ? 'eye-off' : 'eye'"></app-nb-icon>
+                  </button>
+                </div>
+                <p class="form__hint">Masked by default — use the eye toggle to reveal while editing.</p>
+                <p class="form__field-error" *ngIf="fieldError(bankingForm.controls.cardNumber, 'Card number') as msg">{{ msg }}</p>
+              </label>
+              <div class="form-row form-row--3">
+                <label>
+                  <span>Expiry MM</span>
+                  <select formControlName="expiryMonth" (focus)="cardFlipped = false">
+                    <option value="" disabled>MM</option>
+                    <option *ngFor="let m of expiryMonths" [value]="m">{{ m }}</option>
+                  </select>
+                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.expiryMonth, 'Month') as msg">{{ msg }}</p>
+                </label>
+                <label>
+                  <span>Expiry YY</span>
+                  <select formControlName="expiryYear" (focus)="cardFlipped = false">
+                    <option value="" disabled>YY</option>
+                    <option *ngFor="let y of expiryYears" [value]="y">{{ y }}</option>
+                  </select>
+                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.expiryYear, 'Year') as msg">{{ msg }}</p>
+                </label>
+                <label>
+                  <span>CVV</span>
+                  <div class="password-field">
+                    <input
+                      [type]="showCvv ? 'text' : 'password'"
+                      inputmode="numeric"
+                      formControlName="cvv"
+                      maxlength="4"
+                      placeholder="•••"
+                      (focus)="onCvvFocus()"
+                      (blur)="onCvvBlur()"
+                    />
+                    <button
+                      type="button"
+                      class="password-field__toggle"
+                      (mousedown)="$event.preventDefault()"
+                      (click)="showCvv = !showCvv"
+                      [attr.aria-label]="showCvv ? 'Hide CVV' : 'Show CVV'"
+                    >
+                      <app-nb-icon [name]="showCvv ? 'eye-off' : 'eye'"></app-nb-icon>
+                    </button>
+                  </div>
+                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.cvv, 'CVV') as msg">{{ msg }}</p>
+                </label>
+              </div>
+              <p class="form__error" *ngIf="bankingForm.hasError('expiryPast') && bankingForm.touched">
+                Card expiry must be the current month or a future date.
+              </p>
+
+              <p class="section-label">Account number validity</p>
+              <div class="form-row form-row--2">
+                <label>
+                  <span>Account expiry MM</span>
+                  <select formControlName="accountExpiryMonth">
+                    <option value="" disabled>MM</option>
+                    <option *ngFor="let m of expiryMonths" [value]="m">{{ m }}</option>
+                  </select>
+                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.accountExpiryMonth, 'Month') as msg">{{ msg }}</p>
+                </label>
+                <label>
+                  <span>Account expiry YY</span>
+                  <select formControlName="accountExpiryYear">
+                    <option value="" disabled>YY</option>
+                    <option *ngFor="let y of expiryYears" [value]="y">{{ y }}</option>
+                  </select>
+                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.accountExpiryYear, 'Year') as msg">{{ msg }}</p>
+                </label>
+              </div>
+              <p class="form__error" *ngIf="bankingForm.hasError('accountExpiryPast') && bankingForm.touched">
+                Account expiry must be the current month or a future date.
+              </p>
+            </div>
+          </div>
+
+          <button class="btn btn--primary" type="submit" [disabled]="savingApplication">
+            {{ savingApplication ? 'Submitting…' : (hasAccountNumber ? 'Update card & address' : 'Submit for verification') }}
+          </button>
+        </form>
       </app-animated-card>
 
       <app-animated-card
         *ngIf="activeTab === 'cardinfo' && hasCard"
+        class="card-controls-card"
         accent="rose"
         title="Card controls"
         subtitle="Live protections"
@@ -357,6 +398,27 @@
         title="24-hour limits"
         subtitle="Rolling window · deposit, withdraw & transfer caps"
       >
+        <div class="limits-currency" *ngIf="!isStaff">
+          <p class="section-label">Transaction currency</p>
+          <p class="form__hint" *ngIf="!currencyForm.value.currency">
+            Required before deposits, withdrawals, and transfers. No approval needed.
+          </p>
+          <div class="limits-currency__row" [formGroup]="currencyForm">
+            <select formControlName="currency">
+              <option value="" disabled>Select currency</option>
+              <option *ngFor="let code of currencies" [value]="code">{{ code }}</option>
+            </select>
+            <button
+              type="button"
+              class="btn btn--ghost btn--compact"
+              (click)="saveCurrency()"
+              [disabled]="savingCurrency || !currencyForm.value.currency"
+            >
+              {{ savingCurrency ? 'Saving…' : 'Save currency' }}
+            </button>
+          </div>
+        </div>
+
         <div class="limits-current">
           <p class="section-label">Current 24-hour limits</p>
           <dl class="meta-grid meta-grid--cols">
@@ -560,17 +622,7 @@
             <span>Occasional product tips from NovaBank</span>
           </label>
 
-          <p class="section-label">Transaction currency</p>
-          <p class="form__hint" *ngIf="!prefsForm.value.currency">
-            Required before deposits, withdrawals, and transfers. No approval needed.
-          </p>
-          <label>
-            <span>Currency</span>
-            <select formControlName="currency">
-              <option value="" disabled>Select currency</option>
-              <option *ngFor="let code of currencies" [value]="code">{{ code }}</option>
-            </select>
-          </label>
+          <!-- Transaction currency now lives on Account → Limits (near the top of the limits card). -->
 
           <p class="section-label">Theme</p>
           <div class="theme-cards" role="listbox" aria-label="Theme cards">

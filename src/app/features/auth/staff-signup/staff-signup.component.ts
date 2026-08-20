@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription, of } from 'rxjs';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { fieldError } from '../../../core/utils/form-errors';
+import { withShimmerDelay } from '../../../core/utils/shimmer';
 
 function usernameValidator(control: AbstractControl): ValidationErrors | null {
   const value = String(control.value || '').trim().toLowerCase();
@@ -21,7 +23,8 @@ function usernameValidator(control: AbstractControl): ValidationErrors | null {
   templateUrl: './staff-signup.component.html',
   styleUrls: ['./staff-signup.component.scss']
 })
-export class StaffSignupComponent {
+export class StaffSignupComponent implements OnInit, OnDestroy {
+  pageLoading = true;
   loading = false;
   showPassword = false;
   formError = '';
@@ -38,6 +41,7 @@ export class StaffSignupComponent {
     { id: 'manager', label: 'Manager', hint: 'Customer openings, approvals & reports desk' },
     { id: 'admin', label: 'Admin', hint: 'Full operations desk & customer directory' }
   ];
+  private formSub?: Subscription;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -45,6 +49,21 @@ export class StaffSignupComponent {
     private readonly alerts: AlertService,
     private readonly router: Router
   ) {}
+
+  ngOnInit(): void {
+    this.formSub = this.form.valueChanges.subscribe(() => {
+      if (this.formError) {
+        this.formError = '';
+      }
+    });
+    withShimmerDelay(of(true), 220).subscribe(() => {
+      this.pageLoading = false;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.formSub?.unsubscribe();
+  }
 
   submit(): void {
     if (this.form.invalid || this.loading) {

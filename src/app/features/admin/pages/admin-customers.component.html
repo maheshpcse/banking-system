@@ -40,11 +40,22 @@
             <span class="pill" [attr.data-status]="user.role || 'customer'">{{ roleLabel(user.role) }}</span>
           </td>
           <td>
-            <app-account-number
-              variant="inline"
-              [value]="user.accountNumber"
-              pendingLabel="Pending"
-            ></app-account-number>
+            <div class="account-cell">
+              <app-account-number
+                variant="inline"
+                [value]="user.accountNumber"
+                pendingLabel="Pending"
+              ></app-account-number>
+              <button
+                type="button"
+                class="icon-btn icon-btn--tx"
+                (click)="openTxModal(user); $event.stopPropagation()"
+                [attr.aria-label]="'View transactions for ' + user.fullName"
+                title="View transactions"
+              >
+                <app-nb-icon name="chart"></app-nb-icon>
+              </button>
+            </div>
           </td>
           <td>
             <span class="pill" [attr.data-status]="user.accountStatus">
@@ -86,6 +97,9 @@
                   </button>
                   <button type="button" (click)="setStatus(user, 'blocked')">Block</button>
                   <button type="button" (click)="setStatus(user, 'deactivated')">Deactivate</button>
+                  <button type="button" *ngIf="isSuperAdmin" (click)="resetLoginAttempts(user)">
+                    Reset login lock
+                  </button>
                   <button type="button" class="is-danger" (click)="remove(user)">Delete</button>
                 </div>
               </div>
@@ -196,64 +210,95 @@
       </dl>
     </section>
 
-    <section class="drawer__section" *ngIf="(user.role || 'customer') === 'customer'">
-      <h3><app-nb-icon name="chart"></app-nb-icon><span>Transactions</span></h3>
-      <div class="filters">
-        <button
-          type="button"
-          *ngFor="let kind of txFilters"
-          [class.is-active]="txFilter === kind.id"
-          (click)="setTxFilter(kind.id)"
-        >
-          {{ kind.label }}
-        </button>
-      </div>
-      <div class="tools" style="display:flex;gap:0.4rem;margin:0 0 0.85rem;flex-wrap:wrap;">
-        <button type="button" class="btn btn--ghost btn--compact" [class.is-active]="txView === 'timeline'" (click)="setTxView('timeline')">Timeline</button>
-        <button type="button" class="btn btn--ghost btn--compact" [class.is-active]="txView === 'chart'" (click)="setTxView('chart')">Chart</button>
-        <button type="button" class="btn btn--ghost btn--compact" [class.is-active]="txView === 'table'" (click)="setTxView('table')">Table</button>
-      </div>
-
-      <p class="muted" *ngIf="txLoading">Loading activity…</p>
-      <p class="muted" *ngIf="!txLoading && !txItems.length">No transactions for this filter.</p>
-
-      <div class="tx-chart" *ngIf="!txLoading && txView === 'chart' && txItems.length">
-        <div class="tx-chart__row" *ngFor="let bar of chartBars">
-          <span>{{ bar.label }}</span>
-          <div class="tx-chart__track"><span [style.width.%]="bar.pct"></span></div>
-          <strong>{{ bar.total | currencyFormat }}</strong>
-        </div>
-      </div>
-
-      <ul class="tx-timeline" *ngIf="!txLoading && txView === 'timeline' && txItems.length">
-        <li *ngFor="let tx of txItems">
-          <span class="tx-timeline__dot" [attr.data-type]="tx.type"></span>
-          <div>
-            <strong>{{ formatStatus(tx.type) }} · {{ tx.amount | currencyFormat }}</strong>
-            <p>{{ tx.description || '—' }}</p>
-            <time>{{ tx.createdAt | date: 'medium' }}</time>
-          </div>
-        </li>
-      </ul>
-
-      <div class="table-wrap" *ngIf="!txLoading && txView === 'table' && txItems.length">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>When</th>
-              <th>Type</th>
-              <th>Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let tx of txItems">
-              <td>{{ tx.createdAt | date: 'short' }}</td>
-              <td>{{ formatStatus(tx.type) }}</td>
-              <td>{{ tx.amount | currencyFormat }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+    <p class="hint" *ngIf="(user.role || 'customer') === 'customer'">
+      Use the <app-nb-icon name="chart"></app-nb-icon> icon next to the account number in the table
+      to view transaction activity.
+    </p>
   </div>
 </aside>
+
+<div
+  class="tx-modal-backdrop"
+  *ngIf="txModalUser"
+  [class.is-open]="txModalOpen"
+  (click)="closeTxModal()"
+></div>
+<div
+  class="tx-modal"
+  *ngIf="txModalUser as txUser"
+  [class.is-open]="txModalOpen"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Customer transactions"
+>
+  <header class="drawer__head tx-modal__head">
+    <div>
+      <p class="drawer__eyebrow">{{ roleLabel(txUser.role) }} transactions</p>
+      <h2>{{ txUser.fullName }}</h2>
+    </div>
+    <button type="button" class="icon-btn icon-btn--close" (click)="closeTxModal()" aria-label="Close transactions">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 6l12 12M18 6 6 18"></path>
+      </svg>
+    </button>
+  </header>
+
+  <div class="tx-modal__body">
+    <div class="filters">
+      <button
+        type="button"
+        *ngFor="let kind of txFilters"
+        [class.is-active]="txFilter === kind.id"
+        (click)="setTxFilter(kind.id)"
+      >
+        {{ kind.label }}
+      </button>
+    </div>
+    <div class="tools tx-modal__views">
+      <button type="button" class="btn btn--ghost btn--compact" [class.is-active]="txView === 'timeline'" (click)="setTxView('timeline')">Timeline</button>
+      <button type="button" class="btn btn--ghost btn--compact" [class.is-active]="txView === 'chart'" (click)="setTxView('chart')">Chart</button>
+      <button type="button" class="btn btn--ghost btn--compact" [class.is-active]="txView === 'table'" (click)="setTxView('table')">Table</button>
+    </div>
+
+    <p class="muted" *ngIf="txLoading">Loading activity…</p>
+    <p class="muted" *ngIf="!txLoading && !txItems.length">No transactions for this filter.</p>
+
+    <div class="tx-chart" *ngIf="!txLoading && txView === 'chart' && txItems.length">
+      <div class="tx-chart__row" *ngFor="let bar of chartBars">
+        <span>{{ bar.label }}</span>
+        <div class="tx-chart__track"><span [style.width.%]="bar.pct"></span></div>
+        <strong>{{ bar.total | currencyFormat }}</strong>
+      </div>
+    </div>
+
+    <ul class="tx-timeline" *ngIf="!txLoading && txView === 'timeline' && txItems.length">
+      <li *ngFor="let tx of txItems">
+        <span class="tx-timeline__dot" [attr.data-type]="tx.type"></span>
+        <div>
+          <strong>{{ formatStatus(tx.type) }} · {{ tx.amount | currencyFormat }}</strong>
+          <p>{{ tx.description || '—' }}</p>
+          <time>{{ tx.createdAt | date: 'medium' }}</time>
+        </div>
+      </li>
+    </ul>
+
+    <div class="table-wrap" *ngIf="!txLoading && txView === 'table' && txItems.length">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Type</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let tx of txItems">
+            <td>{{ tx.createdAt | date: 'short' }}</td>
+            <td>{{ formatStatus(tx.type) }}</td>
+            <td>{{ tx.amount | currencyFormat }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

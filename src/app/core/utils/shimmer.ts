@@ -1,17 +1,16 @@
-import { Observable, timer } from 'rxjs';
+import { Observable, of, timer } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 /**
- * Keeps shimmer visible for API response time + extraMs (default 500ms).
+ * Keep shimmer at least `minMs` total (default 220) so pages feel as snappy
+ * as Alerts (which clear when the API returns) without a harsh flash.
  */
-export function withShimmerDelay<T>(request$: Observable<T>, extraMs = 500): Observable<T> {
+export function withShimmerDelay<T>(request$: Observable<T>, minMs = 220): Observable<T> {
   const started = Date.now();
   return request$.pipe(
     switchMap((result) => {
-      const apiMs = Date.now() - started;
-      // Ensure callers can reason about total shimmer = apiMs + extraMs
-      void apiMs;
-      return timer(extraMs).pipe(map(() => result));
+      const wait = Math.max(0, minMs - (Date.now() - started));
+      return wait > 0 ? timer(wait).pipe(map(() => result)) : of(result);
     })
   );
 }

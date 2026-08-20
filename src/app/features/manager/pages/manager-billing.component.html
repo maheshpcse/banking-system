@@ -1,4 +1,4 @@
-<section class="page">
+<section class="page" *ngIf="!pageLoading; else billingShimmer">
   <header class="admin-hero">
     <div>
       <p class="eyebrow">NovaBank</p>
@@ -35,3 +35,7 @@
     <code>docs/billing-system-integration.md</code>.
   </p>
 </section>
+
+<ng-template #billingShimmer>
+  <app-shimmer variant="manager-billing"></app-shimmer>
+</ng-template>

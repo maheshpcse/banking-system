@@ -31,6 +31,8 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     { id: 'admin', label: 'Admins' }
   ];
 
+  txModalOpen = false;
+  txModalUser: User | null = null;
   txItems: Transaction[] = [];
   txLoading = false;
   txFilter: TxFilter = 'all';
@@ -45,6 +47,7 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
 
   readonly formatStatus = formatStatusLabel;
   private drawerCloseTimer: ReturnType<typeof setTimeout> | null = null;
+  private txModalCloseTimer: ReturnType<typeof setTimeout> | null = null;
   private subUsers?: Subscription;
   private subPage?: Subscription;
 
@@ -87,7 +90,11 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.subUsers = this.admin.users$.subscribe((users) => (this.users = users));
+    // Safety net — the API already excludes the Super Admin seed account, but
+    // never surface it in a directory table even if that filter regresses.
+    this.subUsers = this.admin.users$.subscribe(
+      (users) => (this.users = users.filter((u) => !u.isSuperAdmin))
+    );
     this.subPage = this.admin.pagination$.subscribe((pagination) => (this.pagination = pagination));
     if (this.isSuperAdmin) {
       this.roleFilter = 'all';
@@ -101,6 +108,10 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     if (this.drawerCloseTimer) {
       clearTimeout(this.drawerCloseTimer);
     }
+    if (this.txModalCloseTimer) {
+      clearTimeout(this.txModalCloseTimer);
+    }
+    this.setDrawerBodyClass(false);
   }
 
   @HostListener('document:click')
@@ -110,6 +121,10 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    if (this.txModalOpen) {
+      this.closeTxModal();
+      return;
+    }
     if (this.viewing) {
       this.closeView();
     }
@@ -163,12 +178,52 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
       this.viewing = user;
     }
     this.drawerOpen = false;
-    this.txFilter = 'all';
-    this.txView = 'timeline';
-    this.loadTransactions(user.id);
+    this.setDrawerBodyClass(true);
     requestAnimationFrame(() => {
       this.drawerOpen = true;
     });
+  }
+
+  closeView(): void {
+    this.drawerOpen = false;
+    this.setDrawerBodyClass(false);
+    if (this.drawerCloseTimer) {
+      clearTimeout(this.drawerCloseTimer);
+    }
+    this.drawerCloseTimer = setTimeout(() => {
+      this.viewing = null;
+      this.drawerCloseTimer = null;
+    }, 280);
+  }
+
+  openTxModal(user: User): void {
+    this.menuOpenId = null;
+    if (this.txModalCloseTimer) {
+      clearTimeout(this.txModalCloseTimer);
+      this.txModalCloseTimer = null;
+    }
+    this.txModalUser = user;
+    this.txFilter = 'all';
+    this.txView = 'timeline';
+    this.loadTransactions(user.id);
+    this.txModalOpen = false;
+    this.setDrawerBodyClass(true);
+    requestAnimationFrame(() => {
+      this.txModalOpen = true;
+    });
+  }
+
+  closeTxModal(): void {
+    this.txModalOpen = false;
+    this.setDrawerBodyClass(false);
+    if (this.txModalCloseTimer) {
+      clearTimeout(this.txModalCloseTimer);
+    }
+    this.txModalCloseTimer = setTimeout(() => {
+      this.txModalUser = null;
+      this.txItems = [];
+      this.txModalCloseTimer = null;
+    }, 260);
   }
 
   loadTransactions(userId: string): void {
@@ -188,8 +243,8 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
 
   setTxFilter(id: TxFilter): void {
     this.txFilter = id;
-    if (this.viewing) {
-      this.loadTransactions(this.viewing.id);
+    if (this.txModalUser) {
+      this.loadTransactions(this.txModalUser.id);
     }
   }
 
@@ -197,16 +252,16 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     this.txView = view;
   }
 
-  closeView(): void {
-    this.drawerOpen = false;
-    if (this.drawerCloseTimer) {
-      clearTimeout(this.drawerCloseTimer);
+  /** Sticky nav shrinks while any drawer/modal overlay is open so its close control stays on top. */
+  private setDrawerBodyClass(open: boolean): void {
+    if (typeof document === 'undefined') {
+      return;
     }
-    this.drawerCloseTimer = setTimeout(() => {
-      this.viewing = null;
-      this.txItems = [];
-      this.drawerCloseTimer = null;
-    }, 280);
+    if (open) {
+      document.body.classList.add('nb-drawer-open');
+    } else if (!this.drawerOpen && !this.txModalOpen) {
+      document.body.classList.remove('nb-drawer-open');
+    }
   }
 
   async setStatus(user: User, status: AccountStatus): Promise<void> {
@@ -219,6 +274,19 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
       successMessage: () => `Status updated to ${this.formatStatus(status)}.`,
       errorMessage: (err) =>
         (err as { error?: { message?: string } })?.error?.message || 'Unable to update status'
+    });
+  }
+
+  async resetLoginAttempts(user: User): Promise<void> {
+    this.menuOpenId = null;
+    await this.alerts.confirmAction({
+      text: `Reset the sign-in lock for ${user.fullName}? They will be able to try signing in again immediately.`,
+      confirmText: 'Reset lock',
+      loadingText: 'Resetting sign-in lock…',
+      action: async () => this.admin.resetLoginAttempts(user.id),
+      successMessage: 'Sign-in lock cleared.',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Unable to reset sign-in lock'
     });
   }
 
