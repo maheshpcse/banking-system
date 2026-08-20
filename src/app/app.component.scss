@@ -169,15 +169,8 @@ main {
   z-index: 1;
 }
 
-/* Drawer / account modal live inside <main>; raise that stacking context above
-   the fixed navbar so overlay headers are not trapped under the nav layer. */
-body.nb-drawer-open main {
-  z-index: 250;
-}
-
-body.nb-drawer-open .nav {
-  z-index: 200;
-}
+/* Overlay stacking for drawers/modals is handled globally in styles.scss
+   (body.nb-drawer-open) so it is not blocked by component encapsulation. */
 
 /* Opacity / horizontal motion only — no up/down translate */
 @keyframes wash-breathe {
