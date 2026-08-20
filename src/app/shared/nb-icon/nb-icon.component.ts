@@ -11,7 +11,12 @@ export type NbIconName =
   | 'bell'
   | 'check'
   | 'user'
-  | 'chart';
+  | 'chart'
+  | 'sun'
+  | 'moon'
+  | 'eye'
+  | 'eye-off'
+  | 'lock';
 
 @Component({
   selector: 'app-nb-icon',
@@ -68,6 +73,26 @@ export type NbIconName =
           <path d="M7 16.5V10"></path>
           <path d="M12 16.5V7"></path>
           <path d="M17 16.5v-4"></path>
+        </g>
+        <g *ngSwitchCase="'sun'">
+          <circle cx="12" cy="12" r="4.25"></circle>
+          <path d="M12 2.75v2.4M12 18.85v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.75 12h2.4M18.85 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path>
+        </g>
+        <g *ngSwitchCase="'moon'">
+          <path d="M20.2 14.2a8.25 8.25 0 1 1-9.9-9.9 6.75 6.75 0 0 0 9.9 9.9Z"></path>
+        </g>
+        <g *ngSwitchCase="'eye'">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </g>
+        <g *ngSwitchCase="'eye-off'">
+          <path d="M3 3l18 18"></path>
+          <path d="M10.6 5.2A11.4 11.4 0 0 1 12 5c7 0 11 7 11 7a13.6 13.6 0 0 1-3.15 3.75M6.5 6.9C3.55 8.7 1 12 1 12s4 7 11 7c1.35 0 2.6-.25 3.7-.68"></path>
+          <path d="M9.5 12a2.5 2.5 0 0 0 2.5 2.5"></path>
+        </g>
+        <g *ngSwitchCase="'lock'">
+          <rect x="4.5" y="10.5" width="15" height="10" rx="2"></rect>
+          <path d="M7.5 10.5V7.75a4.5 4.5 0 0 1 9 0V10.5"></path>
         </g>
       </ng-container>
     </svg>

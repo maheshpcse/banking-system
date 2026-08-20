@@ -8,6 +8,7 @@
   background: #f7fafc;
   border-bottom: 1px solid rgba(148, 163, 184, 0.22);
   box-shadow: 0 8px 24px rgba(90, 120, 150, 0.06);
+  transition: transform 0.32s var(--ease-out), box-shadow 0.32s var(--ease-out);
 }
 
 .nav__inner {
@@ -138,7 +139,6 @@
   color: #fff;
 }
 
-.nav__mode,
 .nav__logout {
   border: 1px solid rgba(148, 163, 184, 0.28);
   background: rgba(255, 255, 255, 0.9);
@@ -150,9 +150,50 @@
   cursor: pointer;
 }
 
-.nav__mode:hover,
 .nav__logout:hover {
   border-color: rgba(95, 196, 176, 0.45);
+}
+
+/* Sun/moon icon toggle — replaces the text Dark/Light button */
+.nav__mode-icon {
+  position: relative;
+  width: 2.35rem;
+  height: 2.35rem;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text);
+  border-radius: 0.7rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.25s ease;
+}
+
+.nav__mode-icon:hover {
+  border-color: rgba(95, 196, 176, 0.45);
+  background: rgba(232, 250, 247, 0.95);
+}
+
+.nav__mode-icon:active {
+  transform: scale(0.92);
+}
+
+.nav__mode-glyph {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.6) rotate(-45deg);
+  transition: opacity 0.28s var(--ease-out), transform 0.28s var(--ease-out);
+}
+
+.nav__mode-glyph.is-visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
 }
 
 html[data-nb-mode='dark'] .nav {

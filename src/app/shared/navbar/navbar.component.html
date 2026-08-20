@@ -49,14 +49,24 @@
         Alerts
         <span class="nav__badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
       </a>
+      <!-- Dark/Light now toggles via the sun/moon icon button below — text button retired -->
       <button
-        class="nav__mode"
+        class="nav__mode-icon"
         type="button"
         (click)="toggleColorMode()"
         [attr.aria-label]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
         [title]="isDarkMode ? 'Light mode' : 'Dark mode'"
       >
-        {{ isDarkMode ? 'Light' : 'Dark' }}
+        <app-nb-icon
+          class="nav__mode-glyph"
+          [class.is-visible]="!isDarkMode"
+          name="moon"
+        ></app-nb-icon>
+        <app-nb-icon
+          class="nav__mode-glyph"
+          [class.is-visible]="isDarkMode"
+          name="sun"
+        ></app-nb-icon>
       </button>
       <button class="nav__logout" type="button" (click)="logout()">Sign out</button>
     </nav>
