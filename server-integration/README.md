@@ -25,6 +25,7 @@ Default: `admin` / `Admin@12345` (Super Admin).
 
 ### Key API additions
 
+- Domain Mongo collections: `accounts`, `cards`, `addresses`, `limitpolicies`, `limitrequests`, `accountapplications`, `staffapplications`, `loginsecurities`, `auditlogs` (dual-written from User embeds; `npm run migrate:domain`)
 - `POST /auth/staff-register`, `POST /auth/staff-status`
 - `GET/POST /admin/staff-pending`, `/admin/staff/:id/approve|reject`
 - `POST /account/limits/request`, `GET/POST /admin/limit-requests` (manager + Super Admin)
