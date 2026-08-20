@@ -151,6 +151,19 @@ export class AdminService {
     return res.user;
   }
 
+  /** Super Admin only — clears a customer's failed sign-in counter/lock. */
+  async resetLoginAttempts(userId: string): Promise<User | null> {
+    const res = await firstValueFrom(
+      this.http.post<{ message: string; user: User }>(
+        `${environment.apiUrl}/admin/customers/${userId}/reset-login-attempts`,
+        {}
+      )
+    );
+    const { page, limit } = this.paginationSubject.value;
+    await firstValueFrom(this.refreshCustomers(page, limit));
+    return res.user || null;
+  }
+
   async removeUser(userId: string): Promise<void> {
     await firstValueFrom(this.http.delete<{ message: string }>(`${environment.apiUrl}/admin/customers/${userId}`));
     const { page, limit } = this.paginationSubject.value;

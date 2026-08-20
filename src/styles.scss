@@ -550,6 +550,14 @@ html[data-nb-theme='mist'] body {
     #f3f6fb;
 }
 
+/* Drawer / medium-modal overlays shrink the sticky nav out of the way so the
+   overlay's close control is always the top-most, unobstructed target. */
+body.nb-drawer-open .nav {
+  transform: translateY(-100%);
+  box-shadow: none;
+  pointer-events: none;
+}
+
 html[data-nb-mode='dark'] body {
   --bg: #0f141b;
   --text: #e8eef4;
