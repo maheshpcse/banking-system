@@ -36,11 +36,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return !!this.auth.currentUser?.isSuperAdmin;
   }
 
+  /** Future enhancement — dark/light toggle UI is commented out in the template. */
   get isDarkMode(): boolean {
-    if (typeof document !== 'undefined' && document.documentElement.dataset['nbMode']) {
-      return document.documentElement.dataset['nbMode'] === 'dark';
-    }
-    return this.auth.currentUser?.settings?.colorMode === 'dark';
+    return false;
   }
 
   get homeLink(): string {
@@ -58,7 +56,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.unreadCount = this.notifications.unreadCount;
     });
     this.unreadCount = this.notifications.unreadCount;
-    this.applyColorMode(this.resolveInitialMode());
+    // Dark/light mode parked as a future enhancement — always stay on light chrome.
+    this.forceLightMode();
   }
 
   ngOnDestroy(): void {
@@ -79,6 +78,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   }
 
+  /*
+  // Future enhancement: dark / light mode toggle
   toggleColorMode(): void {
     const next = this.isDarkMode ? 'light' : 'dark';
     this.applyColorMode(next);
@@ -98,12 +99,27 @@ export class NavbarComponent implements OnInit, OnDestroy {
       })
       .subscribe({ error: () => undefined });
   }
+  */
 
   logout(): void {
     this.closeMenu();
     this.auth.logout();
   }
 
+  private forceLightMode(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    document.documentElement.dataset['nbMode'] = 'light';
+    try {
+      localStorage.setItem('nb-color-mode', 'light');
+    } catch {
+      /* ignore */
+    }
+  }
+
+  /*
+  // Future enhancement: dark / light mode helpers
   private applyColorMode(mode: 'light' | 'dark'): void {
     if (typeof document === 'undefined') {
       return;
@@ -112,7 +128,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     try {
       localStorage.setItem('nb-color-mode', mode);
     } catch {
-      /* ignore */
     }
   }
 
@@ -127,11 +142,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
         return stored;
       }
     } catch {
-      /* ignore */
     }
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       return 'dark';
     }
     return 'light';
   }
+  */
 }
