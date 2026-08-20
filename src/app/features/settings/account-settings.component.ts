@@ -764,7 +764,8 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
           theme: (raw.theme || 'daylight') as NonNullable<User['settings']>['theme'],
           fontScale: (raw.fontScale || 'comfortable') as NonNullable<User['settings']>['fontScale'],
           currency: this.user?.settings?.currency || null,
-          colorMode: this.user?.settings?.colorMode === 'dark' ? 'dark' : 'light'
+          // Dark/light mode parked — always persist light until the feature returns.
+          colorMode: 'light'
         }
       }),
       SHIMMER_MS
@@ -823,6 +824,8 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     const root = document.documentElement;
     root.dataset['nbTheme'] = user.settings?.theme || 'daylight';
     root.dataset['nbFont'] = user.settings?.fontScale || 'comfortable';
-    root.dataset['nbMode'] = user.settings?.colorMode === 'dark' ? 'dark' : 'light';
+    // Dark/light mode parked as a future enhancement — keep light chrome only.
+    root.dataset['nbMode'] = 'light';
+    // root.dataset['nbMode'] = user.settings?.colorMode === 'dark' ? 'dark' : 'light';
   }
 }

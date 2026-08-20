@@ -62,26 +62,20 @@ export class AppComponent implements OnInit, OnDestroy {
           if (user) {
             document.documentElement.dataset['nbTheme'] = user.settings?.theme || 'daylight';
             document.documentElement.dataset['nbFont'] = user.settings?.fontScale || 'comfortable';
-            const mode = user.settings?.colorMode === 'dark' ? 'dark' : 'light';
-            document.documentElement.dataset['nbMode'] = mode;
-            try {
-              localStorage.setItem('nb-color-mode', mode);
-            } catch {
-              /* ignore */
-            }
-          } else if (!document.documentElement.dataset['nbMode']) {
-            let mode: 'light' | 'dark' = 'light';
-            try {
-              const stored = localStorage.getItem('nb-color-mode');
-              if (stored === 'dark' || stored === 'light') {
-                mode = stored;
-              } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                mode = 'dark';
-              }
-            } catch {
-              /* ignore */
-            }
-            document.documentElement.dataset['nbMode'] = mode;
+          }
+          // Dark/light mode parked as a future enhancement — keep light chrome only.
+          document.documentElement.dataset['nbMode'] = 'light';
+          /*
+          const mode = user?.settings?.colorMode === 'dark' ? 'dark' : 'light';
+          document.documentElement.dataset['nbMode'] = mode;
+          try {
+            localStorage.setItem('nb-color-mode', mode);
+          } catch {}
+          */
+          try {
+            localStorage.setItem('nb-color-mode', 'light');
+          } catch {
+            /* ignore */
           }
         }
       })
