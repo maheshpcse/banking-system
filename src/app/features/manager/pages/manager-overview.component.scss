@@ -74,6 +74,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
+  justify-content: flex-end;
+  margin-left: auto;
 }
 
 .range-cluster {
@@ -81,7 +83,7 @@
   flex-wrap: wrap;
   gap: 0.65rem;
   align-items: flex-end;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .range-select {
@@ -208,11 +210,16 @@
   min-height: 11rem;
 }
 
+.bar-chart--single {
+  grid-template-columns: minmax(0, 8rem);
+  justify-content: start;
+}
+
 .bar-chart__col {
   display: grid;
   gap: 0.35rem;
   justify-items: center;
-  opacity: 0.38;
+  opacity: 1;
   transition: opacity 0.2s ease;
 }
 
@@ -286,8 +293,23 @@
 
 .data-table--compact th,
 .data-table--compact td {
-  padding: 0.55rem 0.65rem;
+  padding: 0.7rem 0.85rem;
   font-size: 0.86rem;
+}
+
+.data-table--compact td strong {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
+}
+
+.legend__dot {
+  display: inline-block;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 999px;
+  margin-right: 0.4rem;
+  vertical-align: middle;
 }
 
 @media (max-width: 860px) {

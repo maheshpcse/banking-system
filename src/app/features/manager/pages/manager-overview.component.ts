@@ -24,6 +24,25 @@ export interface DailyPoint {
   total: number;
 }
 
+export interface DailyGridRow {
+  day: string;
+  label: string;
+  deposit: number;
+  withdraw: number;
+  transfer: number;
+  total: number;
+  count: number;
+}
+
+export interface DailyLedgerRow {
+  day: string;
+  label: string;
+  key: FlowCategoryKey;
+  typeLabel: string;
+  total: number;
+  count: number;
+}
+
 export interface DonutSegment {
   key: string;
   label: string;
@@ -230,6 +249,80 @@ export class ManagerOverviewComponent implements OnInit {
 
   barHeightPct(category: VolumeCategory): number {
     return Math.round((category.total / this.maxVolumeTotal) * 100);
+  }
+
+  volumeSharePct(category: VolumeCategory): number {
+    const sum = this.volumeCategories.reduce((acc, row) => acc + row.total, 0);
+    if (sum <= 0) {
+      return 0;
+    }
+    return Math.round((category.total / sum) * 100);
+  }
+
+  /** Table grid for All — only days with activity in the selected range. */
+  get dailyGridRows(): DailyGridRow[] {
+    const byDay = new Map<
+      string,
+      { deposit: number; withdraw: number; transfer: number; count: number }
+    >();
+    this.dayLabels.forEach((day) => {
+      byDay.set(day, { deposit: 0, withdraw: 0, transfer: 0, count: 0 });
+    });
+    (this.analytics?.dailyFlow || []).forEach((row) => {
+      const cat = categoryForType(row.type);
+      const bucket = byDay.get(row.day);
+      if (!cat || !bucket) {
+        return;
+      }
+      bucket[cat] += row.total;
+      bucket.count += row.count;
+    });
+    return this.dayLabels
+      .map((day) => {
+        const bucket = byDay.get(day) || { deposit: 0, withdraw: 0, transfer: 0, count: 0 };
+        const total = bucket.deposit + bucket.withdraw + bucket.transfer;
+        return {
+          day,
+          label: this.shortDayLabel(day),
+          deposit: Math.round(bucket.deposit * 100) / 100,
+          withdraw: Math.round(bucket.withdraw * 100) / 100,
+          transfer: Math.round(bucket.transfer * 100) / 100,
+          total: Math.round(total * 100) / 100,
+          count: bucket.count
+        };
+      })
+      .filter((row) => row.count > 0 || row.total > 0);
+  }
+
+  /** Table rows for a single type filter — only active days. */
+  get dailyLedgerRows(): DailyLedgerRow[] {
+    if (this.filter === 'all') {
+      return [];
+    }
+    const byDay = new Map<string, { total: number; count: number }>();
+    this.dayLabels.forEach((day) => byDay.set(day, { total: 0, count: 0 }));
+    (this.analytics?.dailyFlow || []).forEach((row) => {
+      const cat = categoryForType(row.type);
+      const bucket = byDay.get(row.day);
+      if (!cat || cat !== this.filter || !bucket) {
+        return;
+      }
+      bucket.total += row.total;
+      bucket.count += row.count;
+    });
+    return this.dayLabels
+      .map((day) => {
+        const bucket = byDay.get(day) || { total: 0, count: 0 };
+        return {
+          day,
+          label: this.shortDayLabel(day),
+          key: this.filter as FlowCategoryKey,
+          typeLabel: this.filterLabel,
+          total: Math.round(bucket.total * 100) / 100,
+          count: bucket.count
+        };
+      })
+      .filter((row) => row.count > 0 || row.total > 0);
   }
 
   private get dayLabels(): string[] {
