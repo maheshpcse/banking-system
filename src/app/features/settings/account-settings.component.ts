@@ -89,9 +89,12 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   savingPrefs = false;
   savingCardControls = false;
   savingLimits = false;
+  savingCurrency = false;
   showCurrent = false;
   showNew = false;
   showConfirm = false;
+  showCardNumber = false;
+  showCvv = false;
   user: User | null = null;
   imagePreview: string | null = null;
   imageFileName = '';
@@ -129,8 +132,12 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   cardFlipped = false;
 
   get tabs(): Array<{ id: SettingsTab; label: string; hint: string }> {
-    const staff = this.auth.currentUser?.role === 'admin' || this.auth.currentUser?.role === 'manager';
-    return staff ? this.allTabs.filter((t) => t.staff) : this.allTabs;
+    return this.isStaff ? this.allTabs.filter((t) => t.staff) : this.allTabs;
+  }
+
+  /** Staff (admin/manager, including Super Admin) never manage a personal transaction currency. */
+  get isStaff(): boolean {
+    return this.auth.currentUser?.role === 'admin' || this.auth.currentUser?.role === 'manager';
   }
 
   private panelTimer: ReturnType<typeof setTimeout> | null = null;
@@ -161,8 +168,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     compactLedger: [false],
     marketingTips: [false],
     theme: ['daylight' as NonNullable<User['settings']>['theme']],
-    fontScale: ['comfortable' as NonNullable<User['settings']>['fontScale']],
-    currency: ['' as string]
+    fontScale: ['comfortable' as NonNullable<User['settings']>['fontScale']]
   });
 
   readonly themeCards: { id: NonNullable<User['settings']>['theme']; label: string; swatch: string[] }[] = [
@@ -179,6 +185,12 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   ];
 
   readonly currencies = ['USD', 'EUR', 'GBP', 'INR', 'AED', 'JPY', 'CAD', 'AUD'];
+
+  /** MM/YY <select> options — months 01-12, years current..+15 (2-digit). */
+  readonly expiryMonths: string[] = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+  readonly expiryYears: string[] = Array.from({ length: 16 }, (_, i) =>
+    String((new Date().getFullYear() + i) % 100).padStart(2, '0')
+  );
 
   bankingForm = this.fb.group(
     {
@@ -214,6 +226,11 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     withdrawDaily: [2000, [Validators.required, Validators.min(1)]],
     transferDaily: [3000, [Validators.required, Validators.min(1)]],
     transferCountDaily: [10, [Validators.required, Validators.min(1)]]
+  });
+
+  /** Lives on the Limits tab, saved independently of the limit-change request form. */
+  currencyForm = this.fb.group({
+    currency: ['']
   });
 
   constructor(
@@ -357,6 +374,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
         break;
       case 'limits':
         this.patchLimitsFromUser();
+        this.currencyForm.reset({ currency: this.user?.settings?.currency || '' });
         break;
       case 'experience':
         this.prefsForm.reset({
@@ -365,8 +383,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
           compactLedger: !!this.user?.settings?.compactLedger,
           marketingTips: !!this.user?.settings?.marketingTips,
           theme: this.user?.settings?.theme || 'daylight',
-          fontScale: this.user?.settings?.fontScale || 'comfortable',
-          currency: this.user?.settings?.currency || ''
+          fontScale: this.user?.settings?.fontScale || 'comfortable'
         });
         break;
     }
@@ -503,6 +520,33 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       error: async (err) => {
         this.savingCardControls = false;
         await this.alerts.error(err?.error?.message || 'Unable to update card controls.');
+      }
+    });
+  }
+
+  saveCurrency(): void {
+    if (this.savingCurrency || this.isStaff) {
+      return;
+    }
+    const currency = String(this.currencyForm.value.currency || '').trim().toUpperCase();
+    if (!currency) {
+      return;
+    }
+    this.savingCurrency = true;
+    withShimmerDelay(
+      this.auth.updateProfile({
+        settings: { currency: currency as NonNullable<User['settings']>['currency'] }
+      }),
+      500
+    ).subscribe({
+      next: async (res) => {
+        this.applyUser(res.user);
+        this.savingCurrency = false;
+        await this.afterSaveSuccess('Currency updated.');
+      },
+      error: async (err) => {
+        this.savingCurrency = false;
+        await this.alerts.error(err?.error?.message || 'Unable to update currency.');
       }
     });
   }
@@ -710,7 +754,6 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     }
     this.savingPrefs = true;
     const raw = this.prefsForm.getRawValue();
-    const currency = String(raw.currency || '').trim().toUpperCase();
     withShimmerDelay(
       this.auth.updateProfile({
         settings: {
@@ -719,8 +762,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
           compactLedger: !!raw.compactLedger,
           marketingTips: !!raw.marketingTips,
           theme: (raw.theme || 'daylight') as NonNullable<User['settings']>['theme'],
-          fontScale: (raw.fontScale || 'comfortable') as NonNullable<User['settings']>['fontScale'],
-          currency: (currency || null) as NonNullable<User['settings']>['currency'] | null
+          fontScale: (raw.fontScale || 'comfortable') as NonNullable<User['settings']>['fontScale']
         }
       }),
       500
@@ -762,9 +804,9 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       compactLedger: !!normalized.settings?.compactLedger,
       marketingTips: !!normalized.settings?.marketingTips,
       theme: normalized.settings?.theme || 'daylight',
-      fontScale: normalized.settings?.fontScale || 'comfortable',
-      currency: normalized.settings?.currency || ''
+      fontScale: normalized.settings?.fontScale || 'comfortable'
     });
+    this.currencyForm.patchValue({ currency: normalized.settings?.currency || '' });
     this.imageFileName = normalized.avatar?.image ? 'Current profile photo' : '';
     this.applyAppearance(normalized);
     this.patchBankingFromUser();

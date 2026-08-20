@@ -97,8 +97,11 @@ export class AccountLifecycleService {
     if (!this.canMoveMoney(user)) {
       return 'Account number is required before this action. Complete account opening first.';
     }
-    if (!String(user?.settings?.currency || '').trim()) {
-      return 'Choose your transaction currency in Account → Experience before moving money.';
+    // Currency selection only applies to customers — staff (admin/manager) never move
+    // personal money through these channels, so they can never be blocked on it.
+    const role = user?.role || 'customer';
+    if (role === 'customer' && !String(user?.settings?.currency || '').trim()) {
+      return 'Choose your transaction currency in Account → Limits before moving money.';
     }
     if (!this.isExpiryCurrentOrFuture(user?.card?.accountExpiryMonth, user?.card?.accountExpiryYear)) {
       return 'Account number validity has expired. Update Card info and wait for review.';
