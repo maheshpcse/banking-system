@@ -88,18 +88,6 @@
       </button>
 
       <div class="flow-toolbar">
-        <div class="tools">
-          <button
-            type="button"
-            class="btn btn--ghost btn--compact"
-            *ngFor="let f of filters"
-            [class.is-active]="filter === f.id"
-            (click)="setFilter(f.id)"
-          >
-            {{ f.label }}
-          </button>
-        </div>
-
         <div class="range-cluster">
           <label class="range-select">
             <span>Date range</span>
@@ -119,6 +107,18 @@
             </label>
           </div>
         </div>
+
+        <div class="tools">
+          <button
+            type="button"
+            class="btn btn--ghost btn--compact"
+            *ngFor="let f of filters"
+            [class.is-active]="filter === f.id"
+            (click)="setFilter(f.id)"
+          >
+            {{ f.label }}
+          </button>
+        </div>
       </div>
 
       <p class="hint hint--range" *ngIf="rangeExceedsAvailableData">
@@ -130,9 +130,9 @@
       <ng-container *ngIf="!flowLoading && view === 'chart'; else flowTableGate">
         <div class="chart-block">
           <p class="chart-block__title">Volume by type <span>({{ filterLabel }})</span></p>
-          <div class="bar-chart">
+          <div class="bar-chart" [class.bar-chart--single]="volumeCategories.length === 1">
             <div
-              class="bar-chart__col"
+              class="bar-chart__col is-hot"
               *ngFor="let cat of volumeCategories"
             >
               <span class="bar-chart__value">{{ cat.total | currencyFormat }}</span>
@@ -168,7 +168,7 @@
               <title>{{ point.label }}: {{ point.total | currencyFormat }}</title>
             </circle>
           </svg>
-          <div class="line-chart__axis">
+          <div class="line-chart__axis" *ngIf="dailyPoints.length">
             <span>{{ dailyPoints[0].label }}</span>
             <span>{{ dailyPoints[dailyPoints.length - 1].label }}</span>
           </div>
@@ -179,32 +179,91 @@
         <ng-container *ngIf="!flowLoading && view === 'table'">
           <div class="chart-block">
             <p class="chart-block__title">Volume by type <span>({{ filterLabel }})</span></p>
-            <table class="mini-table">
-              <thead>
-                <tr><th>Type</th><th>Total</th><th>Count</th></tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let cat of volumeCategories">
-                  <td><span class="legend__dot" [style.background]="cat.color"></span>{{ cat.label }}</td>
-                  <td>{{ cat.total | currencyFormat }}</td>
-                  <td>{{ cat.count }}</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-wrap" *ngIf="volumeCategories.length; else noVolume">
+              <table class="data-table data-table--compact">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Total</th>
+                    <th>Count</th>
+                    <th>Share</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let cat of volumeCategories">
+                    <td>
+                      <strong>
+                        <span class="legend__dot" [style.background]="cat.color"></span>
+                        {{ cat.label }}
+                      </strong>
+                    </td>
+                    <td>{{ cat.total | currencyFormat }}</td>
+                    <td>{{ cat.count }}</td>
+                    <td>{{ volumeSharePct(cat) }}%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ng-template #noVolume>
+              <p class="hint">No volume for this filter.</p>
+            </ng-template>
           </div>
+
           <div class="chart-block">
-            <p class="chart-block__title">Daily flow ({{ filterLabel }} · {{ rangeLabel }})</p>
-            <table class="mini-table mini-table--scroll">
-              <thead>
-                <tr><th>Day</th><th>Total</th></tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let point of dailyPoints">
-                  <td>{{ point.label }}</td>
-                  <td>{{ point.total | currencyFormat }}</td>
-                </tr>
-              </tbody>
-            </table>
+            <p class="chart-block__title">Daily flow <span>({{ filterLabel }} · {{ rangeLabel }})</span></p>
+
+            <div class="table-wrap" *ngIf="filter === 'all' && dailyGridRows.length; else dailySingleBlock">
+              <table class="data-table data-table--compact">
+                <thead>
+                  <tr>
+                    <th>Day</th>
+                    <th>Deposits</th>
+                    <th>Withdrawals</th>
+                    <th>Transfers</th>
+                    <th>Total</th>
+                    <th>Txns</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of dailyGridRows">
+                    <td><strong>{{ row.label }}</strong></td>
+                    <td>{{ row.deposit | currencyFormat }}</td>
+                    <td>{{ row.withdraw | currencyFormat }}</td>
+                    <td>{{ row.transfer | currencyFormat }}</td>
+                    <td>{{ row.total | currencyFormat }}</td>
+                    <td>{{ row.count }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <ng-template #dailySingleBlock>
+              <div class="table-wrap" *ngIf="filter !== 'all' && dailyLedgerRows.length; else noDaily">
+                <table class="data-table data-table--compact">
+                  <thead>
+                    <tr>
+                      <th>Day</th>
+                      <th>Type</th>
+                      <th>Total</th>
+                      <th>Count</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let row of dailyLedgerRows">
+                      <td><strong>{{ row.label }}</strong></td>
+                      <td>
+                        <span class="pill" [attr.data-status]="row.key">{{ row.typeLabel }}</span>
+                      </td>
+                      <td>{{ row.total | currencyFormat }}</td>
+                      <td>{{ row.count }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <ng-template #noDaily>
+                <p class="hint">No daily activity for this filter and date range.</p>
+              </ng-template>
+            </ng-template>
           </div>
         </ng-container>
       </ng-template>
