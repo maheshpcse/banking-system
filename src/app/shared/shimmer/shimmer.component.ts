@@ -18,6 +18,10 @@ export class ShimmerComponent {
     | 'admin-overview'
     | 'admin-customers'
     | 'admin-requests'
+    | 'manager-overview'
+    | 'manager-reports'
+    | 'manager-billing'
+    | 'home'
     | 'auth' = 'dashboard';
 
   /** Account settings panel tab layout when variant is settings-panel */
