@@ -1,12 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, of } from 'rxjs';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ShellBootService } from '../../../core/services/shell-boot.service';
 import { fieldError } from '../../../core/utils/form-errors';
+import { withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +15,7 @@ import { fieldError } from '../../../core/utils/form-errors';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit, OnDestroy {
+  pageLoading = true;
   loading = false;
   showPassword = false;
   formError = '';
@@ -39,6 +41,9 @@ export class LoginComponent implements OnInit, OnDestroy {
       if (this.formError) {
         this.formError = '';
       }
+    });
+    withShimmerDelay(of(true), 220).subscribe(() => {
+      this.pageLoading = false;
     });
   }
 

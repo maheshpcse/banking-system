@@ -1,8 +1,11 @@
 import { AbstractControl } from '@angular/forms';
 
-/** Field-level message shown under a control after touch/dirty. */
+/**
+ * Field-level message under a control.
+ * Only after the user has touched the field — never on pristine load / autofill dirty alone.
+ */
 export function fieldError(control: AbstractControl | null | undefined, label: string): string {
-  if (!control || (!control.touched && !control.dirty) || control.valid) {
+  if (!control || !control.touched || control.valid) {
     return '';
   }
 
@@ -29,6 +32,9 @@ export function fieldError(control: AbstractControl | null | undefined, label: s
   }
   if (control.hasError('mismatch')) {
     return 'Passwords do not match.';
+  }
+  if (control.hasError('pattern')) {
+    return `${label} is invalid.`;
   }
 
   return `${label} is invalid.`;

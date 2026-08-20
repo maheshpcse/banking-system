@@ -1,4 +1,4 @@
-<section class="auth-page auth-page--staff">
+<section class="auth-page auth-page--staff" *ngIf="!pageLoading; else authShimmer">
   <div class="auth-page__stage">
     <div class="auth-page__mesh" aria-hidden="true"></div>
     <div class="auth-page__band auth-page__band--a" aria-hidden="true"></div>
@@ -100,3 +100,7 @@
     </app-animated-card>
   </div>
 </section>
+
+<ng-template #authShimmer>
+  <app-shimmer variant="auth"></app-shimmer>
+</ng-template>

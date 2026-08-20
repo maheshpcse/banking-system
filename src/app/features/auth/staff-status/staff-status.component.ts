@@ -1,16 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription, of } from 'rxjs';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { fieldError } from '../../../core/utils/form-errors';
+import { withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
   selector: 'app-staff-status',
   templateUrl: './staff-status.component.html',
   styleUrls: ['./staff-status.component.scss']
 })
-export class StaffStatusComponent implements OnInit {
+export class StaffStatusComponent implements OnInit, OnDestroy {
+  pageLoading = true;
   loading = false;
   formError = '';
   lastChecked: 'active' | 'pending_approval' | 'rejected' | null = null;
@@ -19,6 +22,7 @@ export class StaffStatusComponent implements OnInit {
   });
 
   readonly fieldError = fieldError;
+  private formSub?: Subscription;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -32,6 +36,18 @@ export class StaffStatusComponent implements OnInit {
     if (prefill) {
       this.form.patchValue({ identifier: prefill });
     }
+    this.formSub = this.form.valueChanges.subscribe(() => {
+      if (this.formError) {
+        this.formError = '';
+      }
+    });
+    withShimmerDelay(of(true), 220).subscribe(() => {
+      this.pageLoading = false;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.formSub?.unsubscribe();
   }
 
   submit(): void {

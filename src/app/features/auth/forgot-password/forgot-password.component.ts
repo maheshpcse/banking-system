@@ -1,15 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription, of } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { fieldError } from '../../../core/utils/form-errors';
+import { withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
   selector: 'app-forgot-password',
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.scss']
 })
-export class ForgotPasswordComponent {
+export class ForgotPasswordComponent implements OnInit, OnDestroy {
+  pageLoading = true;
   loading = false;
   formError = '';
   form = this.fb.group({
@@ -17,12 +20,28 @@ export class ForgotPasswordComponent {
   });
 
   readonly fieldError = fieldError;
+  private formSub?: Subscription;
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly auth: AuthService,
     private readonly router: Router
   ) {}
+
+  ngOnInit(): void {
+    this.formSub = this.form.valueChanges.subscribe(() => {
+      if (this.formError) {
+        this.formError = '';
+      }
+    });
+    withShimmerDelay(of(true), 220).subscribe(() => {
+      this.pageLoading = false;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.formSub?.unsubscribe();
+  }
 
   submit(): void {
     if (this.form.invalid || this.loading) {

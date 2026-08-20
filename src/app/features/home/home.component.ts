@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { of } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
+import { withShimmerDelay } from '../../core/utils/shimmer';
 
 @Component({
   selector: 'app-home',
@@ -9,6 +11,7 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class HomeComponent implements OnInit {
   signupComplete = false;
+  pageLoading = true;
 
   constructor(
     private auth: AuthService,
@@ -24,6 +27,10 @@ export class HomeComponent implements OnInit {
 
     this.route.queryParamMap.subscribe((params) => {
       this.signupComplete = params.get('registered') === '1';
+    });
+
+    withShimmerDelay(of(true), 220).subscribe(() => {
+      this.pageLoading = false;
     });
   }
 

@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription, of } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { fieldError } from '../../../core/utils/form-errors';
+import { withShimmerDelay } from '../../../core/utils/shimmer';
 
 function matchPasswords(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
@@ -18,7 +20,8 @@ function matchPasswords(group: AbstractControl): ValidationErrors | null {
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.scss']
 })
-export class ResetPasswordComponent implements OnInit {
+export class ResetPasswordComponent implements OnInit, OnDestroy {
+  pageLoading = true;
   loading = false;
   showPassword = false;
   showConfirm = false;
@@ -37,6 +40,7 @@ export class ResetPasswordComponent implements OnInit {
   );
 
   readonly fieldError = fieldError;
+  private formSub?: Subscription;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -58,6 +62,18 @@ export class ResetPasswordComponent implements OnInit {
     if (!this.resetToken) {
       void this.router.navigateByUrl('/auth/forgot-password');
     }
+    this.formSub = this.form.valueChanges.subscribe(() => {
+      if (this.formError) {
+        this.formError = '';
+      }
+    });
+    withShimmerDelay(of(true), 220).subscribe(() => {
+      this.pageLoading = false;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.formSub?.unsubscribe();
   }
 
   submit(): void {
