@@ -76,6 +76,14 @@
   gap: 0.35rem;
 }
 
+.range-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
 .range-select {
   display: grid;
   gap: 0.3rem;
@@ -92,7 +100,7 @@
 
 .range-select select {
   border: 1px solid rgba(148, 163, 184, 0.3);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--input-bg, rgba(255, 255, 255, 0.92));
   border-radius: 0.7rem;
   padding: 0.5rem 2.2rem 0.5rem 0.75rem;
   font-weight: 650;
@@ -105,6 +113,11 @@
   flex-wrap: wrap;
   gap: 0.65rem;
   margin-bottom: 0.85rem;
+}
+
+.custom-range--inline {
+  margin-bottom: 0;
+  align-items: flex-end;
 }
 
 .custom-range label {
@@ -122,7 +135,7 @@
 
 .custom-range input[type='date'] {
   border: 1px solid rgba(148, 163, 184, 0.3);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--input-bg, rgba(255, 255, 255, 0.92));
   border-radius: 0.7rem;
   padding: 0.5rem 0.75rem;
   font-size: 0.85rem;

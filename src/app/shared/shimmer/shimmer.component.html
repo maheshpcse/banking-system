@@ -199,6 +199,11 @@
           <div class="shimmer-line shimmer-line--xs"></div>
           <div class="shimmer-line shimmer-line--md"></div>
           <div class="shimmer-row shimmer-row--pref" *ngFor="let i of [1, 2, 3, 4]"></div>
+          <div class="shimmer-line shimmer-line--xs"></div>
+          <div class="shimmer-theme-grid">
+            <span class="shimmer-theme-tile" *ngFor="let i of [1, 2, 3, 4, 5, 6]"></span>
+          </div>
+          <div class="shimmer-block shimmer-block--sm"></div>
           <div class="shimmer-line shimmer-line--btn shimmer-line--btn-inline"></div>
         </div>
 
@@ -261,6 +266,25 @@
         <div class="shimmer-line shimmer-line--title"></div>
         <div class="shimmer-line shimmer-line--lede"></div>
       </div>
+      <div class="shimmer-card shimmer-card--table">
+        <div class="shimmer-row shimmer-row--table-head"></div>
+        <div class="shimmer-row shimmer-row--table" *ngFor="let i of [1, 2, 3, 4, 5]">
+          <div class="shimmer-table-cell shimmer-table-cell--name">
+            <div class="shimmer-line shimmer-line--sm"></div>
+            <div class="shimmer-line shimmer-line--xs"></div>
+          </div>
+          <div class="shimmer-line shimmer-line--xs shimmer-table-cell--acct"></div>
+          <div class="shimmer-chip shimmer-chip--pill"></div>
+          <div class="shimmer-line shimmer-line--xs shimmer-table-cell--bal"></div>
+          <div class="shimmer-table-actions">
+            <span class="shimmer-chip shimmer-chip--action"></span>
+            <span class="shimmer-chip shimmer-chip--more"></span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'admin-customers-table'">
       <div class="shimmer-card shimmer-card--table">
         <div class="shimmer-row shimmer-row--table-head"></div>
         <div class="shimmer-row shimmer-row--table" *ngFor="let i of [1, 2, 3, 4, 5]">
@@ -359,24 +383,75 @@
     </ng-container>
 
     <ng-container *ngSwitchCase="'home'">
-      <div class="shimmer__auth">
-        <div class="shimmer-card">
-          <div class="shimmer-line shimmer-line--brand"></div>
-          <div class="shimmer-line shimmer-line--title"></div>
-          <div class="shimmer-line shimmer-line--lede"></div>
-          <div class="shimmer-line shimmer-line--btn"></div>
+      <div class="shimmer__home">
+        <div class="shimmer__home-canvas" aria-hidden="true">
+          <span class="shimmer__home-glow shimmer__home-glow--a"></span>
+          <span class="shimmer__home-glow shimmer__home-glow--b"></span>
+          <span class="shimmer__home-rail"></span>
+        </div>
+        <div class="shimmer__home-frame">
+          <div class="shimmer-line shimmer-line--brand shimmer-line--home-brand"></div>
+          <div class="shimmer-line shimmer-line--title shimmer-line--home-title"></div>
+          <div class="shimmer-line shimmer-line--lede shimmer-line--home-lede"></div>
+          <div class="shimmer__home-actions">
+            <div class="shimmer-line shimmer-line--btn"></div>
+            <div class="shimmer-line shimmer-line--btn shimmer-line--btn-ghost"></div>
+          </div>
         </div>
       </div>
     </ng-container>
 
+    <ng-container *ngSwitchCase="'auth'">
+      <div class="shimmer__auth-page">
+        <div class="shimmer__auth-mesh" aria-hidden="true"></div>
+        <div class="shimmer__auth-stage">
+          <div class="shimmer__auth-copy">
+            <div class="shimmer-line shimmer-line--brand"></div>
+            <div class="shimmer-line shimmer-line--title"></div>
+            <div class="shimmer-line shimmer-line--lede"></div>
+          </div>
+          <div class="shimmer-card shimmer-card--auth">
+            <div class="shimmer-line shimmer-line--xs"></div>
+            <div class="shimmer-line shimmer-line--md"></div>
+            <div class="shimmer-block"></div>
+            <div class="shimmer-block"></div>
+            <div class="shimmer-line shimmer-line--btn"></div>
+            <div class="shimmer-line shimmer-line--xs shimmer-line--auth-link"></div>
+          </div>
+          <div class="shimmer-line shimmer-line--xs shimmer-line--auth-foot"></div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'drawer-profile'">
+      <div class="shimmer-card shimmer-card--drawer">
+        <div class="shimmer-line shimmer-line--xs"></div>
+        <div class="shimmer-line shimmer-line--md"></div>
+        <div class="shimmer-block"></div>
+        <div class="shimmer-block shimmer-block--sm"></div>
+      </div>
+      <div class="shimmer-card shimmer-card--drawer">
+        <div class="shimmer-line shimmer-line--xs"></div>
+        <div class="shimmer-line shimmer-line--md"></div>
+        <div class="shimmer-row" *ngFor="let i of [1, 2, 3]"></div>
+      </div>
+      <div class="shimmer-card shimmer-card--drawer">
+        <div class="shimmer-line shimmer-line--xs"></div>
+        <div class="shimmer-block"></div>
+        <div class="shimmer-block shimmer-block--sm"></div>
+      </div>
+    </ng-container>
+
     <ng-container *ngSwitchDefault>
-      <div class="shimmer__auth">
-        <div class="shimmer-card">
-          <div class="shimmer-line shimmer-line--brand"></div>
-          <div class="shimmer-line shimmer-line--title"></div>
-          <div class="shimmer-block"></div>
-          <div class="shimmer-block"></div>
-          <div class="shimmer-line shimmer-line--btn"></div>
+      <div class="shimmer__auth-page">
+        <div class="shimmer__auth-stage">
+          <div class="shimmer-card shimmer-card--auth">
+            <div class="shimmer-line shimmer-line--brand"></div>
+            <div class="shimmer-line shimmer-line--title"></div>
+            <div class="shimmer-block"></div>
+            <div class="shimmer-block"></div>
+            <div class="shimmer-line shimmer-line--btn"></div>
+          </div>
         </div>
       </div>
     </ng-container>

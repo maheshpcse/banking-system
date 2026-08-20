@@ -4,7 +4,7 @@ import { AdminService } from '../../../core/services/admin.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AlertService } from '../../../core/services/alert.service';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
   selector: 'app-admin-overview',
@@ -39,7 +39,7 @@ export class AdminOverviewComponent implements OnInit {
         analytics: this.admin.getAnalytics(),
         notifications: this.notifications.refresh()
       }),
-      500
+      SHIMMER_MS
     ).subscribe({
       next: ({ customers, requests, analytics }) => {
         this.customers = analytics?.customers?.total ?? customers.pagination.total;

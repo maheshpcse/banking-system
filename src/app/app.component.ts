@@ -58,11 +58,31 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subs.add(
       this.auth.user$.subscribe((user) => {
         this.syncChrome(this.router.url);
-        if (user && typeof document !== 'undefined') {
-          document.documentElement.dataset['nbTheme'] = user.settings?.theme || 'daylight';
-          document.documentElement.dataset['nbFont'] = user.settings?.fontScale || 'comfortable';
-          document.documentElement.dataset['nbMode'] =
-            user.settings?.colorMode === 'dark' ? 'dark' : 'light';
+        if (typeof document !== 'undefined') {
+          if (user) {
+            document.documentElement.dataset['nbTheme'] = user.settings?.theme || 'daylight';
+            document.documentElement.dataset['nbFont'] = user.settings?.fontScale || 'comfortable';
+            const mode = user.settings?.colorMode === 'dark' ? 'dark' : 'light';
+            document.documentElement.dataset['nbMode'] = mode;
+            try {
+              localStorage.setItem('nb-color-mode', mode);
+            } catch {
+              /* ignore */
+            }
+          } else if (!document.documentElement.dataset['nbMode']) {
+            let mode: 'light' | 'dark' = 'light';
+            try {
+              const stored = localStorage.getItem('nb-color-mode');
+              if (stored === 'dark' || stored === 'light') {
+                mode = stored;
+              } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                mode = 'dark';
+              }
+            } catch {
+              /* ignore */
+            }
+            document.documentElement.dataset['nbMode'] = mode;
+          }
         }
       })
     );

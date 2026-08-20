@@ -60,6 +60,30 @@
 
         <p class="form__error" *ngIf="formError">{{ formError }}</p>
 
+        <div class="unlock-box" *ngIf="locked" role="region" aria-label="Request unlock" [formGroup]="unlockForm">
+          <p class="unlock-box__lede">
+            Ask a Super Admin to clear your sign-in lock. They will get an Alerts notification.
+          </p>
+          <label>
+            <span>Optional note</span>
+            <textarea
+              formControlName="message"
+              rows="2"
+              maxlength="500"
+              placeholder="Why you need access restored…"
+            ></textarea>
+          </label>
+          <button
+            class="btn btn--ghost"
+            type="button"
+            [disabled]="unlockLoading"
+            (click)="requestUnlock()"
+          >
+            {{ unlockLoading ? 'Sending…' : 'Request Super Admin unlock' }}
+          </button>
+          <p class="unlock-box__ok" *ngIf="unlockNotice">{{ unlockNotice }}</p>
+        </div>
+
         <button class="btn btn--primary" type="submit" [disabled]="loading">
           {{ loading ? 'Signing in…' : 'Sign in' }}
         </button>

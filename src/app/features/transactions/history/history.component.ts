@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { Transaction } from '../../../core/models/banking.models';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { withShimmerDelay, SHIMMER_MS } from '../../../core/utils/shimmer';
 
 const HISTORY_TYPES = new Set(['deposit', 'withdraw', 'transfer_in', 'transfer_out']);
 
@@ -63,9 +63,10 @@ export class HistoryComponent implements OnInit, OnDestroy {
       this.listLoading = true;
     }
     this.error = '';
-    const request$ = initial
-      ? withShimmerDelay(this.transactionService.list({ page, limit: 12, type: this.type || undefined }))
-      : this.transactionService.list({ page, limit: 12, type: this.type || undefined });
+    const request$ = withShimmerDelay(
+      this.transactionService.list({ page, limit: 12, type: this.type || undefined }),
+      SHIMMER_MS
+    );
 
     request$.subscribe({
       next: (res) => {

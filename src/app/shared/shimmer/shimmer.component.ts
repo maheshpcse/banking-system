@@ -17,12 +17,14 @@ export class ShimmerComponent {
     | 'notifications'
     | 'admin-overview'
     | 'admin-customers'
+    | 'admin-customers-table'
     | 'admin-requests'
     | 'manager-overview'
     | 'manager-reports'
     | 'manager-billing'
     | 'home'
-    | 'auth' = 'dashboard';
+    | 'auth'
+    | 'drawer-profile' = 'dashboard';
 
   /** Account settings panel tab layout when variant is settings-panel */
   @Input() panel:

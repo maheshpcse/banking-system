@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AdminRequestRow, AdminService } from '../../../core/services/admin.service';
 import { AlertService } from '../../../core/services/alert.service';
-import { withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/shimmer';
 import { formatStatusLabel } from '../../../core/utils/status-label';
 
 type RequestFilter = 'all' | 'under_review' | 'active' | 'rejected' | 'blocked' | 'deactivated';
@@ -15,7 +15,8 @@ type RequestFilter = 'all' | 'under_review' | 'active' | 'rejected' | 'blocked' 
 export class AdminRequestsComponent implements OnInit, OnDestroy {
   requests: AdminRequestRow[] = [];
   pageLoading = true;
-  statusFilter: RequestFilter = 'under_review';
+  listLoading = false;
+  statusFilter: RequestFilter = 'all';
   readonly filters: { id: RequestFilter; label: string }[] = [
     { id: 'all', label: 'All' },
     { id: 'under_review', label: 'Under Review' },
@@ -41,7 +42,7 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.sub = this.admin.requests$.subscribe((rows) => (this.requests = rows));
-    withShimmerDelay(this.admin.refreshRequests(), 500).subscribe({
+    withShimmerDelay(this.admin.refreshRequests(), SHIMMER_MS).subscribe({
       next: () => {
         this.pageLoading = false;
       },
@@ -57,7 +58,14 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
   }
 
   setFilter(id: RequestFilter): void {
+    if (this.statusFilter === id) {
+      return;
+    }
     this.statusFilter = id;
+    this.listLoading = true;
+    shimmerPause(SHIMMER_MS).subscribe(() => {
+      this.listLoading = false;
+    });
   }
 
   async approve(row: AdminRequestRow): Promise<void> {
@@ -79,8 +87,8 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
     await this.alerts.confirmAction({
       text: `Reject application for ${row.fullName}?`,
       confirmText: 'Reject',
-      loadingText: 'Rejecting application…',
-      action: async () => this.admin.rejectRequest(row.id, 'Additional verification required.'),
+      loadingText: 'Rejecting…',
+      action: async () => this.admin.rejectRequest(row.id),
       successMessage: 'Application rejected.',
       errorMessage: (err) =>
         (err as { error?: { message?: string } })?.error?.message || 'Unable to reject application'

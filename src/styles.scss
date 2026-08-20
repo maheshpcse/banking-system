@@ -4,6 +4,14 @@
   --bg: #f4f8fb;
   --bg-accent: #e8f3f8;
   --surface: rgba(255, 255, 255, 0.78);
+  --surface-solid: #ffffff;
+  --surface-elevated: rgba(255, 255, 255, 0.92);
+  --surface-muted: rgba(255, 255, 255, 0.55);
+  --border: rgba(148, 163, 184, 0.28);
+  --border-strong: rgba(148, 163, 184, 0.42);
+  --overlay: rgba(24, 38, 48, 0.32);
+  --input-bg: rgba(255, 255, 255, 0.95);
+  --table-bg: rgba(255, 255, 255, 0.84);
   --text: #1d2a36;
   --text-muted: #6b7c8f;
   --accent: #5fc4b0;
@@ -550,21 +558,82 @@ html[data-nb-theme='mist'] body {
     #f3f6fb;
 }
 
-/* Drawer / medium-modal overlays shrink the sticky nav out of the way so the
-   overlay's close control is always the top-most, unobstructed target. */
+/* Keep navbar visible while drawers/modals are open — overlays sit above it (z-index). */
 body.nb-drawer-open .nav {
-  transform: translateY(-100%);
-  box-shadow: none;
-  pointer-events: none;
+  /* previously: translateY(-100%) — removed so NavBar stays on screen */
+}
+
+/*
+ * Dark mode = full UI chrome inversion (like console apps), while palette themes
+ * keep their accent hues bright against dark surfaces.
+ */
+html[data-nb-mode='dark'] {
+  color-scheme: dark;
 }
 
 html[data-nb-mode='dark'] body {
-  --bg: #0f141b;
+  --bg: #0b1118;
+  --bg-accent: #121a24;
+  --surface: rgba(22, 30, 40, 0.88);
+  --surface-solid: #161e28;
+  --surface-elevated: rgba(28, 38, 50, 0.96);
+  --surface-muted: rgba(18, 26, 36, 0.72);
+  --border: rgba(148, 163, 184, 0.22);
+  --border-strong: rgba(148, 163, 184, 0.36);
+  --overlay: rgba(2, 6, 12, 0.62);
+  --input-bg: rgba(14, 20, 28, 0.92);
+  --table-bg: rgba(18, 26, 36, 0.92);
   --text: #e8eef4;
   --text-muted: #9aa8b8;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.45);
+  /* Keep theme accents vivid on dark canvases */
+  --accent: #6ed7c4;
+  --accent-deep: #7be0cf;
+  --accent-sky: #7eb8f0;
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(95, 196, 176, 0.12), transparent 55%),
-    radial-gradient(900px 500px at 90% 0%, rgba(106, 168, 232, 0.1), transparent 50%),
-    #0f141b;
+    radial-gradient(1200px 600px at 10% -10%, rgba(95, 196, 176, 0.16), transparent 55%),
+    radial-gradient(900px 500px at 90% 0%, rgba(106, 168, 232, 0.14), transparent 50%),
+    #0b1118;
   color: var(--text);
+}
+
+html[data-nb-mode='dark'] * {
+  scrollbar-color: rgba(110, 215, 196, 0.45) rgba(18, 26, 36, 0.8);
+}
+
+html[data-nb-mode='dark'] *::-webkit-scrollbar-track {
+  background: rgba(18, 26, 36, 0.8);
+}
+
+html[data-nb-mode='dark'] input,
+html[data-nb-mode='dark'] select,
+html[data-nb-mode='dark'] textarea {
+  background: var(--input-bg);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+html[data-nb-mode='dark'] .card,
+html[data-nb-mode='dark'] .animated-card,
+html[data-nb-mode='dark'] .data-table,
+html[data-nb-mode='dark'] .table-wrap,
+html[data-nb-mode='dark'] .stat,
+html[data-nb-mode='dark'] .roadmap-card,
+html[data-nb-mode='dark'] .settings-nav,
+html[data-nb-mode='dark'] .settings-panel,
+html[data-nb-mode='dark'] .drawer,
+html[data-nb-mode='dark'] .tx-modal,
+html[data-nb-mode='dark'] .shimmer-card {
+  background: var(--surface-elevated);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+html[data-nb-mode='dark'] .drawer-backdrop,
+html[data-nb-mode='dark'] .tx-modal-backdrop {
+  background: var(--overlay);
+}
+
+html[data-nb-mode='light'] {
+  color-scheme: light;
 }

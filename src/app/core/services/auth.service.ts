@@ -69,6 +69,11 @@ export class AuthService {
     });
   }
 
+  /** Public — ask Super Admin to clear a login lock (no auth). */
+  requestUnlock(payload: { identifier: string; message?: string }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/request-unlock`, payload);
+  }
+
   resetPassword(payload: {
     resetToken: string;
     password: string;

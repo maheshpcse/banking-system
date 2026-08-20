@@ -88,13 +88,6 @@
       </button>
 
       <div class="flow-toolbar">
-        <label class="range-select">
-          <span>Date range</span>
-          <select [(ngModel)]="range" (ngModelChange)="onRangeChange($event)" name="range">
-            <option *ngFor="let r of rangeOptions" [value]="r.id">{{ r.label }}</option>
-          </select>
-        </label>
-
         <div class="tools">
           <button
             type="button"
@@ -106,30 +99,41 @@
             {{ f.label }}
           </button>
         </div>
+
+        <div class="range-cluster">
+          <label class="range-select">
+            <span>Date range</span>
+            <select [(ngModel)]="range" (ngModelChange)="onRangeChange($event)" name="range">
+              <option *ngFor="let r of rangeOptions" [value]="r.id">{{ r.label }}</option>
+            </select>
+          </label>
+
+          <div class="custom-range custom-range--inline" *ngIf="range === 'custom'">
+            <label>
+              <span>From</span>
+              <input type="date" [(ngModel)]="customStart" (ngModelChange)="onCustomRangeChange()" name="customStart" />
+            </label>
+            <label>
+              <span>To</span>
+              <input type="date" [(ngModel)]="customEnd" (ngModelChange)="onCustomRangeChange()" name="customEnd" />
+            </label>
+          </div>
+        </div>
       </div>
 
-      <div class="custom-range" *ngIf="range === 'custom'">
-        <label>
-          <span>From</span>
-          <input type="date" [(ngModel)]="customStart" (ngModelChange)="onCustomRangeChange()" name="customStart" />
-        </label>
-        <label>
-          <span>To</span>
-          <input type="date" [(ngModel)]="customEnd" (ngModelChange)="onCustomRangeChange()" name="customEnd" />
-        </label>
-      </div>
       <p class="hint hint--range" *ngIf="rangeExceedsAvailableData">
         Showing all available transaction history — the ledger currently reports up to the trailing 14 days.
       </p>
 
-      <ng-container *ngIf="view === 'chart'; else flowTable">
+      <app-shimmer *ngIf="flowLoading" variant="history-ledger"></app-shimmer>
+
+      <ng-container *ngIf="!flowLoading && view === 'chart'; else flowTableGate">
         <div class="chart-block">
-          <p class="chart-block__title">Volume by type <span>({{ filterLabel }} highlighted)</span></p>
+          <p class="chart-block__title">Volume by type <span>({{ filterLabel }})</span></p>
           <div class="bar-chart">
             <div
               class="bar-chart__col"
               *ngFor="let cat of volumeCategories"
-              [class.is-dim]="!isFilterActive(cat.key)"
             >
               <span class="bar-chart__value">{{ cat.total | currencyFormat }}</span>
               <div class="bar-chart__track">
@@ -145,7 +149,7 @@
         </div>
 
         <div class="chart-block">
-          <p class="chart-block__title">Daily flow <span>({{ rangeLabel }})</span></p>
+          <p class="chart-block__title">Daily flow <span>({{ rangeLabel }} · {{ filterLabel }})</span></p>
           <svg class="line-chart" viewBox="0 0 100 42" preserveAspectRatio="none" role="img" [attr.aria-label]="'Daily transaction flow, ' + rangeLabel">
             <polyline
               class="line-chart__grid"
@@ -171,36 +175,38 @@
         </div>
       </ng-container>
 
-      <ng-template #flowTable>
-        <div class="chart-block">
-          <p class="chart-block__title">Volume by type</p>
-          <table class="mini-table">
-            <thead>
-              <tr><th>Type</th><th>Total</th><th>Count</th></tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let cat of volumeCategories" [class.is-dim]="!isFilterActive(cat.key)">
-                <td><span class="legend__dot" [style.background]="cat.color"></span>{{ cat.label }}</td>
-                <td>{{ cat.total | currencyFormat }}</td>
-                <td>{{ cat.count }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="chart-block">
-          <p class="chart-block__title">Daily flow ({{ filterLabel }})</p>
-          <table class="mini-table mini-table--scroll">
-            <thead>
-              <tr><th>Day</th><th>Total</th></tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let point of dailyPoints">
-                <td>{{ point.label }}</td>
-                <td>{{ point.total | currencyFormat }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <ng-template #flowTableGate>
+        <ng-container *ngIf="!flowLoading && view === 'table'">
+          <div class="chart-block">
+            <p class="chart-block__title">Volume by type <span>({{ filterLabel }})</span></p>
+            <table class="mini-table">
+              <thead>
+                <tr><th>Type</th><th>Total</th><th>Count</th></tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let cat of volumeCategories">
+                  <td><span class="legend__dot" [style.background]="cat.color"></span>{{ cat.label }}</td>
+                  <td>{{ cat.total | currencyFormat }}</td>
+                  <td>{{ cat.count }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="chart-block">
+            <p class="chart-block__title">Daily flow ({{ filterLabel }} · {{ rangeLabel }})</p>
+            <table class="mini-table mini-table--scroll">
+              <thead>
+                <tr><th>Day</th><th>Total</th></tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let point of dailyPoints">
+                  <td>{{ point.label }}</td>
+                  <td>{{ point.total | currencyFormat }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </ng-container>
       </ng-template>
     </app-animated-card>
   </div>
