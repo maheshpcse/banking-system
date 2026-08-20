@@ -7,6 +7,7 @@ import { withShimmerDelay } from '../../../core/utils/shimmer';
 
 export type FlowFilter = 'all' | 'deposit' | 'withdraw' | 'transfer';
 export type FlowCategoryKey = 'deposit' | 'withdraw' | 'transfer';
+export type RangeFilter = 'week' | 'month' | 'quarter' | 'half' | 'custom';
 type ViewMode = 'chart' | 'table';
 
 export interface VolumeCategory {
@@ -67,7 +68,20 @@ export class ManagerOverviewComponent implements OnInit {
     { id: 'transfer', label: 'Transfers' }
   ];
 
-  private readonly dayLabels = this.buildLast14Days();
+  /** Server currently reports the trailing 14 days — longer ranges show all of it. */
+  private static readonly AVAILABLE_DAYS = 14;
+
+  range: RangeFilter = 'month';
+  customStart = '';
+  customEnd = '';
+
+  readonly rangeOptions: Array<{ id: RangeFilter; label: string; days: number }> = [
+    { id: 'week', label: 'Last one week', days: 7 },
+    { id: 'month', label: 'Last 30 days', days: 30 },
+    { id: 'quarter', label: 'Last 3 months', days: 90 },
+    { id: 'half', label: 'Last 6 months', days: 180 },
+    { id: 'custom', label: 'Custom range', days: 0 }
+  ];
 
   constructor(
     private readonly admin: AdminService,
@@ -104,6 +118,34 @@ export class ManagerOverviewComponent implements OnInit {
 
   toggleView(): void {
     this.view = this.view === 'chart' ? 'table' : 'chart';
+  }
+
+  onRangeChange(value: string): void {
+    this.range = (value || 'month') as RangeFilter;
+    if (this.range === 'custom' && !this.customStart && !this.customEnd) {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - 29);
+      this.customEnd = this.isoDay(end);
+      this.customStart = this.isoDay(start);
+    }
+  }
+
+  onCustomRangeChange(): void {
+    // Getter re-derives dayLabels from customStart/customEnd on next read.
+  }
+
+  get rangeLabel(): string {
+    return this.rangeOptions.find((r) => r.id === this.range)?.label || 'Last 30 days';
+  }
+
+  /** True once the selected window exceeds the data the server currently reports. */
+  get rangeExceedsAvailableData(): boolean {
+    if (this.range === 'custom') {
+      return this.dayLabels.length > ManagerOverviewComponent.AVAILABLE_DAYS;
+    }
+    const option = this.rangeOptions.find((r) => r.id === this.range);
+    return (option?.days || 0) > ManagerOverviewComponent.AVAILABLE_DAYS;
   }
 
   isFilterActive(key: FlowCategoryKey): boolean {
@@ -171,6 +213,15 @@ export class ManagerOverviewComponent implements OnInit {
 
   barHeightPct(category: VolumeCategory): number {
     return Math.round((category.total / this.maxVolumeTotal) * 100);
+  }
+
+  private get dayLabels(): string[] {
+    if (this.range === 'custom' && this.customStart && this.customEnd) {
+      return this.buildDayRange(this.customStart, this.customEnd);
+    }
+    const option = this.rangeOptions.find((r) => r.id === this.range);
+    const days = Math.min(option?.days || 30, ManagerOverviewComponent.AVAILABLE_DAYS);
+    return this.buildLastNDays(days);
   }
 
   get dailyPoints(): DailyPoint[] {
@@ -244,16 +295,39 @@ export class ManagerOverviewComponent implements OnInit {
     return parsed.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   }
 
-  private buildLast14Days(): string[] {
+  private buildLastNDays(n: number): string[] {
     const days: string[] = [];
     const now = new Date();
-    for (let i = 13; i >= 0; i -= 1) {
+    for (let i = Math.max(0, n - 1); i >= 0; i -= 1) {
       const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      days.push(`${y}-${m}-${day}`);
+      days.push(this.isoDay(d));
     }
     return days;
+  }
+
+  /** Custom range — bounded so a mistyped date span can't render a huge chart. */
+  private buildDayRange(startStr: string, endStr: string): string[] {
+    const start = new Date(`${startStr}T00:00:00`);
+    const end = new Date(`${endStr}T00:00:00`);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start > end) {
+      return this.buildLastNDays(ManagerOverviewComponent.AVAILABLE_DAYS);
+    }
+    const days: string[] = [];
+    const cursor = new Date(start);
+    const maxSpan = 186;
+    let guard = 0;
+    while (cursor.getTime() <= end.getTime() && guard < maxSpan) {
+      days.push(this.isoDay(cursor));
+      cursor.setDate(cursor.getDate() + 1);
+      guard += 1;
+    }
+    return days;
+  }
+
+  private isoDay(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
   }
 }

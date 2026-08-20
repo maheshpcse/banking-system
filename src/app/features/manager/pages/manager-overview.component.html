@@ -76,8 +76,25 @@
       </ng-template>
     </app-animated-card>
 
-    <app-animated-card accent="sky" title="Transaction flow" subtitle="Volume &amp; 14-day trend">
+    <app-animated-card accent="sky" title="Transaction flow" subtitle="Volume &amp; trend">
+      <button
+        cardHeaderActions
+        type="button"
+        class="btn btn--ghost btn--compact flip-btn"
+        (click)="toggleView()"
+      >
+        <app-nb-icon name="transfer"></app-nb-icon>
+        {{ view === 'chart' ? 'Table view' : 'Chart view' }}
+      </button>
+
       <div class="flow-toolbar">
+        <label class="range-select">
+          <span>Date range</span>
+          <select [(ngModel)]="range" (ngModelChange)="onRangeChange($event)" name="range">
+            <option *ngFor="let r of rangeOptions" [value]="r.id">{{ r.label }}</option>
+          </select>
+        </label>
+
         <div class="tools">
           <button
             type="button"
@@ -89,11 +106,21 @@
             {{ f.label }}
           </button>
         </div>
-        <button type="button" class="flip-btn" (click)="toggleView()">
-          <app-nb-icon name="transfer"></app-nb-icon>
-          {{ view === 'chart' ? 'Table view' : 'Chart view' }}
-        </button>
       </div>
+
+      <div class="custom-range" *ngIf="range === 'custom'">
+        <label>
+          <span>From</span>
+          <input type="date" [(ngModel)]="customStart" (ngModelChange)="onCustomRangeChange()" name="customStart" />
+        </label>
+        <label>
+          <span>To</span>
+          <input type="date" [(ngModel)]="customEnd" (ngModelChange)="onCustomRangeChange()" name="customEnd" />
+        </label>
+      </div>
+      <p class="hint hint--range" *ngIf="rangeExceedsAvailableData">
+        Showing all available transaction history — the ledger currently reports up to the trailing 14 days.
+      </p>
 
       <ng-container *ngIf="view === 'chart'; else flowTable">
         <div class="chart-block">
@@ -118,8 +145,8 @@
         </div>
 
         <div class="chart-block">
-          <p class="chart-block__title">Daily flow <span>(last 14 days)</span></p>
-          <svg class="line-chart" viewBox="0 0 100 42" preserveAspectRatio="none" role="img" aria-label="Daily transaction flow, last 14 days">
+          <p class="chart-block__title">Daily flow <span>({{ rangeLabel }})</span></p>
+          <svg class="line-chart" viewBox="0 0 100 42" preserveAspectRatio="none" role="img" [attr.aria-label]="'Daily transaction flow, ' + rangeLabel">
             <polyline
               class="line-chart__grid"
               points="0,2 100,2 100,40 0,40"
@@ -203,5 +230,5 @@
 </section>
 
 <ng-template #shimmer>
-  <app-shimmer variant="admin-overview"></app-shimmer>
+  <app-shimmer variant="manager-overview"></app-shimmer>
 </ng-template>
