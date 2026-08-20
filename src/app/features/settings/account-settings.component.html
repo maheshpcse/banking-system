@@ -625,6 +625,7 @@
           <!-- Transaction currency now lives on Account → Limits (near the top of the limits card). -->
 
           <p class="section-label">Theme</p>
+          <p class="section-hint">Daylight is the default NovaBank look. Themes apply only after sign-in.</p>
           <div class="theme-cards" role="listbox" aria-label="Theme cards">
             <button
               type="button"
@@ -638,6 +639,7 @@
                 <i *ngFor="let color of card.swatch" [style.background]="color"></i>
               </span>
               <strong>{{ card.label }}</strong>
+              <em class="theme-card__hint" *ngIf="card.hint">{{ card.hint }}</em>
             </button>
           </div>
 

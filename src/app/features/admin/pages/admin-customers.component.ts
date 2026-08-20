@@ -4,7 +4,7 @@ import { AccountStatus, Transaction, User, UserRole } from '../../../core/models
 import { AdminPagination, AdminService } from '../../../core/services/admin.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
-import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/shimmer';
 import { formatStatusLabel } from '../../../core/utils/status-label';
 
 type RoleFilter = 'all' | 'customer' | 'manager' | 'admin';
@@ -38,6 +38,8 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   txModalUser: User | null = null;
   txItems: Transaction[] = [];
   txLoading = false;
+  /** Shimmer when switching Timeline / Chart / Table inside the account modal */
+  txViewLoading = false;
   txFilter: TxFilter = 'all';
   txView: TxView = 'timeline';
   readonly txFilters: { id: TxFilter; label: string }[] = [
@@ -170,7 +172,7 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     this.menuOpenId = this.menuOpenId === userId ? null : userId;
   }
 
-  /** Open drawer instantly with row data, then shimmer while detail loads. */
+  /** Open drawer with fade/slide, then shimmer while detail loads. */
   viewUser(user: User): void {
     this.menuOpenId = null;
     if (this.drawerCloseTimer) {
@@ -179,8 +181,14 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     }
     this.viewing = { ...user };
     this.drawerLoading = true;
-    this.drawerOpen = true;
+    this.drawerOpen = false;
     this.setDrawerBodyClass(true);
+    // Double rAF so the closed state paints before the open transition runs.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.drawerOpen = true;
+      });
+    });
 
     this.admin.getCustomer(user.id).subscribe({
       next: (detail) => {
@@ -203,7 +211,7 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     this.drawerCloseTimer = setTimeout(() => {
       this.viewing = null;
       this.drawerCloseTimer = null;
-    }, 280);
+    }, 400);
   }
 
   openTxModal(user: User): void {
@@ -215,9 +223,15 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     this.txModalUser = user;
     this.txFilter = 'all';
     this.txView = 'timeline';
+    this.txViewLoading = false;
     this.loadTransactions(user.id);
-    this.txModalOpen = true;
+    this.txModalOpen = false;
     this.setDrawerBodyClass(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.txModalOpen = true;
+      });
+    });
   }
 
   closeTxModal(): void {
@@ -229,8 +243,9 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     this.txModalCloseTimer = setTimeout(() => {
       this.txModalUser = null;
       this.txItems = [];
+      this.txViewLoading = false;
       this.txModalCloseTimer = null;
-    }, 260);
+    }, 380);
   }
 
   loadTransactions(userId: string): void {
@@ -262,7 +277,14 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   }
 
   setTxView(view: TxView): void {
+    if (this.txView === view) {
+      return;
+    }
     this.txView = view;
+    this.txViewLoading = true;
+    shimmerPause(SHIMMER_MS).subscribe(() => {
+      this.txViewLoading = false;
+    });
   }
 
   /** Body class tracks overlay state — NavBar stays visible (overlays stack above it). */

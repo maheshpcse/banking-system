@@ -447,7 +447,22 @@ a:focus {
 }
 
 /* Experience preferences — theme & font scale */
-html[data-nb-theme='midnight'] body {
+html[data-nb-app='1'][data-nb-theme='daylight'] body {
+  /* Daylight = original NovaBank default chrome (same as :root). */
+  --bg: #f4f8fb;
+  --bg-accent: #e8f3f8;
+  --text: #1d2a36;
+  --text-muted: #6b7c8f;
+  --accent: #5fc4b0;
+  --accent-deep: #2f8f7f;
+  --accent-sky: #6aa8e8;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(95, 196, 176, 0.18), transparent 55%),
+    radial-gradient(900px 500px at 90% 0%, rgba(106, 168, 232, 0.16), transparent 50%),
+    #f4f8fb;
+}
+
+html[data-nb-app='1'][data-nb-theme='midnight'] body {
   --bg: #0f1720;
   --text: #e8eef4;
   --text-muted: #9aa8b8;
@@ -457,7 +472,7 @@ html[data-nb-theme='midnight'] body {
     #0f1720;
 }
 
-html[data-nb-theme='sand'] body {
+html[data-nb-app='1'][data-nb-theme='sand'] body {
   --bg: #f6f1e8;
   --text: #2a241c;
   --text-muted: #7a6f62;
@@ -467,11 +482,11 @@ html[data-nb-theme='sand'] body {
     #f6f1e8;
 }
 
-html[data-nb-font='compact'] body {
+html[data-nb-app='1'][data-nb-font='compact'] body {
   font-size: 14.5px;
 }
 
-html[data-nb-theme='ocean'] body {
+html[data-nb-app='1'][data-nb-theme='ocean'] body {
   --bg: #eef7fb;
   --text: #153040;
   --text-muted: #5f7a8c;
@@ -481,7 +496,7 @@ html[data-nb-theme='ocean'] body {
     #eef7fb;
 }
 
-html[data-nb-theme='graphite'] body {
+html[data-nb-app='1'][data-nb-theme='graphite'] body {
   --bg: #1b222b;
   --text: #eef2f6;
   --text-muted: #9aa7b5;
@@ -491,7 +506,7 @@ html[data-nb-theme='graphite'] body {
     #1b222b;
 }
 
-html[data-nb-theme='orchid'] body {
+html[data-nb-app='1'][data-nb-theme='orchid'] body {
   --bg: #f8f2f8;
   --text: #2c2030;
   --text-muted: #7a6780;
@@ -501,24 +516,24 @@ html[data-nb-theme='orchid'] body {
     #f8f2f8;
 }
 
-html[data-nb-font='editorial'] body {
+html[data-nb-app='1'][data-nb-font='editorial'] body {
   font-size: 16.5px;
   letter-spacing: 0.01em;
 }
 
-html[data-nb-font='editorial'] body,
-html[data-nb-font='editorial'] .eyebrow,
-html[data-nb-font='editorial'] h1,
-html[data-nb-font='editorial'] h2 {
+html[data-nb-app='1'][data-nb-font='editorial'] body,
+html[data-nb-app='1'][data-nb-font='editorial'] .eyebrow,
+html[data-nb-app='1'][data-nb-font='editorial'] h1,
+html[data-nb-app='1'][data-nb-font='editorial'] h2 {
   --font-display: 'Sora', 'Manrope', sans-serif;
 }
 
-html[data-nb-font='technical'] body {
+html[data-nb-app='1'][data-nb-font='technical'] body {
   font-size: 15px;
   --font-body: 'IBM Plex Mono', 'Manrope', monospace;
 }
 
-html[data-nb-theme='aurora'] body {
+html[data-nb-app='1'][data-nb-theme='aurora'] body {
   --bg: #ecf8f4;
   --text: #16352c;
   --text-muted: #5d7f74;
@@ -528,7 +543,7 @@ html[data-nb-theme='aurora'] body {
     #ecf8f4;
 }
 
-html[data-nb-theme='forest'] body {
+html[data-nb-app='1'][data-nb-theme='forest'] body {
   --bg: #edf6ef;
   --text: #1c3324;
   --text-muted: #5f7a66;
@@ -538,7 +553,7 @@ html[data-nb-theme='forest'] body {
     #edf6ef;
 }
 
-html[data-nb-theme='ember'] body {
+html[data-nb-app='1'][data-nb-theme='ember'] body {
   --bg: #fbf3ee;
   --text: #3a241c;
   --text-muted: #8a6a5a;
@@ -548,7 +563,7 @@ html[data-nb-theme='ember'] body {
     #fbf3ee;
 }
 
-html[data-nb-theme='mist'] body {
+html[data-nb-app='1'][data-nb-theme='mist'] body {
   --bg: #f3f6fb;
   --text: #1e293b;
   --text-muted: #64748b;
