@@ -11,7 +11,8 @@
 .shimmer--tx-chart,
 .shimmer--tx-table,
 .shimmer--notifications-list,
-.shimmer--notifications-grid {
+.shimmer--notifications-grid,
+.shimmer--admin-requests-list {
   padding: 0;
   margin: 0;
   max-width: none;
@@ -555,6 +556,45 @@
     radial-gradient(circle at 82% 18%, rgba(106, 168, 232, 0.24), transparent 40%);
 }
 
+.shimmer__auth-band {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(2px);
+  opacity: 0.55;
+}
+
+.shimmer__auth-band--a {
+  width: min(42vw, 18rem);
+  height: 0.85rem;
+  top: 18%;
+  left: 8%;
+  background: linear-gradient(
+    90deg,
+    rgba(214, 230, 240, 0.35) 0%,
+    rgba(190, 228, 220, 0.75) 50%,
+    rgba(214, 230, 240, 0.35) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-wave 1.35s ease-in-out infinite;
+}
+
+.shimmer__auth-band--b {
+  width: min(36vw, 14rem);
+  height: 0.7rem;
+  bottom: 16%;
+  right: 10%;
+  background: linear-gradient(
+    90deg,
+    rgba(214, 230, 240, 0.3) 0%,
+    rgba(186, 214, 240, 0.7) 50%,
+    rgba(214, 230, 240, 0.3) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-wave 1.35s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+
 .shimmer__auth-stage {
   position: relative;
   z-index: 1;
@@ -571,14 +611,48 @@
 }
 
 .shimmer-card--auth {
-  min-height: 18rem;
+  min-height: auto;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.shimmer-card--auth .shimmer-block {
+  margin: 0;
+}
+
+.shimmer-auth-roles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.shimmer-auth-role {
+  display: block;
+  height: 3.6rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(
+    90deg,
+    rgba(214, 230, 240, 0.55) 0%,
+    rgba(190, 228, 220, 0.85) 35%,
+    rgba(186, 214, 240, 0.9) 50%,
+    rgba(190, 228, 220, 0.85) 65%,
+    rgba(214, 230, 240, 0.55) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-wave 1.35s ease-in-out infinite;
 }
 
 .shimmer-line--auth-link,
 .shimmer-line--auth-foot {
   width: 70%;
-  margin: 0 auto;
+  margin: 0.15rem auto 0;
   justify-self: center;
+}
+
+.shimmer-card--auth .shimmer-line--auth-link {
+  width: 62%;
+  justify-self: start;
+  margin-left: 0;
 }
 
 .shimmer-card--drawer {

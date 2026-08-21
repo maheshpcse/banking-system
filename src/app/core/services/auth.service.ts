@@ -92,6 +92,8 @@ export class AuthService {
     fullName?: string;
     username?: string;
     email?: string;
+    countryCode?: string;
+    phone?: string;
     avatar?: Partial<UserAvatar>;
     settings?: Partial<UserSettings>;
   }): Observable<{ message: string; user: User }> {

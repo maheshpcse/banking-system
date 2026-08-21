@@ -51,6 +51,27 @@
             <input type="email" formControlName="email" autocomplete="email" />
             <p class="form__field-error" *ngIf="fieldError(profileForm.controls.email, 'Email') as msg">{{ msg }}</p>
           </label>
+          <div class="form-row form-row--2" *ngIf="showPhoneFields">
+            <label>
+              <span>Country code</span>
+              <select formControlName="countryCode" autocomplete="tel-country-code">
+                <option value="" disabled>Select code</option>
+                <option *ngFor="let dial of countryDialCodes" [value]="dial.code">{{ dial.label }}</option>
+              </select>
+              <p class="form__field-error form__field-error--slot" *ngIf="fieldError(profileForm.controls.countryCode, 'Country code') as msg">{{ msg }}</p>
+            </label>
+            <label>
+              <span>Phone number</span>
+              <input
+                type="tel"
+                inputmode="numeric"
+                formControlName="phone"
+                autocomplete="tel-national"
+                placeholder="5551234567"
+              />
+              <p class="form__field-error form__field-error--slot" *ngIf="fieldError(profileForm.controls.phone, 'Phone number') as msg">{{ msg }}</p>
+            </label>
+          </div>
           <button class="btn btn--primary" type="submit" [disabled]="savingProfile">
             {{ savingProfile ? 'Saving…' : 'Save profile' }}
           </button>
