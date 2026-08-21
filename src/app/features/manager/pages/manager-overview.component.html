@@ -125,7 +125,8 @@
         Showing all available transaction history — the ledger currently reports up to the trailing 14 days.
       </p>
 
-      <app-shimmer *ngIf="flowLoading" variant="history-ledger"></app-shimmer>
+      <app-shimmer *ngIf="flowLoading && view === 'chart'" variant="manager-flow-chart"></app-shimmer>
+      <app-shimmer *ngIf="flowLoading && view === 'table'" variant="manager-flow-table"></app-shimmer>
 
       <ng-container *ngIf="!flowLoading && view === 'chart'; else flowTableGate">
         <div class="chart-block">
