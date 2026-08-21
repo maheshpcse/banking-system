@@ -113,8 +113,14 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   user: User | null = null;
   imagePreview: string | null = null;
   imageFileName = '';
+  selectedPresetId: string | null = null;
 
   readonly avatarStyles: Array<UserAvatar['style']> = ['mint', 'sky', 'sand', 'rose', 'slate'];
+  readonly avatarPresetsByRole: Record<'customer' | 'manager' | 'admin', string[]> = {
+    customer: ['customer/preset-01', 'customer/preset-02', 'customer/preset-03'],
+    manager: ['manager/preset-01', 'manager/preset-02', 'manager/preset-03'],
+    admin: ['admin/preset-01', 'admin/preset-02', 'admin/preset-03']
+  };
   readonly usStates = US_STATES;
   readonly countries = COUNTRIES;
   readonly countryDialCodes = COUNTRY_DIAL_CODES;
@@ -161,6 +167,44 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     return !this.auth.currentUser?.isSuperAdmin;
   }
 
+  /** Email / SMS channel toggles — Customer and Manager only (not Super Admin or plain Admin). */
+  get showNotifyChannels(): boolean {
+    const user = this.auth.currentUser;
+    if (!user || user.isSuperAdmin) {
+      return false;
+    }
+    return user.role === 'customer' || user.role === 'manager';
+  }
+
+  get avatarRoleFolder(): 'customer' | 'manager' | 'admin' {
+    const role = this.auth.currentUser?.role;
+    if (role === 'manager') {
+      return 'manager';
+    }
+    if (role === 'admin') {
+      return 'admin';
+    }
+    return 'customer';
+  }
+
+  get roleAvatarPresets(): string[] {
+    return this.avatarPresetsByRole[this.avatarRoleFolder];
+  }
+
+  avatarPresetSrc(presetId: string): string {
+    return `assets/avatars/${presetId}.webp`;
+  }
+
+  displayAvatarSrc(): string | null {
+    if (this.imagePreview) {
+      return this.imagePreview;
+    }
+    if (this.selectedPresetId) {
+      return this.avatarPresetSrc(this.selectedPresetId);
+    }
+    return null;
+  }
+
   private panelTimer: ReturnType<typeof setTimeout> | null = null;
 
   profileForm = this.fb.group({
@@ -187,6 +231,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
 
   prefsForm = this.fb.group({
     emailAlerts: [true],
+    smsAlerts: [false],
     hideBalance: [false],
     compactLedger: [false],
     marketingTips: [false],
@@ -375,6 +420,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
         });
         break;
       case 'presence':
+        this.selectedPresetId = this.user?.avatar?.presetId || null;
         this.imagePreview = this.user?.avatar?.image || null;
         this.avatarForm.reset({
           style: this.user?.avatar?.style || 'mint',
@@ -404,6 +450,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       case 'experience':
         this.prefsForm.reset({
           emailAlerts: this.user?.settings?.emailAlerts !== false,
+          smsAlerts: !!this.user?.settings?.smsAlerts,
           hideBalance: !!this.user?.settings?.hideBalance,
           compactLedger: !!this.user?.settings?.compactLedger,
           marketingTips: !!this.user?.settings?.marketingTips,
@@ -668,6 +715,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     }
 
     this.imageFileName = file.name;
+    this.selectedPresetId = null;
     const reader = new FileReader();
     reader.onload = () => {
       this.imagePreview = String(reader.result || '');
@@ -678,6 +726,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   clearImage(event?: Event): void {
     this.imagePreview = null;
     this.imageFileName = '';
+    this.selectedPresetId = null;
     const host = (event?.target as HTMLElement | undefined)?.closest('form');
     const input = (host?.querySelector('input[type="file"]') ||
       document.querySelector('.form--avatar input[type="file"]')) as HTMLInputElement | null;
@@ -721,6 +770,12 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     });
   }
 
+  selectAvatarPreset(presetId: string): void {
+    this.selectedPresetId = presetId;
+    this.imagePreview = null;
+    this.imageFileName = '';
+  }
+
   saveAvatar(): void {
     if (this.avatarForm.invalid || this.savingAvatar) {
       this.avatarForm.markAllAsTouched();
@@ -728,16 +783,18 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     }
     this.savingAvatar = true;
     const raw = this.avatarForm.getRawValue();
-    withShimmerDelay(
-      this.auth.updateProfile({
-        avatar: {
-          style: raw.style as UserAvatar['style'],
-          initials: String(raw.initials || '').trim().toUpperCase(),
-          image: this.imagePreview
-        }
-      }),
-      SHIMMER_MS
-    ).subscribe({
+    const avatar: Partial<UserAvatar> = {
+      style: raw.style as UserAvatar['style'],
+      initials: String(raw.initials || '').trim().toUpperCase()
+    };
+    if (this.selectedPresetId) {
+      avatar.presetId = this.selectedPresetId;
+      avatar.image = null;
+    } else {
+      avatar.image = this.imagePreview;
+      avatar.presetId = null;
+    }
+    withShimmerDelay(this.auth.updateProfile({ avatar }), SHIMMER_MS).subscribe({
       next: async (res) => {
         this.applyUser(res.user);
         this.savingAvatar = false;
@@ -790,7 +847,10 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     withShimmerDelay(
       this.auth.updateProfile({
         settings: {
-          emailAlerts: !!raw.emailAlerts,
+          emailAlerts: this.showNotifyChannels
+            ? !!raw.emailAlerts
+            : this.user?.settings?.emailAlerts !== false,
+          smsAlerts: this.showNotifyChannels ? !!raw.smsAlerts : !!this.user?.settings?.smsAlerts,
           hideBalance: !!raw.hideBalance,
           compactLedger: !!raw.compactLedger,
           marketingTips: !!raw.marketingTips,
@@ -824,6 +884,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       accountStatus: user.accountStatus || (user.accountNumber ? 'active' : 'address_required')
     };
     this.user = normalized;
+    this.selectedPresetId = normalized.avatar?.presetId || null;
     this.imagePreview = normalized.avatar?.image || null;
     this.profileForm.patchValue({
       fullName: normalized.fullName || '',
@@ -838,6 +899,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     });
     this.prefsForm.patchValue({
       emailAlerts: normalized.settings?.emailAlerts !== false,
+      smsAlerts: !!normalized.settings?.smsAlerts,
       hideBalance: !!normalized.settings?.hideBalance,
       compactLedger: !!normalized.settings?.compactLedger,
       marketingTips: !!normalized.settings?.marketingTips,
@@ -845,7 +907,11 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       fontScale: normalized.settings?.fontScale || 'comfortable'
     });
     this.currencyForm.patchValue({ currency: normalized.settings?.currency || '' });
-    this.imageFileName = normalized.avatar?.image ? 'Current profile photo' : '';
+    this.imageFileName = normalized.avatar?.image
+      ? 'Current profile photo'
+      : normalized.avatar?.presetId
+        ? 'Professional preset'
+        : '';
     this.applyAppearance(normalized);
     this.patchBankingFromUser();
     this.patchCardControlsFromUser();
