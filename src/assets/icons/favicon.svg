@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="NovaBank">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5fc4b0"/>
+      <stop offset="100%" stop-color="#7eb8f0"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="18" fill="url(#g)"/>
+  <rect x="2.75" y="2.75" width="58.5" height="58.5" rx="17.25" fill="none" stroke="#2f8f7f" stroke-opacity="0.4" stroke-width="1.25"/>
+  <!-- Geometric N -->
+  <g fill="#ffffff">
+    <rect x="16" y="16" width="8" height="32" rx="3"/>
+    <rect x="40" y="16" width="8" height="32" rx="3"/>
+    <polygon points="22,16 28,16 48,42 48,48 42,48 22,22"/>
+  </g>
+</svg>
