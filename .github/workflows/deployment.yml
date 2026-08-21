@@ -40,7 +40,7 @@ jobs:
         run: npm ci
 
       - name: Build production bundle
-        run: npm run build -- --configuration production
+        run: npm run build -- --configuration production --base-href=/banking-system/
 
       - name: Docker build smoke test
         run: docker build -t banking-client:ci .

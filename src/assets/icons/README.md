@@ -12,3 +12,7 @@ No CDN — files live under this folder and are referenced from `src/index.html`
 | `icon-192.png` / `icon-512.png` | Larger app / notification icons |
 
 Design matches the NovaBank nav mark: teal → sky gradient tile with an **N** / **NB** monogram.
+
+`index.html` references these with **relative** `assets/icons/…` hrefs (no leading `/`)
+so they resolve under GitHub Pages `/banking-system/` and local `/`.
+

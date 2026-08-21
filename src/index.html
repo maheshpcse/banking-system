@@ -7,7 +7,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="NovaBank — a minimal MEAN stack banking system with a light premium UI.">
   <meta name="theme-color" content="#5fc4b0">
-  <!-- Offline favicons from src/assets/icons (no CDN) -->
+  <!-- GitHub Pages SPA: restore deep-link path after 404.html bounce -->
+  <script>
+    (function () {
+      try {
+        var redirect = sessionStorage.getItem('nb-gh-redirect');
+        if (redirect) {
+          sessionStorage.removeItem('nb-gh-redirect');
+          if (redirect !== location.href) {
+            history.replaceState(null, '', redirect);
+          }
+        }
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
+  <!-- Offline favicons (relative to base href — works on /banking-system/) -->
   <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="assets/icons/favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="assets/icons/favicon-16.png" type="image/png" sizes="16x16">

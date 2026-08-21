@@ -71,9 +71,36 @@ jobs:
           --base-href=${{ env.ANGULAR_BASE_HREF }}
 
       - name: Prepare GitHub Pages SPA fallback
+        env:
+          ANGULAR_BASE_HREF: ${{ env.ANGULAR_BASE_HREF }}
         run: |
-          cp dist/client/index.html dist/client/404.html
+          # Deep links (e.g. /banking-system/auth/login) bounce via 404.html,
+          # then index.html restores the path from sessionStorage.
+          python3 - <<'PY'
+          import os
+          base = os.environ.get("ANGULAR_BASE_HREF", "/banking-system/")
+          clean = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>NovaBank</title>
+  <script>
+    (function () {{
+      try {{ sessionStorage.setItem('nb-gh-redirect', location.href); }} catch (e) {{}}
+      location.replace('{base}');
+    }})();
+  </script>
+  <meta http-equiv="refresh" content="0; url={base}">
+</head>
+<body></body>
+</html>
+"""
+          with open("dist/client/404.html", "w", encoding="utf-8") as f:
+              f.write(clean)
+          print("SPA fallback written (base=%s)" % base)
+          PY
           touch dist/client/.nojekyll
+          head -20 dist/client/404.html
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

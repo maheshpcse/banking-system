@@ -8,4 +8,5 @@ Offline copies of the UI typefaces previously loaded from Google Fonts:
 | Sora | 500–800 | `sora-*.ttf` |
 | IBM Plex Mono | 500 | `ibm-plex-mono-500.ttf` |
 
-`fonts.scss` declares `@font-face` rules. Themes remain local CSS variables in `src/styles.scss` (no CDN).
+`fonts.scss` declares `@font-face` rules with **relative** `url('./…')` paths so fonts
+resolve correctly under GitHub Pages (`/banking-system/`) and local `/`.
