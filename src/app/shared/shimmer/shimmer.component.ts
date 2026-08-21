@@ -25,6 +25,7 @@ export class ShimmerComponent {
     | 'admin-customers-table'
     | 'data-table'
     | 'admin-requests'
+    | 'admin-requests-list'
     | 'manager-overview'
     | 'manager-reports'
     | 'manager-billing'
@@ -32,7 +33,7 @@ export class ShimmerComponent {
     | 'auth'
     | 'drawer-profile' = 'dashboard';
 
-  /** Account settings panel tab layout when variant is settings-panel */
+  /** Settings tab or auth page layout when variant is settings-panel / auth */
   @Input() panel:
     | 'identity'
     | 'presence'
@@ -41,6 +42,12 @@ export class ShimmerComponent {
     | 'limits'
     | 'security'
     | 'experience'
+    | 'login'
+    | 'register'
+    | 'forgot'
+    | 'reset'
+    | 'staff-signup'
+    | 'staff-status'
     | '' = '';
 
   /** Column count for data-table shimmer (Customers / Staff grids). */

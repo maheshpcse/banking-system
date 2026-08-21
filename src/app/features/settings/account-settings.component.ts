@@ -41,6 +41,21 @@ const COUNTRIES = [
   'United Arab Emirates'
 ];
 
+const COUNTRY_DIAL_CODES: Array<{ code: string; label: string }> = [
+  { code: '+1', label: 'United States / Canada (+1)' },
+  { code: '+44', label: 'United Kingdom (+44)' },
+  { code: '+61', label: 'Australia (+61)' },
+  { code: '+91', label: 'India (+91)' },
+  { code: '+49', label: 'Germany (+49)' },
+  { code: '+33', label: 'France (+33)' },
+  { code: '+52', label: 'Mexico (+52)' },
+  { code: '+65', label: 'Singapore (+65)' },
+  { code: '+971', label: 'United Arab Emirates (+971)' },
+  { code: '+81', label: 'Japan (+81)' },
+  { code: '+86', label: 'China (+86)' },
+  { code: '+55', label: 'Brazil (+55)' }
+];
+
 function matchPasswords(group: AbstractControl): ValidationErrors | null {
   const newPassword = group.get('newPassword')?.value;
   const confirmPassword = group.get('confirmPassword')?.value;
@@ -102,6 +117,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   readonly avatarStyles: Array<UserAvatar['style']> = ['mint', 'sky', 'sand', 'rose', 'slate'];
   readonly usStates = US_STATES;
   readonly countries = COUNTRIES;
+  readonly countryDialCodes = COUNTRY_DIAL_CODES;
   readonly cardBrands: Array<{ id: CardBrand; label: string }> = [
     { id: 'visa', label: 'Visa' },
     { id: 'mastercard', label: 'Mastercard' },
@@ -140,12 +156,19 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     return this.auth.currentUser?.role === 'admin' || this.auth.currentUser?.role === 'manager';
   }
 
+  /** Phone / country code are available to every role except Super Admin. */
+  get showPhoneFields(): boolean {
+    return !this.auth.currentUser?.isSuperAdmin;
+  }
+
   private panelTimer: ReturnType<typeof setTimeout> | null = null;
 
   profileForm = this.fb.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
     username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(32)]],
-    email: ['', [Validators.required, Validators.email]]
+    email: ['', [Validators.required, Validators.email]],
+    countryCode: [''],
+    phone: ['', [Validators.pattern(/^$|^[0-9]{7,15}$/)]]
   });
 
   avatarForm = this.fb.group({
@@ -668,14 +691,22 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     }
     this.savingProfile = true;
     const raw = this.profileForm.getRawValue();
-    withShimmerDelay(
-      this.auth.updateProfile({
-        fullName: String(raw.fullName),
-        username: String(raw.username).trim().toLowerCase(),
-        email: String(raw.email).trim().toLowerCase()
-      }),
-      SHIMMER_MS
-    ).subscribe({
+    const payload: {
+      fullName: string;
+      username: string;
+      email: string;
+      countryCode?: string;
+      phone?: string;
+    } = {
+      fullName: String(raw.fullName),
+      username: String(raw.username).trim().toLowerCase(),
+      email: String(raw.email).trim().toLowerCase()
+    };
+    if (this.showPhoneFields) {
+      payload.countryCode = String(raw.countryCode || '').trim();
+      payload.phone = String(raw.phone || '').replace(/[\s()-]/g, '').trim();
+    }
+    withShimmerDelay(this.auth.updateProfile(payload), SHIMMER_MS).subscribe({
       next: async (res) => {
         this.applyUser(res.user);
         this.savingProfile = false;
@@ -795,7 +826,9 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     this.profileForm.patchValue({
       fullName: normalized.fullName || '',
       username: normalized.username || '',
-      email: normalized.email || ''
+      email: normalized.email || '',
+      countryCode: normalized.countryCode || '+1',
+      phone: normalized.phone || ''
     });
     this.avatarForm.patchValue({
       style: normalized.avatar?.style || 'mint',

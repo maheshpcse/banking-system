@@ -34,6 +34,9 @@ export function fieldError(control: AbstractControl | null | undefined, label: s
     return 'Passwords do not match.';
   }
   if (control.hasError('pattern')) {
+    if (label.toLowerCase().includes('phone')) {
+      return 'Phone number must be 7–15 digits.';
+    }
     return `${label} is invalid.`;
   }
 

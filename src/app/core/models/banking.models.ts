@@ -131,6 +131,10 @@ export interface User {
   fullName: string;
   username?: string;
   email: string;
+  /** Dial code such as +1 — omitted for Super Admin */
+  countryCode?: string;
+  /** National phone digits — omitted for Super Admin */
+  phone?: string;
   /** Empty / null until account generation is approved */
   accountNumber: string | null;
   balance: number;
