@@ -12,7 +12,9 @@
 .shimmer--tx-table,
 .shimmer--notifications-list,
 .shimmer--notifications-grid,
-.shimmer--admin-requests-list {
+.shimmer--admin-requests-list,
+.shimmer--manager-flow-chart,
+.shimmer--manager-flow-table {
   padding: 0;
   margin: 0;
   max-width: none;
@@ -945,12 +947,101 @@ html[data-nb-mode='dark'] .shimmer__auth-page {
 }
 
 .shimmer__grid--roadmap {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-bottom: 0;
 }
 
 .shimmer-card--roadmap {
   min-height: 8rem;
+}
+
+.shimmer-flow {
+  display: grid;
+  gap: 1.15rem;
+  min-height: 16rem;
+}
+
+.shimmer-flow__block {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.shimmer-flow-bars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  align-items: end;
+  min-height: 10rem;
+  padding: 0.35rem 0.15rem 0;
+}
+
+.shimmer-flow-bars__col {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0.4rem;
+  justify-items: center;
+  min-height: 9rem;
+}
+
+.shimmer-flow-bars__track {
+  width: 100%;
+  max-width: 2.6rem;
+  height: 100%;
+  min-height: 6.5rem;
+  border-radius: 0.75rem;
+  background: rgba(214, 230, 240, 0.4);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.shimmer-flow-bars__fill {
+  display: block;
+  width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(190, 228, 220, 0.95) 0%,
+    rgba(186, 214, 240, 0.85) 100%
+  );
+  background-size: 100% 200%;
+  animation: shimmer-wave 1.35s ease-in-out infinite;
+}
+
+.shimmer-flow-line {
+  height: 8.5rem;
+  border-radius: 0.95rem;
+  background: rgba(241, 245, 249, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-flow-line__area {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 18%;
+  height: 42%;
+  border-radius: 1rem 1rem 0.35rem 0.35rem;
+  background: linear-gradient(
+    90deg,
+    rgba(214, 230, 240, 0.45) 0%,
+    rgba(190, 228, 220, 0.85) 45%,
+    rgba(186, 214, 240, 0.7) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-wave 1.35s ease-in-out infinite;
+}
+
+.shimmer-flow-line__axis {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.shimmer-flow-line__axis .shimmer-line--xs {
+  width: 18%;
 }
 
 .shimmer-request-list {
@@ -1006,9 +1097,16 @@ html[data-nb-mode='dark'] .shimmer__auth-page {
 
 @media (max-width: 900px) {
   .shimmer__grid--admin-stats,
-  .shimmer__grid--manager-analytics,
-  .shimmer__grid--roadmap {
+  .shimmer__grid--manager-analytics {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .shimmer__grid--roadmap {
+    grid-template-columns: 1fr;
+  }
+
+  .shimmer-flow-bars {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .shimmer-card--request {

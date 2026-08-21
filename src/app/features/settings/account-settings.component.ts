@@ -224,8 +224,8 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       postalCode: ['', [Validators.required, Validators.minLength(3)]],
       country: ['', [Validators.required]],
       holderName: ['', [Validators.required, Validators.minLength(2)]],
-      brand: ['visa' as CardBrand, [Validators.required]],
-      accountType: ['personal' as CardAccountType, [Validators.required]],
+      brand: ['', [Validators.required]],
+      accountType: ['', [Validators.required]],
       cardNumber: ['', [Validators.required, Validators.minLength(16), Validators.maxLength(16)]],
       expiryMonth: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])$/)]],
       expiryYear: ['', [Validators.required, Validators.pattern(/^[0-9]{2}$/)]],
@@ -369,7 +369,9 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
         this.profileForm.reset({
           fullName: this.user?.fullName || '',
           username: this.user?.username || '',
-          email: this.user?.email || ''
+          email: this.user?.email || '',
+          countryCode: this.user?.countryCode || '',
+          phone: this.user?.phone || ''
         });
         break;
       case 'presence':
@@ -633,8 +635,8 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       postalCode: addr?.postalCode || '',
       country: addr?.country || '',
       holderName: card?.holderName || this.user?.fullName || '',
-      brand: (card?.brand as CardBrand) || 'visa',
-      accountType: (card?.accountType as CardAccountType) || 'personal',
+      brand: (card?.brand as CardBrand) || '',
+      accountType: (card?.accountType as CardAccountType) || '',
       cardNumber: card?.number ? String(card.number).replace(/\D/g, '').slice(0, 16) : '',
       expiryMonth: card?.expiryMonth || '',
       expiryYear: card?.expiryYear || '',
@@ -827,7 +829,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       fullName: normalized.fullName || '',
       username: normalized.username || '',
       email: normalized.email || '',
-      countryCode: normalized.countryCode || '+1',
+      countryCode: normalized.countryCode || '',
       phone: normalized.phone || ''
     });
     this.avatarForm.patchValue({
