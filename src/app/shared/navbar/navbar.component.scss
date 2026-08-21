@@ -1,14 +1,14 @@
 .nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: relative;
+  flex: 0 0 auto;
+  top: auto;
+  left: auto;
+  right: auto;
   width: 100%;
   z-index: 200;
   background: #f7fafc;
   border-bottom: 1px solid rgba(148, 163, 184, 0.22);
   box-shadow: 0 8px 24px rgba(90, 120, 150, 0.06);
-  transition: transform 0.32s var(--ease-out), box-shadow 0.32s var(--ease-out);
 }
 
 .nav__inner {

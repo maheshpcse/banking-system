@@ -634,13 +634,12 @@
               [class.is-active]="prefsForm.value.theme === card.id"
               (click)="selectTheme(card.id)"
               [attr.aria-selected]="prefsForm.value.theme === card.id"
+              [attr.aria-label]="card.label + (prefsForm.value.theme === card.id ? ' (selected)' : '')"
             >
               <span class="theme-card__swatches" aria-hidden="true">
                 <i *ngFor="let color of card.swatch" [style.background]="color"></i>
               </span>
               <strong>{{ card.label }}</strong>
-              <em class="theme-card__hint" *ngIf="card.hint">{{ card.hint }}</em>
-              <em class="theme-card__hint" *ngIf="!card.hint && prefsForm.value.theme === card.id">Selected</em>
             </button>
           </div>
 

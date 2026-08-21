@@ -44,11 +44,11 @@
         <a routerLink="/manager/reports" routerLinkActive="is-active" (click)="onNavClick()">Reports</a>
         <a routerLink="/manager/billing" routerLinkActive="is-active" (click)="onNavClick()">Billing</a>
       </ng-container>
-      <a routerLink="/settings" routerLinkActive="is-active" (click)="onNavClick()">Account</a>
       <a routerLink="/notifications" routerLinkActive="is-active" class="nav__bell" (click)="onNavClick()">
         Alerts
         <span class="nav__badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
       </a>
+      <a routerLink="/settings" routerLinkActive="is-active" (click)="onNavClick()">Account</a>
       <!--
         Future enhancement: dark / light mode toggle (not working as expected yet).
         <button class="nav__mode btn btn--ghost" type="button" (click)="toggleColorMode()">

@@ -8,10 +8,27 @@
   background: transparent;
 }
 
-/* Fixed full-bleed header: page content starts below the nav */
+/*
+ * Authenticated chrome (drawer-style):
+ * Navbar stays pinned at the top of the shell; page content scrolls in <main>
+ * starting below the navbar — same pattern as Customers sidemenu header/body.
+ */
+.app-shell--has-nav {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .app-shell--has-nav main {
-  padding-top: var(--nb-nav-height);
-  min-height: calc(100vh - var(--nb-nav-height));
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: 0;
 }
 
 .ambient {
