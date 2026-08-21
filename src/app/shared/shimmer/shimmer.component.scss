@@ -9,7 +9,9 @@
 .shimmer--data-table,
 .shimmer--tx-timeline,
 .shimmer--tx-chart,
-.shimmer--tx-table {
+.shimmer--tx-table,
+.shimmer--notifications-list,
+.shimmer--notifications-grid {
   padding: 0;
   margin: 0;
   max-width: none;
@@ -24,6 +26,47 @@
 
 .shimmer-card--ledger {
   min-height: 14rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.shimmer-ledger__header {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+}
+
+.shimmer-tx-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1rem;
+  border-radius: 0.95rem;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+}
+
+.shimmer-tx-item__main {
+  display: grid;
+  gap: 0.35rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.shimmer-tx-item__side {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: end;
+  flex: 0 0 auto;
+  min-width: 4.5rem;
+}
+
+.shimmer-tx-item__side .shimmer-line--sm {
+  width: 4.2rem;
+}
+
+.shimmer-tx-item__side .shimmer-line--xs {
+  width: 3.4rem;
 }
 
 /* Customer transactions modal — layout-matched shimmers */
@@ -166,6 +209,9 @@
 
 .shimmer__grid--cardinfo {
   grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+  grid-template-areas:
+    'preview fields'
+    'address validity';
   margin-bottom: 0;
   align-items: start;
 }
@@ -206,15 +252,35 @@
 }
 
 .shimmer-cardinfo-preview {
+  grid-area: preview;
   display: grid;
   gap: 0.75rem;
   align-content: start;
 }
 
 .shimmer-cardinfo-fields {
+  grid-area: fields;
   display: grid;
   gap: 0.75rem;
   align-content: start;
+}
+
+.shimmer-cardinfo-address {
+  grid-area: address;
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.shimmer-cardinfo-validity {
+  grid-area: validity;
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.shimmer-cardinfo-submit {
+  grid-column: 1 / -1;
 }
 
 .shimmer-cardinfo-row {
@@ -271,6 +337,39 @@
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.8);
   box-shadow: var(--shadow-soft);
+}
+
+.shimmer-notif-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.shimmer-notif-grid .shimmer-notif {
+  margin-bottom: 0;
+}
+
+.shimmer-limits {
+  display: grid;
+  gap: 1.35rem;
+}
+
+.shimmer-limits__section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.shimmer-limits__currency {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.shimmer-limits__caps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
 }
 
 .shimmer-notif__icon {
@@ -864,6 +963,14 @@ html[data-nb-mode='dark'] .shimmer__auth-page {
     grid-template-columns: 1fr;
   }
 
+  .shimmer__grid--cardinfo {
+    grid-template-areas:
+      'preview'
+      'fields'
+      'address'
+      'validity';
+  }
+
   .shimmer__hero--alerts,
   .shimmer__hero--settings {
     flex-direction: column;
@@ -880,6 +987,26 @@ html[data-nb-mode='dark'] .shimmer__auth-page {
 
   .shimmer-cardinfo-row--2,
   .shimmer-cardinfo-row--3 {
+    grid-template-columns: 1fr;
+  }
+
+  .shimmer-notif-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .shimmer-tx-item {
+    flex-direction: column;
+  }
+
+  .shimmer-tx-item__side {
+    justify-items: start;
+  }
+
+  .shimmer-limits__caps {
+    grid-template-columns: 1fr;
+  }
+
+  .shimmer-limits__currency {
     grid-template-columns: 1fr;
   }
 }

@@ -417,15 +417,14 @@
   max-height: none;
 }
 
-/* Card preview (top-left) is shorter than the field columns, so the address
-   section sits directly beneath it — filling that gap — while the ATM card
-   detail fields form a single tall column on the right. */
+/* Card preview (top-left) is shorter than the field columns, so address +
+   account validity sit on one row beneath the card / ATM fields. */
 .banking-layout {
   display: grid;
   grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
   grid-template-areas:
     'card fields'
-    'address fields';
+    'address validity';
   gap: 1.35rem;
   align-items: start;
   overflow: visible;
@@ -445,6 +444,21 @@
   display: grid;
   gap: 0.85rem;
   align-content: start;
+}
+
+.banking-layout__validity {
+  grid-area: validity;
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+}
+
+.banking-layout__address > .section-label,
+.banking-layout__validity > .section-label {
+  margin: 0;
+  min-height: 1.35rem;
+  display: flex;
+  align-items: flex-end;
 }
 
 .banking-layout__fields {
@@ -563,7 +577,8 @@
     grid-template-areas:
       'card'
       'fields'
-      'address';
+      'address'
+      'validity';
   }
 }
 
@@ -612,29 +627,44 @@
 }
 
 .limits-current {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.35rem;
   margin-bottom: 1.25rem;
 }
 
+.limits-current .section-label,
+.limits-currency .section-label,
+.limits-form .section-label {
+  margin: 0;
+}
+
+.limits-current .meta-grid {
+  margin-bottom: 0;
+}
+
 .limits-currency {
-  margin-bottom: 1.25rem;
-  padding-bottom: 1.1rem;
+  display: grid;
+  gap: 0.85rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.35rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.22);
 }
 
 .limits-currency__row {
-  display: flex;
-  gap: 0.65rem;
-  align-items: center;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: end;
 }
 
-.limits-currency__row select {
-  flex: 1 1 12rem;
+.limits-currency__row label {
   min-width: 0;
 }
 
 .limits-currency__row .btn {
-  flex: 0 0 auto;
+  margin-bottom: 0;
+  height: 2.95rem;
 }
 
 .limits-pending {
@@ -705,6 +735,14 @@
 @media (max-width: 520px) {
   .meta-grid--cols {
     grid-template-columns: 1fr;
+  }
+
+  .limits-currency__row {
+    grid-template-columns: 1fr;
+  }
+
+  .limits-currency__row .btn {
+    width: 100%;
   }
 }
 
