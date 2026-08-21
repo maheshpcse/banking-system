@@ -18,6 +18,8 @@ export class ShimmerComponent {
     | 'settings'
     | 'settings-panel'
     | 'notifications'
+    | 'notifications-list'
+    | 'notifications-grid'
     | 'admin-overview'
     | 'admin-customers'
     | 'admin-customers-table'

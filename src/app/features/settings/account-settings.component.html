@@ -177,7 +177,7 @@
               </p>
             </aside>
 
-            <!-- Fills the space left under the (shorter) card preview on wide screens. -->
+            <!-- Under the card preview: address (left) + account validity (right) share one row. -->
             <div class="banking-layout__address">
               <p class="section-label">Residential address</p>
               <label>
@@ -189,11 +189,18 @@
                 <span>Address line 2</span>
                 <input type="text" formControlName="line2" autocomplete="address-line2" />
               </label>
-              <label>
-                <span>City</span>
-                <input type="text" formControlName="city" autocomplete="address-level2" />
-                <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.city, 'City') as msg">{{ msg }}</p>
-              </label>
+              <div class="form-row form-row--2">
+                <label>
+                  <span>City</span>
+                  <input type="text" formControlName="city" autocomplete="address-level2" />
+                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.city, 'City') as msg">{{ msg }}</p>
+                </label>
+                <label>
+                  <span>Postal code</span>
+                  <input type="text" formControlName="postalCode" autocomplete="postal-code" />
+                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.postalCode, 'Postal code') as msg">{{ msg }}</p>
+                </label>
+              </div>
               <div class="form-row form-row--2">
                 <label>
                   <span>State</span>
@@ -204,19 +211,39 @@
                   <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.state, 'State') as msg">{{ msg }}</p>
                 </label>
                 <label>
-                  <span>Postal code</span>
-                  <input type="text" formControlName="postalCode" autocomplete="postal-code" />
-                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.postalCode, 'Postal code') as msg">{{ msg }}</p>
+                  <span>Country</span>
+                  <select formControlName="country" autocomplete="country-name">
+                    <option value="" disabled>Select country</option>
+                    <option *ngFor="let country of countries" [value]="country">{{ country }}</option>
+                  </select>
+                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.country, 'Country') as msg">{{ msg }}</p>
                 </label>
               </div>
-              <label>
-                <span>Country</span>
-                <select formControlName="country" autocomplete="country-name">
-                  <option value="" disabled>Select country</option>
-                  <option *ngFor="let country of countries" [value]="country">{{ country }}</option>
-                </select>
-                <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.country, 'Country') as msg">{{ msg }}</p>
-              </label>
+            </div>
+
+            <div class="banking-layout__validity">
+              <p class="section-label">Account number validity</p>
+              <div class="form-row form-row--2">
+                <label>
+                  <span>Account expiry MM</span>
+                  <select formControlName="accountExpiryMonth">
+                    <option value="" disabled>MM</option>
+                    <option *ngFor="let m of expiryMonths" [value]="m">{{ m }}</option>
+                  </select>
+                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.accountExpiryMonth, 'Month') as msg">{{ msg }}</p>
+                </label>
+                <label>
+                  <span>Account expiry YY</span>
+                  <select formControlName="accountExpiryYear">
+                    <option value="" disabled>YY</option>
+                    <option *ngFor="let y of expiryYears" [value]="y">{{ y }}</option>
+                  </select>
+                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.accountExpiryYear, 'Year') as msg">{{ msg }}</p>
+                </label>
+              </div>
+              <p class="form__error" *ngIf="bankingForm.hasError('accountExpiryPast') && bankingForm.touched">
+                Account expiry must be the current month or a future date.
+              </p>
             </div>
 
             <div class="banking-layout__fields">
@@ -319,29 +346,6 @@
               <p class="form__error" *ngIf="bankingForm.hasError('expiryPast') && bankingForm.touched">
                 Card expiry must be the current month or a future date.
               </p>
-
-              <p class="section-label">Account number validity</p>
-              <div class="form-row form-row--2">
-                <label>
-                  <span>Account expiry MM</span>
-                  <select formControlName="accountExpiryMonth">
-                    <option value="" disabled>MM</option>
-                    <option *ngFor="let m of expiryMonths" [value]="m">{{ m }}</option>
-                  </select>
-                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.accountExpiryMonth, 'Month') as msg">{{ msg }}</p>
-                </label>
-                <label>
-                  <span>Account expiry YY</span>
-                  <select formControlName="accountExpiryYear">
-                    <option value="" disabled>YY</option>
-                    <option *ngFor="let y of expiryYears" [value]="y">{{ y }}</option>
-                  </select>
-                  <p class="form__field-error form__field-error--slot" *ngIf="fieldError(bankingForm.controls.accountExpiryYear, 'Year') as msg">{{ msg }}</p>
-                </label>
-              </div>
-              <p class="form__error" *ngIf="bankingForm.hasError('accountExpiryPast') && bankingForm.touched">
-                Account expiry must be the current month or a future date.
-              </p>
             </div>
           </div>
 
@@ -398,16 +402,19 @@
         title="24-hour limits"
         subtitle="Rolling window · deposit, withdraw & transfer caps"
       >
-        <div class="limits-currency" *ngIf="!isStaff">
+        <div class="form limits-currency" *ngIf="!isStaff" [formGroup]="currencyForm">
           <p class="section-label">Transaction currency</p>
           <p class="form__hint" *ngIf="!currencyForm.value.currency">
             Required before deposits, withdrawals, and transfers. No approval needed.
           </p>
-          <div class="limits-currency__row" [formGroup]="currencyForm">
-            <select formControlName="currency">
-              <option value="" disabled>Select currency</option>
-              <option *ngFor="let code of currencies" [value]="code">{{ code }}</option>
-            </select>
+          <div class="limits-currency__row">
+            <label>
+              <span>Currency</span>
+              <select formControlName="currency">
+                <option value="" disabled>Select currency</option>
+                <option *ngFor="let code of currencies" [value]="code">{{ code }}</option>
+              </select>
+            </label>
             <button
               type="button"
               class="btn btn--ghost btn--compact"
