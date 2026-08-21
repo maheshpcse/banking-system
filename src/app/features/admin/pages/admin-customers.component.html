@@ -270,7 +270,10 @@
       <button type="button" class="btn btn--ghost btn--compact" [class.is-active]="txView === 'table'" (click)="setTxView('table')">Table</button>
     </div>
 
-    <app-shimmer *ngIf="txLoading || txViewLoading" variant="history-ledger"></app-shimmer>
+    <app-shimmer
+      *ngIf="txLoading || txViewLoading"
+      [variant]="txView === 'chart' ? 'tx-chart' : txView === 'table' ? 'tx-table' : 'tx-timeline'"
+    ></app-shimmer>
 
     <p class="muted" *ngIf="!txLoading && !txViewLoading && !txItems.length">No transactions for this filter.</p>
 

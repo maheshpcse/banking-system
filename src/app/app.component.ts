@@ -44,8 +44,8 @@ export class AppComponent implements OnInit, OnDestroy {
         }
 
         if (event instanceof NavigationEnd) {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
           this.syncChrome(event.urlAfterRedirects);
+          this.scrollPageToTop();
         }
 
         if (event instanceof NavigationCancel || event instanceof NavigationError) {
@@ -68,6 +68,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
+    if (typeof document !== 'undefined') {
+      document.body.classList.remove('nb-app-shell');
+    }
   }
 
   private syncChrome(url: string): void {
@@ -79,6 +82,24 @@ export class AppComponent implements OnInit, OnDestroy {
       (!this.isMarketingSurface || this.shellBoot.isBootstrapping);
     this.bootVariant = this.variantForUrl(path);
     this.applyAppearance(this.auth.currentUser);
+    if (typeof document !== 'undefined') {
+      document.body.classList.toggle('nb-app-shell', this.hasStickyNav);
+    }
+  }
+
+  /** Scroll the page viewport — main when nav shell is active, else window. */
+  private scrollPageToTop(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    if (this.hasStickyNav) {
+      const main = document.querySelector('.app-shell--has-nav > main');
+      if (main instanceof HTMLElement) {
+        main.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   /**

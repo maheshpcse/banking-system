@@ -10,6 +10,9 @@ export class ShimmerComponent {
     | 'dashboard'
     | 'history'
     | 'history-ledger'
+    | 'tx-timeline'
+    | 'tx-chart'
+    | 'tx-table'
     | 'form'
     | 'transfer'
     | 'settings'
@@ -36,4 +39,6 @@ export class ShimmerComponent {
     | 'security'
     | 'experience'
     | '' = '';
+
+  readonly barWidths = [72, 54, 88, 40];
 }
