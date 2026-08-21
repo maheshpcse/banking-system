@@ -6,6 +6,7 @@
 
 .shimmer--history-ledger,
 .shimmer--admin-customers-table,
+.shimmer--data-table,
 .shimmer--tx-timeline,
 .shimmer--tx-chart,
 .shimmer--tx-table {
@@ -649,6 +650,60 @@ html[data-nb-mode='dark'] .shimmer__auth-page {
   padding: 0;
   overflow: hidden;
   min-height: 16rem;
+}
+
+/* Filter / list reload — true table grid (header + N columns × rows) */
+.shimmer-data-table {
+  display: grid;
+  gap: 0;
+  min-height: 16rem;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.shimmer-data-table__head,
+.shimmer-data-table__row {
+  display: grid;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+}
+
+.shimmer-data-table__head {
+  background: rgba(232, 242, 248, 0.72);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.shimmer-data-table__row {
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+  min-height: 3.35rem;
+}
+
+.shimmer-data-table__cell {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.shimmer-data-table__cell .shimmer-line {
+  width: 100%;
+  max-width: 100%;
+}
+
+.shimmer-data-table__cell .shimmer-line--sm {
+  width: 78%;
+}
+
+.shimmer-data-table__cell .shimmer-line--xs {
+  width: 62%;
+}
+
+.shimmer-data-table__head .shimmer-data-table__cell .shimmer-line--xs {
+  width: 55%;
+  opacity: 0.85;
 }
 
 .shimmer-row--table-head {
