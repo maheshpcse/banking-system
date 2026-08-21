@@ -20,6 +20,8 @@ export interface UserAvatar {
   initials: string;
   /** Optional profile photo as a data URL */
   image?: string | null;
+  /** Role-scoped preset id, e.g. customer/preset-01 */
+  presetId?: string | null;
 }
 
 export type UserTheme =
@@ -39,6 +41,7 @@ export type UserCurrency = 'USD' | 'EUR' | 'GBP' | 'INR' | 'AED' | 'JPY' | 'CAD'
 
 export interface UserSettings {
   emailAlerts: boolean;
+  smsAlerts?: boolean;
   hideBalance: boolean;
   compactLedger: boolean;
   marketingTips: boolean;

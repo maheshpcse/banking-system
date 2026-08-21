@@ -6,8 +6,8 @@
       <p class="lede">Profile, avatar, password, and premium preferences for your vault.</p>
     </div>
     <div class="hero-avatar" [ngClass]="'hero-avatar--' + (user?.avatar?.style || 'mint')" aria-hidden="true">
-      <img *ngIf="imagePreview as image" [src]="image" alt="" />
-      <ng-container *ngIf="!imagePreview">{{ user?.avatar?.initials || 'NB' }}</ng-container>
+      <img *ngIf="displayAvatarSrc() as image" [src]="image" alt="" />
+      <ng-container *ngIf="!displayAvatarSrc()">{{ user?.avatar?.initials || 'NB' }}</ng-container>
     </div>
   </header>
 
@@ -86,10 +86,25 @@
       >
         <form class="form form--avatar" [formGroup]="avatarForm" (ngSubmit)="saveAvatar()">
           <div class="avatar-preview avatar-preview--lg" [ngClass]="'hero-avatar--' + avatarForm.value.style">
-            <img *ngIf="imagePreview as image" [src]="image" alt="Profile preview" />
-            <ng-container *ngIf="!imagePreview">
+            <img *ngIf="displayAvatarSrc() as image" [src]="image" alt="Profile preview" />
+            <ng-container *ngIf="!displayAvatarSrc()">
               {{ avatarForm.value.initials || user?.avatar?.initials || 'NB' }}
             </ng-container>
+          </div>
+
+          <p class="section-label">Professional presets</p>
+          <p class="section-hint">Curated portraits for your role. Upload your own photo anytime to override.</p>
+          <div class="preset-grid" role="listbox" aria-label="Avatar presets">
+            <button
+              type="button"
+              class="preset-chip"
+              *ngFor="let preset of roleAvatarPresets"
+              [class.is-active]="selectedPresetId === preset && !imagePreview"
+              (click)="selectAvatarPreset(preset)"
+              [attr.aria-pressed]="selectedPresetId === preset && !imagePreview"
+            >
+              <img [src]="avatarPresetSrc(preset)" [alt]="preset" />
+            </button>
           </div>
 
           <label>
@@ -101,7 +116,7 @@
               (change)="onImageSelected($event)"
             />
           </label>
-          <button type="button" class="btn btn--ghost" *ngIf="imagePreview" (click)="clearImage($event)">
+          <button type="button" class="btn btn--ghost" *ngIf="imagePreview || selectedPresetId" (click)="clearImage($event)">
             Remove photo
           </button>
 
@@ -633,10 +648,24 @@
         subtitle="Experience"
       >
         <form class="form form--prefs" [formGroup]="prefsForm" (ngSubmit)="savePrefs()">
-          <label class="toggle">
-            <input type="checkbox" formControlName="emailAlerts" />
-            <span>Email alerts for transfers and security</span>
-          </label>
+          <ng-container *ngIf="showNotifyChannels">
+            <p class="section-label">Notification channels</p>
+            <p class="section-hint">
+              In-app alerts always stay on. Email and SMS follow these switches when a provider is configured on the server.
+            </p>
+            <label class="toggle">
+              <input type="checkbox" formControlName="emailAlerts" />
+              <span>Email alerts for transfers, account, and security events</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" formControlName="smsAlerts" />
+              <span>SMS alerts to your saved phone number</span>
+            </label>
+            <p class="form__hint" *ngIf="showPhoneFields && !user?.phone">
+              Add a phone number on Identity to receive SMS.
+            </p>
+          </ng-container>
+
           <label class="toggle">
             <input type="checkbox" formControlName="hideBalance" />
             <span>Hide balance on shared screens</span>
