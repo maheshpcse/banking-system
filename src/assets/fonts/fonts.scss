@@ -1,6 +1,7 @@
 /**
  * Self-hosted NovaBank UI fonts (offline).
- * Sourced from Google Fonts (Manrope, Sora, IBM Plex Mono) — served from /assets/fonts.
+ * Paths are relative (no leading slash) so they resolve under any base href
+ * (e.g. GitHub Pages `/banking-system/` and local `/`).
  */
 
 /* Manrope — body */
@@ -9,7 +10,7 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/assets/fonts/manrope-500.ttf') format('truetype');
+  src: url('./manrope-500.ttf') format('truetype');
 }
 
 @font-face {
@@ -17,7 +18,7 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/assets/fonts/manrope-600.ttf') format('truetype');
+  src: url('./manrope-600.ttf') format('truetype');
 }
 
 @font-face {
@@ -25,7 +26,7 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/assets/fonts/manrope-700.ttf') format('truetype');
+  src: url('./manrope-700.ttf') format('truetype');
 }
 
 @font-face {
@@ -33,7 +34,7 @@
   font-style: normal;
   font-weight: 800;
   font-display: swap;
-  src: url('/assets/fonts/manrope-800.ttf') format('truetype');
+  src: url('./manrope-800.ttf') format('truetype');
 }
 
 /* Sora — display */
@@ -42,7 +43,7 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/assets/fonts/sora-500.ttf') format('truetype');
+  src: url('./sora-500.ttf') format('truetype');
 }
 
 @font-face {
@@ -50,7 +51,7 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/assets/fonts/sora-600.ttf') format('truetype');
+  src: url('./sora-600.ttf') format('truetype');
 }
 
 @font-face {
@@ -58,7 +59,7 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/assets/fonts/sora-700.ttf') format('truetype');
+  src: url('./sora-700.ttf') format('truetype');
 }
 
 @font-face {
@@ -66,7 +67,7 @@
   font-style: normal;
   font-weight: 800;
   font-display: swap;
-  src: url('/assets/fonts/sora-800.ttf') format('truetype');
+  src: url('./sora-800.ttf') format('truetype');
 }
 
 /* IBM Plex Mono — account numbers / secrets */
@@ -75,5 +76,5 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/assets/fonts/ibm-plex-mono-500.ttf') format('truetype');
+  src: url('./ibm-plex-mono-500.ttf') format('truetype');
 }

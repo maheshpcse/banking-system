@@ -168,7 +168,10 @@ export class NotificationService implements OnDestroy {
         permission = await Notification.requestPermission();
       }
       if (permission === 'granted') {
-        new Notification(title, { body, icon: '/assets/icons/favicon-192.png' });
+        new Notification(title, {
+          body,
+          icon: new URL('assets/icons/favicon-192.png', document.baseURI).toString()
+        });
       }
     } catch {
       // Browser may block notifications; in-app list still works.
