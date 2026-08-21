@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>NovaBank</title>
+  <script>
+    (function () {
+      try {
+        sessionStorage.setItem('nb-gh-redirect', location.href);
+      } catch (e) {}
+      location.replace('__BASE_HREF__');
+    })();
+  </script>
+  <meta http-equiv="refresh" content="0; url=__BASE_HREF__">
+</head>
+<body></body>
+</html>

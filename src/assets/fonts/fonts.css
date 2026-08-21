@@ -1,7 +1,8 @@
 /**
  * Self-hosted NovaBank UI fonts (offline).
- * Paths are relative (no leading slash) so they resolve under any base href
- * (e.g. GitHub Pages `/banking-system/` and local `/`).
+ * Served as a static asset (not bundled into styles.css) so url() paths
+ * resolve relative to this file under any base href, including GitHub Pages
+ * https://maheshpcse.github.io/banking-system/
  */
 
 /* Manrope — body */
