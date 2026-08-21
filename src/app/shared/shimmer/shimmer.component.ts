@@ -21,6 +21,7 @@ export class ShimmerComponent {
     | 'admin-overview'
     | 'admin-customers'
     | 'admin-customers-table'
+    | 'data-table'
     | 'admin-requests'
     | 'manager-overview'
     | 'manager-reports'
@@ -40,5 +41,25 @@ export class ShimmerComponent {
     | 'experience'
     | '' = '';
 
+  /** Column count for data-table shimmer (Customers / Staff grids). */
+  @Input() columns = 6;
+
+  /** Row count for data-table shimmer body. */
+  @Input() rows = 6;
+
   readonly barWidths = [72, 54, 88, 40];
+
+  get columnIndexes(): number[] {
+    const n = Math.max(1, Math.min(12, Math.floor(Number(this.columns) || 6)));
+    return Array.from({ length: n }, (_, i) => i);
+  }
+
+  get rowIndexes(): number[] {
+    const n = Math.max(1, Math.min(20, Math.floor(Number(this.rows) || 6)));
+    return Array.from({ length: n }, (_, i) => i);
+  }
+
+  get tableGridTemplate(): string {
+    return `repeat(${this.columnIndexes.length}, minmax(0, 1fr))`;
+  }
 }
