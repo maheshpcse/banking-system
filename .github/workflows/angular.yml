@@ -13,8 +13,11 @@ on:
   workflow_dispatch:
 
 concurrency:
+  # Keep each branch/ref on a single active workflow run.
+  # Do not auto-cancel the previous run for the same ref; it creates
+  # false "failed" statuses while a newer run is still in flight.
   group: angular-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
