@@ -1,0 +1,47 @@
+<section class="page fade-up">
+  <header class="page__head">
+    <div>
+      <p class="eyebrow">Gateway</p>
+      <h2>Billing settings</h2>
+      <p class="lede">Merchant identity and payment methods shown at POS checkout.</p>
+    </div>
+  </header>
+
+  <app-billing-panel-shimmer *ngIf="pageLoading" variant="list"></app-billing-panel-shimmer>
+
+  <form class="panel form" *ngIf="!pageLoading" [formGroup]="form" (ngSubmit)="save()">
+    <label>
+      Merchant name
+      <input class="input" formControlName="merchantName" />
+    </label>
+    <label>
+      Support note
+      <textarea class="input input--area" rows="3" formControlName="supportNote"></textarea>
+    </label>
+
+    <fieldset class="toggles">
+      <legend>Accepted methods</legend>
+      <label class="toggle"><input type="checkbox" formControlName="cash" /> Cash</label>
+      <label class="toggle"><input type="checkbox" formControlName="card" /> Card</label>
+      <label class="toggle"><input type="checkbox" formControlName="upi" /> UPI</label>
+      <label class="toggle"><input type="checkbox" formControlName="qr" /> QR</label>
+    </fieldset>
+
+    <div class="grid2">
+      <label>
+        UPI VPA
+        <input class="input" formControlName="upiVpa" placeholder="merchant@upi" />
+      </label>
+      <label>
+        Card label
+        <input class="input" formControlName="cardLabel" />
+      </label>
+    </div>
+
+    <div class="form__actions">
+      <button type="submit" class="btn btn--primary" [disabled]="busy">
+        {{ busy ? 'Saving…' : 'Save settings' }}
+      </button>
+    </div>
+  </form>
+</section>

@@ -1,0 +1,103 @@
+<section class="page fade-up">
+  <header class="page__head">
+    <div>
+      <p class="eyebrow">Directory</p>
+      <h2>Customers</h2>
+      <p class="lede">Maintain walk-up clients and optional banking account links.</p>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <input
+      type="search"
+      class="input"
+      placeholder="Search name, phone, email"
+      [(ngModel)]="query"
+      (keyup.enter)="search()"
+    />
+    <button type="button" class="btn btn--ghost" (click)="search()">Search</button>
+  </div>
+
+  <app-billing-panel-shimmer *ngIf="pageLoading" variant="list"></app-billing-panel-shimmer>
+
+  <div class="layout" *ngIf="!pageLoading">
+    <div class="panel">
+      <div class="empty" *ngIf="!customers.length">No customers yet.</div>
+      <ul class="list" *ngIf="customers.length">
+        <li *ngFor="let c of customers">
+          <button type="button" class="row" (click)="openDrawer(c)">
+            <span class="avatar">{{ initials(c.name) }}</span>
+            <div class="row__body">
+              <strong>{{ c.name }}</strong>
+              <span>{{ c.phone || c.email || 'No contact' }}</span>
+            </div>
+          </button>
+          <div class="row__actions">
+            <button type="button" class="link" (click)="edit(c)">Edit</button>
+            <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Remove</button>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <form class="panel form" [formGroup]="form" (ngSubmit)="save()">
+      <h3>{{ editingId ? 'Edit customer' : 'Add customer' }}</h3>
+      <label>
+        Name
+        <input class="input" formControlName="name" />
+      </label>
+      <label>
+        Email
+        <input class="input" formControlName="email" />
+      </label>
+      <label>
+        Phone
+        <input class="input" formControlName="phone" />
+      </label>
+      <label>
+        Address
+        <input class="input" formControlName="address" />
+      </label>
+      <label>
+        Banking account #
+        <input class="input" formControlName="bankingAccountNumber" placeholder="Optional" />
+      </label>
+      <div class="form__actions">
+        <button type="button" class="btn btn--ghost" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
+        <button type="submit" class="btn btn--primary" [disabled]="busy">
+          {{ busy ? 'Saving…' : editingId ? 'Update' : 'Create' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="drawer-backdrop" *ngIf="drawerCustomer" (click)="closeDrawer()"></div>
+  <aside class="drawer" *ngIf="drawerCustomer as c" [@.disabled]="false">
+    <div class="drawer__head">
+      <span class="avatar avatar--lg">{{ initials(c.name) }}</span>
+      <div>
+        <h3>{{ c.name }}</h3>
+        <p>{{ c.email || 'No email' }}</p>
+      </div>
+      <button type="button" class="icon-close" (click)="closeDrawer()" aria-label="Close">×</button>
+    </div>
+    <dl class="drawer__meta">
+      <div>
+        <dt>Phone</dt>
+        <dd>{{ c.phone || '—' }}</dd>
+      </div>
+      <div>
+        <dt>Address</dt>
+        <dd>{{ c.address || '—' }}</dd>
+      </div>
+      <div>
+        <dt>Banking account</dt>
+        <dd>{{ c.bankingAccountNumber || '—' }}</dd>
+      </div>
+    </dl>
+    <div class="drawer__actions">
+      <button type="button" class="btn btn--ghost" (click)="edit(c)">Edit</button>
+      <button type="button" class="btn btn--primary" (click)="closeDrawer()">Done</button>
+    </div>
+  </aside>
+</section>

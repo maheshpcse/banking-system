@@ -1,0 +1,32 @@
+<div class="bs-shell">
+  <header class="bs-topbar">
+    <div class="bs-topbar__brand">
+      <span class="bs-topbar__mark" aria-hidden="true"></span>
+      <div>
+        <p class="bs-topbar__eyebrow">Nova · Commerce</p>
+        <h1 class="bs-topbar__title">Billing System</h1>
+      </div>
+    </div>
+    <div class="bs-topbar__actions">
+      <a class="bs-link" [routerLink]="bankingReturnUrl">{{ bankingReturnLabel }}</a>
+      <button type="button" class="bs-btn bs-btn--ghost" (click)="signOut()">Sign out</button>
+    </div>
+  </header>
+
+  <main class="bs-main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <nav class="bs-dock" aria-label="Billing navigation">
+    <a
+      *ngFor="let item of dockItems"
+      class="bs-dock__item"
+      [routerLink]="item.path"
+      routerLinkActive="is-active"
+      [routerLinkActiveOptions]="{ exact: item.path === '/billing' }"
+    >
+      <span class="bs-dock__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
+      <span class="bs-dock__label">{{ item.label }}</span>
+    </a>
+  </nav>
+</div>
