@@ -4,97 +4,387 @@ import { Component, Input } from '@angular/core';
   selector: 'app-billing-panel-shimmer',
   template: `
     <div class="bps" [attr.data-variant]="variant" aria-hidden="true">
-      <div class="bps__tiles" *ngIf="variant !== 'list'">
-        <div class="bps__tile" *ngFor="let t of tiles"></div>
-      </div>
-      <div class="bps__list">
-        <div class="bps__line" *ngFor="let l of lines" [style.width.%]="l"></div>
-      </div>
-      <div class="bps__pos" *ngIf="variant === 'pos'">
-        <div class="bps__chip" *ngFor="let c of chips"></div>
-        <div class="bps__cart"></div>
-      </div>
+      <!-- Desk: KPI row + bills panel -->
+      <ng-container *ngIf="variant === 'desk'">
+        <div class="bps__kpis">
+          <div class="bps__kpi" *ngFor="let k of kpis">
+            <div class="bps__bone bps__bone--xs"></div>
+            <div class="bps__bone bps__bone--lg"></div>
+          </div>
+        </div>
+        <div class="bps__panel">
+          <div class="bps__toolbar">
+            <div class="bps__bone bps__bone--md"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+          </div>
+          <div class="bps__row" *ngFor="let r of rows">
+            <div class="bps__bone bps__bone--fill" [style.width.%]="r"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Catalog: toolbar + table/grid skeletons -->
+      <ng-container *ngIf="variant === 'catalog'">
+        <div class="bps__toolbar bps__toolbar--wrap">
+          <div class="bps__bone bps__bone--search"></div>
+          <div class="bps__bone bps__bone--btn"></div>
+          <div class="bps__bone bps__bone--select"></div>
+          <div class="bps__bone bps__bone--select"></div>
+          <div class="bps__seg">
+            <span *ngFor="let s of segs"></span>
+          </div>
+        </div>
+        <div class="bps__layout">
+          <div class="bps__panel bps__panel--form">
+            <div class="bps__bone bps__bone--md"></div>
+            <div class="bps__bone bps__bone--field" *ngFor="let f of fields"></div>
+            <div class="bps__bone bps__bone--btn bps__bone--accent"></div>
+          </div>
+          <div class="bps__panel">
+            <div class="bps__table-head">
+              <div class="bps__bone" *ngFor="let h of heads"></div>
+            </div>
+            <div class="bps__row bps__row--table" *ngFor="let r of catalogRows">
+              <div class="bps__dot"></div>
+              <div class="bps__bone bps__bone--fill"></div>
+              <div class="bps__bone bps__bone--sm"></div>
+              <div class="bps__bone bps__bone--xs"></div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- POS: two columns -->
+      <ng-container *ngIf="variant === 'pos'">
+        <div class="bps__pos">
+          <div class="bps__panel bps__pos__picker">
+            <div class="bps__bone bps__bone--field"></div>
+            <div class="bps__search-row">
+              <div class="bps__bone bps__bone--search"></div>
+              <div class="bps__bone bps__bone--btn"></div>
+            </div>
+            <div class="bps__chips">
+              <div class="bps__chip" *ngFor="let c of chips"></div>
+            </div>
+          </div>
+          <div class="bps__panel bps__pos__cart">
+            <div class="bps__toolbar">
+              <div class="bps__bone bps__bone--md"></div>
+              <div class="bps__bone bps__bone--xs"></div>
+            </div>
+            <div class="bps__row" *ngFor="let r of cartRows">
+              <div class="bps__bone bps__bone--fill"></div>
+              <div class="bps__bone bps__bone--xs"></div>
+            </div>
+            <div class="bps__totals">
+              <div class="bps__bone bps__bone--sm" *ngFor="let t of totals"></div>
+            </div>
+            <div class="bps__bone bps__bone--btn bps__bone--block bps__bone--accent"></div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Settings: hero + two columns -->
+      <ng-container *ngIf="variant === 'settings'">
+        <div class="bps__hero">
+          <div class="bps__bone bps__bone--xs"></div>
+          <div class="bps__bone bps__bone--lg"></div>
+          <div class="bps__bone bps__bone--md"></div>
+        </div>
+        <div class="bps__settings">
+          <div class="bps__panel">
+            <div class="bps__bone bps__bone--md"></div>
+            <div class="bps__bone bps__bone--field" *ngFor="let f of settingsFields"></div>
+          </div>
+          <div class="bps__panel">
+            <div class="bps__bone bps__bone--md"></div>
+            <div class="bps__tiles">
+              <div class="bps__tile" *ngFor="let t of methodTiles"></div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- History: toolbar + table -->
+      <ng-container *ngIf="variant === 'history'">
+        <div class="bps__toolbar bps__toolbar--wrap">
+          <div class="bps__bone bps__bone--search"></div>
+          <div class="bps__bone bps__bone--select"></div>
+          <div class="bps__bone bps__bone--select"></div>
+          <div class="bps__bone bps__bone--btn"></div>
+        </div>
+        <div class="bps__panel">
+          <div class="bps__table-head">
+            <div class="bps__bone" *ngFor="let h of historyHeads"></div>
+          </div>
+          <div class="bps__row bps__row--table" *ngFor="let r of historyRows">
+            <div class="bps__bone bps__bone--fill"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+            <div class="bps__bone bps__bone--xs"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+          </div>
+        </div>
+      </ng-container>
     </div>
   `,
   styles: [
     `
       :host {
         display: block;
+        width: 100%;
       }
 
       .bps {
         display: grid;
         gap: 1rem;
-        animation: bps-fade-up 0.45s ease both;
+        width: 100%;
+        animation: bps-fade-up 0.4s ease both;
       }
 
-      .bps__tiles {
+      .bps__bone,
+      .bps__chip,
+      .bps__tile,
+      .bps__dot,
+      .bps__seg span {
+        border-radius: 0.75rem;
+        background: linear-gradient(
+          105deg,
+          rgba(217, 232, 226, 0.55) 18%,
+          rgba(255, 200, 1, 0.42) 42%,
+          rgba(217, 232, 226, 0.65) 62%
+        );
+        background-size: 220% 100%;
+        animation: bps-shimmer 1.35s ease-in-out infinite;
+        border: 1px solid rgba(255, 255, 255, 0.55);
+      }
+
+      .bps__bone--xs {
+        height: 0.55rem;
+        width: 4.5rem;
+      }
+      .bps__bone--sm {
+        height: 0.7rem;
+        width: 5.5rem;
+      }
+      .bps__bone--md {
+        height: 0.85rem;
+        width: 8rem;
+      }
+      .bps__bone--lg {
+        height: 1.35rem;
+        width: 7rem;
+        margin-top: 0.45rem;
+      }
+      .bps__bone--fill {
+        height: 0.8rem;
+        flex: 1;
+        min-width: 0;
+      }
+      .bps__bone--search {
+        height: 2.35rem;
+        flex: 1;
+        min-width: 12rem;
+        border-radius: 0.85rem;
+      }
+      .bps__bone--btn {
+        height: 2.35rem;
+        width: 5.5rem;
+        border-radius: 0.85rem;
+      }
+      .bps__bone--select {
+        height: 2.35rem;
+        width: 8.5rem;
+        border-radius: 0.85rem;
+      }
+      .bps__bone--field {
+        height: 2.35rem;
+        width: 100%;
+        border-radius: 0.85rem;
+      }
+      .bps__bone--block {
+        width: 100%;
+        height: 2.6rem;
+      }
+      .bps__bone--accent {
+        background: linear-gradient(
+          105deg,
+          rgba(255, 153, 50, 0.35) 18%,
+          rgba(255, 200, 1, 0.55) 45%,
+          rgba(255, 153, 50, 0.4) 65%
+        );
+        background-size: 220% 100%;
+      }
+
+      .bps__panel {
+        padding: 1rem 1.1rem;
+        border-radius: 1.15rem;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        display: grid;
+        gap: 0.7rem;
+      }
+
+      .bps__kpis {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 0.75rem;
       }
 
-      .bps__tile,
-      .bps__line,
-      .bps__chip,
-      .bps__cart {
-        border-radius: 1rem;
-        background: linear-gradient(
-          100deg,
-          rgba(255, 255, 255, 0.45) 20%,
-          rgba(147, 197, 253, 0.45) 40%,
-          rgba(255, 255, 255, 0.55) 60%
-        );
-        background-size: 200% 100%;
-        animation: bps-shimmer 1.35s ease-in-out infinite;
-        border: 1px solid rgba(255, 255, 255, 0.55);
-        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
-        backdrop-filter: blur(8px);
+      .bps__kpi {
+        padding: 1rem 1.05rem;
+        border-radius: 1.1rem;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
       }
 
-      .bps__tile {
-        height: 5.5rem;
-      }
-
-      .bps__list {
-        display: grid;
+      .bps__toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         gap: 0.65rem;
-        padding: 1rem;
-        border-radius: 1.15rem;
-        background: rgba(255, 255, 255, 0.55);
-        border: 1px solid rgba(255, 255, 255, 0.65);
       }
 
-      .bps__line {
-        height: 0.85rem;
-        border-radius: 999px;
+      .bps__toolbar--wrap {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .bps__row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.35rem 0;
+      }
+
+      .bps__row--table {
+        padding: 0.55rem 0;
+        border-top: 1px solid rgba(22, 50, 58, 0.06);
+      }
+
+      .bps__layout {
+        display: grid;
+        grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.6fr);
+        gap: 0.9rem;
+        align-items: start;
+      }
+
+      .bps__panel--form {
+        gap: 0.65rem;
+      }
+
+      .bps__table-head {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr 0.7fr 0.6fr;
+        gap: 0.75rem;
+        padding-bottom: 0.35rem;
+
+        .bps__bone {
+          height: 0.55rem;
+          width: 70%;
+        }
+      }
+
+      .bps__dot {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 50%;
+        flex: 0 0 auto;
+      }
+
+      .bps__seg {
+        display: inline-flex;
+        gap: 0.35rem;
+        padding: 0.25rem;
+        border-radius: 0.85rem;
+        background: rgba(255, 255, 255, 0.55);
+        border: 1px solid rgba(22, 50, 58, 0.08);
+
+        span {
+          width: 3.2rem;
+          height: 1.7rem;
+          border-radius: 0.65rem;
+        }
       }
 
       .bps__pos {
         display: grid;
-        gap: 0.75rem;
+        grid-template-columns: 1.35fr 1fr;
+        gap: 0.9rem;
+        min-height: min(62vh, 560px);
+      }
+
+      .bps__pos__picker,
+      .bps__pos__cart {
+        min-height: 100%;
+      }
+
+      .bps__search-row {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .bps__chips {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.55rem;
       }
 
       .bps__chip {
-        height: 2.2rem;
-        width: 28%;
-        display: inline-block;
+        height: 4.2rem;
+        border-radius: 0.95rem;
       }
 
-      .bps__cart {
-        height: 9rem;
+      .bps__totals {
+        display: grid;
+        gap: 0.45rem;
+        padding-top: 0.35rem;
+        border-top: 1px solid rgba(22, 50, 58, 0.08);
       }
 
-      .bps[data-variant='list'] .bps__tiles {
-        display: none;
+      .bps__hero {
+        padding: 1.35rem 1.5rem;
+        border-radius: 1.25rem;
+        background: linear-gradient(
+          120deg,
+          rgba(255, 200, 1, 0.28),
+          rgba(217, 232, 226, 0.75) 55%,
+          rgba(255, 255, 255, 0.7)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        display: grid;
+        gap: 0.55rem;
       }
 
-      .bps[data-variant='pos'] .bps__tiles {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      .bps__settings {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.9rem;
       }
 
-      @media (max-width: 720px) {
-        .bps__tiles {
+      .bps__tiles {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.65rem;
+      }
+
+      .bps__tile {
+        height: 5.25rem;
+        border-radius: 1rem;
+      }
+
+      @media (max-width: 960px) {
+        .bps__kpis {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .bps__layout,
+        .bps__pos,
+        .bps__settings {
+          grid-template-columns: 1fr;
+        }
+        .bps__chips {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
       }
@@ -111,7 +401,7 @@ import { Component, Input } from '@angular/core';
       @keyframes bps-fade-up {
         from {
           opacity: 0;
-          transform: translateY(10px);
+          transform: translateY(8px);
         }
         to {
           opacity: 1;
@@ -122,9 +412,19 @@ import { Component, Input } from '@angular/core';
   ]
 })
 export class BillingPanelShimmerComponent {
-  @Input() variant: 'desk' | 'list' | 'pos' = 'desk';
+  @Input() variant: 'desk' | 'catalog' | 'pos' | 'settings' | 'history' = 'desk';
 
-  readonly tiles = [1, 2, 3, 4];
-  readonly lines = [92, 78, 86, 64, 74];
-  readonly chips = [1, 2, 3, 4];
+  readonly kpis = [1, 2, 3, 4];
+  readonly rows = [88, 76, 92, 70, 84];
+  readonly segs = [1, 2, 3];
+  readonly fields = [1, 2, 3, 4];
+  readonly heads = [1, 2, 3, 4];
+  readonly catalogRows = [1, 2, 3, 4, 5, 6];
+  readonly chips = [1, 2, 3, 4, 5, 6];
+  readonly cartRows = [1, 2, 3, 4];
+  readonly totals = [1, 2, 3];
+  readonly settingsFields = [1, 2, 3];
+  readonly methodTiles = [1, 2, 3, 4];
+  readonly historyHeads = [1, 2, 3, 4];
+  readonly historyRows = [1, 2, 3, 4, 5, 6, 7, 8];
 }

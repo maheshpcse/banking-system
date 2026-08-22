@@ -92,36 +92,49 @@
             </ng-container>
           </div>
 
-          <label>
+          <label class="field-with-clear">
             <span>Professional preset</span>
-            <select formControlName="presetId" (change)="onPresetChange()">
-              <option value="" disabled>Select preset</option>
-              <option *ngFor="let preset of roleAvatarPresetOptions" [value]="preset.id">
-                {{ preset.label }}
-              </option>
-            </select>
+            <div class="field-with-clear__control">
+              <select formControlName="presetId" (change)="onPresetChange()">
+                <option value="" disabled>Select preset</option>
+                <option *ngFor="let preset of roleAvatarPresetOptions" [value]="preset.id">
+                  {{ preset.label }}
+                </option>
+              </select>
+              <button
+                type="button"
+                class="field-clear"
+                *ngIf="avatarForm.value.presetId"
+                (click)="clearPreset($event)"
+                aria-label="Clear preset"
+                title="Clear preset"
+              >
+                ×
+              </button>
+            </div>
           </label>
-          <button
-            type="button"
-            class="btn btn--ghost"
-            *ngIf="avatarForm.value.presetId"
-            (click)="clearPreset($event)"
-          >
-            Clear preset
-          </button>
 
-          <label>
+          <label class="field-with-clear">
             <span>Profile image</span>
-            <input
-              class="file-input"
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              (change)="onImageSelected($event)"
-            />
+            <div class="field-with-clear__control">
+              <input
+                class="file-input"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                (change)="onImageSelected($event)"
+              />
+              <button
+                type="button"
+                class="field-clear"
+                *ngIf="imagePreview"
+                (click)="clearImage($event)"
+                aria-label="Remove photo"
+                title="Remove photo"
+              >
+                ×
+              </button>
+            </div>
           </label>
-          <button type="button" class="btn btn--ghost" *ngIf="imagePreview" (click)="clearImage($event)">
-            Remove photo
-          </button>
 
           <label>
             <span>Initials (fallback)</span>
@@ -664,8 +677,9 @@
               <input type="checkbox" formControlName="smsAlerts" />
               <span>SMS alerts to your saved phone number</span>
             </label>
-            <p class="form__hint" *ngIf="showPhoneFields && !user?.phone">
-              Add a phone number on Identity to receive SMS.
+            <p class="form__hint form__hint--info" *ngIf="showPhoneFields && !user?.phone">
+              Note: Add a phone number on Identity to receive SMS. This is informational — the SMS
+              alerts checkbox above stays available once a number is saved.
             </p>
           </ng-container>
 

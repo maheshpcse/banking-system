@@ -57,8 +57,31 @@ export class BillingShellComponent implements OnInit, OnDestroy {
   }
 
   get bankingReturnLabel(): string {
-    const role = this.auth.currentUser?.role;
-    return role === 'admin' ? 'Return to Banking' : 'Return to Banking';
+    return 'Return to Banking';
+  }
+
+  get avatarStyle(): string {
+    return this.auth.currentUser?.avatar?.style || 'mint';
+  }
+
+  get avatarInitials(): string {
+    return (this.auth.currentUser?.avatar?.initials || 'NB').trim().toUpperCase() || 'NB';
+  }
+
+  get avatarSrc(): string | null {
+    const avatar = this.auth.currentUser?.avatar;
+    if (avatar?.image) {
+      return avatar.image;
+    }
+    const presetId = String(avatar?.presetId || '').trim();
+    if (!/^(customer|manager|admin)\/preset-\d{2}$/.test(presetId)) {
+      return null;
+    }
+    return `assets/avatars/${presetId}.webp`;
+  }
+
+  get operatorName(): string {
+    return this.auth.currentUser?.fullName || this.auth.currentUser?.username || 'Operator';
   }
 
   signOut(): void {
@@ -66,8 +89,10 @@ export class BillingShellComponent implements OnInit, OnDestroy {
   }
 
   private injectBootstrapCss(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
     if (document.getElementById(BOOTSTRAP_CSS_ID)) {
-      this.bootstrapLink = document.getElementById(BOOTSTRAP_CSS_ID) as HTMLLinkElement;
       return;
     }
     const link = this.renderer.createElement('link') as HTMLLinkElement;
@@ -79,10 +104,10 @@ export class BillingShellComponent implements OnInit, OnDestroy {
   }
 
   private ensureThreeJs(): void {
-    if ((window as unknown as { THREE?: unknown }).THREE) {
+    if (typeof document === 'undefined') {
       return;
     }
-    if (document.getElementById(THREE_SCRIPT_ID)) {
+    if (document.getElementById(THREE_SCRIPT_ID) || (window as unknown as { THREE?: unknown }).THREE) {
       return;
     }
     const script = this.renderer.createElement('script') as HTMLScriptElement;

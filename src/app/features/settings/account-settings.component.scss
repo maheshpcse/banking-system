@@ -466,6 +466,62 @@
   align-content: start;
 }
 
+.banking-layout__address > label {
+  width: 100%;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.banking-layout__address > .form-row {
+  width: 100%;
+}
+
+.field-with-clear {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field-with-clear__control {
+  position: relative;
+  display: grid;
+}
+
+.field-with-clear__control select,
+.field-with-clear__control .file-input {
+  width: 100%;
+  padding-right: 2.4rem;
+}
+
+.field-clear {
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.65rem;
+  height: 1.65rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.22);
+  color: var(--text);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+}
+
+.field-clear:hover {
+  background: rgba(196, 91, 108, 0.22);
+}
+
+.form__hint--info {
+  margin-top: 0.25rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.7rem;
+  background: rgba(106, 168, 232, 0.12);
+  border: 1px solid rgba(106, 168, 232, 0.22);
+}
+
 .banking-layout__validity {
   grid-area: validity;
   display: grid;

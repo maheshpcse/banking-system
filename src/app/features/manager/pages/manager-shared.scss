@@ -35,6 +35,18 @@
   align-self: flex-start;
 }
 
+.roadmap-card__btn.btn--ghost {
+  background: transparent;
+  border-color: rgba(148, 163, 184, 0.35);
+  color: var(--text-muted);
+}
+
+.roadmap-card__btn.btn--ghost:hover {
+  color: var(--text);
+  background: rgba(95, 196, 176, 0.18);
+  border-color: rgba(95, 196, 176, 0.45);
+}
+
 .report-layout {
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;

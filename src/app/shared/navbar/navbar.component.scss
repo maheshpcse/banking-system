@@ -197,6 +197,19 @@
   cursor: pointer;
 }
 
+.nav__billing-launch {
+  border: 1px solid rgba(255, 153, 50, 0.4) !important;
+  background: rgba(255, 200, 1, 0.18) !important;
+  color: var(--text) !important;
+  font-weight: 700 !important;
+}
+
+.nav__billing-launch:hover,
+.nav__billing-launch.is-active {
+  background: rgba(255, 153, 50, 0.28) !important;
+  border-color: rgba(220, 20, 60, 0.35) !important;
+}
+
 .nav__logout:hover {
   border-color: rgba(95, 196, 176, 0.45);
 }

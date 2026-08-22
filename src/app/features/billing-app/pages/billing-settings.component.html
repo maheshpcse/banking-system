@@ -1,47 +1,92 @@
-<section class="page fade-up">
-  <header class="page__head">
-    <div>
+<section class="bs-page fade-up">
+  <app-billing-panel-shimmer *ngIf="pageLoading" variant="settings"></app-billing-panel-shimmer>
+
+  <ng-container *ngIf="!pageLoading">
+    <header class="hero">
       <p class="eyebrow">Gateway</p>
       <h2>Billing settings</h2>
-      <p class="lede">Merchant identity and payment methods shown at POS checkout.</p>
-    </div>
-  </header>
+      <p class="lede">Merchant identity on the left · payment rails as large toggle tiles on the right.</p>
+    </header>
 
-  <app-billing-panel-shimmer *ngIf="pageLoading" variant="list"></app-billing-panel-shimmer>
+    <form class="settings" [formGroup]="form" (ngSubmit)="save()">
+      <div class="glass col">
+        <h3>Merchant identity</h3>
+        <label>
+          Merchant name
+          <input class="input" formControlName="merchantName" />
+        </label>
+        <label>
+          Support note
+          <textarea class="input input--area" rows="4" formControlName="supportNote"></textarea>
+        </label>
+        <div class="grid2">
+          <label>
+            UPI VPA
+            <input class="input" formControlName="upiVpa" placeholder="merchant@upi" />
+          </label>
+          <label>
+            Card label
+            <input class="input" formControlName="cardLabel" />
+          </label>
+        </div>
+      </div>
 
-  <form class="panel form" *ngIf="!pageLoading" [formGroup]="form" (ngSubmit)="save()">
-    <label>
-      Merchant name
-      <input class="input" formControlName="merchantName" />
-    </label>
-    <label>
-      Support note
-      <textarea class="input input--area" rows="3" formControlName="supportNote"></textarea>
-    </label>
+      <div class="glass col">
+        <h3>Payment methods</h3>
+        <p class="hint">Tap a tile to enable or disable at POS checkout.</p>
+        <div class="tiles">
+          <button
+            type="button"
+            class="tile tile--saffron"
+            [class.is-on]="form.value.cash"
+            (click)="toggleMethod('cash')"
+          >
+            <span class="tile__label">Cash</span>
+            <strong>{{ form.value.cash ? 'On' : 'Off' }}</strong>
+          </button>
+          <button
+            type="button"
+            class="tile tile--mint"
+            [class.is-on]="form.value.card"
+            (click)="toggleMethod('card')"
+          >
+            <span class="tile__label">Card</span>
+            <strong>{{ form.value.card ? 'On' : 'Off' }}</strong>
+          </button>
+          <button
+            type="button"
+            class="tile tile--saffron"
+            [class.is-on]="form.value.upi"
+            (click)="toggleMethod('upi')"
+          >
+            <span class="tile__label">UPI</span>
+            <strong>{{ form.value.upi ? 'On' : 'Off' }}</strong>
+          </button>
+          <button
+            type="button"
+            class="tile tile--mint"
+            [class.is-on]="form.value.qr"
+            (click)="toggleMethod('qr')"
+          >
+            <span class="tile__label">QR</span>
+            <strong>{{ form.value.qr ? 'On' : 'Off' }}</strong>
+          </button>
+        </div>
 
-    <fieldset class="toggles">
-      <legend>Accepted methods</legend>
-      <label class="toggle"><input type="checkbox" formControlName="cash" /> Cash</label>
-      <label class="toggle"><input type="checkbox" formControlName="card" /> Card</label>
-      <label class="toggle"><input type="checkbox" formControlName="upi" /> UPI</label>
-      <label class="toggle"><input type="checkbox" formControlName="qr" /> QR</label>
-    </fieldset>
+        <!-- Keep controls bound for form submit -->
+        <div class="sr-only" aria-hidden="true">
+          <input type="checkbox" formControlName="cash" />
+          <input type="checkbox" formControlName="card" />
+          <input type="checkbox" formControlName="upi" />
+          <input type="checkbox" formControlName="qr" />
+        </div>
+      </div>
 
-    <div class="grid2">
-      <label>
-        UPI VPA
-        <input class="input" formControlName="upiVpa" placeholder="merchant@upi" />
-      </label>
-      <label>
-        Card label
-        <input class="input" formControlName="cardLabel" />
-      </label>
-    </div>
-
-    <div class="form__actions">
-      <button type="submit" class="btn btn--primary" [disabled]="busy">
-        {{ busy ? 'Saving…' : 'Save settings' }}
-      </button>
-    </div>
-  </form>
+      <div class="settings__foot">
+        <button type="submit" class="btn btn--primary" [disabled]="busy">
+          {{ busy ? 'Saving…' : 'Save settings' }}
+        </button>
+      </div>
+    </form>
+  </ng-container>
 </section>

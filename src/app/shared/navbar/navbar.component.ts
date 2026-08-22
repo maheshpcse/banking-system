@@ -51,6 +51,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return '/dashboard';
   }
 
+  /** Manager/Admin operators (not Super Admin) can open the Billing System app. */
+  get canLaunchBilling(): boolean {
+    const user = this.auth.currentUser;
+    return !!user && !user.isSuperAdmin && (user.role === 'manager' || user.role === 'admin');
+  }
+
   get avatarStyle(): string {
     return this.auth.currentUser?.avatar?.style || 'mint';
   }

@@ -1,5 +1,5 @@
-<section class="page fade-up">
-  <header class="page__head">
+<section class="bs-page fade-up">
+  <header class="bs-page__head">
     <div>
       <p class="eyebrow">Overview</p>
       <h2>Sales pulse</h2>
@@ -40,7 +40,7 @@
     <div class="panel">
       <div class="panel__head">
         <h3>Recent bills</h3>
-        <a routerLink="/billing/history">View history</a>
+        <a class="history-link" routerLink="/billing/history">View History</a>
       </div>
       <div class="empty" *ngIf="!recentBills.length">No invoices yet — start from POS.</div>
       <ul class="bills" *ngIf="recentBills.length">

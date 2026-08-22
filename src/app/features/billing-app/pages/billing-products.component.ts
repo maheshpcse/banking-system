@@ -1,21 +1,35 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { AlertService } from '../../../core/services/alert.service';
 import { BillingService } from '../../../core/services/billing.service';
 import { BillingProduct } from '../../../core/models/banking.models';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
+
+type ProductSort = 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc' | 'stock-asc';
+type StockFilter = 'all' | 'in' | 'low' | 'out';
+type ViewMode = 'list' | 'grid' | 'table';
 
 @Component({
   selector: 'app-billing-products',
   templateUrl: './billing-products.component.html',
   styleUrls: ['./billing-products.component.scss']
 })
-export class BillingProductsComponent implements OnInit {
-  pageLoading = true;
+export class BillingProductsComponent implements OnInit, OnDestroy {
+  listLoading = true;
   busy = false;
   query = '';
   products: BillingProduct[] = [];
   editingId: string | null = null;
+  showForm = true;
+  detail: BillingProduct | null = null;
+
+  sort: ProductSort = 'name-asc';
+  stockFilter: StockFilter = 'all';
+  view: ViewMode = 'table';
+  page = 1;
+  readonly pageSize = 8;
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
@@ -25,6 +39,9 @@ export class BillingProductsComponent implements OnInit {
     gstPercentage: [18, [Validators.required, Validators.min(0), Validators.max(100)]]
   });
 
+  private readonly search$ = new Subject<string>();
+  private readonly destroy$ = new Subject<void>();
+
   constructor(
     private readonly billing: BillingService,
     private readonly alerts: AlertService,
@@ -32,29 +49,117 @@ export class BillingProductsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.search$
+      .pipe(debounceTime(250), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.page = 1;
+        this.load();
+      });
     this.load();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  get filtered(): BillingProduct[] {
+    let items = [...this.products];
+    if (this.stockFilter === 'in') {
+      items = items.filter((p) => p.stock > 5);
+    } else if (this.stockFilter === 'low') {
+      items = items.filter((p) => p.stock > 0 && p.stock <= 5);
+    } else if (this.stockFilter === 'out') {
+      items = items.filter((p) => p.stock <= 0);
+    }
+
+    const cmp = (a: BillingProduct, b: BillingProduct): number => {
+      switch (this.sort) {
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'price-asc':
+          return a.price - b.price;
+        case 'price-desc':
+          return b.price - a.price;
+        case 'stock-asc':
+          return a.stock - b.stock;
+        case 'name-asc':
+        default:
+          return a.name.localeCompare(b.name);
+      }
+    };
+    return items.sort(cmp);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filtered.length / this.pageSize));
+  }
+
+  get paged(): BillingProduct[] {
+    const start = (this.page - 1) * this.pageSize;
+    return this.filtered.slice(start, start + this.pageSize);
+  }
+
+  onQueryChange(value: string): void {
+    this.query = value;
+    this.search$.next(value.trim());
+  }
+
+  clearQuery(): void {
+    this.query = '';
+    this.search$.next('');
+  }
+
+  search(): void {
+    this.page = 1;
+    this.load();
+  }
+
+  onFilterChange(): void {
+    this.page = 1;
+    this.listLoading = true;
+    setTimeout(() => {
+      this.listLoading = false;
+    }, 220);
+  }
+
+  setView(mode: ViewMode): void {
+    this.view = mode;
+  }
+
+  goPage(delta: number): void {
+    this.page = Math.min(this.totalPages, Math.max(1, this.page + delta));
+  }
+
   load(): void {
-    this.pageLoading = true;
+    this.listLoading = true;
     withShimmerDelay(this.billing.listProducts(this.query.trim()), SHIMMER_MS).subscribe({
       next: (res) => {
         this.products = res.items || [];
-        this.pageLoading = false;
+        if (this.page > this.totalPages) {
+          this.page = this.totalPages;
+        }
+        this.listLoading = false;
       },
       error: async () => {
-        this.pageLoading = false;
+        this.listLoading = false;
         await this.alerts.error('Unable to load products.');
       }
     });
   }
 
-  search(): void {
-    this.load();
+  openDetail(product: BillingProduct): void {
+    this.detail = product;
+  }
+
+  closeDetail(): void {
+    this.detail = null;
   }
 
   edit(product: BillingProduct): void {
     this.editingId = product.id;
+    this.showForm = true;
+    this.detail = null;
     this.form.patchValue({
       name: product.name,
       sku: product.sku,
@@ -69,12 +174,11 @@ export class BillingProductsComponent implements OnInit {
     this.form.reset({ name: '', sku: '', price: 0, stock: 0, gstPercentage: 18 });
   }
 
-  save(): void {
+  async save(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-    this.busy = true;
     const raw = this.form.getRawValue();
     const payload = {
       name: String(raw.name || ''),
@@ -83,53 +187,78 @@ export class BillingProductsComponent implements OnInit {
       stock: Number(raw.stock || 0),
       gstPercentage: Number(raw.gstPercentage || 0)
     };
-    const req$ = this.editingId
-      ? this.billing.updateProduct(this.editingId, payload)
-      : this.billing.createProduct(payload);
+    const editingId = this.editingId;
+    const label = editingId ? 'Update' : 'Create';
 
-    withShimmerDelay(req$, SHIMMER_MS).subscribe({
-      next: async (res) => {
-        this.busy = false;
-        await this.alerts.toastSuccess(res.message || 'Product saved');
-        this.cancelEdit();
-        this.load();
-      },
-      error: async (err) => {
-        this.busy = false;
-        await this.alerts.error(err?.error?.message || 'Could not save product.');
-      }
+    this.busy = true;
+    this.listLoading = true;
+    const outcome = await this.alerts.confirmAction({
+      text: editingId
+        ? `Save changes to “${payload.name}”?`
+        : `Add “${payload.name}” to the catalog?`,
+      confirmText: label,
+      loadingText: 'Saving product…',
+      action: () =>
+        withShimmerDelay(
+          editingId
+            ? this.billing.updateProduct(editingId, payload)
+            : this.billing.createProduct(payload),
+          SHIMMER_MS
+        ),
+      successMessage: (res) => res.message || 'Product saved',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Could not save product.'
     });
+    this.busy = false;
+    this.listLoading = false;
+    if (outcome.ok) {
+      this.cancelEdit();
+      this.load();
+    }
   }
 
   async archive(product: BillingProduct): Promise<void> {
-    const ok = await this.alerts.confirm({
-      text: `Archive “${product.name}”? It will leave the active catalog.`,
-      confirmText: 'Archive'
-    });
-    if (!ok) {
-      return;
-    }
     this.busy = true;
-    withShimmerDelay(this.billing.archiveProduct(product.id), SHIMMER_MS).subscribe({
-      next: async (res) => {
-        this.busy = false;
-        await this.alerts.toastSuccess(res.message || 'Archived');
-        this.load();
-      },
-      error: async (err) => {
-        this.busy = false;
-        await this.alerts.error(err?.error?.message || 'Archive failed.');
-      }
+    this.listLoading = true;
+    const outcome = await this.alerts.confirmAction({
+      text: `Archive “${product.name}”? It will leave the active catalog.`,
+      confirmText: 'Archive',
+      loadingText: 'Archiving…',
+      action: () => withShimmerDelay(this.billing.archiveProduct(product.id), SHIMMER_MS),
+      successMessage: (res) => res.message || 'Archived',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Archive failed.'
     });
+    this.busy = false;
+    this.listLoading = false;
+    if (outcome.ok) {
+      if (this.detail?.id === product.id) {
+        this.closeDetail();
+      }
+      if (this.editingId === product.id) {
+        this.cancelEdit();
+      }
+      this.load();
+    }
   }
 
   stockTone(stock: number): string {
     if (stock <= 0) {
       return 'stock stock--out';
     }
-    if (stock < 8) {
+    if (stock <= 5) {
       return 'stock stock--low';
     }
     return 'stock stock--ok';
+  }
+
+  stockLabel(stock: number): string {
+    if (stock <= 0) {
+      return 'Out';
+    }
+    if (stock <= 5) {
+      return 'Low';
+    }
+    return 'In stock';
   }
 }
