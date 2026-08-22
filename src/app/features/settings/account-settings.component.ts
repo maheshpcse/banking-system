@@ -211,12 +211,14 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     return `assets/avatars/${id}.webp`;
   }
 
-  /** Custom upload wins; otherwise show the selected (or saved) professional preset. */
+  /** Custom upload wins; otherwise the form’s selected professional preset. */
   displayAvatarSrc(): string | null {
     if (this.imagePreview) {
       return this.imagePreview;
     }
-    return this.avatarPresetSrc(this.avatarForm.value.presetId || this.user?.avatar?.presetId);
+    // Use only the form value so clearing preset/photo can fall back to initials
+    // without resurrecting a previously saved user.avatar.presetId.
+    return this.avatarPresetSrc(this.avatarForm.value.presetId);
   }
 
   private panelTimer: ReturnType<typeof setTimeout> | null = null;
@@ -741,10 +743,23 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   clearImage(event?: Event): void {
     this.imagePreview = null;
     this.imageFileName = '';
+    // Drop any preset too so center + hero show Initials (fallback).
     this.avatarForm.patchValue({ presetId: '' });
     const host = (event?.target as HTMLElement | undefined)?.closest('form');
     const input = (host?.querySelector('input[type="file"]') ||
       document.querySelector('.form--avatar input[type="file"]')) as HTMLInputElement | null;
+    if (input) {
+      input.value = '';
+    }
+  }
+
+  /** Reset professional preset so Initials (fallback) can be saved instead. */
+  clearPreset(event?: Event): void {
+    event?.preventDefault();
+    this.avatarForm.patchValue({ presetId: '' });
+    this.imagePreview = null;
+    this.imageFileName = '';
+    const input = document.querySelector('.form--avatar input[type="file"]') as HTMLInputElement | null;
     if (input) {
       input.value = '';
     }

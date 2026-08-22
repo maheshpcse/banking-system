@@ -95,12 +95,20 @@
           <label>
             <span>Professional preset</span>
             <select formControlName="presetId" (change)="onPresetChange()">
-              <option value="" disabled hidden>Select preset</option>
+              <option value="" disabled>Select preset</option>
               <option *ngFor="let preset of roleAvatarPresetOptions" [value]="preset.id">
                 {{ preset.label }}
               </option>
             </select>
           </label>
+          <button
+            type="button"
+            class="btn btn--ghost"
+            *ngIf="avatarForm.value.presetId"
+            (click)="clearPreset($event)"
+          >
+            Clear preset
+          </button>
 
           <label>
             <span>Profile image</span>
