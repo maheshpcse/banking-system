@@ -23,6 +23,7 @@ export class BillingCustomersComponent implements OnInit, OnDestroy {
   customers: BillingCustomer[] = [];
   editingId: string | null = null;
   showForm = true;
+  panelAnimating = false;
   detail: BillingCustomer | null = null;
 
   sort: CustomerSort = 'name-asc';
@@ -41,6 +42,7 @@ export class BillingCustomersComponent implements OnInit, OnDestroy {
 
   private readonly search$ = new Subject<string>();
   private readonly destroy$ = new Subject<void>();
+  private panelTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private readonly billing: BillingService,
@@ -59,8 +61,22 @@ export class BillingCustomersComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.panelTimer) {
+      clearTimeout(this.panelTimer);
+    }
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  toggleForm(): void {
+    this.panelAnimating = true;
+    this.showForm = !this.showForm;
+    if (this.panelTimer) {
+      clearTimeout(this.panelTimer);
+    }
+    this.panelTimer = setTimeout(() => {
+      this.panelAnimating = false;
+    }, 320);
   }
 
   get filtered(): BillingCustomer[] {

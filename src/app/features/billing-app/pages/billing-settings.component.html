@@ -5,7 +5,7 @@
     <header class="hero">
       <p class="eyebrow">Gateway</p>
       <h2>Billing settings</h2>
-      <p class="lede">Merchant identity on the left · payment rails as large toggle tiles on the right.</p>
+      <p class="lede">Merchant identity on the left · payment rails styled like ATM card faces on the right.</p>
     </header>
 
     <form class="settings" [formGroup]="form" (ngSubmit)="save()">
@@ -33,47 +33,54 @@
 
       <div class="glass col">
         <h3>Payment methods</h3>
-        <p class="hint">Tap a tile to enable or disable at POS checkout.</p>
-        <div class="tiles">
+        <p class="hint">Tap a card face to enable or disable at POS checkout.</p>
+        <div class="pay-faces">
           <button
             type="button"
-            class="tile tile--saffron"
+            class="pay-face pay-face--cash"
             [class.is-on]="form.value.cash"
             (click)="toggleMethod('cash')"
           >
-            <span class="tile__label">Cash</span>
-            <strong>{{ form.value.cash ? 'On' : 'Off' }}</strong>
+            <span class="pay-face__chip" aria-hidden="true"></span>
+            <span class="pay-face__brand">Cash</span>
+            <strong class="pay-face__status">{{ form.value.cash ? 'Enabled' : 'Off' }}</strong>
+            <span class="pay-face__mark" aria-hidden="true"></span>
           </button>
           <button
             type="button"
-            class="tile tile--mint"
+            class="pay-face pay-face--card"
             [class.is-on]="form.value.card"
             (click)="toggleMethod('card')"
           >
-            <span class="tile__label">Card</span>
-            <strong>{{ form.value.card ? 'On' : 'Off' }}</strong>
+            <span class="pay-face__chip" aria-hidden="true"></span>
+            <span class="pay-face__brand">Card</span>
+            <strong class="pay-face__status">{{ form.value.card ? 'Enabled' : 'Off' }}</strong>
+            <span class="pay-face__mark" aria-hidden="true"></span>
           </button>
           <button
             type="button"
-            class="tile tile--saffron"
+            class="pay-face pay-face--upi"
             [class.is-on]="form.value.upi"
             (click)="toggleMethod('upi')"
           >
-            <span class="tile__label">UPI</span>
-            <strong>{{ form.value.upi ? 'On' : 'Off' }}</strong>
+            <span class="pay-face__chip" aria-hidden="true"></span>
+            <span class="pay-face__brand">UPI</span>
+            <strong class="pay-face__status">{{ form.value.upi ? 'Enabled' : 'Off' }}</strong>
+            <span class="pay-face__mark" aria-hidden="true"></span>
           </button>
           <button
             type="button"
-            class="tile tile--mint"
+            class="pay-face pay-face--qr"
             [class.is-on]="form.value.qr"
             (click)="toggleMethod('qr')"
           >
-            <span class="tile__label">QR</span>
-            <strong>{{ form.value.qr ? 'On' : 'Off' }}</strong>
+            <span class="pay-face__chip" aria-hidden="true"></span>
+            <span class="pay-face__brand">QR</span>
+            <strong class="pay-face__status">{{ form.value.qr ? 'Enabled' : 'Off' }}</strong>
+            <span class="pay-face__mark" aria-hidden="true"></span>
           </button>
         </div>
 
-        <!-- Keep controls bound for form submit -->
         <div class="sr-only" aria-hidden="true">
           <input type="checkbox" formControlName="cash" />
           <input type="checkbox" formControlName="card" />

@@ -1,44 +1,46 @@
 <section class="page fade-up">
-  <header class="page__head">
-    <div>
-      <p class="eyebrow">Ledger</p>
-      <h2>Invoice history</h2>
-      <p class="lede">Browse past bills as a soft timeline — filter, page, and open details.</p>
-    </div>
-  </header>
-
-  <div class="filters">
-    <input class="input" type="search" placeholder="Search bill or customer" [(ngModel)]="query" />
-    <input class="input" type="date" [(ngModel)]="from" />
-    <input class="input" type="date" [(ngModel)]="to" />
-    <button type="button" class="btn btn--ghost" (click)="applyFilters()">Filter</button>
-  </div>
-
   <app-billing-panel-shimmer *ngIf="pageLoading" variant="history"></app-billing-panel-shimmer>
 
-  <div class="timeline" *ngIf="!pageLoading">
-    <div class="empty" *ngIf="!bills.length">No invoices match these filters.</div>
-    <article class="card" *ngFor="let bill of bills" (click)="openDetail(bill)">
-      <div class="card__rail" aria-hidden="true"></div>
-      <div class="card__body">
-        <div class="card__top">
-          <strong>{{ bill.billNumber }}</strong>
-          <span [class]="statusClass(bill.paymentStatus)">{{ bill.paymentStatus }}</span>
-        </div>
-        <p>{{ bill.customerName }}</p>
-        <div class="card__meta">
-          <span>{{ bill.createdAt | date: 'mediumDate' }}</span>
-          <em>{{ bill.grandTotal | currencyFormat }}</em>
-        </div>
+  <ng-container *ngIf="!pageLoading">
+    <header class="page__head">
+      <div>
+        <p class="eyebrow">Ledger</p>
+        <h2>Invoice history</h2>
+        <p class="lede">Browse past bills as a soft timeline — filter, page, and open details.</p>
       </div>
-    </article>
-  </div>
+    </header>
 
-  <div class="pager" *ngIf="!pageLoading && pages > 1">
-    <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
-    <span>Page {{ page }} / {{ pages }} · {{ total }} total</span>
-    <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
-  </div>
+    <div class="filters">
+      <input class="input" type="search" placeholder="Search bill or customer" [(ngModel)]="query" />
+      <input class="input" type="date" [(ngModel)]="from" />
+      <input class="input" type="date" [(ngModel)]="to" />
+      <button type="button" class="btn btn--ghost" (click)="applyFilters()">Filter</button>
+    </div>
+
+    <div class="timeline">
+      <div class="empty" *ngIf="!bills.length">No invoices match these filters.</div>
+      <article class="card" *ngFor="let bill of bills" (click)="openDetail(bill)">
+        <div class="card__rail" aria-hidden="true"></div>
+        <div class="card__body">
+          <div class="card__top">
+            <strong>{{ bill.billNumber }}</strong>
+            <span [class]="statusClass(bill.paymentStatus)">{{ bill.paymentStatus }}</span>
+          </div>
+          <p>{{ bill.customerName }}</p>
+          <div class="card__meta">
+            <span>{{ bill.createdAt | date: 'mediumDate' }}</span>
+            <em>{{ bill.grandTotal | currencyFormat }}</em>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="pager" *ngIf="pages > 1">
+      <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
+      <span>Page {{ page }} / {{ pages }} · {{ total }} total</span>
+      <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
+    </div>
+  </ng-container>
 
   <div class="drawer-backdrop" *ngIf="detailBill" (click)="closeDetail()"></div>
   <aside class="drawer" *ngIf="detailBill as bill">

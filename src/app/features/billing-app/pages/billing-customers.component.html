@@ -1,160 +1,162 @@
 <section class="bs-page fade-up">
-  <header class="bs-page__head">
-    <div>
-      <p class="eyebrow">Directory</p>
-      <h2>Customers</h2>
-      <p class="lede">Walk-up clients and optional banking account links — full-width desk.</p>
-    </div>
-    <button type="button" class="btn btn--ghost" (click)="showForm = !showForm">
-      {{ showForm ? 'Hide form' : 'Add customer' }}
-    </button>
-  </header>
-
-  <div class="toolbar">
-    <div class="search">
-      <input
-        type="search"
-        class="input"
-        placeholder="Search name, phone, email"
-        [ngModel]="query"
-        (ngModelChange)="onQueryChange($event)"
-        (keyup.enter)="search()"
-      />
-      <button
-        type="button"
-        class="search__clear"
-        *ngIf="query"
-        (click)="clearQuery()"
-        aria-label="Clear search"
-      >
-        ×
-      </button>
-    </div>
-    <button type="button" class="btn btn--ghost" (click)="search()">Search</button>
-
-    <select class="input input--select" [(ngModel)]="sort" (ngModelChange)="onFilterChange()">
-      <option value="name-asc">Name A–Z</option>
-      <option value="name-desc">Name Z–A</option>
-      <option value="newest">Newest first</option>
-    </select>
-
-    <select class="input input--select" [(ngModel)]="bankingFilter" (ngModelChange)="onFilterChange()">
-      <option value="all">All accounts</option>
-      <option value="yes">Has banking account</option>
-      <option value="no">No banking account</option>
-    </select>
-
-    <div class="seg" role="group" aria-label="View mode">
-      <button type="button" [class.is-active]="view === 'list'" (click)="setView('list')">List</button>
-      <button type="button" [class.is-active]="view === 'grid'" (click)="setView('grid')">Grid</button>
-      <button type="button" [class.is-active]="view === 'table'" (click)="setView('table')">Table</button>
-    </div>
-  </div>
-
   <app-billing-panel-shimmer *ngIf="listLoading" variant="catalog"></app-billing-panel-shimmer>
 
-  <div class="layout" *ngIf="!listLoading">
-    <form class="glass form" *ngIf="showForm" [formGroup]="form" (ngSubmit)="save()">
-      <h3>{{ editingId ? 'Edit customer' : 'Add customer' }}</h3>
-      <label>
-        Name
-        <input class="input" formControlName="name" />
-      </label>
-      <label>
-        Email
-        <input class="input" formControlName="email" />
-      </label>
-      <label>
-        Phone
-        <input class="input" formControlName="phone" />
-      </label>
-      <label>
-        Address
-        <input class="input" formControlName="address" />
-      </label>
-      <label>
-        Banking account #
-        <input class="input" formControlName="bankingAccountNumber" placeholder="Optional" />
-      </label>
-      <div class="form__actions">
-        <button type="button" class="btn btn--ghost" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
-        <button type="submit" class="btn btn--primary" [disabled]="busy">
-          {{ busy ? 'Saving…' : editingId ? 'Update' : 'Create' }}
+  <ng-container *ngIf="!listLoading">
+    <header class="bs-page__head">
+      <div>
+        <p class="eyebrow">Directory</p>
+        <h2>Customers</h2>
+        <p class="lede">Walk-up clients and optional banking account links — full-width desk.</p>
+      </div>
+      <button type="button" class="btn btn--ghost" (click)="toggleForm()">
+        {{ showForm ? 'Hide form' : 'Add customer' }}
+      </button>
+    </header>
+
+    <div class="toolbar">
+      <div class="search">
+        <input
+          type="search"
+          class="input"
+          placeholder="Search name, phone, email"
+          [ngModel]="query"
+          (ngModelChange)="onQueryChange($event)"
+          (keyup.enter)="search()"
+        />
+        <button
+          type="button"
+          class="search__clear"
+          *ngIf="query"
+          (click)="clearQuery()"
+          aria-label="Clear search"
+        >
+          ×
         </button>
       </div>
-    </form>
+      <button type="button" class="btn btn--ghost" (click)="search()">Search</button>
 
-    <div class="main-panel glass">
-      <div class="empty" *ngIf="!filtered.length">No customers match this search or filter.</div>
+      <select class="input input--select" [(ngModel)]="sort" (ngModelChange)="onFilterChange()">
+        <option value="name-asc">Name A–Z</option>
+        <option value="name-desc">Name Z–A</option>
+        <option value="newest">Newest first</option>
+      </select>
 
-      <ul class="list" *ngIf="filtered.length && view === 'list'">
-        <li *ngFor="let c of paged">
-          <button type="button" class="row" (click)="openDetail(c)">
-            <span class="avatar">{{ initials(c.name) }}</span>
-            <div class="row__body">
-              <strong>{{ c.name }}</strong>
-              <span>{{ c.phone || c.email || 'No contact' }}</span>
+      <select class="input input--select" [(ngModel)]="bankingFilter" (ngModelChange)="onFilterChange()">
+        <option value="all">All accounts</option>
+        <option value="yes">Has banking account</option>
+        <option value="no">No banking account</option>
+      </select>
+
+      <div class="seg" role="group" aria-label="View mode">
+        <button type="button" [class.is-active]="view === 'list'" (click)="setView('list')">List</button>
+        <button type="button" [class.is-active]="view === 'grid'" (click)="setView('grid')">Grid</button>
+        <button type="button" [class.is-active]="view === 'table'" (click)="setView('table')">Table</button>
+      </div>
+    </div>
+
+    <div class="layout" [class.is-expanded]="!showForm" [class.is-animating]="panelAnimating">
+      <form class="glass form" *ngIf="showForm" [formGroup]="form" (ngSubmit)="save()">
+        <h3>{{ editingId ? 'Edit customer' : 'Add customer' }}</h3>
+        <label>
+          Name
+          <input class="input" formControlName="name" />
+        </label>
+        <label>
+          Email
+          <input class="input" formControlName="email" />
+        </label>
+        <label>
+          Phone
+          <input class="input" formControlName="phone" />
+        </label>
+        <label>
+          Address
+          <input class="input" formControlName="address" />
+        </label>
+        <label>
+          Banking account #
+          <input class="input" formControlName="bankingAccountNumber" placeholder="Optional" />
+        </label>
+        <div class="form__actions">
+          <button type="button" class="btn btn--ghost" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
+          <button type="submit" class="btn btn--primary" [disabled]="busy">
+            {{ busy ? 'Saving…' : editingId ? 'Update' : 'Create' }}
+          </button>
+        </div>
+      </form>
+
+      <div class="main-panel glass">
+        <div class="empty" *ngIf="!filtered.length">No customers match this search or filter.</div>
+
+        <ul class="list" *ngIf="filtered.length && view === 'list'">
+          <li *ngFor="let c of paged">
+            <button type="button" class="row" (click)="openDetail(c)">
+              <span class="avatar">{{ initials(c.name) }}</span>
+              <div class="row__body">
+                <strong>{{ c.name }}</strong>
+                <span>{{ c.phone || c.email || 'No contact' }}</span>
+              </div>
+              <em *ngIf="c.bankingAccountNumber">Linked</em>
+            </button>
+            <div class="row__actions">
+              <button type="button" class="link" (click)="edit(c)">Edit</button>
+              <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Remove</button>
             </div>
-            <em *ngIf="c.bankingAccountNumber">Linked</em>
+          </li>
+        </ul>
+
+        <div class="grid-view" *ngIf="filtered.length && view === 'grid'">
+          <button type="button" class="card-tile" *ngFor="let c of paged" (click)="openDetail(c)">
+            <span class="avatar avatar--lg">{{ initials(c.name) }}</span>
+            <strong>{{ c.name }}</strong>
+            <span>{{ c.phone || c.email || 'No contact' }}</span>
+            <small>{{ c.bankingAccountNumber ? 'Banking linked' : 'Walk-up only' }}</small>
           </button>
-          <div class="row__actions">
-            <button type="button" class="link" (click)="edit(c)">Edit</button>
-            <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Remove</button>
+        </div>
+
+        <div class="table-wrap" *ngIf="filtered.length && view === 'table'">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Banking</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of paged">
+                <td>
+                  <button type="button" class="name-btn" (click)="openDetail(c)">
+                    <span class="avatar avatar--sm">{{ initials(c.name) }}</span>
+                    {{ c.name }}
+                  </button>
+                </td>
+                <td>{{ c.phone || '—' }}</td>
+                <td>{{ c.email || '—' }}</td>
+                <td>{{ c.bankingAccountNumber || '—' }}</td>
+                <td class="table__actions">
+                  <button type="button" class="link" (click)="edit(c)">Edit</button>
+                  <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Remove</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pager" *ngIf="filtered.length">
+          <span>{{ filtered.length }} customers · page {{ page }} / {{ totalPages }}</span>
+          <div class="pager__btns">
+            <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="goPage(-1)">Prev</button>
+            <button type="button" class="btn btn--ghost" [disabled]="page >= totalPages" (click)="goPage(1)">
+              Next
+            </button>
           </div>
-        </li>
-      </ul>
-
-      <div class="grid-view" *ngIf="filtered.length && view === 'grid'">
-        <button type="button" class="card-tile" *ngFor="let c of paged" (click)="openDetail(c)">
-          <span class="avatar avatar--lg">{{ initials(c.name) }}</span>
-          <strong>{{ c.name }}</strong>
-          <span>{{ c.phone || c.email || 'No contact' }}</span>
-          <small>{{ c.bankingAccountNumber ? 'Banking linked' : 'Walk-up only' }}</small>
-        </button>
-      </div>
-
-      <div class="table-wrap" *ngIf="filtered.length && view === 'table'">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Customer</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Banking</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let c of paged">
-              <td>
-                <button type="button" class="name-btn" (click)="openDetail(c)">
-                  <span class="avatar avatar--sm">{{ initials(c.name) }}</span>
-                  {{ c.name }}
-                </button>
-              </td>
-              <td>{{ c.phone || '—' }}</td>
-              <td>{{ c.email || '—' }}</td>
-              <td>{{ c.bankingAccountNumber || '—' }}</td>
-              <td class="table__actions">
-                <button type="button" class="link" (click)="edit(c)">Edit</button>
-                <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Remove</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="pager" *ngIf="filtered.length">
-        <span>{{ filtered.length }} customers · page {{ page }} / {{ totalPages }}</span>
-        <div class="pager__btns">
-          <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="goPage(-1)">Prev</button>
-          <button type="button" class="btn btn--ghost" [disabled]="page >= totalPages" (click)="goPage(1)">
-            Next
-          </button>
         </div>
       </div>
     </div>
-  </div>
+  </ng-container>
 
   <div class="drawer-backdrop" *ngIf="detail" (click)="closeDetail()"></div>
   <aside class="drawer drawer--xl" *ngIf="detail as c" role="dialog" aria-modal="true">
