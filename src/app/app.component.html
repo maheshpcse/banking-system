@@ -2,6 +2,7 @@
   class="app-shell"
   [class.app-shell--marketing]="isMarketingSurface && !bootstrapping"
   [class.app-shell--has-nav]="hasStickyNav"
+  [class.app-shell--billing]="isBillingSurface"
 >
   <div class="ambient" *ngIf="showAmbient" aria-hidden="true">
     <div class="ambient__wash"></div>
@@ -14,8 +15,8 @@
     <div class="ambient__coin ambient__coin--c"></div>
     <div class="ambient__sheen"></div>
   </div>
-  <app-navbar></app-navbar>
-  <main>
+  <app-navbar *ngIf="!isBillingSurface"></app-navbar>
+  <main [class.main--billing]="isBillingSurface">
     <app-shimmer *ngIf="bootstrapping" [variant]="bootVariant"></app-shimmer>
     <div [hidden]="bootstrapping">
       <router-outlet></router-outlet>

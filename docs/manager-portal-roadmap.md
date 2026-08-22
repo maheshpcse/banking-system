@@ -49,7 +49,7 @@ flowchart TB
 | `/manager/approvals` | Opening request approve / reject |
 | `/manager/limits` | Approve / reject customer 24h limit change requests |
 | `/manager/reports` | Cadence scheduler preview for banking ledger reports |
-| `/manager/billing` | Live Billing desk — POS, catalog, history, disputes |
+| `/manager/billing` | Banking **Billing monitor** + launch bridge to `/billing` POS app |
 | `/settings` | Shared profile, presence, security, experience (theme / font) |
 | `/notifications` | Alerts inbox (view only; no deep-link navigation) |
 

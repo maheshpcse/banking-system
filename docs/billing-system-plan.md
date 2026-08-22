@@ -1,65 +1,46 @@
-# NovaBank Billing System — Combined Plan
+# NovaBank dual-app architecture (Banking + Billing)
 
-This plan merges:
+## Decision
 
-1. `docs/billing-system-integration.md` (banking ↔ billing bridge)
-2. `docs/manager-portal-roadmap.md` Phase 3 (Manager Billing)
-3. The Minimal Billing System (MEAN + POS) product brief
+**One frontend repo, two application shells**, one shared API + MongoDB + JWT.
 
-## Architecture decision
+| | Banking System | Billing System |
+| --- | --- | --- |
+| URL | `/`, `/dashboard`, `/manager`, … | `/billing/*` |
+| Chrome | NovaBank navbar + vault ambient | Own bottom dock + glass fintech theme |
+| Purpose | Identity, money, RBAC, **billing monitoring** | Store POS: products, customers, invoices, fake gateway |
+| Who operates | All roles (scoped) | **Manager + Admin only** (not Super Admin) |
+| Who monitors | Customer / Manager / Admin / Super Admin | — |
 
-| Brief asks for | NovaBank ships |
-| --- | --- |
-| Separate MEAN app + MySQL | **Same Angular 14 app + Express API + MongoDB** |
-| Bootstrap 5 CDN | Existing NovaBank design system (premium vault chrome) |
-| Three.js CDN scene | Lightweight CSS 3D billing stage (performance-safe) |
-| Separate admin login | **SSO** via existing JWT / `manager` + Super Admin |
+This is smoother than a second GitHub repo: same login token, same alerts, one deploy, clear “Enter Billing System” / “Return to Banking” bridges.
 
-Billing is a **staff mode** inside NovaBank, entered from:
+Separate repo later remains possible — API is already namespaced under `/api/billing`.
 
-- Navbar → **Billing** (`/manager/billing`)
-- Manager desk → Billing card
-- Home → **Staff desk** (login; managers land on `/manager`)
+## Theme (Billing System)
 
-## Domains
+- Soft white / light gray glass panels
+- Subtle blue neon accents (`#3b82f6` / `#60a5fa`)
+- Bottom-centered dock navigation (no classic sidebar)
+- Three.js lightweight dashboard stage (CDN, auto-pause when hidden)
+- Bootstrap 5 utilities loaded only while Billing shell is active
+- Premium shimmers + micro-loaders on every Billing panel
 
-### POS / commerce (from product brief)
+## Role matrix
 
-- Products (CRUD, stock, GST %)
-- Billing customers (CRUD; optional `bankingAccountNumber`)
-- Bill builder (line items, discount, tax, grand total)
-- Fake payments: cash / card / UPI / QR simulation
-- Invoice print view
-- Bill history (filter by date, customer, bill id)
+| Capability | Customer | Manager | Admin | Super Admin |
+| --- | --- | --- | --- | --- |
+| Banking controls | Own vault | Desk ops | Ops | Full override |
+| Open Billing System app | — | Yes | Yes | — (monitor only) |
+| Products / stock / gateway settings | — | Write | Write | Read via Banking monitor |
+| Create bills + fake payments | — | Yes | Yes | — |
+| Track invoices / disputes in Banking | Own invoices (next) | Monitor queue | Monitor | Monitor + escalation |
 
-### Banking bridge (from docs)
+## Navigation bridges
 
-- Shared refs: `bankingAccountNumber` on invoices, `billingReference` on ledger txs (optional)
-- Complaint queue: open → accept / adjust / reject / escalate
-- Period reporting handoff (Reports page remains banking; Billing stats on Billing desk)
-- Role notifications for invoice paid, complaint opened/resolved/escalated
+1. Home → **Open Billing System** (staff login → `/billing`)
+2. Banking Manager → **Billing monitor** → **Launch Billing System**
+3. Billing dock → **Return to Banking**
 
-## API surface (`/api/billing`)
+## Notifications
 
-- `GET /dashboard/stats`
-- Products: `GET|POST /products`, `PUT|DELETE /products/:id`
-- Customers: `GET|POST /customers`, `PUT|DELETE /customers/:id`
-- Bills: `GET|POST /bills`, `GET /bills/:id`
-- Payments: `POST /payments`, `GET /payments`
-- Complaints: `GET|POST /complaints`, `PATCH /complaints/:id`
-- `POST /seed` (manager) — sample catalog when empty
-
-## Roles
-
-| Action | Manager | Super Admin | Customer |
-| --- | --- | --- | --- |
-| POS / products / invoices | Yes | Yes | — |
-| Dispute queue | Yes | Yes | File later |
-| Escalations | — | Yes | — |
-| Alerts | invoice + dispute | escalation | invoice / dispute status |
-
-## Implementation phases
-
-1. **Now** — API + Manager Billing workspace (dashboard, catalog, POS, history, disputes, seed, notifications)
-2. **Next** — Customer self-serve invoices / file complaint from dashboard
-3. **Later** — Auto settlement webhooks from transfers + merged period graphs on Reports
+Invoice paid / complaint events still fan out through NovaBank Alerts (`billing`, `complaint` kinds) so Banking monitors stay live without opening the POS UI.

@@ -104,8 +104,10 @@ Managers schedule banking ledger reports on `/manager/reports`. Billing System l
 ## Implementation order (agreed)
 
 1. Banking: account lifecycle, card UX, RBAC admin, notifications, money locks ✅
-2. Billing service scaffold + auth SSO with banking roles ✅ (`/api/billing`, Manager Billing desk)
-3. Cross-system settlement events + dashboard widgets (partial — shared refs + billing stats)
-4. Complaint workflows + graphical period reports (complaints ✅; merged report graphs next)
+2. Billing API scaffold + SSO ✅ (`/api/billing`)
+3. **Separate Billing System app shell** at `/billing` (Manager/Admin operators) ✅
+4. Banking **Billing monitor** (stats + disputes; Super Admin oversight) ✅
+5. Cross-system settlement webhooks + customer self-serve invoices (next)
+6. Merged period graphs on Reports (next)
 
-See **`docs/billing-system-plan.md`** for the combined POS + banking-bridge plan (MEAN brief adapted to NovaBank Angular + MongoDB).
+See **`docs/billing-system-plan.md`** for the dual-app architecture.

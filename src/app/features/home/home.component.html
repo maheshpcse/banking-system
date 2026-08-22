@@ -28,9 +28,11 @@
     </p>
 
     <div class="home__actions home__reveal home__reveal--actions">
-      <a class="home__cta home__cta--primary" routerLink="/auth/login">Login</a>
+      <a class="home__cta home__cta--primary" routerLink="/auth/login">Banking login</a>
       <a class="home__cta home__cta--secondary" routerLink="/auth/register">Signup</a>
-      <a class="home__cta home__cta--ghost" routerLink="/auth/login" [queryParams]="{ next: 'billing' }">Staff desk</a>
+      <a class="home__cta home__cta--ghost" routerLink="/auth/login" [queryParams]="{ next: 'billing' }">
+        Billing System
+      </a>
     </div>
   </div>
 </section>

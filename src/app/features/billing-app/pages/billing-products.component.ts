@@ -75,7 +75,14 @@ export class BillingProductsComponent implements OnInit {
       return;
     }
     this.busy = true;
-    const payload = this.form.getRawValue();
+    const raw = this.form.getRawValue();
+    const payload = {
+      name: String(raw.name || ''),
+      sku: String(raw.sku || ''),
+      price: Number(raw.price || 0),
+      stock: Number(raw.stock || 0),
+      gstPercentage: Number(raw.gstPercentage || 0)
+    };
     const req$ = this.editingId
       ? this.billing.updateProduct(this.editingId, payload)
       : this.billing.createProduct(payload);

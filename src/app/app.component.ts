@@ -14,6 +14,7 @@ export class AppComponent implements OnInit, OnDestroy {
   /** Ambient ledger backdrop only on authenticated app pages */
   showAmbient = false;
   isMarketingSurface = true;
+  isBillingSurface = false;
   hasStickyNav = false;
   bootstrapping = false;
   bootVariant: 'dashboard' | 'history' | 'transfer' | 'settings' | 'form' = 'dashboard';
@@ -76,14 +77,18 @@ export class AppComponent implements OnInit, OnDestroy {
   private syncChrome(url: string): void {
     const path = url.split('?')[0];
     this.isMarketingSurface = path === '/' || path.startsWith('/auth');
-    this.showAmbient = !this.isMarketingSurface || this.shellBoot.isBootstrapping;
+    this.isBillingSurface = path.startsWith('/billing');
+    this.showAmbient =
+      !this.isBillingSurface && (!this.isMarketingSurface || this.shellBoot.isBootstrapping);
     this.hasStickyNav =
       this.auth.isAuthenticated() &&
+      !this.isBillingSurface &&
       (!this.isMarketingSurface || this.shellBoot.isBootstrapping);
     this.bootVariant = this.variantForUrl(path);
     this.applyAppearance(this.auth.currentUser);
     if (typeof document !== 'undefined') {
       document.body.classList.toggle('nb-app-shell', this.hasStickyNav);
+      document.body.classList.toggle('billing-mode', this.isBillingSurface);
     }
   }
 
@@ -118,7 +123,8 @@ export class AppComponent implements OnInit, OnDestroy {
       /* ignore */
     }
 
-    const inApp = !!user && this.auth.isAuthenticated() && !this.isMarketingSurface;
+    const inApp =
+      !!user && this.auth.isAuthenticated() && !this.isMarketingSurface && !this.isBillingSurface;
     if (inApp) {
       root.dataset['nbTheme'] = user?.settings?.theme || 'daylight';
       root.dataset['nbFont'] = user?.settings?.fontScale || 'comfortable';

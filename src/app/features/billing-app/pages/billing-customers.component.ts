@@ -94,7 +94,14 @@ export class BillingCustomersComponent implements OnInit {
       return;
     }
     this.busy = true;
-    const payload = this.form.getRawValue();
+    const raw = this.form.getRawValue();
+    const payload = {
+      name: String(raw.name || ''),
+      email: String(raw.email || ''),
+      phone: String(raw.phone || ''),
+      address: String(raw.address || ''),
+      bankingAccountNumber: String(raw.bankingAccountNumber || '') || null
+    };
     const req$ = this.editingId
       ? this.billing.updateCustomer(this.editingId, payload)
       : this.billing.createCustomer(payload);

@@ -347,6 +347,21 @@ export interface BillingDashboardStats {
   recentBills: BillingBill[];
 }
 
+export interface BillingGatewaySettings {
+  id?: string;
+  merchantName: string;
+  supportNote: string;
+  methods: {
+    cash: boolean;
+    card: boolean;
+    upi: boolean;
+    qr: boolean;
+  };
+  upiVpa: string;
+  cardLabel: string;
+  updatedAt?: string;
+}
+
 export interface AdminUserRow {
   id: string;
   fullName: string;

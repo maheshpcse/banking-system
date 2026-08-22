@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/auth.guard';
 import { RoleGuard } from './core/role.guard';
+import { BillingOperatorGuard } from './core/billing-operator.guard';
 
 const routes: Routes = [
   {
@@ -50,6 +51,12 @@ const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['manager'], allowSuperAdmin: true },
     loadChildren: () => import('./features/manager/manager.module').then((m) => m.ManagerModule)
+  },
+  {
+    path: 'billing',
+    canActivate: [AuthGuard, BillingOperatorGuard],
+    loadChildren: () =>
+      import('./features/billing-app/billing-app.module').then((m) => m.BillingAppModule)
   },
   { path: '**', redirectTo: '' }
 ];

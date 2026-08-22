@@ -8,6 +8,7 @@ import {
   BillingComplaintStatus,
   BillingCustomer,
   BillingDashboardStats,
+  BillingGatewaySettings,
   BillingPayment,
   BillingPaymentMethod,
   BillingProduct
@@ -152,6 +153,19 @@ export class BillingService {
     return this.http.post<{ message: string; products?: number; customers?: number }>(
       `${this.base}/seed`,
       { force }
+    );
+  }
+
+  getSettings(): Observable<{ settings: BillingGatewaySettings }> {
+    return this.http.get<{ settings: BillingGatewaySettings }>(`${this.base}/settings`);
+  }
+
+  updateSettings(
+    payload: Partial<BillingGatewaySettings>
+  ): Observable<{ message: string; settings: BillingGatewaySettings }> {
+    return this.http.put<{ message: string; settings: BillingGatewaySettings }>(
+      `${this.base}/settings`,
+      payload
     );
   }
 }

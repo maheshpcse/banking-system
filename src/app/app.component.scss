@@ -31,6 +31,16 @@
   padding-top: 0;
 }
 
+.app-shell--billing {
+  min-height: 100vh;
+  background: #f4f7fb;
+}
+
+.app-shell--billing main.main--billing {
+  padding: 0;
+  min-height: 100vh;
+}
+
 .ambient {
   position: fixed;
   inset: 0;
