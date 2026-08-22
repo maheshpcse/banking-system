@@ -4,7 +4,20 @@ import { Component, Input } from '@angular/core';
   selector: 'app-billing-panel-shimmer',
   template: `
     <div class="bps" [attr.data-variant]="variant" aria-hidden="true">
-      <!-- Desk: KPI row + bills panel -->
+      <!-- Shared page head: title + actions -->
+      <div class="bps__head" *ngIf="variant !== 'settings'">
+        <div class="bps__head-copy">
+          <div class="bps__bone bps__bone--xs"></div>
+          <div class="bps__bone bps__bone--title"></div>
+          <div class="bps__bone bps__bone--lede"></div>
+        </div>
+        <div class="bps__head-actions" *ngIf="variant === 'desk' || variant === 'catalog'">
+          <div class="bps__bone bps__bone--btn"></div>
+          <div class="bps__bone bps__bone--btn bps__bone--accent" *ngIf="variant === 'desk'"></div>
+        </div>
+      </div>
+
+      <!-- Desk: KPI row + Recent bills panel -->
       <ng-container *ngIf="variant === 'desk'">
         <div class="bps__kpis">
           <div class="bps__kpi" *ngFor="let k of kpis">
@@ -24,7 +37,7 @@ import { Component, Input } from '@angular/core';
         </div>
       </ng-container>
 
-      <!-- Catalog: toolbar + table/grid skeletons -->
+      <!-- Catalog: toolbar + form/data panels -->
       <ng-container *ngIf="variant === 'catalog'">
         <div class="bps__toolbar bps__toolbar--wrap">
           <div class="bps__bone bps__bone--search"></div>
@@ -59,6 +72,7 @@ import { Component, Input } from '@angular/core';
       <ng-container *ngIf="variant === 'pos'">
         <div class="bps__pos">
           <div class="bps__panel bps__pos__picker">
+            <div class="bps__bone bps__bone--md"></div>
             <div class="bps__bone bps__bone--field"></div>
             <div class="bps__search-row">
               <div class="bps__bone bps__bone--search"></div>
@@ -89,16 +103,18 @@ import { Component, Input } from '@angular/core';
       <ng-container *ngIf="variant === 'settings'">
         <div class="bps__hero">
           <div class="bps__bone bps__bone--xs"></div>
-          <div class="bps__bone bps__bone--lg"></div>
-          <div class="bps__bone bps__bone--md"></div>
+          <div class="bps__bone bps__bone--title"></div>
+          <div class="bps__bone bps__bone--lede"></div>
         </div>
         <div class="bps__settings">
           <div class="bps__panel">
             <div class="bps__bone bps__bone--md"></div>
             <div class="bps__bone bps__bone--field" *ngFor="let f of settingsFields"></div>
+            <div class="bps__bone bps__bone--btn bps__bone--accent"></div>
           </div>
           <div class="bps__panel">
             <div class="bps__bone bps__bone--md"></div>
+            <div class="bps__bone bps__bone--sm"></div>
             <div class="bps__tiles">
               <div class="bps__tile" *ngFor="let t of methodTiles"></div>
             </div>
@@ -159,6 +175,27 @@ import { Component, Input } from '@angular/core';
         border: 1px solid rgba(255, 255, 255, 0.55);
       }
 
+      .bps__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .bps__head-copy {
+        display: grid;
+        gap: 0.45rem;
+        flex: 1;
+        min-width: 12rem;
+      }
+
+      .bps__head-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
       .bps__bone--xs {
         height: 0.55rem;
         width: 4.5rem;
@@ -170,6 +207,15 @@ import { Component, Input } from '@angular/core';
       .bps__bone--md {
         height: 0.85rem;
         width: 8rem;
+      }
+      .bps__bone--title {
+        height: 1.55rem;
+        width: min(16rem, 55%);
+        border-radius: 0.65rem;
+      }
+      .bps__bone--lede {
+        height: 0.7rem;
+        width: min(28rem, 85%);
       }
       .bps__bone--lg {
         height: 1.35rem;
@@ -268,7 +314,8 @@ import { Component, Input } from '@angular/core';
         display: grid;
         grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.6fr);
         gap: 0.9rem;
-        align-items: start;
+        align-items: stretch;
+        min-height: min(52vh, 480px);
       }
 
       .bps__panel--form {
@@ -371,8 +418,11 @@ import { Component, Input } from '@angular/core';
       }
 
       .bps__tile {
-        height: 5.25rem;
+        height: 5.75rem;
         border-radius: 1rem;
+        aspect-ratio: 1.586 / 1;
+        height: auto;
+        min-height: 5.5rem;
       }
 
       @media (max-width: 960px) {
@@ -423,7 +473,7 @@ export class BillingPanelShimmerComponent {
   readonly chips = [1, 2, 3, 4, 5, 6];
   readonly cartRows = [1, 2, 3, 4];
   readonly totals = [1, 2, 3];
-  readonly settingsFields = [1, 2, 3];
+  readonly settingsFields = [1, 2, 3, 4];
   readonly methodTiles = [1, 2, 3, 4];
   readonly historyHeads = [1, 2, 3, 4];
   readonly historyRows = [1, 2, 3, 4, 5, 6, 7, 8];

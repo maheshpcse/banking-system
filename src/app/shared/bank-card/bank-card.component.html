@@ -8,7 +8,12 @@
     <div class="bank-card__face bank-card__face--front">
       <div class="bank-card__top">
         <span class="bank-card__brand">{{ brandLabel }}</span>
-        <span class="bank-card__chip" aria-hidden="true"></span>
+        <div class="bank-card__top-end">
+          <span class="bank-card__network" aria-hidden="true">
+            <span class="bank-card__mark"></span>
+          </span>
+          <span class="bank-card__chip" aria-hidden="true"></span>
+        </div>
       </div>
       <div class="bank-card__number-row">
         <app-secure-secret
@@ -26,13 +31,10 @@
           <span>Card holder</span>
           <strong>{{ displayName }}</strong>
         </div>
-        <div>
+        <div class="bank-card__meta-expiry">
           <span>Expires</span>
           <strong>{{ displayExpiry }}</strong>
         </div>
-      </div>
-      <div class="bank-card__network" aria-hidden="true">
-        <span class="bank-card__mark"></span>
       </div>
     </div>
     <div class="bank-card__face bank-card__face--back">

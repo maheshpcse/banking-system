@@ -103,6 +103,13 @@ export class AppComponent implements OnInit, OnDestroy {
         return;
       }
     }
+    if (this.isBillingSurface) {
+      const billingMain = document.querySelector('.bs-main');
+      if (billingMain instanceof HTMLElement) {
+        billingMain.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
