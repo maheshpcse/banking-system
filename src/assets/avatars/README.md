@@ -1,10 +1,11 @@
 # Avatar presets
 
-Professional portrait presets for Account → Presence, scoped by role:
+Role-scoped professional preset **values** (stored on `avatar.presetId`):
 
-- `customer/preset-01.webp` … `preset-03.webp`
-- `manager/preset-01.webp` … `preset-03.webp`
-- `admin/preset-01.webp` … `preset-03.webp` (also used by Super Admin)
+- Customer: `customer/preset-01` … `customer/preset-03`
+- Manager: `manager/preset-01` … `manager/preset-03`
+- Admin / Super Admin: `admin/preset-01` … `admin/preset-03`
 
-Selecting a preset stores `avatar.presetId` (for example `customer/preset-01`).
-A custom upload clears `presetId` and stores a data URL in `avatar.image`.
+Account → Presence exposes these as a dropdown (`Select preset` / Professional 1–3).
+They are saved as string IDs only — not rendered as portrait images in the UI.
+A custom profile upload still uses `avatar.image` and clears `presetId`.
