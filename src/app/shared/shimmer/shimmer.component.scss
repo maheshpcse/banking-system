@@ -204,9 +204,10 @@
 }
 
 .shimmer-avatar--lg {
-  width: 8.75rem;
-  height: 8.75rem;
-  border-radius: 999px;
+  width: min(100%, 12.5rem);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 1rem;
   margin: 0.35rem auto 0.85rem;
 }
 
