@@ -69,16 +69,27 @@
 }
 
 .avatar-preview--lg {
-  width: 8.75rem;
-  height: 8.75rem;
-  border-radius: 999px;
-  font-size: 1.85rem;
+  /* Match former professional-preset tile size/shape (square, rounded card). */
+  width: min(100%, 12.5rem);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 1rem;
+  font-size: 2.1rem;
   margin: 0 auto 1.1rem;
+  border: 2px solid rgba(148, 163, 184, 0.28);
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: var(--shadow-soft);
+}
+
+.avatar-preview--lg img {
+  border-radius: 0.8rem;
+  object-fit: cover;
 }
 
 /* Only the avatar image is centered — form fields stay left-aligned */
 .form--avatar .avatar-preview--lg {
   justify-self: center;
+  width: min(100%, 12.5rem);
 }
 
 /* Match text-input chrome for the profile image file control */
