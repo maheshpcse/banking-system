@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { forkJoin, of } from 'rxjs';
+import { firstValueFrom, forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AlertService } from '../../../core/services/alert.service';
 import { BillingService } from '../../../core/services/billing.service';
@@ -89,7 +89,9 @@ export class BillingPosComponent implements OnInit {
         customers: this.billing
           .listCustomers()
           .pipe(catchError(() => of({ items: [] as BillingCustomer[] }))),
-        settings: this.billing.getSettings().pipe(catchError(() => of({ settings: null as BillingGatewaySettings | null })))
+        settings: this.billing
+          .getSettings()
+          .pipe(catchError(() => of({ settings: null as BillingGatewaySettings | null })))
       }),
       SHIMMER_MS
     ).subscribe({
@@ -111,17 +113,22 @@ export class BillingPosComponent implements OnInit {
   }
 
   searchProducts(): void {
-    this.busy = true;
+    this.pageLoading = true;
     withShimmerDelay(this.billing.listProducts(this.productQuery.trim()), SHIMMER_MS).subscribe({
       next: (res) => {
         this.products = (res.items || []).filter((p) => p.active !== false);
-        this.busy = false;
+        this.pageLoading = false;
       },
       error: async () => {
-        this.busy = false;
+        this.pageLoading = false;
         await this.alerts.error('Product search failed.');
       }
     });
+  }
+
+  clearProductQuery(): void {
+    this.productQuery = '';
+    this.searchProducts();
   }
 
   addToCart(product: BillingProduct): void {
@@ -167,33 +174,39 @@ export class BillingPosComponent implements OnInit {
     this.showPayModal = false;
   }
 
-  createInvoice(): void {
+  async createInvoice(): Promise<void> {
     if (!this.selectedCustomerId || !this.cart.length) {
       void this.alerts.warning('Choose a customer and add at least one product.');
       return;
     }
+    const items = this.cart.map((c) => ({ productId: c.productId, quantity: c.quantity }));
+    const discount = this.safeDiscount;
     this.busy = true;
-    withShimmerDelay(
-      this.billing.createBill({
-        customerId: this.selectedCustomerId,
-        items: this.cart.map((c) => ({ productId: c.productId, quantity: c.quantity })),
-        discount: this.safeDiscount
-      }),
-      SHIMMER_MS
-    ).subscribe({
-      next: async (res) => {
-        this.busy = false;
-        this.activeInvoice = res.bill;
-        this.cart = [];
-        this.discount = 0;
-        this.showPayModal = true;
-        await this.alerts.toastSuccess(res.message || 'Invoice created');
-      },
-      error: async (err) => {
-        this.busy = false;
-        await this.alerts.error(err?.error?.message || 'Unable to create invoice.');
-      }
+    const outcome = await this.alerts.confirmAction({
+      text: `Create invoice for ${this.cartGrandTotal.toFixed(2)}?`,
+      confirmText: 'Create invoice',
+      loadingText: 'Creating invoice…',
+      action: () =>
+        withShimmerDelay(
+          this.billing.createBill({
+            customerId: this.selectedCustomerId,
+            items,
+            discount
+          }),
+          SHIMMER_MS
+        ),
+      successMessage: (res) => res.message || 'Invoice created',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Unable to create invoice.'
     });
+    this.busy = false;
+    if (outcome.ok) {
+      this.activeInvoice = outcome.result.bill;
+      this.cart = [];
+      this.discount = 0;
+      this.showPayModal = true;
+      this.qrPhase = 'idle';
+    }
   }
 
   openPayModal(bill?: BillingBill): void {
@@ -216,33 +229,48 @@ export class BillingPosComponent implements OnInit {
     if (!this.activeInvoice || this.activeInvoice.paymentStatus === 'paid') {
       return;
     }
+    const billId = this.activeInvoice.id;
+    const method = this.paymentMethod;
     this.paying = true;
-    if (this.paymentMethod === 'qr') {
+    if (method === 'qr') {
       this.qrPhase = 'scanning';
-      await new Promise((r) => setTimeout(r, 1400));
     }
-    withShimmerDelay(
-      this.billing.payBill({
-        billId: this.activeInvoice.id,
-        paymentMethod: this.paymentMethod
-      }),
-      SHIMMER_MS
-    ).subscribe({
-      next: async (res) => {
-        this.paying = false;
-        this.activeInvoice = res.bill;
-        this.qrPhase = this.paymentMethod === 'qr' ? 'success' : 'idle';
-        await this.alerts.toastSuccess(res.message || 'Payment recorded');
-        if (res.bill.paymentStatus === 'paid') {
-          setTimeout(() => this.closePayModal(), 700);
+
+    const outcome = await this.alerts.confirmAction({
+      text: `Collect ${this.activeInvoice.grandTotal.toFixed(2)} via ${this.methodLabel(method)}?`,
+      confirmText: 'Confirm payment',
+      loadingText: method === 'qr' ? 'Scanning QR…' : 'Processing payment…',
+      action: async () => {
+        if (method === 'qr') {
+          await new Promise((r) => setTimeout(r, 1400));
         }
+        return firstValueFrom(
+          withShimmerDelay(
+            this.billing.payBill({
+              billId,
+              paymentMethod: method
+            }),
+            SHIMMER_MS
+          )
+        );
       },
-      error: async (err) => {
-        this.paying = false;
-        this.qrPhase = this.paymentMethod === 'qr' ? 'failed' : 'idle';
-        await this.alerts.error(err?.error?.message || 'Payment failed.');
-      }
+      successMessage: (res) => res.message || 'Payment recorded',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Payment failed.'
     });
+
+    this.paying = false;
+    if (outcome.ok) {
+      this.activeInvoice = outcome.result.bill;
+      this.qrPhase = method === 'qr' ? 'success' : 'idle';
+      if (outcome.result.bill.paymentStatus === 'paid') {
+        setTimeout(() => this.closePayModal(), 700);
+      }
+    } else if (!outcome.cancelled) {
+      this.qrPhase = method === 'qr' ? 'failed' : 'idle';
+    } else {
+      this.qrPhase = 'idle';
+    }
   }
 
   printInvoice(): void {
@@ -257,9 +285,9 @@ export class BillingPosComponent implements OnInit {
       )
       .join('');
     const html = `<!doctype html><html><head><title>${bill.billNumber}</title>
-      <style>body{font-family:system-ui,sans-serif;padding:24px;color:#0f172a}
+      <style>body{font-family:system-ui,sans-serif;padding:24px;color:#16323a}
       h1{font-size:18px;margin:0 0 8px}table{width:100%;border-collapse:collapse;margin-top:16px}
-      th,td{border-bottom:1px solid #e2e8f0;padding:8px;text-align:left;font-size:13px}
+      th,td{border-bottom:1px solid #d9e8e2;padding:8px;text-align:left;font-size:13px}
       .tot{margin-top:16px;font-weight:700}</style></head><body>
       <h1>Invoice ${bill.billNumber}</h1>
       <div>${bill.customerName}</div>

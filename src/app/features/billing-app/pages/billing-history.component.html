@@ -14,7 +14,7 @@
     <button type="button" class="btn btn--ghost" (click)="applyFilters()">Filter</button>
   </div>
 
-  <app-billing-panel-shimmer *ngIf="pageLoading" variant="list"></app-billing-panel-shimmer>
+  <app-billing-panel-shimmer *ngIf="pageLoading" variant="history"></app-billing-panel-shimmer>
 
   <div class="timeline" *ngIf="!pageLoading">
     <div class="empty" *ngIf="!bills.length">No invoices match these filters.</div>
@@ -50,7 +50,7 @@
       <button type="button" class="icon-close" (click)="closeDetail()" aria-label="Close">×</button>
     </div>
 
-    <app-billing-panel-shimmer *ngIf="detailLoading" variant="list"></app-billing-panel-shimmer>
+    <app-billing-panel-shimmer *ngIf="detailLoading" variant="history"></app-billing-panel-shimmer>
 
     <ng-container *ngIf="!detailLoading">
       <div [class]="statusClass(bill.paymentStatus)">{{ bill.paymentStatus }}</div>

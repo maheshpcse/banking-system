@@ -43,17 +43,19 @@ export class BillingDashboardComponent implements OnInit {
 
   async seedCatalog(): Promise<void> {
     this.seeding = true;
-    withShimmerDelay(this.billing.seedCatalog(false), SHIMMER_MS).subscribe({
-      next: async (res) => {
-        this.seeding = false;
-        await this.alerts.toastSuccess(res.message || 'Catalog seeded');
-        this.load();
-      },
-      error: async (err) => {
-        this.seeding = false;
-        await this.alerts.error(err?.error?.message || 'Seed failed.');
-      }
+    const outcome = await this.alerts.confirmAction({
+      text: 'Seed demo products and customers into this billing desk?',
+      confirmText: 'Seed catalog',
+      loadingText: 'Seeding catalog…',
+      action: () => withShimmerDelay(this.billing.seedCatalog(false), SHIMMER_MS),
+      successMessage: (res) => res.message || 'Catalog seeded',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Seed failed.'
     });
+    this.seeding = false;
+    if (outcome.ok) {
+      this.load();
+    }
   }
 
   goPos(): void {

@@ -1,32 +1,56 @@
 <div class="bs-shell">
-  <header class="bs-topbar">
-    <div class="bs-topbar__brand">
-      <span class="bs-topbar__mark" aria-hidden="true"></span>
+  <aside class="bs-rail" aria-label="Billing navigation">
+    <div class="bs-rail__brand">
+      <span class="bs-rail__mark" aria-hidden="true"></span>
       <div>
-        <p class="bs-topbar__eyebrow">Nova · Commerce</p>
-        <h1 class="bs-topbar__title">Billing System</h1>
+        <p class="bs-rail__eyebrow">NovaBill</p>
+        <strong>Billing System</strong>
       </div>
     </div>
-    <div class="bs-topbar__actions">
-      <a class="bs-link" [routerLink]="bankingReturnUrl">{{ bankingReturnLabel }}</a>
-      <button type="button" class="bs-btn bs-btn--ghost" (click)="signOut()">Sign out</button>
+
+    <nav class="bs-rail__nav">
+      <a
+        *ngFor="let item of dockItems"
+        class="bs-rail__item"
+        [routerLink]="item.path"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: item.path === '/billing' }"
+      >
+        <span class="bs-rail__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
+        <span class="bs-rail__label">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <div class="bs-rail__operator">
+      <span class="bs-avatar" [ngClass]="'bs-avatar--' + avatarStyle" role="img" [attr.aria-label]="avatarInitials">
+        <img *ngIf="avatarSrc as src" [src]="src" alt="" />
+        <ng-container *ngIf="!avatarSrc">{{ avatarInitials }}</ng-container>
+      </span>
+      <div class="bs-rail__operator-copy">
+        <strong>{{ operatorName }}</strong>
+        <span>Manager desk</span>
+      </div>
     </div>
-  </header>
+  </aside>
 
-  <main class="bs-main">
-    <router-outlet></router-outlet>
-  </main>
+  <div class="bs-workspace">
+    <header class="bs-topbar">
+      <div>
+        <p class="bs-topbar__eyebrow">Store POS · Fake gateway ready</p>
+        <h1 class="bs-topbar__title">Billing Portal</h1>
+      </div>
+      <div class="bs-topbar__actions">
+        <span class="bs-avatar bs-avatar--lg" [ngClass]="'bs-avatar--' + avatarStyle" aria-hidden="true">
+          <img *ngIf="avatarSrc as src" [src]="src" alt="" />
+          <ng-container *ngIf="!avatarSrc">{{ avatarInitials }}</ng-container>
+        </span>
+        <a class="bs-link" [routerLink]="bankingReturnUrl">{{ bankingReturnLabel }}</a>
+        <button type="button" class="bs-btn bs-btn--ghost" (click)="signOut()">Sign out</button>
+      </div>
+    </header>
 
-  <nav class="bs-dock" aria-label="Billing navigation">
-    <a
-      *ngFor="let item of dockItems"
-      class="bs-dock__item"
-      [routerLink]="item.path"
-      routerLinkActive="is-active"
-      [routerLinkActiveOptions]="{ exact: item.path === '/billing' }"
-    >
-      <span class="bs-dock__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
-      <span class="bs-dock__label">{{ item.label }}</span>
-    </a>
-  </nav>
+    <main class="bs-main container-fluid">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 </div>

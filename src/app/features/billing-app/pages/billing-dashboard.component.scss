@@ -1,13 +1,26 @@
-.page {
+:host {
+  --ink: #16323a;
+  --muted: #5b6b70;
+  --line: rgba(22, 50, 58, 0.1);
+  --forsythia: #ffc801;
+  --mint: #d9e8e2;
+  --saffron: #ff9932;
+  --crimson: #dc143c;
+  display: block;
+  width: 100%;
+}
+
+.bs-page {
   display: grid;
   gap: 1.1rem;
+  width: 100%;
 }
 
 .fade-up {
   animation: fade-up 0.45s ease both;
 }
 
-.page__head {
+.bs-page__head {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
@@ -20,18 +33,19 @@
   font-size: 0.7rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--muted);
 }
 
 h2 {
   margin: 0;
-  font-size: 1.55rem;
+  font-size: clamp(1.5rem, 2.4vw, 1.8rem);
   letter-spacing: -0.03em;
+  color: var(--ink);
 }
 
 .lede {
   margin: 0.35rem 0 0;
-  color: #64748b;
+  color: var(--muted);
   max-width: 36rem;
 }
 
@@ -57,9 +71,9 @@ h2 {
 }
 
 .btn--primary {
-  background: linear-gradient(135deg, #3b82f6, #60a5fa);
-  color: #fff;
-  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.28);
+  background: linear-gradient(135deg, var(--forsythia), var(--saffron));
+  color: #16323a;
+  box-shadow: 0 10px 24px rgba(255, 153, 50, 0.28);
 }
 
 .btn--primary:hover:not(:disabled) {
@@ -67,45 +81,65 @@ h2 {
 }
 
 .btn--ghost {
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  color: #0f172a;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background: rgba(255, 200, 1, 0.22);
 }
 
 .stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem;
+  width: 100%;
 }
 
 .stat {
   padding: 1rem 1.05rem;
   border-radius: 1.1rem;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(12px);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 12px 30px rgba(22, 50, 58, 0.05);
   display: grid;
   gap: 0.35rem;
   animation: fade-up 0.45s ease both;
 
   span {
-    color: #64748b;
+    color: var(--muted);
     font-size: 0.78rem;
   }
 
   strong {
     font-size: 1.35rem;
     letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  &:nth-child(1) {
+    border-top: 3px solid var(--forsythia);
+  }
+  &:nth-child(2) {
+    border-top: 3px solid var(--saffron);
+  }
+  &:nth-child(3) {
+    border-top: 3px solid var(--mint);
+  }
+  &:nth-child(4) {
+    border-top: 3px solid rgba(220, 20, 60, 0.55);
   }
 }
 
 .panel {
   padding: 1rem 1.1rem 0.4rem;
   border-radius: 1.2rem;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(12px);
+  width: 100%;
 }
 
 .panel__head {
@@ -118,13 +152,23 @@ h2 {
     margin: 0;
     font-size: 1rem;
   }
+}
 
-  a {
-    color: #3b82f6;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.85rem;
-  }
+.history-link {
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 650;
+  font-size: 0.88rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.7rem;
+  border: 1px solid transparent;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.history-link:hover {
+  color: #16323a;
+  background: linear-gradient(135deg, rgba(255, 200, 1, 0.55), rgba(255, 153, 50, 0.45));
+  border-color: rgba(255, 153, 50, 0.4);
 }
 
 .bills {
@@ -138,14 +182,14 @@ h2 {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.8rem 0;
-  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  border-top: 1px solid rgba(22, 50, 58, 0.06);
 
   strong {
     display: block;
   }
 
   span {
-    color: #64748b;
+    color: var(--muted);
     font-size: 0.85rem;
   }
 }
@@ -166,25 +210,25 @@ h2 {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-weight: 700;
-  color: #64748b;
+  color: var(--muted);
 }
 
 .status--paid {
-  color: #059669;
+  color: #1f6b5c;
 }
 
 .status--pending,
 .status--draft {
-  color: #d97706;
+  color: var(--saffron);
 }
 
 .status--failed {
-  color: #dc2626;
+  color: var(--crimson);
 }
 
 .empty {
   padding: 1.25rem 0 1.5rem;
-  color: #64748b;
+  color: var(--muted);
 }
 
 @keyframes fade-up {

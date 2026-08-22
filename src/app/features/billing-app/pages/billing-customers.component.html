@@ -1,46 +1,60 @@
-<section class="page fade-up">
-  <header class="page__head">
+<section class="bs-page fade-up">
+  <header class="bs-page__head">
     <div>
       <p class="eyebrow">Directory</p>
       <h2>Customers</h2>
-      <p class="lede">Maintain walk-up clients and optional banking account links.</p>
+      <p class="lede">Walk-up clients and optional banking account links — full-width desk.</p>
     </div>
+    <button type="button" class="btn btn--ghost" (click)="showForm = !showForm">
+      {{ showForm ? 'Hide form' : 'Add customer' }}
+    </button>
   </header>
 
   <div class="toolbar">
-    <input
-      type="search"
-      class="input"
-      placeholder="Search name, phone, email"
-      [(ngModel)]="query"
-      (keyup.enter)="search()"
-    />
+    <div class="search">
+      <input
+        type="search"
+        class="input"
+        placeholder="Search name, phone, email"
+        [ngModel]="query"
+        (ngModelChange)="onQueryChange($event)"
+        (keyup.enter)="search()"
+      />
+      <button
+        type="button"
+        class="search__clear"
+        *ngIf="query"
+        (click)="clearQuery()"
+        aria-label="Clear search"
+      >
+        ×
+      </button>
+    </div>
     <button type="button" class="btn btn--ghost" (click)="search()">Search</button>
+
+    <select class="input input--select" [(ngModel)]="sort" (ngModelChange)="onFilterChange()">
+      <option value="name-asc">Name A–Z</option>
+      <option value="name-desc">Name Z–A</option>
+      <option value="newest">Newest first</option>
+    </select>
+
+    <select class="input input--select" [(ngModel)]="bankingFilter" (ngModelChange)="onFilterChange()">
+      <option value="all">All accounts</option>
+      <option value="yes">Has banking account</option>
+      <option value="no">No banking account</option>
+    </select>
+
+    <div class="seg" role="group" aria-label="View mode">
+      <button type="button" [class.is-active]="view === 'list'" (click)="setView('list')">List</button>
+      <button type="button" [class.is-active]="view === 'grid'" (click)="setView('grid')">Grid</button>
+      <button type="button" [class.is-active]="view === 'table'" (click)="setView('table')">Table</button>
+    </div>
   </div>
 
-  <app-billing-panel-shimmer *ngIf="pageLoading" variant="list"></app-billing-panel-shimmer>
+  <app-billing-panel-shimmer *ngIf="listLoading" variant="catalog"></app-billing-panel-shimmer>
 
-  <div class="layout" *ngIf="!pageLoading">
-    <div class="panel">
-      <div class="empty" *ngIf="!customers.length">No customers yet.</div>
-      <ul class="list" *ngIf="customers.length">
-        <li *ngFor="let c of customers">
-          <button type="button" class="row" (click)="openDrawer(c)">
-            <span class="avatar">{{ initials(c.name) }}</span>
-            <div class="row__body">
-              <strong>{{ c.name }}</strong>
-              <span>{{ c.phone || c.email || 'No contact' }}</span>
-            </div>
-          </button>
-          <div class="row__actions">
-            <button type="button" class="link" (click)="edit(c)">Edit</button>
-            <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Remove</button>
-          </div>
-        </li>
-      </ul>
-    </div>
-
-    <form class="panel form" [formGroup]="form" (ngSubmit)="save()">
+  <div class="layout" *ngIf="!listLoading">
+    <form class="glass form" *ngIf="showForm" [formGroup]="form" (ngSubmit)="save()">
       <h3>{{ editingId ? 'Edit customer' : 'Add customer' }}</h3>
       <label>
         Name
@@ -69,19 +83,94 @@
         </button>
       </div>
     </form>
+
+    <div class="main-panel glass">
+      <div class="empty" *ngIf="!filtered.length">No customers match this search or filter.</div>
+
+      <ul class="list" *ngIf="filtered.length && view === 'list'">
+        <li *ngFor="let c of paged">
+          <button type="button" class="row" (click)="openDetail(c)">
+            <span class="avatar">{{ initials(c.name) }}</span>
+            <div class="row__body">
+              <strong>{{ c.name }}</strong>
+              <span>{{ c.phone || c.email || 'No contact' }}</span>
+            </div>
+            <em *ngIf="c.bankingAccountNumber">Linked</em>
+          </button>
+          <div class="row__actions">
+            <button type="button" class="link" (click)="edit(c)">Edit</button>
+            <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Remove</button>
+          </div>
+        </li>
+      </ul>
+
+      <div class="grid-view" *ngIf="filtered.length && view === 'grid'">
+        <button type="button" class="card-tile" *ngFor="let c of paged" (click)="openDetail(c)">
+          <span class="avatar avatar--lg">{{ initials(c.name) }}</span>
+          <strong>{{ c.name }}</strong>
+          <span>{{ c.phone || c.email || 'No contact' }}</span>
+          <small>{{ c.bankingAccountNumber ? 'Banking linked' : 'Walk-up only' }}</small>
+        </button>
+      </div>
+
+      <div class="table-wrap" *ngIf="filtered.length && view === 'table'">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Banking</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of paged">
+              <td>
+                <button type="button" class="name-btn" (click)="openDetail(c)">
+                  <span class="avatar avatar--sm">{{ initials(c.name) }}</span>
+                  {{ c.name }}
+                </button>
+              </td>
+              <td>{{ c.phone || '—' }}</td>
+              <td>{{ c.email || '—' }}</td>
+              <td>{{ c.bankingAccountNumber || '—' }}</td>
+              <td class="table__actions">
+                <button type="button" class="link" (click)="edit(c)">Edit</button>
+                <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Remove</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pager" *ngIf="filtered.length">
+        <span>{{ filtered.length }} customers · page {{ page }} / {{ totalPages }}</span>
+        <div class="pager__btns">
+          <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="goPage(-1)">Prev</button>
+          <button type="button" class="btn btn--ghost" [disabled]="page >= totalPages" (click)="goPage(1)">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="drawer-backdrop" *ngIf="drawerCustomer" (click)="closeDrawer()"></div>
-  <aside class="drawer" *ngIf="drawerCustomer as c" [@.disabled]="false">
+  <div class="drawer-backdrop" *ngIf="detail" (click)="closeDetail()"></div>
+  <aside class="drawer drawer--xl" *ngIf="detail as c" role="dialog" aria-modal="true">
     <div class="drawer__head">
-      <span class="avatar avatar--lg">{{ initials(c.name) }}</span>
+      <span class="avatar avatar--xl">{{ initials(c.name) }}</span>
       <div>
+        <p class="eyebrow">Customer detail</p>
         <h3>{{ c.name }}</h3>
-        <p>{{ c.email || 'No email' }}</p>
       </div>
-      <button type="button" class="icon-close" (click)="closeDrawer()" aria-label="Close">×</button>
+      <button type="button" class="icon-close" (click)="closeDetail()" aria-label="Close">×</button>
     </div>
     <dl class="drawer__meta">
+      <div>
+        <dt>Email</dt>
+        <dd>{{ c.email || '—' }}</dd>
+      </div>
       <div>
         <dt>Phone</dt>
         <dd>{{ c.phone || '—' }}</dd>
@@ -97,7 +186,7 @@
     </dl>
     <div class="drawer__actions">
       <button type="button" class="btn btn--ghost" (click)="edit(c)">Edit</button>
-      <button type="button" class="btn btn--primary" (click)="closeDrawer()">Done</button>
+      <button type="button" class="btn btn--danger" [disabled]="busy" (click)="remove(c)">Remove</button>
     </div>
   </aside>
 </section>

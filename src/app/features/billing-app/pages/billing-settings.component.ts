@@ -49,12 +49,19 @@ export class BillingSettingsComponent implements OnInit {
     });
   }
 
-  save(): void {
+  toggleMethod(key: 'cash' | 'card' | 'upi' | 'qr'): void {
+    const ctrl = this.form.get(key);
+    if (!ctrl) {
+      return;
+    }
+    ctrl.setValue(!ctrl.value);
+  }
+
+  async save(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-    this.busy = true;
     const raw = this.form.getRawValue();
     const payload: Partial<BillingGatewaySettings> = {
       merchantName: String(raw.merchantName || ''),
@@ -69,17 +76,20 @@ export class BillingSettingsComponent implements OnInit {
       cardLabel: String(raw.cardLabel || 'Card')
     };
 
-    withShimmerDelay(this.billing.updateSettings(payload), SHIMMER_MS).subscribe({
-      next: async (res) => {
-        this.busy = false;
-        this.patchForm(res.settings);
-        await this.alerts.toastSuccess(res.message || 'Settings saved');
-      },
-      error: async (err) => {
-        this.busy = false;
-        await this.alerts.error(err?.error?.message || 'Unable to save settings.');
-      }
+    this.busy = true;
+    const outcome = await this.alerts.confirmAction({
+      text: 'Save merchant identity and payment methods for POS?',
+      confirmText: 'Save settings',
+      loadingText: 'Saving settings…',
+      action: () => withShimmerDelay(this.billing.updateSettings(payload), SHIMMER_MS),
+      successMessage: (res) => res.message || 'Settings saved',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Unable to save settings.'
     });
+    this.busy = false;
+    if (outcome.ok) {
+      this.patchForm(outcome.result.settings);
+    }
   }
 
   private patchForm(settings: BillingGatewaySettings | null | undefined): void {
