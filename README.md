@@ -12,6 +12,7 @@ Backend API lives in a separate repository: [`maheshpcse/banking-system-server`]
 - Instant transfers with recipient autocomplete and transfer usage meters
 - Paginated transaction history
 - Staff signup / Super Admin approval / Manager analytics
+- **Billing System desk** (Manager → Billing): POS invoices, catalog, fake payments, disputes
 - Light premium UI with soft motion
 
 ## Requirements

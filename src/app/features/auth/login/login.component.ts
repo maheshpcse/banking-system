@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, of } from 'rxjs';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -38,6 +38,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private readonly auth: AuthService,
     private readonly alerts: AlertService,
     private readonly router: Router,
+    private readonly route: ActivatedRoute,
     private readonly shellBoot: ShellBootService,
     private readonly notifications: NotificationService
   ) {}
@@ -75,8 +76,12 @@ export class LoginComponent implements OnInit, OnDestroy {
       next: () => {
         this.notifications.refresh().subscribe();
         const role = this.auth.currentUser?.role || 'customer';
-        const dest =
+        const next = this.route.snapshot.queryParamMap.get('next');
+        let dest =
           role === 'admin' ? '/admin' : role === 'manager' ? '/manager' : '/dashboard';
+        if (next === 'billing' && (role === 'manager' || role === 'admin')) {
+          dest = '/manager/billing';
+        }
         this.shellBoot.begin();
         this.notifications.startRealtime();
         void this.router.navigateByUrl(dest).then((ok) => {

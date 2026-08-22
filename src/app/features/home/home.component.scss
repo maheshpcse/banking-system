@@ -283,6 +283,18 @@
   border-color: rgba(95, 196, 176, 0.45);
 }
 
+.home__cta--ghost {
+  background: transparent;
+  color: #1d2a36;
+  border: 1px dashed rgba(29, 42, 54, 0.28);
+  min-width: auto;
+}
+
+.home__cta--ghost:hover {
+  border-color: rgba(59, 159, 216, 0.55);
+  background: rgba(106, 168, 232, 0.12);
+}
+
 @keyframes home-breathe {
   0%,
   100% {

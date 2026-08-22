@@ -1,6 +1,6 @@
 # Billing System ↔ Banking System Integration
 
-This document captures the **planned Billing System** linkage. Banking lifecycle (account opening, cards, RBAC, admin, transfer push notifications) ships first; billing is designed here for a follow-up build.
+This document captures the **Billing System** linkage. Banking lifecycle (account opening, cards, RBAC, admin, transfer push notifications) ships first; billing POS + dispute queues are live under Manager → Billing.
 
 ## Goals
 
@@ -83,8 +83,8 @@ Managers schedule banking ledger reports on `/manager/reports`. Billing System l
 
 ## Manager + Billing bridge
 
-- Manager portal pages (`/manager`, Approvals, Reports, Billing) are the UI shell until Billing APIs ship.
-- Shared settlement references connect banking transfers to Billing invoices.
+- Manager portal **Billing** (`/manager/billing`) is the live POS + dispute desk (Mongo `/api/billing`).
+- Shared settlement references connect banking transfers to Billing invoices (`bankingAccountNumber` on invoices; optional `billingReference` on ledger txs).
 - Complaint accept / reject / escalate lands on the Manager Billing queue with Admin escalation.
 
 | Cadence | Banking view | Billing view |
@@ -103,7 +103,9 @@ Managers schedule banking ledger reports on `/manager/reports`. Billing System l
 
 ## Implementation order (agreed)
 
-1. Banking: account lifecycle, card UX, RBAC admin, notifications, money locks ✅ (this PR)
-2. Billing service scaffold + auth SSO with banking roles
-3. Cross-system settlement events + dashboard widgets
-4. Complaint workflows + graphical period reports
+1. Banking: account lifecycle, card UX, RBAC admin, notifications, money locks ✅
+2. Billing service scaffold + auth SSO with banking roles ✅ (`/api/billing`, Manager Billing desk)
+3. Cross-system settlement events + dashboard widgets (partial — shared refs + billing stats)
+4. Complaint workflows + graphical period reports (complaints ✅; merged report graphs next)
+
+See **`docs/billing-system-plan.md`** for the combined POS + banking-bridge plan (MEAN brief adapted to NovaBank Angular + MongoDB).

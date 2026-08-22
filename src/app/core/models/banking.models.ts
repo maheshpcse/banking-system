@@ -240,6 +240,7 @@ export type NotificationKind =
   | 'security'
   | 'admin'
   | 'complaint'
+  | 'billing'
   | 'system';
 
 export interface AppNotification {
@@ -250,6 +251,100 @@ export interface AppNotification {
   createdAt: string;
   read: boolean;
   href?: string;
+}
+
+export type BillingPaymentMethod = 'cash' | 'card' | 'upi' | 'qr';
+export type BillingPaymentStatus = 'draft' | 'pending' | 'paid' | 'failed' | 'refunded';
+export type BillingComplaintStatus =
+  | 'open'
+  | 'accepted'
+  | 'adjusted'
+  | 'rejected'
+  | 'escalated'
+  | 'resolved';
+
+export interface BillingProduct {
+  id: string;
+  name: string;
+  sku: string;
+  price: number;
+  stock: number;
+  gstPercentage: number;
+  active: boolean;
+  createdAt?: string;
+}
+
+export interface BillingCustomer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  bankingAccountNumber?: string | null;
+  createdAt?: string;
+}
+
+export interface BillingBillItem {
+  productId: string;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  gstPercentage: number;
+  lineTotal: number;
+}
+
+export interface BillingBill {
+  id: string;
+  billNumber: string;
+  customerId: string;
+  customerName: string;
+  bankingAccountNumber?: string | null;
+  items: BillingBillItem[];
+  subtotal: number;
+  discount: number;
+  tax: number;
+  grandTotal: number;
+  paymentStatus: BillingPaymentStatus;
+  paymentMethod?: BillingPaymentMethod | null;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface BillingPayment {
+  id: string;
+  billId: string;
+  billNumber: string;
+  paymentMethod: BillingPaymentMethod;
+  status: 'pending' | 'success' | 'failed';
+  amount: number;
+  transactionRef: string;
+  meta?: Record<string, unknown>;
+  createdAt?: string;
+}
+
+export interface BillingComplaint {
+  id: string;
+  billId?: string | null;
+  billNumber?: string;
+  customerId?: string | null;
+  customerName: string;
+  bankingAccountNumber?: string | null;
+  subject: string;
+  detail: string;
+  status: BillingComplaintStatus;
+  resolutionNote?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface BillingDashboardStats {
+  totalSales: number;
+  totalOrders: number;
+  totalProducts: number;
+  totalCustomers: number;
+  openComplaints: number;
+  recentBills: BillingBill[];
 }
 
 export interface AdminUserRow {

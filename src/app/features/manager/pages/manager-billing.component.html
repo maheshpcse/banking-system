@@ -1,39 +1,386 @@
-<section class="page" *ngIf="!pageLoading; else billingShimmer">
-  <header class="admin-hero">
+<section class="page billing-page" *ngIf="!pageLoading; else billingShimmer">
+  <header class="admin-hero billing-hero">
     <div>
-      <p class="eyebrow">NovaBank</p>
-      <h1>Billing System bridge</h1>
+      <p class="eyebrow">NovaBank Billing</p>
+      <h1>Billing System</h1>
       <p class="lede">
-        Manager controls for invoices, settlements, disputes, and scheduled reports once Billing is
-        connected.
+        Premium POS desk for invoices, settlements, catalog control, and dispute queues — bridged to
+        NovaBank roles and alerts.
       </p>
+    </div>
+    <div class="billing-stage" aria-hidden="true">
+      <span class="billing-stage__orb billing-stage__orb--mint"></span>
+      <span class="billing-stage__orb billing-stage__orb--sky"></span>
+      <span class="billing-stage__symbol billing-stage__symbol--a">$</span>
+      <span class="billing-stage__symbol billing-stage__symbol--b">₹</span>
+      <span class="billing-stage__symbol billing-stage__symbol--c">€</span>
+      <span class="billing-stage__counter"></span>
     </div>
   </header>
 
-  <div class="roadmap-grid">
-    <article class="roadmap-card">
-      <h2>Phase A — Banking ready</h2>
-      <p>Customer openings, transfers with alerts, and manager approvals are live in this portal.</p>
-    </article>
-    <article class="roadmap-card">
-      <h2>Phase B — Report engine</h2>
-      <p>Daily / weekly / bi-weekly / monthly ledger exports with graph views on the Reports page.</p>
-    </article>
-    <article class="roadmap-card">
-      <h2>Phase C — Billing join</h2>
-      <p>
-        Shared settlement IDs, invoice status chips, and complaint accept / reject / escalate flows
-        between Manager and Billing.
-      </p>
-    </article>
+  <div class="billing-toolbar">
+    <nav class="billing-tabs" aria-label="Billing sections">
+      <button
+        type="button"
+        class="billing-tabs__item"
+        *ngFor="let tab of tabs"
+        [class.is-active]="activeTab === tab.id"
+        (click)="setTab(tab.id)"
+      >
+        <strong>{{ tab.label }}</strong>
+        <span>{{ tab.hint }}</span>
+      </button>
+    </nav>
+    <div class="billing-toolbar__actions">
+      <button type="button" class="btn btn--ghost" [disabled]="busy" (click)="refresh()">Refresh</button>
+      <button type="button" class="btn btn--primary" [disabled]="busy" (click)="seedCatalog()">
+        Seed sample catalog
+      </button>
+    </div>
   </div>
 
-  <p class="hint">
-    Full workflow notes live in
-    <code>docs/manager-portal-roadmap.md</code>
-    and
-    <code>docs/billing-system-integration.md</code>.
-  </p>
+  <!-- Desk -->
+  <ng-container *ngIf="activeTab === 'desk'">
+    <div class="stat-grid billing-stats">
+      <article class="stat">
+        <app-nb-icon name="wallet"></app-nb-icon>
+        <div>
+          <span>Total sales</span>
+          <strong>{{ stats?.totalSales || 0 | number: '1.2-2' }}</strong>
+        </div>
+      </article>
+      <article class="stat">
+        <app-nb-icon name="card"></app-nb-icon>
+        <div>
+          <span>Orders</span>
+          <strong>{{ stats?.totalOrders || 0 }}</strong>
+        </div>
+      </article>
+      <article class="stat">
+        <app-nb-icon name="chart"></app-nb-icon>
+        <div>
+          <span>Products</span>
+          <strong>{{ stats?.totalProducts || 0 }}</strong>
+        </div>
+      </article>
+      <article class="stat">
+        <app-nb-icon name="user"></app-nb-icon>
+        <div>
+          <span>Customers</span>
+          <strong>{{ stats?.totalCustomers || 0 }}</strong>
+        </div>
+      </article>
+      <article class="stat">
+        <app-nb-icon name="bell"></app-nb-icon>
+        <div>
+          <span>Open disputes</span>
+          <strong>{{ stats?.openComplaints || 0 }}</strong>
+        </div>
+      </article>
+    </div>
+
+    <app-animated-card accent="mint" title="Recent invoices" subtitle="Live desk">
+      <table class="billing-table" *ngIf="stats?.recentBills?.length; else noRecent">
+        <thead>
+          <tr>
+            <th>Bill</th>
+            <th>Customer</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let bill of stats?.recentBills">
+            <td>{{ bill.billNumber }}</td>
+            <td>{{ bill.customerName }}</td>
+            <td>${{ bill.grandTotal | number: '1.2-2' }}</td>
+            <td><span class="pill" [attr.data-status]="bill.paymentStatus">{{ bill.paymentStatus }}</span></td>
+            <td><button type="button" class="btn btn--ghost" (click)="openInvoice(bill)">Open</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noRecent>
+        <p class="hint">No invoices yet — seed the catalog and create a POS bill.</p>
+      </ng-template>
+    </app-animated-card>
+  </ng-container>
+
+  <!-- Catalog -->
+  <ng-container *ngIf="activeTab === 'catalog'">
+    <div class="billing-split">
+      <app-animated-card accent="sky" title="Products" subtitle="Stock & GST">
+        <div class="billing-filter">
+          <input type="search" [(ngModel)]="productQuery" placeholder="Search products" (keyup.enter)="searchProducts()" />
+          <button type="button" class="btn btn--ghost" (click)="searchProducts()">Search</button>
+          <button type="button" class="btn btn--ghost" (click)="startEditProduct()">New</button>
+        </div>
+        <form class="form form--compact" [formGroup]="productForm" (ngSubmit)="saveProduct()">
+          <div class="form-row form-row--2">
+            <label><span>Name</span><input formControlName="name" /></label>
+            <label><span>SKU</span><input formControlName="sku" /></label>
+          </div>
+          <div class="form-row form-row--3">
+            <label><span>Price</span><input type="number" step="0.01" formControlName="price" /></label>
+            <label><span>Stock</span><input type="number" formControlName="stock" /></label>
+            <label><span>GST %</span><input type="number" formControlName="gstPercentage" /></label>
+          </div>
+          <button class="btn btn--primary" type="submit">
+            {{ editingProductId ? 'Update product' : 'Add product' }}
+          </button>
+        </form>
+        <table class="billing-table">
+          <thead>
+            <tr><th>Name</th><th>Price</th><th>Stock</th><th>GST</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of products">
+              <td>{{ p.name }}<small *ngIf="p.sku"> · {{ p.sku }}</small></td>
+              <td>${{ p.price | number: '1.2-2' }}</td>
+              <td>{{ p.stock }}</td>
+              <td>{{ p.gstPercentage }}%</td>
+              <td class="billing-table__actions">
+                <button type="button" class="btn btn--ghost" (click)="startEditProduct(p)">Edit</button>
+                <button type="button" class="btn btn--ghost" (click)="archiveProduct(p)">Archive</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </app-animated-card>
+
+      <app-animated-card accent="sand" title="Customers" subtitle="Billing clients">
+        <div class="billing-filter">
+          <input type="search" [(ngModel)]="customerQuery" placeholder="Search customers" (keyup.enter)="searchCustomers()" />
+          <button type="button" class="btn btn--ghost" (click)="searchCustomers()">Search</button>
+          <button type="button" class="btn btn--ghost" (click)="startEditCustomer()">New</button>
+        </div>
+        <form class="form form--compact" [formGroup]="customerForm" (ngSubmit)="saveCustomer()">
+          <label><span>Name</span><input formControlName="name" /></label>
+          <div class="form-row form-row--2">
+            <label><span>Email</span><input formControlName="email" /></label>
+            <label><span>Phone</span><input formControlName="phone" /></label>
+          </div>
+          <label><span>Address</span><input formControlName="address" /></label>
+          <label>
+            <span>Banking account # (optional bridge)</span>
+            <input formControlName="bankingAccountNumber" />
+          </label>
+          <button class="btn btn--primary" type="submit">
+            {{ editingCustomerId ? 'Update customer' : 'Add customer' }}
+          </button>
+        </form>
+        <table class="billing-table">
+          <thead>
+            <tr><th>Name</th><th>Contact</th><th>Vault link</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of customers">
+              <td>{{ c.name }}</td>
+              <td>{{ c.email || c.phone || '—' }}</td>
+              <td>{{ c.bankingAccountNumber || '—' }}</td>
+              <td class="billing-table__actions">
+                <button type="button" class="btn btn--ghost" (click)="startEditCustomer(c)">Edit</button>
+                <button type="button" class="btn btn--ghost" (click)="removeCustomer(c)">Remove</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </app-animated-card>
+    </div>
+  </ng-container>
+
+  <!-- POS -->
+  <ng-container *ngIf="activeTab === 'pos'">
+    <div class="billing-split billing-split--pos">
+      <app-animated-card accent="mint" title="Build invoice" subtitle="Product cart">
+        <label class="billing-select">
+          <span>Customer</span>
+          <select [(ngModel)]="selectedCustomerId">
+            <option value="">Select customer</option>
+            <option *ngFor="let c of customers" [value]="c.id">{{ c.name }}</option>
+          </select>
+        </label>
+        <div class="pos-products">
+          <button type="button" class="pos-chip" *ngFor="let p of products" (click)="addToCart(p)">
+            <strong>{{ p.name }}</strong>
+            <span>${{ p.price | number: '1.2-2' }} · stock {{ p.stock }}</span>
+          </button>
+        </div>
+        <table class="billing-table" *ngIf="cart.length">
+          <thead>
+            <tr><th>Item</th><th>Qty</th><th>Line</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let line of cart">
+              <td>{{ line.name }}</td>
+              <td class="qty-cell">
+                <button type="button" (click)="updateQty(line, -1)">−</button>
+                <span>{{ line.quantity }}</span>
+                <button type="button" (click)="updateQty(line, 1)">+</button>
+              </td>
+              <td>${{ line.unitPrice * line.quantity | number: '1.2-2' }}</td>
+              <td><button type="button" class="btn btn--ghost" (click)="removeLine(line)">Remove</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pos-totals" *ngIf="cart.length">
+          <label>
+            <span>Discount</span>
+            <input type="number" min="0" step="0.01" [(ngModel)]="discount" />
+          </label>
+          <p>Subtotal <strong>${{ cartSubtotal | number: '1.2-2' }}</strong></p>
+          <p>Tax <strong>${{ cartTax | number: '1.2-2' }}</strong></p>
+          <p class="pos-totals__grand">Grand total <strong>${{ cartGrandTotal | number: '1.2-2' }}</strong></p>
+          <div class="billing-toolbar__actions">
+            <button type="button" class="btn btn--ghost" (click)="clearCart()">Clear</button>
+            <button type="button" class="btn btn--primary" [disabled]="busy" (click)="createInvoice()">
+              Create invoice
+            </button>
+          </div>
+        </div>
+      </app-animated-card>
+
+      <app-animated-card accent="sky" title="Payment & invoice" subtitle="Fake gateway">
+        <ng-container *ngIf="activeInvoice as inv; else noInvoice">
+          <div class="invoice-sheet" id="billing-invoice-print">
+            <header>
+              <strong>NovaBank Invoice</strong>
+              <span>{{ inv.billNumber }}</span>
+            </header>
+            <p>{{ inv.customerName }}</p>
+            <p *ngIf="inv.bankingAccountNumber">Vault account {{ inv.bankingAccountNumber }}</p>
+            <ul>
+              <li *ngFor="let item of inv.items">
+                {{ item.name }} × {{ item.quantity }}
+                <span>${{ item.lineTotal | number: '1.2-2' }}</span>
+              </li>
+            </ul>
+            <p>Subtotal ${{ inv.subtotal | number: '1.2-2' }}</p>
+            <p>Discount −${{ inv.discount | number: '1.2-2' }}</p>
+            <p>Tax ${{ inv.tax | number: '1.2-2' }}</p>
+            <p class="invoice-sheet__grand">Grand total ${{ inv.grandTotal | number: '1.2-2' }}</p>
+            <p>
+              Status
+              <span class="pill" [attr.data-status]="inv.paymentStatus">{{ inv.paymentStatus }}</span>
+            </p>
+          </div>
+
+          <div class="pay-methods" *ngIf="inv.paymentStatus !== 'paid'">
+            <button
+              type="button"
+              *ngFor="let method of ['cash', 'card', 'upi', 'qr']"
+              class="pay-methods__btn"
+              [class.is-active]="paymentMethod === method"
+              (click)="paymentMethod = $any(method)"
+            >
+              {{ method | uppercase }}
+            </button>
+          </div>
+
+          <div class="qr-stage" *ngIf="paymentMethod === 'qr' && inv.paymentStatus !== 'paid'" [attr.data-phase]="qrPhase">
+            <div class="qr-stage__frame">
+              <span></span><span></span><span></span><span></span>
+              <div class="qr-stage__scan"></div>
+            </div>
+            <p *ngIf="qrPhase === 'idle'">Ready to simulate QR capture</p>
+            <p *ngIf="qrPhase === 'scanning'">Scanning…</p>
+            <p *ngIf="qrPhase === 'success'">Payment success</p>
+            <p *ngIf="qrPhase === 'failed'">Payment failed</p>
+          </div>
+
+          <div class="billing-toolbar__actions" *ngIf="inv.paymentStatus !== 'paid'">
+            <button type="button" class="btn btn--primary" [disabled]="paying" (click)="collectPayment(false)">
+              {{ paying ? 'Processing…' : 'Collect payment' }}
+            </button>
+            <button type="button" class="btn btn--ghost" [disabled]="paying" (click)="collectPayment(true)">
+              Simulate fail
+            </button>
+          </div>
+          <div class="billing-toolbar__actions">
+            <button type="button" class="btn btn--ghost" (click)="printInvoice()">Print invoice</button>
+          </div>
+        </ng-container>
+        <ng-template #noInvoice>
+          <p class="hint">Create an invoice from the cart to unlock payment and print.</p>
+        </ng-template>
+      </app-animated-card>
+    </div>
+  </ng-container>
+
+  <!-- History -->
+  <ng-container *ngIf="activeTab === 'history'">
+    <app-animated-card accent="sand" title="Billing history" subtitle="Filter & reopen">
+      <div class="billing-filter billing-filter--history">
+        <input type="search" [(ngModel)]="historyQuery" placeholder="Bill ID or customer" />
+        <input type="date" [(ngModel)]="historyFrom" />
+        <input type="date" [(ngModel)]="historyTo" />
+        <button type="button" class="btn btn--ghost" (click)="loadBills(1)">Filter</button>
+      </div>
+      <table class="billing-table">
+        <thead>
+          <tr><th>Bill</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let bill of bills">
+            <td>{{ bill.billNumber }}</td>
+            <td>{{ bill.customerName }}</td>
+            <td>{{ bill.createdAt | date: 'mediumDate' }}</td>
+            <td>${{ bill.grandTotal | number: '1.2-2' }}</td>
+            <td><span class="pill" [attr.data-status]="bill.paymentStatus">{{ bill.paymentStatus }}</span></td>
+            <td><button type="button" class="btn btn--ghost" (click)="openInvoice(bill)">Open</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="billing-pager" *ngIf="billPages > 1">
+        <button type="button" class="btn btn--ghost" [disabled]="billPage <= 1" (click)="loadBills(billPage - 1)">
+          Previous
+        </button>
+        <span>Page {{ billPage }} / {{ billPages }}</span>
+        <button
+          type="button"
+          class="btn btn--ghost"
+          [disabled]="billPage >= billPages"
+          (click)="loadBills(billPage + 1)"
+        >
+          Next
+        </button>
+      </div>
+    </app-animated-card>
+  </ng-container>
+
+  <!-- Disputes -->
+  <ng-container *ngIf="activeTab === 'disputes'">
+    <div class="billing-split">
+      <app-animated-card accent="rose" title="File complaint" subtitle="Manager intake">
+        <form class="form form--compact" [formGroup]="complaintForm" (ngSubmit)="fileComplaint()">
+          <label><span>Customer name</span><input formControlName="customerName" /></label>
+          <label><span>Bill number (optional)</span><input formControlName="billNumber" /></label>
+          <label><span>Subject</span><input formControlName="subject" /></label>
+          <label><span>Detail</span><textarea rows="4" formControlName="detail"></textarea></label>
+          <button class="btn btn--primary" type="submit">Open dispute</button>
+        </form>
+      </app-animated-card>
+
+      <app-animated-card accent="sky" title="Dispute queue" subtitle="Accept · adjust · reject · escalate">
+        <article class="dispute-card" *ngFor="let c of complaints">
+          <header>
+            <strong>{{ c.subject }}</strong>
+            <span class="pill" [attr.data-status]="c.status">{{ c.status }}</span>
+          </header>
+          <p>{{ c.customerName }} · {{ c.billNumber || 'No bill link' }}</p>
+          <p>{{ c.detail }}</p>
+          <div class="billing-toolbar__actions" *ngIf="c.status === 'open' || c.status === 'escalated'">
+            <button type="button" class="btn btn--ghost" (click)="resolveComplaint(c, 'accepted')">Accept</button>
+            <button type="button" class="btn btn--ghost" (click)="resolveComplaint(c, 'adjusted')">Adjust</button>
+            <button type="button" class="btn btn--ghost" (click)="resolveComplaint(c, 'rejected')">Reject</button>
+            <button type="button" class="btn btn--ghost" (click)="resolveComplaint(c, 'escalated')">Escalate</button>
+            <button type="button" class="btn btn--primary" (click)="resolveComplaint(c, 'resolved')">Resolve</button>
+          </div>
+        </article>
+        <p class="hint" *ngIf="!complaints.length">No complaints in queue.</p>
+      </app-animated-card>
+    </div>
+  </ng-container>
 </section>
 
 <ng-template #billingShimmer>
