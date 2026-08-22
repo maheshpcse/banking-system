@@ -1,0 +1,60 @@
+<section class="page fade-up">
+  <header class="page__head">
+    <div>
+      <p class="eyebrow">Overview</p>
+      <h2>Sales pulse</h2>
+      <p class="lede">Live counters, recent invoices, and a quick path into POS.</p>
+    </div>
+    <div class="page__actions">
+      <button type="button" class="btn btn--ghost" [disabled]="seeding || pageLoading" (click)="seedCatalog()">
+        {{ seeding ? 'Seeding…' : 'Seed catalog' }}
+      </button>
+      <button type="button" class="btn btn--primary" (click)="goPos()">Open POS</button>
+    </div>
+  </header>
+
+  <app-billing-panel-shimmer *ngIf="pageLoading" variant="desk"></app-billing-panel-shimmer>
+
+  <ng-container *ngIf="!pageLoading && stats as s">
+    <div class="stats">
+      <article class="stat">
+        <span>Total sales</span>
+        <strong>{{ s.totalSales | currencyFormat }}</strong>
+      </article>
+      <article class="stat">
+        <span>Orders</span>
+        <strong>{{ s.totalOrders }}</strong>
+      </article>
+      <article class="stat">
+        <span>Products</span>
+        <strong>{{ s.totalProducts }}</strong>
+      </article>
+      <article class="stat">
+        <span>Customers</span>
+        <strong>{{ s.totalCustomers }}</strong>
+      </article>
+    </div>
+
+    <app-billing-scene></app-billing-scene>
+
+    <div class="panel">
+      <div class="panel__head">
+        <h3>Recent bills</h3>
+        <a routerLink="/billing/history">View history</a>
+      </div>
+      <div class="empty" *ngIf="!recentBills.length">No invoices yet — start from POS.</div>
+      <ul class="bills" *ngIf="recentBills.length">
+        <li *ngFor="let bill of recentBills">
+          <div>
+            <strong>{{ bill.billNumber }}</strong>
+            <span>{{ bill.customerName }}</span>
+          </div>
+          <div class="bills__meta">
+            <span [class]="statusClass(bill.paymentStatus)">{{ bill.paymentStatus }}</span>
+            <em>{{ bill.grandTotal | currencyFormat }}</em>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </ng-container>
+</section>

@@ -1,0 +1,78 @@
+<section class="page fade-up">
+  <header class="page__head">
+    <div>
+      <p class="eyebrow">Ledger</p>
+      <h2>Invoice history</h2>
+      <p class="lede">Browse past bills as a soft timeline — filter, page, and open details.</p>
+    </div>
+  </header>
+
+  <div class="filters">
+    <input class="input" type="search" placeholder="Search bill or customer" [(ngModel)]="query" />
+    <input class="input" type="date" [(ngModel)]="from" />
+    <input class="input" type="date" [(ngModel)]="to" />
+    <button type="button" class="btn btn--ghost" (click)="applyFilters()">Filter</button>
+  </div>
+
+  <app-billing-panel-shimmer *ngIf="pageLoading" variant="list"></app-billing-panel-shimmer>
+
+  <div class="timeline" *ngIf="!pageLoading">
+    <div class="empty" *ngIf="!bills.length">No invoices match these filters.</div>
+    <article class="card" *ngFor="let bill of bills" (click)="openDetail(bill)">
+      <div class="card__rail" aria-hidden="true"></div>
+      <div class="card__body">
+        <div class="card__top">
+          <strong>{{ bill.billNumber }}</strong>
+          <span [class]="statusClass(bill.paymentStatus)">{{ bill.paymentStatus }}</span>
+        </div>
+        <p>{{ bill.customerName }}</p>
+        <div class="card__meta">
+          <span>{{ bill.createdAt | date: 'mediumDate' }}</span>
+          <em>{{ bill.grandTotal | currencyFormat }}</em>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <div class="pager" *ngIf="!pageLoading && pages > 1">
+    <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
+    <span>Page {{ page }} / {{ pages }} · {{ total }} total</span>
+    <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
+  </div>
+
+  <div class="drawer-backdrop" *ngIf="detailBill" (click)="closeDetail()"></div>
+  <aside class="drawer" *ngIf="detailBill as bill">
+    <div class="drawer__head">
+      <div>
+        <h3>{{ bill.billNumber }}</h3>
+        <p>{{ bill.customerName }}</p>
+      </div>
+      <button type="button" class="icon-close" (click)="closeDetail()" aria-label="Close">×</button>
+    </div>
+
+    <app-billing-panel-shimmer *ngIf="detailLoading" variant="list"></app-billing-panel-shimmer>
+
+    <ng-container *ngIf="!detailLoading">
+      <div [class]="statusClass(bill.paymentStatus)">{{ bill.paymentStatus }}</div>
+      <ul class="lines">
+        <li *ngFor="let item of bill.items">
+          <span>{{ item.name }} × {{ item.quantity }}</span>
+          <em>{{ item.lineTotal | currencyFormat }}</em>
+        </li>
+      </ul>
+      <dl class="totals">
+        <div><dt>Subtotal</dt><dd>{{ bill.subtotal | currencyFormat }}</dd></div>
+        <div><dt>Discount</dt><dd>{{ bill.discount | currencyFormat }}</dd></div>
+        <div><dt>Tax</dt><dd>{{ bill.tax | currencyFormat }}</dd></div>
+        <div class="totals__grand"><dt>Grand total</dt><dd>{{ bill.grandTotal | currencyFormat }}</dd></div>
+      </dl>
+      <div class="payments" *ngIf="detailPayments.length">
+        <h4>Payments</h4>
+        <div *ngFor="let p of detailPayments">
+          <strong>{{ p.paymentMethod | uppercase }}</strong>
+          <span>{{ p.status }} · {{ p.amount | currencyFormat }}</span>
+        </div>
+      </div>
+    </ng-container>
+  </aside>
+</section>

@@ -79,8 +79,12 @@ export class LoginComponent implements OnInit, OnDestroy {
         const next = this.route.snapshot.queryParamMap.get('next');
         let dest =
           role === 'admin' ? '/admin' : role === 'manager' ? '/manager' : '/dashboard';
-        if (next === 'billing' && (role === 'manager' || role === 'admin')) {
-          dest = '/manager/billing';
+        if (next === 'billing') {
+          if (this.auth.currentUser?.isSuperAdmin) {
+            dest = '/manager/billing';
+          } else if (role === 'manager' || role === 'admin') {
+            dest = '/billing';
+          }
         }
         this.shellBoot.begin();
         this.notifications.startRealtime();

@@ -1,0 +1,147 @@
+<section class="page fade-up">
+  <header class="page__head">
+    <div>
+      <p class="eyebrow">Checkout</p>
+      <h2>Point of sale</h2>
+      <p class="lede">Spotlight products, build a cart, invoice, then collect payment.</p>
+    </div>
+  </header>
+
+  <app-billing-panel-shimmer *ngIf="pageLoading" variant="pos"></app-billing-panel-shimmer>
+
+  <div class="pos" *ngIf="!pageLoading">
+    <div class="pos__left">
+      <div class="panel">
+        <label class="field">
+          Customer
+          <select class="input" [(ngModel)]="selectedCustomerId">
+            <option value="">Select customer…</option>
+            <option *ngFor="let c of customers" [value]="c.id">{{ c.name }}</option>
+          </select>
+        </label>
+
+        <div class="search-row">
+          <input
+            class="input"
+            type="search"
+            placeholder="Spotlight search products"
+            [(ngModel)]="productQuery"
+            (keyup.enter)="searchProducts()"
+          />
+          <button type="button" class="btn btn--ghost" [disabled]="busy" (click)="searchProducts()">Find</button>
+        </div>
+
+        <div class="chips">
+          <button
+            type="button"
+            class="chip"
+            *ngFor="let p of products"
+            [disabled]="p.stock < 1"
+            (click)="addToCart(p)"
+          >
+            <strong>{{ p.name }}</strong>
+            <span>{{ p.price | currencyFormat }} · {{ p.stock }} left</span>
+          </button>
+        </div>
+        <div class="empty" *ngIf="!products.length">No products in spotlight.</div>
+      </div>
+    </div>
+
+    <div class="pos__right panel">
+      <div class="panel__head">
+        <h3>Cart</h3>
+        <button type="button" class="link" *ngIf="cart.length" (click)="clearCart()">Clear</button>
+      </div>
+
+      <div class="empty" *ngIf="!cart.length">Tap products to add lines.</div>
+
+      <ul class="cart" *ngIf="cart.length">
+        <li *ngFor="let line of cart">
+          <div>
+            <strong>{{ line.name }}</strong>
+            <span>{{ line.unitPrice | currencyFormat }}</span>
+          </div>
+          <div class="stepper">
+            <button type="button" (click)="updateQty(line, -1)">−</button>
+            <em>{{ line.quantity }}</em>
+            <button type="button" (click)="updateQty(line, 1)">+</button>
+          </div>
+          <button type="button" class="link-danger" (click)="removeLine(line)">Remove</button>
+        </li>
+      </ul>
+
+      <label class="field">
+        Discount
+        <input class="input" type="number" [(ngModel)]="discount" min="0" />
+      </label>
+
+      <dl class="totals">
+        <div><dt>Subtotal</dt><dd>{{ cartSubtotal | currencyFormat }}</dd></div>
+        <div><dt>Tax</dt><dd>{{ cartTax | currencyFormat }}</dd></div>
+        <div class="totals__grand"><dt>Total</dt><dd>{{ cartGrandTotal | currencyFormat }}</dd></div>
+      </dl>
+
+      <button
+        type="button"
+        class="btn btn--primary btn--block"
+        [disabled]="busy || !cart.length"
+        (click)="createInvoice()"
+      >
+        {{ busy ? 'Creating…' : 'Create invoice' }}
+      </button>
+
+      <div class="invoice" *ngIf="activeInvoice as bill">
+        <div>
+          <strong>{{ bill.billNumber }}</strong>
+          <span [class]="'status status--' + bill.paymentStatus">{{ bill.paymentStatus }}</span>
+        </div>
+        <div class="invoice__actions">
+          <button type="button" class="btn btn--ghost" (click)="printInvoice()">Print</button>
+          <button
+            type="button"
+            class="btn btn--primary"
+            *ngIf="bill.paymentStatus !== 'paid'"
+            (click)="openPayModal()"
+          >
+            Take payment
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="showPayModal" (click)="closePayModal()"></div>
+  <div class="modal" *ngIf="showPayModal && activeInvoice as bill" role="dialog" aria-modal="true">
+    <div class="modal__head">
+      <h3>Collect payment</h3>
+      <button type="button" class="icon-close" (click)="closePayModal()" aria-label="Close">×</button>
+    </div>
+    <p class="modal__lede">{{ bill.billNumber }} · {{ bill.grandTotal | currencyFormat }}</p>
+
+    <div class="methods">
+      <button
+        type="button"
+        class="method"
+        *ngFor="let m of enabledMethods"
+        [class.is-active]="paymentMethod === m"
+        (click)="paymentMethod = m"
+      >
+        {{ methodLabel(m) }}
+      </button>
+    </div>
+
+    <div class="qr" *ngIf="paymentMethod === 'qr'" [attr.data-phase]="qrPhase">
+      <div class="qr__frame">
+        <span class="qr__scan"></span>
+      </div>
+      <p *ngIf="qrPhase === 'idle'">Ready to scan customer QR</p>
+      <p *ngIf="qrPhase === 'scanning'">Scanning…</p>
+      <p *ngIf="qrPhase === 'success'">Payment captured</p>
+      <p *ngIf="qrPhase === 'failed'">Scan failed — retry</p>
+    </div>
+
+    <button type="button" class="btn btn--primary btn--block" [disabled]="paying" (click)="collectPayment()">
+      {{ paying ? 'Processing…' : 'Confirm payment' }}
+    </button>
+  </div>
+</section>
