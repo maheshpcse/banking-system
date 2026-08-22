@@ -202,6 +202,23 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     return this.avatarPresetsByRole[this.avatarRoleFolder];
   }
 
+  /** Resolve a role preset id to a packaged portrait under assets/avatars. */
+  avatarPresetSrc(presetId: string | null | undefined): string | null {
+    const id = String(presetId || '').trim();
+    if (!/^(customer|manager|admin)\/preset-\d{2}$/.test(id)) {
+      return null;
+    }
+    return `assets/avatars/${id}.webp`;
+  }
+
+  /** Custom upload wins; otherwise show the selected (or saved) professional preset. */
+  displayAvatarSrc(): string | null {
+    if (this.imagePreview) {
+      return this.imagePreview;
+    }
+    return this.avatarPresetSrc(this.avatarForm.value.presetId || this.user?.avatar?.presetId);
+  }
+
   private panelTimer: ReturnType<typeof setTimeout> | null = null;
 
   profileForm = this.fb.group({
@@ -773,6 +790,10 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     if (presetId) {
       this.imagePreview = null;
       this.imageFileName = '';
+      const input = document.querySelector('.form--avatar input[type="file"]') as HTMLInputElement | null;
+      if (input) {
+        input.value = '';
+      }
     }
   }
 
