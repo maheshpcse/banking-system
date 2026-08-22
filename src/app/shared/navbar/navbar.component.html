@@ -49,6 +49,15 @@
         <span class="nav__badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
       </a>
       <a routerLink="/settings" routerLinkActive="is-active" (click)="onNavClick()">Account</a>
+      <span
+        class="nav__avatar"
+        [ngClass]="'nav__avatar--' + avatarStyle"
+        [attr.aria-label]="avatarInitials + ' profile'"
+        role="img"
+      >
+        <img *ngIf="avatarSrc as src" [src]="src" alt="" />
+        <ng-container *ngIf="!avatarSrc">{{ avatarInitials }}</ng-container>
+      </span>
       <!--
         Future enhancement: dark / light mode toggle (not working as expected yet).
         <button class="nav__mode btn btn--ghost" type="button" (click)="toggleColorMode()">
