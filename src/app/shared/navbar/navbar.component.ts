@@ -51,6 +51,27 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return '/dashboard';
   }
 
+  get avatarStyle(): string {
+    return this.auth.currentUser?.avatar?.style || 'mint';
+  }
+
+  get avatarInitials(): string {
+    return (this.auth.currentUser?.avatar?.initials || 'NB').trim().toUpperCase() || 'NB';
+  }
+
+  /** Custom upload wins; otherwise the saved professional preset portrait. */
+  get avatarSrc(): string | null {
+    const avatar = this.auth.currentUser?.avatar;
+    if (avatar?.image) {
+      return avatar.image;
+    }
+    const presetId = String(avatar?.presetId || '').trim();
+    if (!/^(customer|manager|admin)\/preset-\d{2}$/.test(presetId)) {
+      return null;
+    }
+    return `assets/avatars/${presetId}.webp`;
+  }
+
   ngOnInit(): void {
     this.sub = this.notifications.notifications$.subscribe(() => {
       this.unreadCount = this.notifications.unreadCount;
