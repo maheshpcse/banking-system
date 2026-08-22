@@ -6,8 +6,8 @@
       <p class="lede">Profile, avatar, password, and premium preferences for your vault.</p>
     </div>
     <div class="hero-avatar" [ngClass]="'hero-avatar--' + (user?.avatar?.style || 'mint')" aria-hidden="true">
-      <img *ngIf="displayAvatarSrc() as image" [src]="image" alt="" />
-      <ng-container *ngIf="!displayAvatarSrc()">{{ user?.avatar?.initials || 'NB' }}</ng-container>
+      <img *ngIf="imagePreview as image" [src]="image" alt="" />
+      <ng-container *ngIf="!imagePreview">{{ user?.avatar?.initials || 'NB' }}</ng-container>
     </div>
   </header>
 
@@ -86,26 +86,22 @@
       >
         <form class="form form--avatar" [formGroup]="avatarForm" (ngSubmit)="saveAvatar()">
           <div class="avatar-preview avatar-preview--lg" [ngClass]="'hero-avatar--' + avatarForm.value.style">
-            <img *ngIf="displayAvatarSrc() as image" [src]="image" alt="Profile preview" />
-            <ng-container *ngIf="!displayAvatarSrc()">
+            <img *ngIf="imagePreview as image" [src]="image" alt="Profile preview" />
+            <ng-container *ngIf="!imagePreview">
               {{ avatarForm.value.initials || user?.avatar?.initials || 'NB' }}
             </ng-container>
           </div>
 
-          <p class="section-label">Professional presets</p>
-          <p class="section-hint">Curated portraits for your role. Upload your own photo anytime to override.</p>
-          <div class="preset-grid" role="listbox" aria-label="Avatar presets">
-            <button
-              type="button"
-              class="preset-chip"
-              *ngFor="let preset of roleAvatarPresets"
-              [class.is-active]="selectedPresetId === preset && !imagePreview"
-              (click)="selectAvatarPreset(preset)"
-              [attr.aria-pressed]="selectedPresetId === preset && !imagePreview"
-            >
-              <img [src]="avatarPresetSrc(preset)" [alt]="preset" />
-            </button>
-          </div>
+          <label>
+            <span>Professional preset</span>
+            <select formControlName="presetId" (change)="onPresetChange()">
+              <option value="">Select preset</option>
+              <option *ngFor="let preset of roleAvatarPresetOptions" [value]="preset.id">
+                {{ preset.label }}
+              </option>
+            </select>
+            <p class="form__hint">Saved as a preset value for your role — not shown as a portrait image.</p>
+          </label>
 
           <label>
             <span>Profile image</span>
@@ -116,7 +112,7 @@
               (change)="onImageSelected($event)"
             />
           </label>
-          <button type="button" class="btn btn--ghost" *ngIf="imagePreview || selectedPresetId" (click)="clearImage($event)">
+          <button type="button" class="btn btn--ghost" *ngIf="imagePreview" (click)="clearImage($event)">
             Remove photo
           </button>
 

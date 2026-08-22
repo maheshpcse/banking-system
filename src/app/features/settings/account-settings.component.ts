@@ -113,13 +113,24 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   user: User | null = null;
   imagePreview: string | null = null;
   imageFileName = '';
-  selectedPresetId: string | null = null;
 
   readonly avatarStyles: Array<UserAvatar['style']> = ['mint', 'sky', 'sand', 'rose', 'slate'];
-  readonly avatarPresetsByRole: Record<'customer' | 'manager' | 'admin', string[]> = {
-    customer: ['customer/preset-01', 'customer/preset-02', 'customer/preset-03'],
-    manager: ['manager/preset-01', 'manager/preset-02', 'manager/preset-03'],
-    admin: ['admin/preset-01', 'admin/preset-02', 'admin/preset-03']
+  readonly avatarPresetsByRole: Record<'customer' | 'manager' | 'admin', Array<{ id: string; label: string }>> = {
+    customer: [
+      { id: 'customer/preset-01', label: 'Professional 1' },
+      { id: 'customer/preset-02', label: 'Professional 2' },
+      { id: 'customer/preset-03', label: 'Professional 3' }
+    ],
+    manager: [
+      { id: 'manager/preset-01', label: 'Professional 1' },
+      { id: 'manager/preset-02', label: 'Professional 2' },
+      { id: 'manager/preset-03', label: 'Professional 3' }
+    ],
+    admin: [
+      { id: 'admin/preset-01', label: 'Professional 1' },
+      { id: 'admin/preset-02', label: 'Professional 2' },
+      { id: 'admin/preset-03', label: 'Professional 3' }
+    ]
   };
   readonly usStates = US_STATES;
   readonly countries = COUNTRIES;
@@ -187,22 +198,8 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     return 'customer';
   }
 
-  get roleAvatarPresets(): string[] {
+  get roleAvatarPresetOptions(): Array<{ id: string; label: string }> {
     return this.avatarPresetsByRole[this.avatarRoleFolder];
-  }
-
-  avatarPresetSrc(presetId: string): string {
-    return `assets/avatars/${presetId}.webp`;
-  }
-
-  displayAvatarSrc(): string | null {
-    if (this.imagePreview) {
-      return this.imagePreview;
-    }
-    if (this.selectedPresetId) {
-      return this.avatarPresetSrc(this.selectedPresetId);
-    }
-    return null;
   }
 
   private panelTimer: ReturnType<typeof setTimeout> | null = null;
@@ -217,7 +214,8 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
 
   avatarForm = this.fb.group({
     style: ['mint' as UserAvatar['style'], Validators.required],
-    initials: ['', [Validators.maxLength(3)]]
+    initials: ['', [Validators.maxLength(3)]],
+    presetId: ['']
   });
 
   passwordForm = this.fb.group(
@@ -420,11 +418,11 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
         });
         break;
       case 'presence':
-        this.selectedPresetId = this.user?.avatar?.presetId || null;
         this.imagePreview = this.user?.avatar?.image || null;
         this.avatarForm.reset({
           style: this.user?.avatar?.style || 'mint',
-          initials: this.user?.avatar?.initials || ''
+          initials: this.user?.avatar?.initials || '',
+          presetId: this.user?.avatar?.presetId || ''
         });
         break;
       case 'security':
@@ -715,7 +713,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     }
 
     this.imageFileName = file.name;
-    this.selectedPresetId = null;
+    this.avatarForm.patchValue({ presetId: '' });
     const reader = new FileReader();
     reader.onload = () => {
       this.imagePreview = String(reader.result || '');
@@ -726,7 +724,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   clearImage(event?: Event): void {
     this.imagePreview = null;
     this.imageFileName = '';
-    this.selectedPresetId = null;
+    this.avatarForm.patchValue({ presetId: '' });
     const host = (event?.target as HTMLElement | undefined)?.closest('form');
     const input = (host?.querySelector('input[type="file"]') ||
       document.querySelector('.form--avatar input[type="file"]')) as HTMLInputElement | null;
@@ -770,10 +768,12 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     });
   }
 
-  selectAvatarPreset(presetId: string): void {
-    this.selectedPresetId = presetId;
-    this.imagePreview = null;
-    this.imageFileName = '';
+  onPresetChange(): void {
+    const presetId = String(this.avatarForm.value.presetId || '');
+    if (presetId) {
+      this.imagePreview = null;
+      this.imageFileName = '';
+    }
   }
 
   saveAvatar(): void {
@@ -783,16 +783,17 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     }
     this.savingAvatar = true;
     const raw = this.avatarForm.getRawValue();
+    const presetId = String(raw.presetId || '').trim();
     const avatar: Partial<UserAvatar> = {
       style: raw.style as UserAvatar['style'],
       initials: String(raw.initials || '').trim().toUpperCase()
     };
-    if (this.selectedPresetId) {
-      avatar.presetId = this.selectedPresetId;
+    if (presetId) {
+      avatar.presetId = presetId;
       avatar.image = null;
     } else {
-      avatar.image = this.imagePreview;
       avatar.presetId = null;
+      avatar.image = this.imagePreview;
     }
     withShimmerDelay(this.auth.updateProfile({ avatar }), SHIMMER_MS).subscribe({
       next: async (res) => {
@@ -884,7 +885,6 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       accountStatus: user.accountStatus || (user.accountNumber ? 'active' : 'address_required')
     };
     this.user = normalized;
-    this.selectedPresetId = normalized.avatar?.presetId || null;
     this.imagePreview = normalized.avatar?.image || null;
     this.profileForm.patchValue({
       fullName: normalized.fullName || '',
@@ -895,7 +895,8 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     });
     this.avatarForm.patchValue({
       style: normalized.avatar?.style || 'mint',
-      initials: normalized.avatar?.initials || ''
+      initials: normalized.avatar?.initials || '',
+      presetId: normalized.avatar?.presetId || ''
     });
     this.prefsForm.patchValue({
       emailAlerts: normalized.settings?.emailAlerts !== false,
@@ -907,11 +908,7 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       fontScale: normalized.settings?.fontScale || 'comfortable'
     });
     this.currencyForm.patchValue({ currency: normalized.settings?.currency || '' });
-    this.imageFileName = normalized.avatar?.image
-      ? 'Current profile photo'
-      : normalized.avatar?.presetId
-        ? 'Professional preset'
-        : '';
+    this.imageFileName = normalized.avatar?.image ? 'Current profile photo' : '';
     this.applyAppearance(normalized);
     this.patchBankingFromUser();
     this.patchCardControlsFromUser();
