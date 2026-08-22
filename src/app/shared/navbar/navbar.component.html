@@ -49,6 +49,13 @@
         <span class="nav__badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
       </a>
       <a routerLink="/settings" routerLinkActive="is-active" (click)="onNavClick()">Account</a>
+      <a
+        *ngIf="canLaunchBilling"
+        routerLink="/billing"
+        routerLinkActive="is-active"
+        class="nav__billing-launch"
+        (click)="onNavClick()"
+      >Launch Billing System</a>
       <span
         class="nav__avatar"
         [ngClass]="'nav__avatar--' + avatarStyle"

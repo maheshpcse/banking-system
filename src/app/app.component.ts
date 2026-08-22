@@ -39,9 +39,8 @@ export class AppComponent implements OnInit, OnDestroy {
       this.router.events.subscribe((event) => {
         if (event instanceof NavigationStart && this.auth.isAuthenticated()) {
           this.bootVariant = this.variantForUrl(event.url);
-          if (this.shellBoot.isBootstrapping) {
-            this.syncChrome(event.url);
-          }
+          // Hide banking chrome immediately when entering Billing (avoids navbar flash).
+          this.syncChrome(event.url);
         }
 
         if (event instanceof NavigationEnd) {

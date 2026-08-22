@@ -4,31 +4,18 @@
       <p class="eyebrow">NovaBank Controls</p>
       <h1>Billing monitor</h1>
       <p class="lede">
-        Track Billing System sales, invoices, and disputes from Banking. The store POS lives in the
-        separate Billing System app — Managers and Admins launch it from here.
+        Track Billing System sales, invoices, and disputes from Banking. Managers and Admins launch
+        the store POS from the navbar.
       </p>
     </div>
   </header>
 
-  <div class="billing-launch" *ngIf="canLaunchBillingApp; else superOnly">
-    <div>
-      <strong>Billing System</strong>
-      <p>Open the standalone POS workspace (products, customers, invoices, fake gateway).</p>
-    </div>
-    <a class="btn btn--primary" routerLink="/billing">Launch Billing System</a>
-  </div>
-  <ng-template #superOnly>
-    <p class="hint launch-hint">
-      Super Admin monitors Billing activity here. Product stock and gateway changes are operated by
-      Manager / Admin in the Billing System app.
-    </p>
-  </ng-template>
+  <p class="hint launch-hint" *ngIf="!canLaunchBillingApp">
+    Super Admin monitors Billing activity here. Product stock and gateway changes are operated by
+    Manager / Admin in the Billing System app.
+  </p>
 
-  <div class="billing-toolbar__actions" style="margin: 0.75rem 0 1rem">
-    <button type="button" class="btn btn--ghost" [disabled]="busy" (click)="refresh()">Refresh</button>
-  </div>
-
-  <div class="stat-grid">
+  <div class="stat-grid monitor-stats">
     <article class="stat">
       <app-nb-icon name="wallet"></app-nb-icon>
       <div>
@@ -59,7 +46,7 @@
     </article>
   </div>
 
-  <div class="report-layout">
+  <div class="report-layout monitor-panels">
     <app-animated-card accent="mint" title="Recent invoices" subtitle="Billing System feed">
       <table class="mini-table" *ngIf="recentBills.length; else noBills">
         <thead>

@@ -414,9 +414,6 @@
         <div class="shimmer-line shimmer-line--title"></div>
         <div class="shimmer-line shimmer-line--lede"></div>
       </div>
-      <div class="shimmer-chips">
-        <span *ngFor="let i of [1, 2, 3, 4]" class="shimmer-chip"></span>
-      </div>
       <div class="shimmer-data-table" aria-hidden="true">
         <div class="shimmer-data-table__head" style="grid-template-columns: repeat(6, minmax(0, 1fr))">
           <div class="shimmer-data-table__cell" *ngFor="let c of [0, 1, 2, 3, 4, 5]">
@@ -643,10 +640,13 @@
         <div class="shimmer-line shimmer-line--title"></div>
         <div class="shimmer-line shimmer-line--lede"></div>
       </div>
-      <div class="shimmer__grid--roadmap shimmer__grid">
-        <div class="shimmer-card shimmer-card--roadmap" *ngFor="let i of [1, 2, 3]"></div>
+      <div class="stat-grid" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.85rem">
+        <div class="shimmer-card" *ngFor="let i of [1, 2, 3, 4]" style="min-height: 5.5rem"></div>
       </div>
-      <div class="shimmer-line shimmer-line--lede shimmer-line--admin-hint"></div>
+      <div class="shimmer__grid" style="margin-top: 1.75rem; grid-template-columns: 1fr 1fr; gap: 1rem; display: grid">
+        <div class="shimmer-card" style="min-height: 14rem"></div>
+        <div class="shimmer-card" style="min-height: 14rem"></div>
+      </div>
     </ng-container>
 
     <ng-container *ngSwitchCase="'home'">
@@ -759,21 +759,21 @@
     </ng-container>
 
     <ng-container *ngSwitchCase="'drawer-profile'">
-      <div class="shimmer-card shimmer-card--drawer">
-        <div class="shimmer-line shimmer-line--xs"></div>
-        <div class="shimmer-line shimmer-line--md"></div>
-        <div class="shimmer-block"></div>
-        <div class="shimmer-block shimmer-block--sm"></div>
-      </div>
-      <div class="shimmer-card shimmer-card--drawer">
-        <div class="shimmer-line shimmer-line--xs"></div>
-        <div class="shimmer-line shimmer-line--md"></div>
-        <div class="shimmer-row" *ngFor="let i of [1, 2, 3]"></div>
-      </div>
-      <div class="shimmer-card shimmer-card--drawer">
-        <div class="shimmer-line shimmer-line--xs"></div>
-        <div class="shimmer-block"></div>
-        <div class="shimmer-block shimmer-block--sm"></div>
+      <div class="shimmer-drawer-profile" aria-hidden="true">
+        <div class="shimmer-drawer-profile__section">
+          <div class="shimmer-line shimmer-line--xs"></div>
+          <div class="shimmer-line shimmer-line--sm"></div>
+          <div class="shimmer-row" *ngFor="let i of [1, 2, 3, 4]"></div>
+        </div>
+        <div class="shimmer-drawer-profile__section">
+          <div class="shimmer-line shimmer-line--xs"></div>
+          <div class="shimmer-row" *ngFor="let i of [1, 2, 3]"></div>
+        </div>
+        <div class="shimmer-drawer-profile__section">
+          <div class="shimmer-line shimmer-line--xs"></div>
+          <div class="shimmer-block"></div>
+          <div class="shimmer-block shimmer-block--sm"></div>
+        </div>
       </div>
     </ng-container>
 
