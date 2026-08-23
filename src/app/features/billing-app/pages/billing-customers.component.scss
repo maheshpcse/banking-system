@@ -224,6 +224,14 @@
   gap: 0.75rem;
   min-width: 0;
   align-self: start;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.main-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
 }
 
 .list {

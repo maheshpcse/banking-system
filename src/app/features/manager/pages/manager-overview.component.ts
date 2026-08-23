@@ -104,6 +104,10 @@ export class ManagerOverviewComponent implements OnInit {
     { id: 'custom', label: 'Custom range', days: 0 }
   ];
 
+  get rangeSelectOptions(): Array<{ value: string; label: string }> {
+    return this.rangeOptions.map((r) => ({ value: r.id, label: r.label }));
+  }
+
   constructor(
     private readonly admin: AdminService,
     private readonly notifications: NotificationService,

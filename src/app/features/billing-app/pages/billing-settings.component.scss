@@ -52,13 +52,15 @@
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 0.9rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .col {
   display: grid;
   gap: 0.7rem;
   align-content: start;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .col h3 {

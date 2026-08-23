@@ -15,12 +15,12 @@
       <form class="form" (ngSubmit)="schedule()">
         <label>
           <span>Report cadence</span>
-          <select [(ngModel)]="cadence" name="cadence">
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="biweekly">Bi-weekly</option>
-            <option value="monthly">Monthly</option>
-          </select>
+          <app-theme-select
+            [(ngModel)]="cadence"
+            name="cadence"
+            [options]="cadenceOptions"
+            ariaLabel="Report cadence"
+          ></app-theme-select>
         </label>
         <p class="hint">
           Schedules are stored for the Billing report engine handoff. Delivery channels (email / desk)

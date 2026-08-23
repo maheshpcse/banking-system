@@ -10,6 +10,7 @@ import { BankCardComponent } from './bank-card/bank-card.component';
 import { NbIconComponent } from './nb-icon/nb-icon.component';
 import { AccountNumberComponent } from './account-number/account-number.component';
 import { SecureSecretComponent } from './secure-secret/secure-secret.component';
+import { ThemeSelectComponent } from './theme-select/theme-select.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { SecureSecretComponent } from './secure-secret/secure-secret.component';
     BankCardComponent,
     NbIconComponent,
     AccountNumberComponent,
-    SecureSecretComponent
+    SecureSecretComponent,
+    ThemeSelectComponent
   ],
   imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
   exports: [
@@ -35,7 +37,8 @@ import { SecureSecretComponent } from './secure-secret/secure-secret.component';
     BankCardComponent,
     NbIconComponent,
     AccountNumberComponent,
-    SecureSecretComponent
+    SecureSecretComponent,
+    ThemeSelectComponent
   ]
 })
 export class SharedModule {}

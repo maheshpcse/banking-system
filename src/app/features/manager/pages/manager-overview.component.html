@@ -91,9 +91,13 @@
         <div class="range-cluster">
           <label class="range-select">
             <span>Date range</span>
-            <select [(ngModel)]="range" (ngModelChange)="onRangeChange($event)" name="range">
-              <option *ngFor="let r of rangeOptions" [value]="r.id">{{ r.label }}</option>
-            </select>
+            <app-theme-select
+              [(ngModel)]="range"
+              [options]="rangeSelectOptions"
+              name="range"
+              ariaLabel="Date range"
+              (valueChange)="onRangeChange($event)"
+            ></app-theme-select>
           </label>
 
           <div class="custom-range custom-range--inline" *ngIf="range === 'custom'">

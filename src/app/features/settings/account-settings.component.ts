@@ -17,7 +17,7 @@ import { fieldError } from '../../core/utils/form-errors';
 
 type SettingsTab = 'identity' | 'presence' | 'banking' | 'cardinfo' | 'limits' | 'security' | 'experience';
 
-/** Loaded once for native <select> options — no custom popup UI */
+/** Loaded once for theme-select option lists */
 const US_STATES = [
   'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
   'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky',
@@ -163,6 +163,51 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   activeTab: SettingsTab = 'identity';
   savingApplication = false;
   cardFlipped = false;
+
+  /** Theme-select option lists for Card info / Identity / Experience dropdowns. */
+  get countryCodeOptions(): Array<{ value: string; label: string }> {
+    return this.countryDialCodes.map((d) => ({ value: d.code, label: d.label }));
+  }
+
+  get presetSelectOptions(): Array<{ value: string; label: string }> {
+    return this.roleAvatarPresetOptions.map((p) => ({ value: p.id, label: p.label }));
+  }
+
+  get brandOptions(): Array<{ value: string; label: string }> {
+    return this.cardBrands.map((b) => ({ value: b.id, label: b.label }));
+  }
+
+  get accountTypeOptions(): Array<{ value: string; label: string }> {
+    return this.accountTypes.map((t) => ({ value: t.id, label: t.label }));
+  }
+
+  get expiryMonthOptions(): Array<{ value: string; label: string }> {
+    return this.expiryMonths.map((m) => ({ value: m, label: m }));
+  }
+
+  get expiryYearOptions(): Array<{ value: string; label: string }> {
+    return this.expiryYears.map((y) => ({ value: y, label: y }));
+  }
+
+  get stateOptions(): Array<{ value: string; label: string }> {
+    return this.usStates.map((s) => ({ value: s, label: s }));
+  }
+
+  get countryOptions(): Array<{ value: string; label: string }> {
+    return this.countries.map((c) => ({ value: c, label: c }));
+  }
+
+  get currencyOptions(): Array<{ value: string; label: string }> {
+    return this.currencies.map((c) => ({ value: c, label: c }));
+  }
+
+  readonly fontScaleOptions: Array<{ value: string; label: string }> = [
+    { value: 'comfortable', label: 'Comfortable' },
+    { value: 'compact', label: 'Compact' },
+    { value: 'large', label: 'Large' },
+    { value: 'editorial', label: 'Editorial' },
+    { value: 'technical', label: 'Technical' }
+  ];
 
   get tabs(): Array<{ id: SettingsTab; label: string; hint: string }> {
     return this.isStaff ? this.allTabs.filter((t) => t.staff) : this.allTabs;
