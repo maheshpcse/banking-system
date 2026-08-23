@@ -75,7 +75,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private syncChrome(url: string): void {
     const path = url.split('?')[0];
-    this.isMarketingSurface = path === '/' || path.startsWith('/auth');
+    this.isMarketingSurface =
+      path === '/' || path.startsWith('/auth') || path.startsWith('/error');
     this.isBillingSurface = path.startsWith('/billing');
     this.showAmbient =
       !this.isBillingSurface && (!this.isMarketingSurface || this.shellBoot.isBootstrapping);

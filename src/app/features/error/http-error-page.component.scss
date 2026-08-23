@@ -1,0 +1,394 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.http-error {
+  --he-ink: #1d2a36;
+  --he-muted: #6b7c8f;
+  --he-accent: #5fc4b0;
+  --he-accent-2: #6aa8e8;
+  --he-accent-deep: #2f8f7f;
+  --he-panel: rgba(255, 255, 255, 0.78);
+  --he-wash-a: rgba(95, 196, 176, 0.28);
+  --he-wash-b: rgba(106, 168, 232, 0.22);
+  --he-cta: linear-gradient(135deg, #5fc4b0, #6aa8e8);
+  --he-cta-ink: #0f2a32;
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  overflow: hidden;
+  color: var(--he-ink);
+  background:
+    radial-gradient(circle at 18% 16%, var(--he-wash-a), transparent 42%),
+    radial-gradient(circle at 84% 78%, var(--he-wash-b), transparent 40%),
+    linear-gradient(160deg, #eaf6fb 0%, #f4fbf8 48%, #e7f3ef 100%);
+}
+
+.http-error[data-tone='billing'] {
+  --he-ink: #16323a;
+  --he-muted: #5b6b70;
+  --he-accent: #ff9932;
+  --he-accent-2: #ffc801;
+  --he-accent-deep: #c45c26;
+  --he-panel: rgba(255, 253, 248, 0.86);
+  --he-wash-a: rgba(255, 200, 1, 0.32);
+  --he-wash-b: rgba(255, 153, 50, 0.22);
+  --he-cta: linear-gradient(135deg, #ffc801, #ff9932);
+  --he-cta-ink: #16323a;
+  background:
+    radial-gradient(circle at 20% 14%, var(--he-wash-a), transparent 44%),
+    radial-gradient(circle at 82% 82%, var(--he-wash-b), transparent 42%),
+    linear-gradient(160deg, #fff8e8 0%, #f4faf7 52%, #eef6f1 100%);
+}
+
+.http-error__canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.http-error__orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(2px);
+  opacity: 0.7;
+  animation: he-float 8s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) infinite;
+}
+
+.http-error__orb--a {
+  width: min(28vw, 14rem);
+  height: min(28vw, 14rem);
+  top: 8%;
+  left: 6%;
+  background: radial-gradient(circle, var(--he-wash-a), transparent 70%);
+}
+
+.http-error__orb--b {
+  width: min(34vw, 16rem);
+  height: min(34vw, 16rem);
+  right: 4%;
+  bottom: 10%;
+  background: radial-gradient(circle, var(--he-wash-b), transparent 72%);
+  animation-delay: -2.4s;
+  animation-duration: 10s;
+}
+
+.http-error__orb--c {
+  width: min(18vw, 9rem);
+  height: min(18vw, 9rem);
+  top: 42%;
+  left: 48%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.55), transparent 70%);
+  animation-delay: -4.2s;
+  animation-duration: 7.5s;
+}
+
+.http-error__grid {
+  position: absolute;
+  inset: 12% 8% 18%;
+  opacity: 0.28;
+  background-image:
+    linear-gradient(rgba(29, 42, 54, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 42, 54, 0.05) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(ellipse at center, #000 28%, transparent 78%);
+  animation: he-grid-drift 18s linear infinite;
+}
+
+.http-error__sheen {
+  position: absolute;
+  inset: -40% -20%;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.35) 48%,
+    transparent 62%
+  );
+  animation: he-sheen 7.5s ease-in-out infinite;
+}
+
+.http-error__frame {
+  position: relative;
+  z-index: 1;
+  width: min(36rem, 100%);
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 0.55rem;
+  padding: clamp(0.5rem, 2vw, 1rem);
+  animation: he-rise 0.7s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+.http-error__brand {
+  margin: 0;
+  font-family: var(--font-display, 'Sora', sans-serif);
+  font-weight: 750;
+  font-size: clamp(1.55rem, 3.6vw, 2.05rem);
+  letter-spacing: -0.03em;
+  color: var(--he-ink);
+  animation: he-rise 0.75s 0.05s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+.http-error__code {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.12em;
+  margin: 0.35rem 0 0.15rem;
+  min-height: 4.6rem;
+}
+
+.http-error__digit {
+  font-family: var(--font-display, 'Sora', sans-serif);
+  font-weight: 780;
+  font-size: clamp(3.4rem, 11vw, 5.4rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  background: linear-gradient(160deg, var(--he-accent), var(--he-accent-2) 55%, var(--he-accent-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: he-digit 0.85s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+.http-error__ring {
+  position: absolute;
+  inset: -18% -12%;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--he-panel), var(--he-panel)) padding-box,
+    linear-gradient(120deg, var(--he-accent), transparent 45%, var(--he-accent-2)) border-box;
+  opacity: 0.55;
+  pointer-events: none;
+  animation: he-spin 10s linear infinite;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 2px;
+}
+
+.http-error__art {
+  width: min(9.5rem, 42vw);
+  margin: 0.15rem 0 0.35rem;
+  animation: he-rise 0.8s 0.12s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+.http-error__art svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.http-error__desk {
+  fill: rgba(95, 196, 176, 0.22);
+}
+
+.http-error[data-tone='billing'] .http-error__desk {
+  fill: rgba(255, 153, 50, 0.22);
+}
+
+.http-error__folder {
+  fill: rgba(255, 255, 255, 0.9);
+  stroke: var(--he-accent);
+  stroke-width: 2;
+}
+
+.http-error__lens {
+  fill: rgba(95, 196, 176, 0.14);
+  stroke: var(--he-accent);
+  stroke-width: 2.25;
+}
+
+.http-error[data-tone='billing'] .http-error__lens {
+  fill: rgba(255, 200, 1, 0.22);
+}
+
+.http-error__slash {
+  stroke: var(--he-accent-deep);
+}
+
+.http-error__title {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-display, 'Sora', sans-serif);
+  font-size: clamp(1.35rem, 3.2vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--he-ink);
+  animation: he-rise 0.75s 0.16s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+.http-error__message {
+  margin: 0;
+  max-width: 28rem;
+  font-size: 1.02rem;
+  line-height: 1.45;
+  color: var(--he-ink);
+  animation: he-rise 0.75s 0.2s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+.http-error__hint {
+  margin: 0;
+  max-width: 26rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--he-muted);
+  animation: he-rise 0.75s 0.24s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+.http-error__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
+  margin-top: 0.65rem;
+  animation: he-rise 0.75s 0.28s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+.http-error__cta {
+  border: 0;
+  cursor: pointer;
+  border-radius: 0.9rem;
+  padding: 0.7rem 1.15rem;
+  font-weight: 700;
+  font-size: 0.92rem;
+  font-family: inherit;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.http-error__cta--primary {
+  background: var(--he-cta);
+  color: var(--he-cta-ink);
+  box-shadow: 0 12px 24px rgba(95, 196, 176, 0.28);
+}
+
+.http-error[data-tone='billing'] .http-error__cta--primary {
+  box-shadow: 0 12px 24px rgba(255, 153, 50, 0.28);
+}
+
+.http-error__cta--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 28px rgba(95, 196, 176, 0.36);
+}
+
+.http-error[data-tone='billing'] .http-error__cta--primary:hover {
+  box-shadow: 0 16px 28px rgba(255, 153, 50, 0.36);
+}
+
+.http-error__cta--ghost {
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--he-ink);
+  border: 1px solid rgba(95, 196, 176, 0.28);
+}
+
+.http-error[data-tone='billing'] .http-error__cta--ghost {
+  border-color: rgba(255, 153, 50, 0.3);
+}
+
+.http-error__cta--ghost:hover {
+  background: rgba(95, 196, 176, 0.12);
+}
+
+.http-error[data-tone='billing'] .http-error__cta--ghost:hover {
+  background: rgba(255, 200, 1, 0.18);
+}
+
+.http-error__meta {
+  margin: 0.85rem 0 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--he-muted);
+  animation: he-rise 0.75s 0.32s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+@keyframes he-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes he-digit {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes he-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0);
+  }
+}
+
+@keyframes he-sheen {
+  0%,
+  100% {
+    transform: translateX(-12%) rotate(8deg);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translateX(10%) rotate(8deg);
+    opacity: 0.45;
+  }
+}
+
+@keyframes he-grid-drift {
+  from {
+    background-position: 0 0, 0 0;
+  }
+  to {
+    background-position: 42px 42px, 42px 42px;
+  }
+}
+
+@keyframes he-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .http-error__orb,
+  .http-error__sheen,
+  .http-error__grid,
+  .http-error__ring,
+  .http-error__digit,
+  .http-error__frame,
+  .http-error__brand,
+  .http-error__art,
+  .http-error__title,
+  .http-error__message,
+  .http-error__hint,
+  .http-error__actions,
+  .http-error__meta {
+    animation: none !important;
+  }
+
+  .http-error__cta--primary:hover {
+    transform: none;
+  }
+}
