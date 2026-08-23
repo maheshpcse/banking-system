@@ -98,16 +98,34 @@
 
 .search-row {
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.55rem;
 }
 
 .search {
   position: relative;
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .search .input {
+  height: 2.5rem;
   padding-right: 2rem;
+}
+
+.search-row .btn {
+  flex: 0 0 auto;
+  align-self: center;
+  height: 2.5rem;
+  min-height: 2.5rem;
+  max-height: 2.5rem;
+  padding: 0 1rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .search__clear {

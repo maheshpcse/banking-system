@@ -18,6 +18,7 @@ type ViewMode = 'list' | 'grid' | 'table';
 })
 export class BillingProductsComponent implements OnInit, OnDestroy {
   listLoading = true;
+  filterLoading = false;
   busy = false;
   query = '';
   products: BillingProduct[] = [];
@@ -55,7 +56,7 @@ export class BillingProductsComponent implements OnInit, OnDestroy {
       .pipe(debounceTime(250), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => {
         this.page = 1;
-        this.load();
+        this.reloadForFilters();
       });
     this.load();
   }
@@ -128,23 +129,32 @@ export class BillingProductsComponent implements OnInit, OnDestroy {
 
   search(): void {
     this.page = 1;
-    this.load();
+    this.reloadForFilters();
   }
 
   onFilterChange(): void {
     this.page = 1;
-    this.listLoading = true;
-    setTimeout(() => {
-      this.listLoading = false;
-    }, 220);
+    this.refreshFilteredView();
   }
 
   setView(mode: ViewMode): void {
+    if (this.view === mode) {
+      return;
+    }
     this.view = mode;
+    this.refreshFilteredView();
   }
 
   goPage(delta: number): void {
     this.page = Math.min(this.totalPages, Math.max(1, this.page + delta));
+  }
+
+  /** Client-side sort/stock/view flash — data already in memory. */
+  private refreshFilteredView(): void {
+    this.filterLoading = true;
+    setTimeout(() => {
+      this.filterLoading = false;
+    }, 220);
   }
 
   load(): void {
@@ -160,6 +170,39 @@ export class BillingProductsComponent implements OnInit, OnDestroy {
       error: async () => {
         this.listLoading = false;
         await this.alerts.error('Unable to load products.');
+      }
+    });
+  }
+
+  /** Search / query changes — refresh data panel only. */
+  private reloadForFilters(): void {
+    this.filterLoading = true;
+    withShimmerDelay(this.billing.listProducts(this.query.trim()), SHIMMER_MS).subscribe({
+      next: (res) => {
+        this.products = res.items || [];
+        if (this.page > this.totalPages) {
+          this.page = this.totalPages;
+        }
+        this.filterLoading = false;
+      },
+      error: async () => {
+        this.filterLoading = false;
+        await this.alerts.error('Unable to load products.');
+      }
+    });
+  }
+
+  /** Soft list refresh after mutate — no full-page shimmer. */
+  private softReload(): void {
+    this.billing.listProducts(this.query.trim()).subscribe({
+      next: (res) => {
+        this.products = res.items || [];
+        if (this.page > this.totalPages) {
+          this.page = this.totalPages;
+        }
+      },
+      error: async () => {
+        await this.alerts.error('Unable to refresh products.');
       }
     });
   }
@@ -207,7 +250,6 @@ export class BillingProductsComponent implements OnInit, OnDestroy {
     const label = editingId ? 'Update' : 'Create';
 
     this.busy = true;
-    this.listLoading = true;
     const outcome = await this.alerts.confirmAction({
       text: editingId
         ? `Save changes to “${payload.name}”?`
@@ -215,38 +257,32 @@ export class BillingProductsComponent implements OnInit, OnDestroy {
       confirmText: label,
       loadingText: 'Saving product…',
       action: () =>
-        withShimmerDelay(
-          editingId
-            ? this.billing.updateProduct(editingId, payload)
-            : this.billing.createProduct(payload),
-          SHIMMER_MS
-        ),
+        editingId
+          ? this.billing.updateProduct(editingId, payload)
+          : this.billing.createProduct(payload),
       successMessage: (res) => res.message || 'Product saved',
       errorMessage: (err) =>
         (err as { error?: { message?: string } })?.error?.message || 'Could not save product.'
     });
     this.busy = false;
-    this.listLoading = false;
     if (outcome.ok) {
       this.cancelEdit();
-      this.load();
+      this.softReload();
     }
   }
 
   async archive(product: BillingProduct): Promise<void> {
     this.busy = true;
-    this.listLoading = true;
     const outcome = await this.alerts.confirmAction({
       text: `Archive “${product.name}”? It will leave the active catalog.`,
       confirmText: 'Archive',
       loadingText: 'Archiving…',
-      action: () => withShimmerDelay(this.billing.archiveProduct(product.id), SHIMMER_MS),
+      action: () => this.billing.archiveProduct(product.id),
       successMessage: (res) => res.message || 'Archived',
       errorMessage: (err) =>
         (err as { error?: { message?: string } })?.error?.message || 'Archive failed.'
     });
     this.busy = false;
-    this.listLoading = false;
     if (outcome.ok) {
       if (this.detail?.id === product.id) {
         this.closeDetail();
@@ -254,7 +290,7 @@ export class BillingProductsComponent implements OnInit, OnDestroy {
       if (this.editingId === product.id) {
         this.cancelEdit();
       }
-      this.load();
+      this.softReload();
     }
   }
 

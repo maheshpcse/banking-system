@@ -54,8 +54,20 @@
       </div>
     </div>
 
-    <div class="layout" [class.is-expanded]="!showForm" [class.is-animating]="panelAnimating">
-      <form class="glass form" *ngIf="showForm" [formGroup]="form" (ngSubmit)="save()">
+    <app-billing-panel-shimmer *ngIf="filterLoading" variant="catalog-data"></app-billing-panel-shimmer>
+
+    <div
+      class="layout"
+      *ngIf="!filterLoading"
+      [class.is-expanded]="!showForm"
+      [class.is-animating]="panelAnimating"
+    >
+      <form
+        class="glass form"
+        [class.is-hidden]="!showForm"
+        [formGroup]="form"
+        (ngSubmit)="save()"
+      >
         <h3>{{ editingId ? 'Edit customer' : 'Add customer' }}</h3>
         <label>
           Name

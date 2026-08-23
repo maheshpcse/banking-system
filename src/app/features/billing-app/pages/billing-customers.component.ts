@@ -18,6 +18,7 @@ type ViewMode = 'list' | 'grid' | 'table';
 })
 export class BillingCustomersComponent implements OnInit, OnDestroy {
   listLoading = true;
+  filterLoading = false;
   busy = false;
   query = '';
   customers: BillingCustomer[] = [];
@@ -55,7 +56,7 @@ export class BillingCustomersComponent implements OnInit, OnDestroy {
       .pipe(debounceTime(250), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => {
         this.page = 1;
-        this.load();
+        this.reloadForFilters();
       });
     this.load();
   }
@@ -120,23 +121,31 @@ export class BillingCustomersComponent implements OnInit, OnDestroy {
 
   search(): void {
     this.page = 1;
-    this.load();
+    this.reloadForFilters();
   }
 
   onFilterChange(): void {
     this.page = 1;
-    this.listLoading = true;
-    setTimeout(() => {
-      this.listLoading = false;
-    }, 220);
+    this.refreshFilteredView();
   }
 
   setView(mode: ViewMode): void {
+    if (this.view === mode) {
+      return;
+    }
     this.view = mode;
+    this.refreshFilteredView();
   }
 
   goPage(delta: number): void {
     this.page = Math.min(this.totalPages, Math.max(1, this.page + delta));
+  }
+
+  private refreshFilteredView(): void {
+    this.filterLoading = true;
+    setTimeout(() => {
+      this.filterLoading = false;
+    }, 220);
   }
 
   load(): void {
@@ -152,6 +161,37 @@ export class BillingCustomersComponent implements OnInit, OnDestroy {
       error: async () => {
         this.listLoading = false;
         await this.alerts.error('Unable to load customers.');
+      }
+    });
+  }
+
+  private reloadForFilters(): void {
+    this.filterLoading = true;
+    withShimmerDelay(this.billing.listCustomers(this.query.trim()), SHIMMER_MS).subscribe({
+      next: (res) => {
+        this.customers = res.items || [];
+        if (this.page > this.totalPages) {
+          this.page = this.totalPages;
+        }
+        this.filterLoading = false;
+      },
+      error: async () => {
+        this.filterLoading = false;
+        await this.alerts.error('Unable to load customers.');
+      }
+    });
+  }
+
+  private softReload(): void {
+    this.billing.listCustomers(this.query.trim()).subscribe({
+      next: (res) => {
+        this.customers = res.items || [];
+        if (this.page > this.totalPages) {
+          this.page = this.totalPages;
+        }
+      },
+      error: async () => {
+        await this.alerts.error('Unable to refresh customers.');
       }
     });
   }
@@ -208,7 +248,6 @@ export class BillingCustomersComponent implements OnInit, OnDestroy {
     const label = editingId ? 'Update' : 'Create';
 
     this.busy = true;
-    this.listLoading = true;
     const outcome = await this.alerts.confirmAction({
       text: editingId
         ? `Save changes to “${payload.name}”?`
@@ -216,38 +255,32 @@ export class BillingCustomersComponent implements OnInit, OnDestroy {
       confirmText: label,
       loadingText: 'Saving customer…',
       action: () =>
-        withShimmerDelay(
-          editingId
-            ? this.billing.updateCustomer(editingId, payload)
-            : this.billing.createCustomer(payload),
-          SHIMMER_MS
-        ),
+        editingId
+          ? this.billing.updateCustomer(editingId, payload)
+          : this.billing.createCustomer(payload),
       successMessage: (res) => res.message || 'Customer saved',
       errorMessage: (err) =>
         (err as { error?: { message?: string } })?.error?.message || 'Could not save customer.'
     });
     this.busy = false;
-    this.listLoading = false;
     if (outcome.ok) {
       this.cancelEdit();
-      this.load();
+      this.softReload();
     }
   }
 
   async remove(customer: BillingCustomer): Promise<void> {
     this.busy = true;
-    this.listLoading = true;
     const outcome = await this.alerts.confirmAction({
       text: `Remove “${customer.name}” from the billing directory?`,
       confirmText: 'Remove',
       loadingText: 'Removing…',
-      action: () => withShimmerDelay(this.billing.deleteCustomer(customer.id), SHIMMER_MS),
+      action: () => this.billing.deleteCustomer(customer.id),
       successMessage: (res) => res.message || 'Removed',
       errorMessage: (err) =>
         (err as { error?: { message?: string } })?.error?.message || 'Remove failed.'
     });
     this.busy = false;
-    this.listLoading = false;
     if (outcome.ok) {
       if (this.detail?.id === customer.id) {
         this.closeDetail();
@@ -255,7 +288,7 @@ export class BillingCustomersComponent implements OnInit, OnDestroy {
       if (this.editingId === customer.id) {
         this.cancelEdit();
       }
-      this.load();
+      this.softReload();
     }
   }
 }
