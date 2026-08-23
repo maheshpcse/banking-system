@@ -1,173 +1,171 @@
 <section class="bs-page fade-up">
-  <header class="bs-page__head">
-    <div>
-      <p class="eyebrow">Catalog</p>
-      <h2>Products</h2>
-      <p class="lede">Search stock, tune pricing, and archive quiet SKUs across the full workspace.</p>
-    </div>
-    <button type="button" class="btn btn--ghost" (click)="showForm = !showForm">
-      {{ showForm ? 'Hide form' : 'Add product' }}
-    </button>
-  </header>
-
-  <div class="toolbar">
-    <div class="search">
-      <input
-        type="search"
-        class="input"
-        placeholder="Search name or SKU"
-        [ngModel]="query"
-        (ngModelChange)="onQueryChange($event)"
-        (keyup.enter)="search()"
-      />
-      <button
-        type="button"
-        class="search__clear"
-        *ngIf="query"
-        (click)="clearQuery()"
-        aria-label="Clear search"
-      >
-        ×
-      </button>
-    </div>
-    <button type="button" class="btn btn--ghost" (click)="search()">Search</button>
-
-    <select class="input input--select" [(ngModel)]="sort" (ngModelChange)="onFilterChange()">
-      <option value="name-asc">Name A–Z</option>
-      <option value="name-desc">Name Z–A</option>
-      <option value="price-asc">Price low–high</option>
-      <option value="price-desc">Price high–low</option>
-      <option value="stock-asc">Stock low–high</option>
-    </select>
-
-    <select class="input input--select" [(ngModel)]="stockFilter" (ngModelChange)="onFilterChange()">
-      <option value="all">All stock</option>
-      <option value="in">In stock</option>
-      <option value="low">Low (≤5)</option>
-      <option value="out">Out of stock</option>
-    </select>
-
-    <div class="seg" role="group" aria-label="View mode">
-      <button type="button" [class.is-active]="view === 'list'" (click)="setView('list')">List</button>
-      <button type="button" [class.is-active]="view === 'grid'" (click)="setView('grid')">Grid</button>
-      <button type="button" [class.is-active]="view === 'table'" (click)="setView('table')">Table</button>
-    </div>
-  </div>
-
   <app-billing-panel-shimmer *ngIf="listLoading" variant="catalog"></app-billing-panel-shimmer>
 
-  <div class="layout" *ngIf="!listLoading">
-    <form class="glass form" *ngIf="showForm" [formGroup]="form" (ngSubmit)="save()">
-      <h3>{{ editingId ? 'Edit product' : 'Add product' }}</h3>
-      <label>
-        Name
-        <input class="input" formControlName="name" />
-      </label>
-      <label>
-        SKU
-        <input class="input" formControlName="sku" />
-      </label>
-      <div class="grid2">
-        <label>
-          Price
-          <input class="input" type="number" formControlName="price" />
-        </label>
-        <label>
-          Stock
-          <input class="input" type="number" formControlName="stock" />
-        </label>
+  <ng-container *ngIf="!listLoading">
+    <header class="bs-page__head">
+      <div>
+        <p class="eyebrow">Catalog</p>
+        <h2>Products</h2>
+        <p class="lede">Search stock, tune pricing, and archive quiet SKUs across the full workspace.</p>
       </div>
-      <label>
-        GST %
-        <input class="input" type="number" formControlName="gstPercentage" />
-      </label>
-      <div class="form__actions">
-        <button type="button" class="btn btn--ghost" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
-        <button type="submit" class="btn btn--primary" [disabled]="busy">
-          {{ busy ? 'Saving…' : editingId ? 'Update' : 'Create' }}
+      <button type="button" class="btn btn--ghost" (click)="toggleForm()">
+        {{ showForm ? 'Hide form' : 'Add product' }}
+      </button>
+    </header>
+
+    <div class="toolbar">
+      <div class="search">
+        <input
+          type="search"
+          class="input"
+          placeholder="Search name or SKU"
+          [ngModel]="query"
+          (ngModelChange)="onQueryChange($event)"
+          (keyup.enter)="search()"
+        />
+        <button
+          type="button"
+          class="search__clear"
+          *ngIf="query"
+          (click)="clearQuery()"
+          aria-label="Clear search"
+        >
+          ×
         </button>
       </div>
-    </form>
+      <button type="button" class="btn btn--ghost" (click)="search()">Search</button>
 
-    <div class="main-panel glass">
-      <div class="empty" *ngIf="!filtered.length">No products match this search or filter.</div>
+      <select class="input input--select" [(ngModel)]="sort" (ngModelChange)="onFilterChange()">
+        <option value="name-asc">Name A–Z</option>
+        <option value="name-desc">Name Z–A</option>
+        <option value="price-asc">Price low–high</option>
+        <option value="price-desc">Price high–low</option>
+        <option value="stock-asc">Stock low–high</option>
+      </select>
 
-      <!-- List view -->
-      <ul class="list" *ngIf="filtered.length && view === 'list'">
-        <li *ngFor="let p of paged">
-          <button type="button" class="row" (click)="openDetail(p)">
-            <span [class]="stockTone(p.stock)" aria-hidden="true"></span>
-            <div class="row__body">
-              <strong>{{ p.name }}</strong>
-              <span>{{ p.sku || 'No SKU' }} · {{ stockLabel(p.stock) }} · {{ p.stock }}</span>
+      <select class="input input--select" [(ngModel)]="stockFilter" (ngModelChange)="onFilterChange()">
+        <option value="all">All stock</option>
+        <option value="in">In stock</option>
+        <option value="low">Low (≤5)</option>
+        <option value="out">Out of stock</option>
+      </select>
+
+      <div class="seg" role="group" aria-label="View mode">
+        <button type="button" [class.is-active]="view === 'list'" (click)="setView('list')">List</button>
+        <button type="button" [class.is-active]="view === 'grid'" (click)="setView('grid')">Grid</button>
+        <button type="button" [class.is-active]="view === 'table'" (click)="setView('table')">Table</button>
+      </div>
+    </div>
+
+    <div class="layout" [class.is-expanded]="!showForm" [class.is-animating]="panelAnimating">
+      <form class="glass form" *ngIf="showForm" [formGroup]="form" (ngSubmit)="save()">
+        <h3>{{ editingId ? 'Edit product' : 'Add product' }}</h3>
+        <label>
+          Name
+          <input class="input" formControlName="name" />
+        </label>
+        <label>
+          SKU
+          <input class="input" formControlName="sku" />
+        </label>
+        <div class="grid2">
+          <label>
+            Price
+            <input class="input" type="number" formControlName="price" />
+          </label>
+          <label>
+            Stock
+            <input class="input" type="number" formControlName="stock" />
+          </label>
+        </div>
+        <label>
+          GST %
+          <input class="input" type="number" formControlName="gstPercentage" />
+        </label>
+        <div class="form__actions">
+          <button type="button" class="btn btn--ghost" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
+          <button type="submit" class="btn btn--primary" [disabled]="busy">
+            {{ busy ? 'Saving…' : editingId ? 'Update' : 'Create' }}
+          </button>
+        </div>
+      </form>
+
+      <div class="main-panel glass">
+        <div class="empty" *ngIf="!filtered.length">No products match this search or filter.</div>
+
+        <ul class="list" *ngIf="filtered.length && view === 'list'">
+          <li *ngFor="let p of paged">
+            <button type="button" class="row" (click)="openDetail(p)">
+              <span [class]="stockTone(p.stock)" aria-hidden="true"></span>
+              <div class="row__body">
+                <strong>{{ p.name }}</strong>
+                <span>{{ p.sku || 'No SKU' }} · {{ stockLabel(p.stock) }} · {{ p.stock }}</span>
+              </div>
+              <em>{{ p.price | currencyFormat }}</em>
+            </button>
+            <div class="row__actions">
+              <button type="button" class="link" (click)="edit(p)">Edit</button>
+              <button type="button" class="link-danger" [disabled]="busy" (click)="archive(p)">Archive</button>
             </div>
+          </li>
+        </ul>
+
+        <div class="grid-view" *ngIf="filtered.length && view === 'grid'">
+          <button type="button" class="card-tile" *ngFor="let p of paged" (click)="openDetail(p)">
+            <span [class]="stockTone(p.stock)" aria-hidden="true"></span>
+            <strong>{{ p.name }}</strong>
+            <span>{{ p.sku || 'No SKU' }}</span>
             <em>{{ p.price | currencyFormat }}</em>
+            <small>{{ stockLabel(p.stock) }} · {{ p.stock }}</small>
           </button>
-          <div class="row__actions">
-            <button type="button" class="link" (click)="edit(p)">Edit</button>
-            <button type="button" class="link-danger" [disabled]="busy" (click)="archive(p)">Archive</button>
+        </div>
+
+        <div class="table-wrap" *ngIf="filtered.length && view === 'table'">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>GST</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of paged">
+                <td>
+                  <button type="button" class="name-btn" (click)="openDetail(p)">
+                    <span [class]="stockTone(p.stock)" aria-hidden="true"></span>
+                    {{ p.name }}
+                  </button>
+                </td>
+                <td>{{ p.sku || '—' }}</td>
+                <td>{{ p.price | currencyFormat }}</td>
+                <td>{{ p.stock }} <small>({{ stockLabel(p.stock) }})</small></td>
+                <td>{{ p.gstPercentage }}%</td>
+                <td class="table__actions">
+                  <button type="button" class="link" (click)="edit(p)">Edit</button>
+                  <button type="button" class="link-danger" [disabled]="busy" (click)="archive(p)">Archive</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pager" *ngIf="filtered.length">
+          <span>{{ filtered.length }} products · page {{ page }} / {{ totalPages }}</span>
+          <div class="pager__btns">
+            <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="goPage(-1)">Prev</button>
+            <button type="button" class="btn btn--ghost" [disabled]="page >= totalPages" (click)="goPage(1)">
+              Next
+            </button>
           </div>
-        </li>
-      </ul>
-
-      <!-- Grid view -->
-      <div class="grid-view" *ngIf="filtered.length && view === 'grid'">
-        <button type="button" class="card-tile" *ngFor="let p of paged" (click)="openDetail(p)">
-          <span [class]="stockTone(p.stock)" aria-hidden="true"></span>
-          <strong>{{ p.name }}</strong>
-          <span>{{ p.sku || 'No SKU' }}</span>
-          <em>{{ p.price | currencyFormat }}</em>
-          <small>{{ stockLabel(p.stock) }} · {{ p.stock }}</small>
-        </button>
-      </div>
-
-      <!-- Table view -->
-      <div class="table-wrap" *ngIf="filtered.length && view === 'table'">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>SKU</th>
-              <th>Price</th>
-              <th>Stock</th>
-              <th>GST</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let p of paged">
-              <td>
-                <button type="button" class="name-btn" (click)="openDetail(p)">
-                  <span [class]="stockTone(p.stock)" aria-hidden="true"></span>
-                  {{ p.name }}
-                </button>
-              </td>
-              <td>{{ p.sku || '—' }}</td>
-              <td>{{ p.price | currencyFormat }}</td>
-              <td>{{ p.stock }} <small>({{ stockLabel(p.stock) }})</small></td>
-              <td>{{ p.gstPercentage }}%</td>
-              <td class="table__actions">
-                <button type="button" class="link" (click)="edit(p)">Edit</button>
-                <button type="button" class="link-danger" [disabled]="busy" (click)="archive(p)">Archive</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="pager" *ngIf="filtered.length">
-        <span>{{ filtered.length }} products · page {{ page }} / {{ totalPages }}</span>
-        <div class="pager__btns">
-          <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="goPage(-1)">Prev</button>
-          <button type="button" class="btn btn--ghost" [disabled]="page >= totalPages" (click)="goPage(1)">
-            Next
-          </button>
         </div>
       </div>
     </div>
-  </div>
+  </ng-container>
 
-  <!-- Detail slide-over -->
   <div class="drawer-backdrop" *ngIf="detail" (click)="closeDetail()"></div>
   <aside class="drawer drawer--xl" *ngIf="detail as p" role="dialog" aria-modal="true">
     <div class="drawer__head">

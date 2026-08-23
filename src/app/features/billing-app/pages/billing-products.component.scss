@@ -90,8 +90,19 @@
   display: grid;
   grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.55fr);
   gap: 0.9rem;
-  align-items: start;
+  align-items: stretch;
   width: 100%;
+  min-height: min(58vh, 620px);
+  transition: grid-template-columns 0.35s ease;
+}
+
+.layout.is-expanded {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.layout.is-animating .main-panel,
+.layout.is-animating .form {
+  animation: panel-fade 0.32s ease both;
 }
 
 .input {
@@ -187,8 +198,9 @@
 .form {
   display: grid;
   gap: 0.7rem;
-  position: sticky;
-  top: 0.75rem;
+  align-content: start;
+  height: 100%;
+  min-height: 100%;
 
   h3 {
     margin: 0 0 0.15rem;
@@ -220,6 +232,9 @@
   display: grid;
   gap: 0.75rem;
   min-width: 0;
+  height: 100%;
+  min-height: 100%;
+  align-content: start;
 }
 
 .list {
@@ -522,6 +537,15 @@
   }
 }
 
+@keyframes panel-fade {
+  from {
+    opacity: 0.2;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes slide-in {
   from {
     transform: translateX(24px);
@@ -534,11 +558,15 @@
 }
 
 @media (max-width: 960px) {
-  .layout {
+  .layout,
+  .layout.is-expanded {
     grid-template-columns: 1fr;
+    min-height: 0;
   }
 
-  .form {
-    position: static;
+  .form,
+  .main-panel {
+    height: auto;
+    min-height: 0;
   }
 }

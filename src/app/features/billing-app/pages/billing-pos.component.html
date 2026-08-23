@@ -1,23 +1,27 @@
 <section class="bs-page fade-up">
-  <header class="bs-page__head">
-    <div>
-      <p class="eyebrow">Checkout</p>
-      <h2>Point of sale</h2>
-      <p class="lede">Picker + cart locked to the viewport — cart scrolls inside, page stays put.</p>
-    </div>
-  </header>
-
   <app-billing-panel-shimmer *ngIf="pageLoading || busy" variant="pos"></app-billing-panel-shimmer>
 
-  <div class="pos" *ngIf="!pageLoading && !busy">
-    <div class="pos__left glass">
-      <label class="field">
-        Customer
-        <select class="input" [(ngModel)]="selectedCustomerId">
-          <option value="">Select customer…</option>
-          <option *ngFor="let c of customers" [value]="c.id">{{ c.name }}</option>
-        </select>
-      </label>
+  <ng-container *ngIf="!pageLoading && !busy">
+    <header class="bs-page__head">
+      <div>
+        <p class="eyebrow">Checkout</p>
+        <h2>Point of sale</h2>
+        <p class="lede">Picker + cart locked to the viewport — cart scrolls inside, page stays put.</p>
+      </div>
+    </header>
+
+    <div class="pos">
+      <div class="pos__left glass">
+        <div class="panel__head">
+          <h3>Customer</h3>
+        </div>
+        <label class="field field--bare">
+          <span class="sr-only">Select customer</span>
+          <select class="input" [(ngModel)]="selectedCustomerId">
+            <option value="">Select customer…</option>
+            <option *ngFor="let c of customers" [value]="c.id">{{ c.name }}</option>
+          </select>
+        </label>
 
       <div class="search-row">
         <div class="search">
@@ -156,4 +160,5 @@
       {{ paying ? 'Processing…' : 'Confirm payment' }}
     </button>
   </div>
+  </ng-container>
 </section>

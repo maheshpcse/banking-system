@@ -15,6 +15,10 @@ const THREE_JS_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three
 })
 export class BillingShellComponent implements OnInit, OnDestroy {
   private bootstrapLink: HTMLLinkElement | null = null;
+  private fadeTimer: ReturnType<typeof setTimeout> | null = null;
+
+  railCollapsed = false;
+  contentFading = false;
 
   readonly dockItems: Array<{ path: string; label: string; icon: string }> = [
     { path: '/billing', label: 'Dashboard', icon: 'dashboard' },
@@ -36,16 +40,40 @@ export class BillingShellComponent implements OnInit, OnDestroy {
     this.ensureThreeJs();
     document.documentElement.dataset['nbBilling'] = '1';
     document.body.classList.add('billing-mode');
+    try {
+      this.railCollapsed = localStorage.getItem('nb-billing-rail-collapsed') === '1';
+    } catch {
+      this.railCollapsed = false;
+    }
     this.shellBoot.complete();
   }
 
   ngOnDestroy(): void {
+    if (this.fadeTimer) {
+      clearTimeout(this.fadeTimer);
+    }
     if (this.bootstrapLink?.parentNode) {
       this.bootstrapLink.parentNode.removeChild(this.bootstrapLink);
     }
     this.bootstrapLink = null;
     delete document.documentElement.dataset['nbBilling'];
     document.body.classList.remove('billing-mode');
+  }
+
+  toggleRail(): void {
+    this.contentFading = true;
+    this.railCollapsed = !this.railCollapsed;
+    try {
+      localStorage.setItem('nb-billing-rail-collapsed', this.railCollapsed ? '1' : '0');
+    } catch {
+      /* ignore */
+    }
+    if (this.fadeTimer) {
+      clearTimeout(this.fadeTimer);
+    }
+    this.fadeTimer = setTimeout(() => {
+      this.contentFading = false;
+    }, 280);
   }
 
   get bankingReturnUrl(): string {
