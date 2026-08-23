@@ -3,6 +3,7 @@
   [class.is-open]="open"
   [class.is-disabled]="disabled"
   [class.has-value]="hasValue"
+  [class.has-clear]="clearable && hasValue"
 >
   <button
     type="button"
@@ -16,6 +17,17 @@
   >
     <span class="theme-select__value" [class.is-placeholder]="!hasValue">{{ selectedLabel }}</span>
     <span class="theme-select__chevron" aria-hidden="true"></span>
+  </button>
+
+  <button
+    type="button"
+    class="theme-select__clear"
+    *ngIf="clearable && hasValue"
+    (click)="clear($event)"
+    aria-label="Clear selection"
+    title="Clear"
+  >
+    ×
   </button>
 
   <div

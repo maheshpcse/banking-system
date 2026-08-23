@@ -15,7 +15,9 @@
 }
 
 .fade-up {
+  /* Directional motion disabled.
   animation: fade-up 0.45s ease both;
+  */
 }
 
 .hero h2 {
@@ -295,11 +297,15 @@ label {
 @keyframes fade-up {
   from {
     opacity: 0;
+    /* Directional motion disabled.
     transform: translateY(8px);
+    */
   }
   to {
     opacity: 1;
+    /* Directional motion disabled.
     transform: translateY(0);
+    */
   }
 }
 

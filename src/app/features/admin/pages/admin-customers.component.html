@@ -144,7 +144,8 @@
   class="drawer-backdrop"
   *ngIf="viewing"
   [class.is-open]="drawerOpen"
-  (click)="closeView()"
+  data-backdrop="static"
+  data-keyboard="false"
 ></div>
 <aside
   class="drawer"
@@ -153,6 +154,9 @@
   role="dialog"
   aria-modal="true"
   aria-label="User profile"
+  tabindex="-1"
+  data-backdrop="static"
+  data-keyboard="false"
 >
   <header class="drawer__head">
     <div>
@@ -231,7 +235,8 @@
   class="tx-modal-backdrop"
   *ngIf="txModalUser"
   [class.is-open]="txModalOpen"
-  (click)="closeTxModal()"
+  data-backdrop="static"
+  data-keyboard="false"
 ></div>
 <div
   class="tx-modal tx-modal--large"
@@ -240,6 +245,9 @@
   role="dialog"
   aria-modal="true"
   aria-label="Customer transactions"
+  tabindex="-1"
+  data-backdrop="static"
+  data-keyboard="false"
 >
   <header class="drawer__head tx-modal__head">
     <div>

@@ -1,7 +1,7 @@
-<section class="bs-page fade-up">
-  <app-billing-panel-shimmer *ngIf="pageLoading || busy" variant="pos"></app-billing-panel-shimmer>
+<section class="bs-page">
+  <app-billing-panel-shimmer *ngIf="pageLoading" variant="pos"></app-billing-panel-shimmer>
 
-  <ng-container *ngIf="!pageLoading && !busy">
+  <ng-container *ngIf="!pageLoading">
     <header class="bs-page__head">
       <div>
         <p class="eyebrow">Checkout</p>
@@ -21,92 +21,105 @@
             controlClass="input"
             [(ngModel)]="selectedCustomerId"
             [options]="customerSelectOptions"
+            [clearable]="true"
             placeholder="Select customer…"
             ariaLabel="Select customer"
           ></app-theme-select>
         </label>
 
-      <div class="search-row">
-        <div class="search">
-          <input
-            class="input"
-            type="search"
-            placeholder="Spotlight search products"
-            [(ngModel)]="productQuery"
-            (keyup.enter)="searchProducts()"
-          />
-          <button
-            type="button"
-            class="search__clear"
-            *ngIf="productQuery"
-            (click)="clearProductQuery()"
-            aria-label="Clear search"
-          >
-            ×
+        <div class="search-row">
+          <div class="search">
+            <input
+              class="input"
+              type="text"
+              placeholder="Spotlight search products"
+              [(ngModel)]="productQuery"
+              (keyup.enter)="searchProducts()"
+            />
+            <button
+              type="button"
+              class="search__clear"
+              *ngIf="productQuery"
+              (click)="clearProductQuery()"
+              aria-label="Clear search"
+            >
+              ×
+            </button>
+          </div>
+          <button type="button" class="btn btn--ghost" [disabled]="productLoading" (click)="searchProducts()">
+            {{ productLoading ? 'Finding…' : 'Find' }}
           </button>
         </div>
-        <button type="button" class="btn btn--ghost" (click)="searchProducts()">Find</button>
-      </div>
 
-      <div class="chips">
-        <button
-          type="button"
-          class="chip"
-          *ngFor="let p of products"
-          [disabled]="p.stock < 1"
-          (click)="addToCart(p)"
-        >
-          <strong>{{ p.name }}</strong>
-          <span>{{ p.price | currencyFormat }} · {{ p.stock }} left</span>
-        </button>
-      </div>
-      <div class="empty" *ngIf="!products.length">No products in spotlight.</div>
-    </div>
-
-    <aside class="pos__right glass">
-      <div class="panel__head">
-        <h3>Cart</h3>
-        <button type="button" class="link" *ngIf="cart.length" (click)="clearCart()">Clear</button>
-      </div>
-
-      <div class="cart-scroll">
-        <div class="empty" *ngIf="!cart.length">Tap products to add lines.</div>
-        <ul class="cart" *ngIf="cart.length">
-          <li *ngFor="let line of cart">
-            <div>
-              <strong>{{ line.name }}</strong>
-              <span>{{ line.unitPrice | currencyFormat }}</span>
+        <div class="chips-wrap">
+          <app-billing-panel-shimmer *ngIf="productLoading" variant="pos-products"></app-billing-panel-shimmer>
+          <ng-container *ngIf="!productLoading">
+            <div class="chips">
+              <button
+                type="button"
+                class="chip"
+                *ngFor="let p of products"
+                [disabled]="p.stock < 1"
+                (click)="addToCart(p)"
+              >
+                <strong>{{ p.name }}</strong>
+                <span>{{ p.price | currencyFormat }} · {{ p.stock }} left</span>
+              </button>
             </div>
-            <div class="stepper">
-              <button type="button" (click)="updateQty(line, -1)">−</button>
-              <em>{{ line.quantity }}</em>
-              <button type="button" (click)="updateQty(line, 1)">+</button>
-            </div>
-            <button type="button" class="link-danger" (click)="removeLine(line)">×</button>
-          </li>
-        </ul>
+            <div class="empty" *ngIf="!products.length">No products in spotlight.</div>
+          </ng-container>
+        </div>
       </div>
 
-      <div class="pos__sticky">
-        <label class="field">
-          Discount
-          <input class="input" type="number" [(ngModel)]="discount" min="0" />
-        </label>
+      <aside class="pos__right glass">
+        <div class="panel__head">
+          <h3>Cart</h3>
+          <button type="button" class="link" *ngIf="cart.length" (click)="clearCart()">Clear</button>
+        </div>
 
-        <dl class="totals">
-          <div><dt>Subtotal</dt><dd>{{ cartSubtotal | currencyFormat }}</dd></div>
-          <div><dt>Tax</dt><dd>{{ cartTax | currencyFormat }}</dd></div>
-          <div class="totals__grand"><dt>Total</dt><dd>{{ cartGrandTotal | currencyFormat }}</dd></div>
-        </dl>
+        <div class="cart-scroll">
+          <div class="empty" *ngIf="!cart.length">Tap products to add lines.</div>
+          <ul class="cart" *ngIf="cart.length">
+            <li *ngFor="let line of cart">
+              <div>
+                <strong>{{ line.name }}</strong>
+                <span>{{ line.unitPrice | currencyFormat }}</span>
+              </div>
+              <div class="stepper">
+                <button type="button" (click)="updateQty(line, -1)" aria-label="Decrease quantity">−</button>
+                <em>{{ line.quantity }}</em>
+                <button type="button" (click)="updateQty(line, 1)" aria-label="Increase quantity">+</button>
+              </div>
+              <button type="button" class="link-danger" (click)="removeLine(line)" aria-label="Remove line">×</button>
+            </li>
+          </ul>
+        </div>
+      </aside>
 
-        <button
-          type="button"
-          class="btn btn--primary btn--block"
-          [disabled]="!cart.length"
-          (click)="createInvoice()"
-        >
-          Create invoice
-        </button>
+      <div class="pos__checkout glass">
+        <div class="checkout__body">
+          <label class="field checkout__discount">
+            Discount
+            <input class="input" type="number" [(ngModel)]="discount" min="0" />
+          </label>
+
+          <dl class="totals">
+            <div><dt>Subtotal</dt><dd>{{ cartSubtotal | currencyFormat }}</dd></div>
+            <div><dt>Tax</dt><dd>{{ cartTax | currencyFormat }}</dd></div>
+            <div class="totals__grand"><dt>Total</dt><dd>{{ cartGrandTotal | currencyFormat }}</dd></div>
+          </dl>
+
+          <div class="checkout__actions">
+            <button
+              type="button"
+              class="btn btn--primary"
+              [disabled]="!cart.length || busy"
+              (click)="createInvoice()"
+            >
+              {{ busy ? 'Creating…' : 'Create invoice' }}
+            </button>
+          </div>
+        </div>
 
         <div class="invoice" *ngIf="activeInvoice as bill">
           <div>
@@ -126,42 +139,54 @@
           </div>
         </div>
       </div>
-    </aside>
-  </div>
-
-  <div class="modal-backdrop" *ngIf="showPayModal" (click)="closePayModal()"></div>
-  <div class="modal" *ngIf="showPayModal && activeInvoice as bill" role="dialog" aria-modal="true">
-    <div class="modal__head">
-      <h3>Collect payment</h3>
-      <button type="button" class="icon-close" (click)="closePayModal()" aria-label="Close">×</button>
     </div>
-    <p class="modal__lede">{{ bill.billNumber }} · {{ bill.grandTotal | currencyFormat }}</p>
 
-    <div class="methods">
-      <button
-        type="button"
-        class="method"
-        *ngFor="let m of enabledMethods"
-        [class.is-active]="paymentMethod === m"
-        (click)="paymentMethod = m"
-      >
-        {{ methodLabel(m) }}
+    <div
+      class="modal-backdrop"
+      *ngIf="showPayModal"
+      data-backdrop="static"
+      data-keyboard="false"
+    ></div>
+    <div
+      class="modal"
+      *ngIf="showPayModal && activeInvoice as bill"
+      role="dialog"
+      aria-modal="true"
+      tabindex="-1"
+      data-backdrop="static"
+      data-keyboard="false"
+    >
+      <div class="modal__head">
+        <h3>Collect payment</h3>
+        <button type="button" class="icon-close" (click)="closePayModal()" aria-label="Close">×</button>
+      </div>
+      <p class="modal__lede">{{ bill.billNumber }} · {{ bill.grandTotal | currencyFormat }}</p>
+
+      <div class="methods">
+        <button
+          type="button"
+          class="method"
+          *ngFor="let m of enabledMethods"
+          [class.is-active]="paymentMethod === m"
+          (click)="paymentMethod = m"
+        >
+          {{ methodLabel(m) }}
+        </button>
+      </div>
+
+      <div class="qr" *ngIf="paymentMethod === 'qr'" [attr.data-phase]="qrPhase">
+        <div class="qr__frame">
+          <span class="qr__scan"></span>
+        </div>
+        <p *ngIf="qrPhase === 'idle'">Ready to scan customer QR</p>
+        <p *ngIf="qrPhase === 'scanning'">Scanning…</p>
+        <p *ngIf="qrPhase === 'success'">Payment captured</p>
+        <p *ngIf="qrPhase === 'failed'">Scan failed — retry</p>
+      </div>
+
+      <button type="button" class="btn btn--primary btn--block" [disabled]="paying" (click)="collectPayment()">
+        {{ paying ? 'Processing…' : 'Confirm payment' }}
       </button>
     </div>
-
-    <div class="qr" *ngIf="paymentMethod === 'qr'" [attr.data-phase]="qrPhase">
-      <div class="qr__frame">
-        <span class="qr__scan"></span>
-      </div>
-      <p *ngIf="qrPhase === 'idle'">Ready to scan customer QR</p>
-      <p *ngIf="qrPhase === 'scanning'">Scanning…</p>
-      <p *ngIf="qrPhase === 'success'">Payment captured</p>
-      <p *ngIf="qrPhase === 'failed'">Scan failed — retry</p>
-    </div>
-
-    <button type="button" class="btn btn--primary btn--block" [disabled]="paying" (click)="collectPayment()">
-      {{ paying ? 'Processing…' : 'Confirm payment' }}
-    </button>
-  </div>
   </ng-container>
 </section>

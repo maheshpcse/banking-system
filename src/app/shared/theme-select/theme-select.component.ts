@@ -35,10 +35,13 @@ export class ThemeSelectComponent implements ControlValueAccessor {
   @Input() name = '';
   /** Extra class on the control (e.g. input--select for compact toolbars). */
   @Input() controlClass = '';
+  /** Show a Presence-style clear “×” when a value is selected. */
+  @Input() clearable = false;
 
   @Output() opened = new EventEmitter<void>();
   @Output() closed = new EventEmitter<void>();
   @Output() valueChange = new EventEmitter<string>();
+  @Output() cleared = new EventEmitter<void>();
 
   open = false;
   menuMounted = false;
@@ -137,6 +140,20 @@ export class ThemeSelectComponent implements ControlValueAccessor {
     this.onChange(this.value);
     this.valueChange.emit(this.value);
     this.closeMenu();
+  }
+
+  clear(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.disabled) {
+      return;
+    }
+    this.value = '';
+    this.onChange(this.value);
+    this.valueChange.emit(this.value);
+    this.cleared.emit();
+    this.closeMenu();
+    this.onTouched();
   }
 
   trackByValue(_: number, option: ThemeSelectOption): string {

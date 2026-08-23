@@ -510,7 +510,7 @@
   position: absolute;
   right: 0.45rem;
   top: 50%;
-  transform: translateY(-50%);
+    transform: translateY(-50%);
   width: 1.65rem;
   height: 1.65rem;
   border: 0;
@@ -810,13 +810,19 @@
 
 @keyframes limits-progress {
   0% {
+    /* Directional motion disabled.
     transform: translateX(-40%);
+    */
   }
   50% {
+    /* Directional motion disabled.
     transform: translateX(60%);
+    */
   }
   100% {
+    /* Directional motion disabled.
     transform: translateX(-40%);
+    */
   }
 }
 
@@ -874,7 +880,9 @@
 .theme-card:hover {
   border-color: rgba(95, 196, 176, 0.55);
   box-shadow: 0 10px 22px rgba(90, 120, 150, 0.12);
+  /* Directional motion disabled.
   transform: translateY(-1px);
+  */
 }
 
 .theme-card.is-active {
@@ -883,7 +891,9 @@
   box-shadow:
     0 0 0 3px rgba(95, 196, 176, 0.22),
     0 12px 24px rgba(90, 120, 150, 0.14);
+  /* Directional motion disabled.
   transform: translateY(-1px);
+  */
 }
 
 .theme-card__swatches {

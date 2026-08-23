@@ -5,7 +5,9 @@
 }
 
 .fade-up {
+  /* Directional motion disabled.
   animation: fade-up 0.45s ease both;
+  */
 }
 
 .page__head h2 {
@@ -78,7 +80,9 @@
   animation: fade-up 0.45s ease both;
 
   &:hover {
+    /* Directional motion disabled.
     transform: translateY(-2px);
+    */
     box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
   }
 }
@@ -272,21 +276,29 @@
 @keyframes fade-up {
   from {
     opacity: 0;
+    /* Directional motion disabled.
     transform: translateY(10px);
+    */
   }
   to {
     opacity: 1;
+    /* Directional motion disabled.
     transform: translateY(0);
+    */
   }
 }
 
 @keyframes slide-in {
   from {
+    /* Directional motion disabled.
     transform: translateX(24px);
+    */
     opacity: 0;
   }
   to {
+    /* Directional motion disabled.
     transform: translateX(0);
+    */
     opacity: 1;
   }
 }

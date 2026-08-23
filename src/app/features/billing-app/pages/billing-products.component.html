@@ -16,7 +16,7 @@
     <div class="toolbar">
       <div class="search">
         <input
-          type="search"
+          type="text"
           class="input"
           placeholder="Search name or SKU"
           [ngModel]="query"
@@ -116,12 +116,20 @@
         <ul class="list" *ngIf="filtered.length && view === 'list'">
           <li *ngFor="let p of paged">
             <button type="button" class="row" (click)="openDetail(p)">
-              <span [class]="stockTone(p.stock)" aria-hidden="true"></span>
+              <span
+                class="thumb"
+                [class.thumb--out]="p.stock <= 0"
+                [class.thumb--low]="p.stock > 0 && p.stock <= 5"
+                [class.thumb--ok]="p.stock > 5"
+                aria-hidden="true"
+              >
+                {{ (p.name || '?').slice(0, 1).toUpperCase() }}
+              </span>
               <div class="row__body">
                 <strong>{{ p.name }}</strong>
                 <span>{{ p.sku || 'No SKU' }} · {{ stockLabel(p.stock) }} · {{ p.stock }}</span>
               </div>
-              <em>{{ p.price | currencyFormat }}</em>
+              <em class="row__amount">{{ p.price | currencyFormat }}</em>
             </button>
             <div class="row__actions">
               <button type="button" class="link" (click)="edit(p)">Edit</button>
@@ -188,16 +196,29 @@
     </div>
   </ng-container>
 
-  <div class="drawer-backdrop" *ngIf="detail" (click)="closeDetail()"></div>
-  <aside class="drawer drawer--xl" *ngIf="detail as p" role="dialog" aria-modal="true">
-    <div class="drawer__head">
+  <div
+    class="detail-backdrop"
+    *ngIf="detail"
+    data-backdrop="static"
+    data-keyboard="false"
+  ></div>
+  <div
+    class="detail-modal"
+    *ngIf="detail as p"
+    role="dialog"
+    aria-modal="true"
+    tabindex="-1"
+    data-backdrop="static"
+    data-keyboard="false"
+  >
+    <div class="detail-modal__head">
       <div>
         <p class="eyebrow">Product detail</p>
         <h3>{{ p.name }}</h3>
       </div>
       <button type="button" class="icon-close" (click)="closeDetail()" aria-label="Close">×</button>
     </div>
-    <dl class="drawer__meta">
+    <dl class="detail-modal__meta">
       <div>
         <dt>SKU</dt>
         <dd>{{ p.sku || '—' }}</dd>
@@ -222,9 +243,9 @@
         <dd>{{ p.active === false ? 'Archived' : 'Active' }}</dd>
       </div>
     </dl>
-    <div class="drawer__actions">
+    <div class="detail-modal__actions">
       <button type="button" class="btn btn--ghost" (click)="edit(p)">Edit</button>
       <button type="button" class="btn btn--danger" [disabled]="busy" (click)="archive(p)">Archive</button>
     </div>
-  </aside>
+  </div>
 </section>

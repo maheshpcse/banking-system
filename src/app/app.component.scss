@@ -220,10 +220,14 @@ main {
 
 @keyframes flow-x {
   0% {
+    /* Directional motion disabled.
     transform: translateX(-8%);
+    */
   }
   100% {
+    /* Directional motion disabled.
     transform: translateX(8%);
+    */
   }
 }
 
