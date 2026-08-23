@@ -44,8 +44,21 @@
     </div>
   </ng-container>
 
-  <div class="drawer-backdrop" *ngIf="detailBill" (click)="closeDetail()"></div>
-  <aside class="drawer" *ngIf="detailBill as bill">
+  <div
+    class="drawer-backdrop"
+    *ngIf="detailBill"
+    data-backdrop="static"
+    data-keyboard="false"
+  ></div>
+  <aside
+    class="drawer"
+    *ngIf="detailBill as bill"
+    role="dialog"
+    aria-modal="true"
+    tabindex="-1"
+    data-backdrop="static"
+    data-keyboard="false"
+  >
     <div class="drawer__head">
       <div>
         <h3>{{ bill.billNumber }}</h3>

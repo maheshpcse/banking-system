@@ -22,6 +22,17 @@ export class AlertService {
     color: '#1d2a36'
   };
 
+  /** Bootstrap-equivalent static backdrop: no outside click / Escape dismiss. */
+  private readonly staticBackdrop = {
+    allowOutsideClick: false as const,
+    allowEscapeKey: false as const,
+    didOpen: (popup: HTMLElement) => {
+      popup.setAttribute('data-backdrop', 'static');
+      popup.setAttribute('data-keyboard', 'false');
+      popup.setAttribute('tabindex', '-1');
+    }
+  };
+
   private readonly alertClasses = {
     popup: 'nb-alert',
     confirmButton: 'nb-alert__confirm',
@@ -78,6 +89,7 @@ export class AlertService {
       text,
       confirmButtonText: 'Continue',
       ...this.theme,
+      ...this.staticBackdrop,
       customClass: this.alertClasses
     });
   }
@@ -91,6 +103,7 @@ export class AlertService {
       confirmButtonColor: '#c45b6c',
       background: this.theme.background,
       color: this.theme.color,
+      ...this.staticBackdrop,
       customClass: {
         ...this.alertClasses,
         confirmButton: 'nb-alert__confirm nb-alert__confirm--danger'
@@ -107,6 +120,7 @@ export class AlertService {
       confirmButtonColor: '#d4a017',
       background: this.theme.background,
       color: this.theme.color,
+      ...this.staticBackdrop,
       customClass: this.alertClasses
     });
   }
@@ -118,6 +132,7 @@ export class AlertService {
       text,
       confirmButtonText: 'OK',
       ...this.theme,
+      ...this.staticBackdrop,
       customClass: this.alertClasses
     });
   }
@@ -146,6 +161,7 @@ export class AlertService {
       cancelButtonText: options.cancelText || 'Close',
       reverseButtons: true,
       ...this.theme,
+      ...this.staticBackdrop,
       customClass: this.alertClasses
     });
     return !!result.isConfirmed;
@@ -166,6 +182,7 @@ export class AlertService {
       cancelButtonText: options.cancelText || 'Cancel',
       reverseButtons: true,
       ...this.theme,
+      ...this.staticBackdrop,
       customClass: this.alertClasses
     }).then((result) => !!result.isConfirmed);
   }
@@ -202,7 +219,10 @@ export class AlertService {
       showConfirmButton: false,
       ...this.theme,
       customClass: this.alertClasses,
-      didOpen: () => {
+      didOpen: (popup) => {
+        popup.setAttribute('data-backdrop', 'static');
+        popup.setAttribute('data-keyboard', 'false');
+        popup.setAttribute('tabindex', '-1');
         Swal.showLoading();
       }
     });
@@ -221,6 +241,7 @@ export class AlertService {
         text: message,
         confirmButtonText: 'Continue',
         ...this.theme,
+        ...this.staticBackdrop,
         customClass: this.alertClasses
       });
 
@@ -239,6 +260,7 @@ export class AlertService {
         confirmButtonColor: '#c45b6c',
         background: this.theme.background,
         color: this.theme.color,
+        ...this.staticBackdrop,
         customClass: {
           ...this.alertClasses,
           confirmButton: 'nb-alert__confirm nb-alert__confirm--danger'

@@ -155,6 +155,12 @@ import { Component, Input } from '@angular/core';
         </div>
       </ng-container>
 
+      <ng-container *ngIf="variant === 'pos-products'">
+        <div class="bps__chips">
+          <div class="bps__chip" *ngFor="let c of chips"></div>
+        </div>
+      </ng-container>
+
       <!-- Settings: hero + two columns -->
       <ng-container *ngIf="variant === 'settings'">
         <div class="bps__hero">
@@ -548,6 +554,7 @@ export class BillingPanelShimmerComponent {
     | 'catalog'
     | 'catalog-data'
     | 'pos'
+    | 'pos-products'
     | 'settings'
     | 'history'
     | 'history-data' = 'desk';

@@ -206,10 +206,14 @@
 
 @keyframes auth-band {
   0% {
+    /* Directional motion disabled.
     transform: translateX(-6%);
+    */
   }
   100% {
+    /* Directional motion disabled.
     transform: translateX(6%);
+    */
   }
 }
 

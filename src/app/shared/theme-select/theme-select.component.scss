@@ -96,20 +96,49 @@
   position: absolute;
   right: 0.7rem;
   top: 50%;
-  width: 0.7rem;
-  height: 0.7rem;
-  margin-top: -0.2rem;
+  width: 0.55rem;
+  height: 0.55rem;
   border-right: 2px solid var(--ts-muted);
   border-bottom: 2px solid var(--ts-muted);
-  transform: rotate(45deg);
+  transform: translateY(-50%) rotate(45deg);
   transition: transform 0.2s ease, border-color 0.2s ease;
   pointer-events: none;
 }
 
 .theme-select.is-open .theme-select__chevron {
-  margin-top: 0.1rem;
-  transform: rotate(225deg);
+  transform: translateY(-50%) rotate(225deg);
   border-color: var(--ts-accent-deep);
+}
+
+.theme-select__clear {
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.65rem;
+  height: 1.65rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.22);
+  color: var(--ts-ink);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  z-index: 2;
+}
+
+.theme-select__clear:hover {
+  background: rgba(196, 91, 108, 0.22);
+}
+
+.theme-select.has-clear .theme-select__control {
+  padding-right: 4rem;
+}
+
+.theme-select.has-clear .theme-select__chevron {
+  right: 2.35rem;
 }
 
 .theme-select__menu {
@@ -120,20 +149,24 @@
   z-index: 80;
   max-height: 14.5rem;
   overflow: auto;
-  padding: 0.35rem;
+  padding: 0.4rem;
+  display: grid;
+  gap: 0.28rem;
   border-radius: 0.9rem;
   border: 1px solid rgba(95, 196, 176, 0.35);
   background: linear-gradient(180deg, rgba(232, 250, 247, 0.96), #ffffff);
   box-shadow: 0 16px 36px rgba(24, 40, 56, 0.14);
   opacity: 0;
+  /* Directional motion disabled — keep fade only.
   transform: translateY(-4px);
+  */
   pointer-events: none;
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition: opacity 0.18s ease;
 }
 
 .theme-select__menu.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  /* transform: translateY(0); */
   pointer-events: auto;
 }
 
@@ -194,6 +227,10 @@
 
 :host(.theme-select--with-clear) .theme-select__chevron {
   right: 2.35rem;
+}
+
+:host(.theme-select--with-clear) .theme-select__clear {
+  display: inline-grid;
 }
 
 :host(.theme-select--compact) {

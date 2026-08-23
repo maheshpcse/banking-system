@@ -61,7 +61,6 @@
         <img *ngIf="avatarSrc as src" [src]="src" alt="" />
         <ng-container *ngIf="!avatarSrc">{{ avatarInitials }}</ng-container>
       </span>
-      <button class="nav__logout" type="button" (click)="logout()">Sign out</button>
       <a
         *ngIf="canLaunchBilling"
         routerLink="/billing"
@@ -69,6 +68,7 @@
         class="nav__billing-launch"
         (click)="onNavClick()"
       >Launch Billing</a>
+      <button class="nav__logout" type="button" (click)="logout()">Sign out</button>
     </div>
   </div>
 </header>

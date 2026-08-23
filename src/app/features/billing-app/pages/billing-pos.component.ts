@@ -30,6 +30,7 @@ interface CartLine {
 })
 export class BillingPosComponent implements OnInit {
   pageLoading = true;
+  productLoading = false;
   busy = false;
   paying = false;
   productQuery = '';
@@ -119,14 +120,14 @@ export class BillingPosComponent implements OnInit {
   }
 
   searchProducts(): void {
-    this.pageLoading = true;
+    this.productLoading = true;
     withShimmerDelay(this.billing.listProducts(this.productQuery.trim()), SHIMMER_MS).subscribe({
       next: (res) => {
         this.products = (res.items || []).filter((p) => p.active !== false);
-        this.pageLoading = false;
+        this.productLoading = false;
       },
       error: async () => {
-        this.pageLoading = false;
+        this.productLoading = false;
         await this.alerts.error('Product search failed.');
       }
     });

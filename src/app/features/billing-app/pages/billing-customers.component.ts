@@ -18,7 +18,14 @@ type ViewMode = 'list' | 'grid' | 'table';
   styleUrls: ['./billing-customers.component.scss']
 })
 export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('addForm') addFormRef?: ElementRef<HTMLElement>;
+  @ViewChild('addForm')
+  set addForm(ref: ElementRef<HTMLElement> | undefined) {
+    this.addFormRef = ref;
+    if (ref && this.showForm) {
+      setTimeout(() => this.bindFormHeightObserver(), 0);
+    }
+  }
+  private addFormRef?: ElementRef<HTMLElement>;
 
   listLoading = true;
   filterLoading = false;
@@ -80,7 +87,7 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   ngAfterViewInit(): void {
-    this.bindFormHeightObserver();
+    setTimeout(() => this.bindFormHeightObserver(), 0);
   }
 
   ngOnDestroy(): void {
@@ -202,6 +209,7 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
           this.page = this.totalPages;
         }
         this.listLoading = false;
+        setTimeout(() => this.bindFormHeightObserver(), 0);
       },
       error: async () => {
         this.listLoading = false;
