@@ -98,6 +98,12 @@
 .timeline {
   display: grid;
   gap: 0.7rem;
+  min-height: 16rem;
+}
+
+.timeline.is-empty {
+  place-items: center;
+  align-content: center;
 }
 
 .card {

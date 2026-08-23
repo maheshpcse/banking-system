@@ -1,6 +1,93 @@
-<div class="empty-state" [attr.data-tone]="tone" role="status">
+<div
+  class="empty-state"
+  [attr.data-tone]="tone"
+  [attr.data-kind]="kind"
+  [class.empty-state--fill]="fill"
+  role="status"
+>
   <div class="empty-state__art" aria-hidden="true">
-    <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Products: shelf / tags -->
+    <svg *ngIf="kind === 'products'" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect class="empty-state__desk" x="16" y="88" width="128" height="14" rx="5" />
+      <rect class="empty-state__box" x="28" y="42" width="32" height="40" rx="6" />
+      <rect class="empty-state__box" x="64" y="30" width="32" height="52" rx="6" />
+      <rect class="empty-state__box" x="100" y="48" width="32" height="34" rx="6" />
+      <circle class="empty-state__dot" cx="44" cy="58" r="5" />
+      <circle class="empty-state__dot" cx="80" cy="48" r="5" />
+      <circle class="empty-state__dot" cx="116" cy="62" r="5" />
+    </svg>
+
+    <!-- Customers: people -->
+    <svg *ngIf="kind === 'customers'" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect class="empty-state__desk" x="18" y="90" width="124" height="12" rx="5" />
+      <circle class="empty-state__avatar" cx="56" cy="42" r="14" />
+      <path class="empty-state__body" d="M34 86c2-18 12-28 22-28s20 10 22 28" />
+      <circle class="empty-state__avatar" cx="104" cy="46" r="12" />
+      <path class="empty-state__body" d="M86 86c2-15 10-24 18-24s16 9 18 24" />
+    </svg>
+
+    <!-- Invoices / history -->
+    <svg *ngIf="kind === 'invoices'" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect class="empty-state__paper" x="42" y="18" width="76" height="84" rx="8" />
+      <path class="empty-state__line" d="M56 40h48M56 54h40M56 68h44M56 82h28" stroke-width="3" stroke-linecap="round" />
+      <circle class="empty-state__dot" cx="112" cy="86" r="10" />
+    </svg>
+
+    <!-- Cart -->
+    <svg *ngIf="kind === 'cart'" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        class="empty-state__cart"
+        d="M36 34h18l10 42h52l12-30H62"
+        stroke-width="4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <circle class="empty-state__wheel" cx="72" cy="92" r="7" />
+      <circle class="empty-state__wheel" cx="108" cy="92" r="7" />
+    </svg>
+
+    <!-- Spotlight / product chips -->
+    <svg *ngIf="kind === 'spotlight'" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect class="empty-state__chip" x="24" y="34" width="50" height="36" rx="10" />
+      <rect class="empty-state__chip" x="86" y="34" width="50" height="36" rx="10" />
+      <rect class="empty-state__chip" x="55" y="78" width="50" height="28" rx="10" />
+      <circle class="empty-state__dot" cx="80" cy="52" r="8" />
+    </svg>
+
+    <!-- Transactions -->
+    <svg *ngIf="kind === 'transactions'" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect class="empty-state__paper" x="30" y="24" width="100" height="72" rx="10" />
+      <path class="empty-state__line" d="M46 48h40M46 64h56" stroke-width="3" stroke-linecap="round" />
+      <path class="empty-state__arrow" d="M110 44v20M102 56l8 8 8-8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+
+    <!-- Notifications -->
+    <svg *ngIf="kind === 'notifications'" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        class="empty-state__bell"
+        d="M80 26c-14 0-24 10-24 28v12l-8 14h64l-8-14V54c0-18-10-28-24-28z"
+      />
+      <path class="empty-state__line" d="M70 90c2 8 8 12 10 12s8-4 10-12" stroke-width="3" stroke-linecap="round" />
+      <circle class="empty-state__dot" cx="104" cy="34" r="8" />
+    </svg>
+
+    <!-- Requests -->
+    <svg *ngIf="kind === 'requests'" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect class="empty-state__paper" x="36" y="22" width="88" height="76" rx="10" />
+      <circle class="empty-state__avatar" cx="60" cy="48" r="10" />
+      <path class="empty-state__line" d="M78 44h30M78 56h22" stroke-width="3" stroke-linecap="round" />
+      <rect class="empty-state__chip" x="48" y="72" width="64" height="12" rx="6" />
+    </svg>
+
+    <!-- Staff -->
+    <svg *ngIf="kind === 'staff'" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect class="empty-state__paper" x="28" y="28" width="104" height="64" rx="10" />
+      <circle class="empty-state__avatar" cx="56" cy="56" r="12" />
+      <path class="empty-state__line" d="M78 48h40M78 64h28" stroke-width="3" stroke-linecap="round" />
+    </svg>
+
+    <!-- Generic folder -->
+    <svg *ngIf="kind === 'generic'" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect class="empty-state__desk" x="18" y="78" width="124" height="18" rx="6" />
       <rect class="empty-state__folder" x="42" y="28" width="76" height="58" rx="10" />
       <path class="empty-state__tab" d="M52 28h28l8 10h30v-4a6 6 0 0 0-6-6H52z" />
@@ -8,6 +95,5 @@
       <path class="empty-state__mark" d="M74 58h12M80 52v12" stroke-width="3" stroke-linecap="round" />
     </svg>
   </div>
-  <p class="empty-state__title">{{ title }}</p>
   <p class="empty-state__message">{{ message }}</p>
 </div>

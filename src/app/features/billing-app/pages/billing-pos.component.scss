@@ -112,6 +112,13 @@
 .chips-wrap {
   min-height: 0;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.chips-wrap.is-empty {
+  justify-content: center;
+  align-items: center;
 }
 
 .panel__head {
@@ -288,6 +295,14 @@
   overflow: auto;
   max-height: 100%;
   padding-right: 0.15rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-scroll.is-empty {
+  justify-content: center;
+  align-items: center;
+  min-height: 10rem;
 }
 
 .cart {

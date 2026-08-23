@@ -110,13 +110,28 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   get dataPanelHeight(): number | null {
-    if (this.showForm) {
-      return this.matchedPanelHeight;
-    }
     return this.lockedPanelHeight ?? this.matchedPanelHeight;
   }
 
+  get dataShimmerVariant():
+    | 'catalog-data-list'
+    | 'catalog-data-grid'
+    | 'catalog-data-table' {
+    if (this.view === 'list') {
+      return 'catalog-data-list';
+    }
+    if (this.view === 'grid') {
+      return 'catalog-data-grid';
+    }
+    return 'catalog-data-table';
+  }
+
   toggleForm(): void {
+    if (this.showForm) {
+      this.capturePanelHeight();
+      this.formResizeObserver?.disconnect();
+      this.formResizeObserver = null;
+    }
     this.panelAnimating = true;
     this.showForm = !this.showForm;
     if (this.panelTimer) {
@@ -124,8 +139,22 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
     }
     this.panelTimer = setTimeout(() => {
       this.panelAnimating = false;
-      this.bindFormHeightObserver();
+      if (this.showForm) {
+        this.bindFormHeightObserver();
+      }
     }, 320);
+  }
+
+  private capturePanelHeight(): void {
+    const el = this.addFormRef?.nativeElement;
+    if (!el) {
+      return;
+    }
+    const height = Math.ceil(el.getBoundingClientRect().height);
+    if (height >= 120) {
+      this.matchedPanelHeight = height;
+      this.lockedPanelHeight = height;
+    }
   }
 
   private bindFormHeightObserver(): void {
@@ -139,7 +168,13 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
       return;
     }
     const sync = (): void => {
+      if (!this.showForm) {
+        return;
+      }
       const height = Math.ceil(el.getBoundingClientRect().height);
+      if (height < 120) {
+        return;
+      }
       this.matchedPanelHeight = height;
       this.lockedPanelHeight = height;
       this.cdr.markForCheck();
@@ -223,15 +258,20 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   goPage(delta: number): void {
-    this.page = Math.min(this.totalPages, Math.max(1, this.page + delta));
+    const next = Math.min(this.totalPages, Math.max(1, this.page + delta));
+    if (next === this.page) {
+      return;
+    }
+    this.page = next;
+    this.refreshFilteredView();
   }
 
-  /** Client-side sort/stock/view flash — data already in memory. */
+  /** Client-side sort/stock/view/page flash — data already in memory. */
   private refreshFilteredView(): void {
     this.filterLoading = true;
     setTimeout(() => {
       this.filterLoading = false;
-    }, 220);
+    }, 260);
   }
 
   load(): void {
@@ -270,16 +310,19 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
     });
   }
 
-  /** Soft list refresh after mutate — no full-page shimmer. */
+  /** Soft list refresh after mutate — view-matched data shimmer. */
   private softReload(): void {
-    this.billing.listProducts(this.query.trim()).subscribe({
+    this.filterLoading = true;
+    withShimmerDelay(this.billing.listProducts(this.query.trim()), SHIMMER_MS).subscribe({
       next: (res) => {
         this.products = res.items || [];
         if (this.page > this.totalPages) {
           this.page = this.totalPages;
         }
+        this.filterLoading = false;
       },
       error: async () => {
+        this.filterLoading = false;
         await this.alerts.error('Unable to refresh products.');
       }
     });

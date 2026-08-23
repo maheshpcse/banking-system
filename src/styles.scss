@@ -337,13 +337,41 @@ a:focus {
   color: var(--text);
 }
 
-/* Theme-colored top-right toasts (login / signup) */
+/* Theme-colored toasts (login / signup / empty-filter warnings) */
 .nb-toast {
   border-radius: 0.9rem !important;
   border: 1px solid rgba(95, 196, 176, 0.35) !important;
   box-shadow: 0 14px 28px rgba(90, 120, 150, 0.14) !important;
   font-family: var(--font-body) !important;
-  padding: 0.85rem 1rem !important;
+  padding: 0.75rem 2.1rem 0.75rem 0.95rem !important;
+  width: fit-content !important;
+  max-width: min(26rem, calc(100vw - 1.5rem)) !important;
+  display: grid !important;
+  gap: 0.2rem !important;
+}
+
+.nb-toast .swal2-timer-progress-bar,
+.nb-toast .swal2-timer-progress-bar-container {
+  display: none !important;
+}
+
+.nb-toast__close {
+  position: absolute !important;
+  top: 0.45rem !important;
+  right: 0.45rem !important;
+  width: 1.45rem !important;
+  height: 1.45rem !important;
+  border-radius: 999px !important;
+  font-size: 1.05rem !important;
+  line-height: 1 !important;
+  color: var(--text-muted) !important;
+  box-shadow: none !important;
+  background: rgba(148, 163, 184, 0.18) !important;
+}
+
+.nb-toast__close:hover {
+  background: rgba(196, 91, 108, 0.2) !important;
+  color: var(--text) !important;
 }
 
 .nb-toast--success {
@@ -371,11 +399,19 @@ html[data-nb-billing='1'] .nb-toast--warning {
   font-size: 0.95rem !important;
   font-weight: 700 !important;
   color: var(--text) !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  line-height: 1.35 !important;
+  padding-right: 0.35rem !important;
 }
 
 .nb-toast__text {
   font-size: 0.86rem !important;
   color: var(--text-muted) !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
 }
 
 /* Theme-colored SweetAlert2 popups */

@@ -43,62 +43,43 @@ export class AlertService {
 
   /** Small top-right toast for login/signup feedback */
   toastSuccess(title: string, text?: string): Promise<SweetAlertResult> {
-    return Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon: 'success',
-      title,
-      text,
-      showConfirmButton: false,
-      timer: 1300,
-      timerProgressBar: true,
-      background: this.theme.background,
-      color: this.theme.color,
-      customClass: {
-        popup: 'nb-toast nb-toast--success',
-        title: 'nb-toast__title',
-        htmlContainer: 'nb-toast__text'
-      }
-    });
+    return this.fireToast('success', 'top-end', title, text, 'nb-toast--success');
   }
 
   toastError(title: string, text?: string): Promise<SweetAlertResult> {
-    return Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon: 'error',
-      title,
-      text,
-      showConfirmButton: false,
-      timer: 3800,
-      timerProgressBar: true,
-      background: this.theme.background,
-      color: this.theme.color,
-      customClass: {
-        popup: 'nb-toast nb-toast--error',
-        title: 'nb-toast__title',
-        htmlContainer: 'nb-toast__text'
-      }
-    });
+    return this.fireToast('error', 'top-end', title, text, 'nb-toast--error');
   }
 
   /** Top-center themed warning toast (empty search / filter guards). */
   toastWarning(title: string, text?: string): Promise<SweetAlertResult> {
+    return this.fireToast('warning', 'top', title, text, 'nb-toast--warning');
+  }
+
+  private fireToast(
+    icon: SweetAlertIcon,
+    position: 'top' | 'top-end',
+    title: string,
+    text: string | undefined,
+    toneClass: string
+  ): Promise<SweetAlertResult> {
     return Swal.fire({
       toast: true,
-      position: 'top',
-      icon: 'warning',
+      position,
+      icon,
       title,
       text,
       showConfirmButton: false,
-      timer: 2600,
-      timerProgressBar: true,
+      showCloseButton: true,
+      timer: 2000,
+      timerProgressBar: false,
       background: this.theme.background,
       color: this.theme.color,
+      width: 'auto',
       customClass: {
-        popup: 'nb-toast nb-toast--warning',
+        popup: `nb-toast ${toneClass}`,
         title: 'nb-toast__title',
-        htmlContainer: 'nb-toast__text'
+        htmlContainer: 'nb-toast__text',
+        closeButton: 'nb-toast__close'
       }
     });
   }

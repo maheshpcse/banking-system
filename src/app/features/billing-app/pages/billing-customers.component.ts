@@ -106,13 +106,28 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   get dataPanelHeight(): number | null {
-    if (this.showForm) {
-      return this.matchedPanelHeight;
-    }
     return this.lockedPanelHeight ?? this.matchedPanelHeight;
   }
 
+  get dataShimmerVariant():
+    | 'catalog-data-list'
+    | 'catalog-data-grid'
+    | 'catalog-data-table' {
+    if (this.view === 'list') {
+      return 'catalog-data-list';
+    }
+    if (this.view === 'grid') {
+      return 'catalog-data-grid';
+    }
+    return 'catalog-data-table';
+  }
+
   toggleForm(): void {
+    if (this.showForm) {
+      this.capturePanelHeight();
+      this.formResizeObserver?.disconnect();
+      this.formResizeObserver = null;
+    }
     this.panelAnimating = true;
     this.showForm = !this.showForm;
     if (this.panelTimer) {
@@ -120,8 +135,22 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
     }
     this.panelTimer = setTimeout(() => {
       this.panelAnimating = false;
-      this.bindFormHeightObserver();
+      if (this.showForm) {
+        this.bindFormHeightObserver();
+      }
     }, 320);
+  }
+
+  private capturePanelHeight(): void {
+    const el = this.addFormRef?.nativeElement;
+    if (!el) {
+      return;
+    }
+    const height = Math.ceil(el.getBoundingClientRect().height);
+    if (height >= 120) {
+      this.matchedPanelHeight = height;
+      this.lockedPanelHeight = height;
+    }
   }
 
   private bindFormHeightObserver(): void {
@@ -135,7 +164,13 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
       return;
     }
     const sync = (): void => {
+      if (!this.showForm) {
+        return;
+      }
       const height = Math.ceil(el.getBoundingClientRect().height);
+      if (height < 120) {
+        return;
+      }
       this.matchedPanelHeight = height;
       this.lockedPanelHeight = height;
       this.cdr.markForCheck();
@@ -176,6 +211,10 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
 
   onQueryChange(value: string): void {
     this.query = value;
+    if (!value.trim()) {
+      this.search$.next('');
+      return;
+    }
     this.search$.next(value.trim());
   }
 
@@ -207,14 +246,19 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   goPage(delta: number): void {
-    this.page = Math.min(this.totalPages, Math.max(1, this.page + delta));
+    const next = Math.min(this.totalPages, Math.max(1, this.page + delta));
+    if (next === this.page) {
+      return;
+    }
+    this.page = next;
+    this.refreshFilteredView();
   }
 
   private refreshFilteredView(): void {
     this.filterLoading = true;
     setTimeout(() => {
       this.filterLoading = false;
-    }, 220);
+    }, 260);
   }
 
   load(): void {
@@ -253,14 +297,17 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   private softReload(): void {
-    this.billing.listCustomers(this.query.trim()).subscribe({
+    this.filterLoading = true;
+    withShimmerDelay(this.billing.listCustomers(this.query.trim()), SHIMMER_MS).subscribe({
       next: (res) => {
         this.customers = res.items || [];
         if (this.page > this.totalPages) {
           this.page = this.totalPages;
         }
+        this.filterLoading = false;
       },
       error: async () => {
+        this.filterLoading = false;
         await this.alerts.error('Unable to refresh customers.');
       }
     });

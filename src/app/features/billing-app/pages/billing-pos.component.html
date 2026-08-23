@@ -52,7 +52,7 @@
           </button>
         </div>
 
-        <div class="chips-wrap">
+        <div class="chips-wrap" [class.is-empty]="!productLoading && !products.length">
           <app-billing-panel-shimmer *ngIf="productLoading" variant="pos-products"></app-billing-panel-shimmer>
           <ng-container *ngIf="!productLoading">
             <div class="chips">
@@ -70,6 +70,8 @@
             <app-empty-state
               *ngIf="!products.length"
               tone="billing"
+              kind="spotlight"
+              [fill]="true"
               message="No products in spotlight."
             ></app-empty-state>
           </ng-container>
@@ -82,10 +84,12 @@
           <button type="button" class="link" *ngIf="cart.length" (click)="clearCart()">Clear</button>
         </div>
 
-        <div class="cart-scroll">
+        <div class="cart-scroll" [class.is-empty]="!cart.length">
           <app-empty-state
             *ngIf="!cart.length"
             tone="billing"
+            kind="cart"
+            [fill]="true"
             message="Tap products to add lines."
           ></app-empty-state>
           <ul class="cart" *ngIf="cart.length">

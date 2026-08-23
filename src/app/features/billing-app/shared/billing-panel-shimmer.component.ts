@@ -69,7 +69,7 @@ import { Component, Input } from '@angular/core';
       </ng-container>
 
       <!-- Catalog data panel only (form stays mounted) -->
-      <ng-container *ngIf="variant === 'catalog-data'">
+      <ng-container *ngIf="variant === 'catalog-data' || variant === 'catalog-data-table'">
         <div class="bps__table-head">
           <div class="bps__bone" *ngFor="let h of heads"></div>
         </div>
@@ -78,6 +78,30 @@ import { Component, Input } from '@angular/core';
           <div class="bps__bone bps__bone--fill"></div>
           <div class="bps__bone bps__bone--sm"></div>
           <div class="bps__bone bps__bone--xs"></div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="variant === 'catalog-data-list'">
+        <div class="bps__list">
+          <div class="bps__list-row" *ngFor="let r of catalogDataRows">
+            <div class="bps__thumb"></div>
+            <div class="bps__list-copy">
+              <div class="bps__bone bps__bone--md"></div>
+              <div class="bps__bone bps__bone--xs"></div>
+            </div>
+            <div class="bps__bone bps__bone--sm"></div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="variant === 'catalog-data-grid'">
+        <div class="bps__grid">
+          <div class="bps__grid-tile" *ngFor="let r of catalogDataRows">
+            <div class="bps__dot"></div>
+            <div class="bps__bone bps__bone--md"></div>
+            <div class="bps__bone bps__bone--xs"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+          </div>
         </div>
       </ng-container>
 
@@ -161,7 +185,7 @@ import { Component, Input } from '@angular/core';
         </div>
       </ng-container>
 
-      <!-- Settings: hero + two columns -->
+      <!-- Settings: hero + merchant form + compact method rows -->
       <ng-container *ngIf="variant === 'settings'">
         <div class="bps__hero">
           <div class="bps__bone bps__bone--xs"></div>
@@ -169,18 +193,30 @@ import { Component, Input } from '@angular/core';
           <div class="bps__bone bps__bone--lede"></div>
         </div>
         <div class="bps__settings">
-          <div class="bps__panel">
+          <div class="bps__panel bps__panel--settings">
             <div class="bps__bone bps__bone--md"></div>
             <div class="bps__bone bps__bone--field" *ngFor="let f of settingsFields"></div>
-            <div class="bps__bone bps__bone--btn bps__bone--accent"></div>
-          </div>
-          <div class="bps__panel">
-            <div class="bps__bone bps__bone--md"></div>
-            <div class="bps__bone bps__bone--sm"></div>
-            <div class="bps__tiles">
-              <div class="bps__tile" *ngFor="let t of methodTiles"></div>
+            <div class="bps__settings-grid">
+              <div class="bps__bone bps__bone--field"></div>
+              <div class="bps__bone bps__bone--field"></div>
             </div>
           </div>
+          <div class="bps__panel bps__panel--settings">
+            <div class="bps__bone bps__bone--md"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+            <div class="bps__method-rows">
+              <div class="bps__method-row" *ngFor="let t of methodTiles">
+                <div class="bps__method-icon"></div>
+                <div class="bps__list-copy">
+                  <div class="bps__bone bps__bone--sm"></div>
+                  <div class="bps__bone bps__bone--xs"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bps__settings-foot">
+          <div class="bps__bone bps__bone--btn bps__bone--accent"></div>
         </div>
       </ng-container>
 
@@ -426,6 +462,102 @@ import { Component, Input } from '@angular/core';
         flex: 0 0 auto;
       }
 
+      .bps__list {
+        display: grid;
+        gap: 0.45rem;
+      }
+
+      .bps__list-row {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 0.7rem;
+        align-items: center;
+        padding: 0.55rem 0.65rem;
+        border-radius: 0.9rem;
+        background: rgba(241, 246, 244, 0.55);
+      }
+
+      .bps__list-copy {
+        display: grid;
+        gap: 0.35rem;
+        min-width: 0;
+      }
+
+      .bps__thumb {
+        width: 2.4rem;
+        height: 2.4rem;
+        border-radius: 0.75rem;
+        background: linear-gradient(
+          105deg,
+          rgba(217, 232, 226, 0.55) 18%,
+          rgba(255, 200, 1, 0.42) 42%,
+          rgba(217, 232, 226, 0.65) 62%
+        );
+        background-size: 220% 100%;
+        animation: bps-shimmer 1.35s ease-in-out infinite;
+      }
+
+      .bps__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.65rem;
+      }
+
+      .bps__grid-tile {
+        display: grid;
+        gap: 0.45rem;
+        padding: 0.85rem 0.9rem;
+        border-radius: 1rem;
+        background: rgba(241, 246, 244, 0.55);
+        min-height: 7.5rem;
+        align-content: start;
+      }
+
+      .bps__panel--settings {
+        min-height: 18rem;
+        align-content: start;
+      }
+
+      .bps__settings-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.55rem;
+      }
+
+      .bps__method-rows {
+        display: grid;
+        gap: 0.45rem;
+      }
+
+      .bps__method-row {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.65rem;
+        align-items: center;
+        padding: 0.55rem 0.65rem;
+        border-radius: 0.85rem;
+        background: rgba(241, 246, 244, 0.55);
+      }
+
+      .bps__method-icon {
+        width: 2.1rem;
+        height: 2.1rem;
+        border-radius: 0.7rem;
+        background: linear-gradient(
+          105deg,
+          rgba(255, 153, 50, 0.28) 18%,
+          rgba(255, 200, 1, 0.45) 45%,
+          rgba(255, 153, 50, 0.3) 65%
+        );
+        background-size: 220% 100%;
+        animation: bps-shimmer 1.35s ease-in-out infinite;
+      }
+
+      .bps__settings-foot {
+        display: flex;
+        justify-content: flex-end;
+      }
+
       .bps__seg {
         display: inline-flex;
         gap: 0.35rem;
@@ -553,6 +685,9 @@ export class BillingPanelShimmerComponent {
     | 'desk-bills'
     | 'catalog'
     | 'catalog-data'
+    | 'catalog-data-list'
+    | 'catalog-data-grid'
+    | 'catalog-data-table'
     | 'pos'
     | 'pos-products'
     | 'settings'
@@ -579,7 +714,7 @@ export class BillingPanelShimmerComponent {
   readonly chips = [1, 2, 3, 4, 5, 6];
   readonly cartRows = [1, 2, 3, 4];
   readonly totals = [1, 2, 3];
-  readonly settingsFields = [1, 2, 3, 4];
+  readonly settingsFields = [1, 2];
   readonly methodTiles = [1, 2, 3, 4];
   readonly historyHeads = [1, 2, 3, 4];
   readonly historyRows = [1, 2, 3, 4, 5, 6];

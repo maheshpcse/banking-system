@@ -46,6 +46,7 @@
         <app-empty-state
           *ngIf="!recentBills.length"
           tone="billing"
+          kind="invoices"
           message="No invoices yet — start from POS."
         ></app-empty-state>
         <ul class="bills" *ngIf="recentBills.length">
