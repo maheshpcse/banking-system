@@ -1,48 +1,45 @@
-<section class="page">
-  <ng-container *ngIf="loading; else ready">
-    <app-billing-panel-shimmer variant="settings"></app-billing-panel-shimmer>
-  </ng-container>
-  <ng-template #ready>
-    <header class="head">
-      <div>
-        <p class="kicker">Merchant desk</p>
-        <h2>Billing settings</h2>
-      </div>
-      <button type="button" class="save" (click)="save()" [disabled]="saving">
-        {{ saving ? 'Saving…' : 'Save settings' }}
-      </button>
+<section class="bs-page fade-up">
+  <app-billing-panel-shimmer *ngIf="pageLoading" variant="settings"></app-billing-panel-shimmer>
+
+  <ng-container *ngIf="!pageLoading">
+    <header class="hero">
+      <p class="eyebrow">Gateway</p>
+      <h2>Billing settings</h2>
+      <p class="lede">Merchant identity on the left · payment rails on the right.</p>
     </header>
 
-    <div class="grid">
-      <article class="panel">
+    <form class="settings" [formGroup]="form" (ngSubmit)="save()">
+      <div class="glass col">
         <h3>Merchant identity</h3>
         <label>
           Merchant name
-          <input [(ngModel)]="draft.merchantName" />
+          <input class="input" formControlName="merchantName" />
         </label>
         <label>
           Support note
-          <textarea rows="3" [(ngModel)]="draft.supportNote"></textarea>
+          <textarea class="input input--area" rows="4" formControlName="supportNote"></textarea>
         </label>
-        <label>
-          UPI VPA
-          <input [(ngModel)]="draft.upiVpa" />
-        </label>
-        <label>
-          Card label
-          <input [(ngModel)]="draft.cardLabel" />
-        </label>
-      </article>
+        <div class="grid2">
+          <label>
+            UPI VPA
+            <input class="input" formControlName="upiVpa" placeholder="merchant@upi" />
+          </label>
+          <label>
+            Card label
+            <input class="input" formControlName="cardLabel" />
+          </label>
+        </div>
+      </div>
 
-      <article class="panel">
+      <div class="glass col">
         <h3>Payment methods</h3>
         <p class="hint">Toggle rails available at checkout. Icons stay small and clear.</p>
         <div class="methods">
           <button
             type="button"
             class="method"
-            [class.on]="draft.methods.cash"
-            (click)="draft.methods.cash = !draft.methods.cash"
+            [class.on]="form.value.cash"
+            (click)="toggleMethod('cash')"
           >
             <span class="method__icon method__icon--cash" aria-hidden="true">
               <span class="cash-bill"></span>
@@ -50,14 +47,14 @@
             </span>
             <span class="method__meta">
               <strong>Cash</strong>
-              <small>{{ draft.methods.cash ? 'Enabled' : 'Off' }}</small>
+              <small>{{ form.value.cash ? 'Enabled' : 'Off' }}</small>
             </span>
           </button>
           <button
             type="button"
             class="method"
-            [class.on]="draft.methods.card"
-            (click)="draft.methods.card = !draft.methods.card"
+            [class.on]="form.value.card"
+            (click)="toggleMethod('card')"
           >
             <span class="method__icon method__icon--card" aria-hidden="true">
               <span class="card-body">
@@ -67,39 +64,52 @@
             </span>
             <span class="method__meta">
               <strong>Card</strong>
-              <small>{{ draft.methods.card ? 'Enabled' : 'Off' }}</small>
+              <small>{{ form.value.card ? 'Enabled' : 'Off' }}</small>
             </span>
           </button>
           <button
             type="button"
             class="method"
-            [class.on]="draft.methods.upi"
-            (click)="draft.methods.upi = !draft.methods.upi"
+            [class.on]="form.value.upi"
+            (click)="toggleMethod('upi')"
           >
             <span class="method__icon method__icon--upi" aria-hidden="true">
               <span class="upi-mark">UPI</span>
             </span>
             <span class="method__meta">
               <strong>UPI</strong>
-              <small>{{ draft.methods.upi ? 'Enabled' : 'Off' }}</small>
+              <small>{{ form.value.upi ? 'Enabled' : 'Off' }}</small>
             </span>
           </button>
           <button
             type="button"
             class="method"
-            [class.on]="draft.methods.qr"
-            (click)="draft.methods.qr = !draft.methods.qr"
+            [class.on]="form.value.qr"
+            (click)="toggleMethod('qr')"
           >
             <span class="method__icon method__icon--qr" aria-hidden="true">
               <span class="qr-mark"></span>
             </span>
             <span class="method__meta">
               <strong>QR</strong>
-              <small>{{ draft.methods.qr ? 'Enabled' : 'Off' }}</small>
+              <small>{{ form.value.qr ? 'Enabled' : 'Off' }}</small>
             </span>
           </button>
         </div>
-      </article>
-    </div>
-  </ng-template>
+
+        <div class="sr-only" aria-hidden="true">
+          <input type="checkbox" formControlName="cash" />
+          <input type="checkbox" formControlName="card" />
+          <input type="checkbox" formControlName="upi" />
+          <input type="checkbox" formControlName="qr" />
+        </div>
+      </div>
+
+      <div class="settings__foot">
+        <button type="submit" class="btn btn--primary" [disabled]="busy">
+          {{ busy ? 'Saving…' : 'Save settings' }}
+        </button>
+      </div>
+    </form>
+  </ng-container>
 </section>
