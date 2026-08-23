@@ -13,8 +13,9 @@
 
 .nav__inner {
   position: relative;
-  max-width: 1280px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   min-height: var(--nb-nav-height);
   padding: 0.75rem 1.25rem;
   display: grid;
@@ -66,8 +67,7 @@
   flex: 0 0 auto;
 }
 
-.nav__links a,
-.nav__logout {
+.nav__links a {
   text-decoration: none;
   color: var(--text-muted);
   font-weight: 550;
@@ -81,8 +81,7 @@
   transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
-.nav__links a:hover,
-.nav__logout:hover {
+.nav__links a:hover {
   color: var(--text);
   background: rgba(95, 196, 176, 0.16);
 }
@@ -215,7 +214,12 @@
   background: linear-gradient(145deg, #c5d0da, #e2e8ef);
 }
 
-.nav__logout {
+.nav__logout,
+.nav__billing-launch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
   border: 1px solid rgba(148, 163, 184, 0.28);
   background: rgba(255, 255, 255, 0.9);
   color: var(--text);
@@ -223,24 +227,29 @@
   padding: 0.4rem 0.75rem;
   font-weight: 650;
   font-size: 0.84rem;
+  line-height: 1.2;
   cursor: pointer;
-}
-
-.nav__billing-launch {
-  border: 1px solid rgba(255, 153, 50, 0.4) !important;
-  background: rgba(255, 200, 1, 0.18) !important;
-  color: var(--text) !important;
-  font-weight: 700 !important;
-}
-
-.nav__billing-launch:hover,
-.nav__billing-launch.is-active {
-  background: rgba(255, 153, 50, 0.28) !important;
-  border-color: rgba(220, 20, 60, 0.35) !important;
+  white-space: nowrap;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .nav__logout:hover {
   border-color: rgba(95, 196, 176, 0.45);
+  background: rgba(232, 250, 247, 0.95);
+  color: var(--text);
+}
+
+.nav__billing-launch {
+  border-color: rgba(255, 153, 50, 0.45);
+  background: rgba(255, 200, 1, 0.22);
+  color: #16323a;
+}
+
+.nav__billing-launch:hover,
+.nav__billing-launch.is-active {
+  border-color: rgba(220, 20, 60, 0.4);
+  background: rgba(255, 153, 50, 0.34);
+  color: #16323a;
 }
 
 /* Sun/moon icon toggle — replaces the text Dark/Light button */

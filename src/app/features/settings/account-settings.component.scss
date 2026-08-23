@@ -497,25 +497,13 @@
   display: grid;
 }
 
-.field-with-clear__control select,
+.field-with-clear__control app-theme-select {
+  width: 100%;
+}
+
 .field-with-clear__control .file-input {
   width: 100%;
   padding-right: 2.4rem;
-}
-
-/* Custom chevron so the clear “×” never sits on the native select arrow. */
-.field-with-clear__control select {
-  appearance: none;
-  -webkit-appearance: none;
-  padding-right: 4rem;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235b6b70' d='M1.1 1.2 6 6.1l4.9-4.9 1.1 1.1L6 8.3.0 2.3z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.85rem center;
-  background-size: 0.7rem;
-}
-
-.field-with-clear__control select + .field-clear {
-  right: 2.2rem;
 }
 
 .field-clear {

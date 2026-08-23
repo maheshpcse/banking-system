@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
@@ -6,6 +6,7 @@ import { AlertService } from '../../../core/services/alert.service';
 import { BillingService } from '../../../core/services/billing.service';
 import { BillingCustomer } from '../../../core/models/banking.models';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
+import { ThemeSelectOption } from '../../../shared/theme-select/theme-select.component';
 
 type CustomerSort = 'name-asc' | 'name-desc' | 'newest';
 type BankingFilter = 'all' | 'yes' | 'no';
@@ -16,7 +17,9 @@ type ViewMode = 'list' | 'grid' | 'table';
   templateUrl: './billing-customers.component.html',
   styleUrls: ['./billing-customers.component.scss']
 })
-export class BillingCustomersComponent implements OnInit, OnDestroy {
+export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('addForm') addFormRef?: ElementRef<HTMLElement>;
+
   listLoading = true;
   filterLoading = false;
   busy = false;
@@ -26,12 +29,25 @@ export class BillingCustomersComponent implements OnInit, OnDestroy {
   showForm = true;
   panelAnimating = false;
   detail: BillingCustomer | null = null;
+  matchedPanelHeight: number | null = null;
 
   sort: CustomerSort = 'name-asc';
   bankingFilter: BankingFilter = 'all';
   view: ViewMode = 'table';
   page = 1;
   readonly pageSize = 8;
+
+  readonly sortOptions: ThemeSelectOption[] = [
+    { value: 'name-asc', label: 'Name A–Z' },
+    { value: 'name-desc', label: 'Name Z–A' },
+    { value: 'newest', label: 'Newest first' }
+  ];
+
+  readonly bankingOptions: ThemeSelectOption[] = [
+    { value: 'all', label: 'All accounts' },
+    { value: 'yes', label: 'Has banking account' },
+    { value: 'no', label: 'No banking account' }
+  ];
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
@@ -44,11 +60,13 @@ export class BillingCustomersComponent implements OnInit, OnDestroy {
   private readonly search$ = new Subject<string>();
   private readonly destroy$ = new Subject<void>();
   private panelTimer: ReturnType<typeof setTimeout> | null = null;
+  private formResizeObserver: ResizeObserver | null = null;
 
   constructor(
     private readonly billing: BillingService,
     private readonly alerts: AlertService,
-    private readonly fb: FormBuilder
+    private readonly fb: FormBuilder,
+    private readonly cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -61,10 +79,15 @@ export class BillingCustomersComponent implements OnInit, OnDestroy {
     this.load();
   }
 
+  ngAfterViewInit(): void {
+    this.bindFormHeightObserver();
+  }
+
   ngOnDestroy(): void {
     if (this.panelTimer) {
       clearTimeout(this.panelTimer);
     }
+    this.formResizeObserver?.disconnect();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -77,7 +100,29 @@ export class BillingCustomersComponent implements OnInit, OnDestroy {
     }
     this.panelTimer = setTimeout(() => {
       this.panelAnimating = false;
+      this.bindFormHeightObserver();
     }, 320);
+  }
+
+  private bindFormHeightObserver(): void {
+    this.formResizeObserver?.disconnect();
+    this.formResizeObserver = null;
+    if (!this.showForm || typeof ResizeObserver === 'undefined') {
+      this.matchedPanelHeight = null;
+      return;
+    }
+    const el = this.addFormRef?.nativeElement;
+    if (!el) {
+      this.matchedPanelHeight = null;
+      return;
+    }
+    const sync = (): void => {
+      this.matchedPanelHeight = Math.ceil(el.getBoundingClientRect().height);
+      this.cdr.markForCheck();
+    };
+    this.formResizeObserver = new ResizeObserver(() => sync());
+    this.formResizeObserver.observe(el);
+    sync();
   }
 
   get filtered(): BillingCustomer[] {

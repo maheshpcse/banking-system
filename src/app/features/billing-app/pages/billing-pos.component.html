@@ -17,10 +17,13 @@
         </div>
         <label class="field field--bare">
           <span class="sr-only">Select customer</span>
-          <select class="input" [(ngModel)]="selectedCustomerId">
-            <option value="">Select customer…</option>
-            <option *ngFor="let c of customers" [value]="c.id">{{ c.name }}</option>
-          </select>
+          <app-theme-select
+            controlClass="input"
+            [(ngModel)]="selectedCustomerId"
+            [options]="customerSelectOptions"
+            placeholder="Select customer…"
+            ariaLabel="Select customer"
+          ></app-theme-select>
         </label>
 
       <div class="search-row">

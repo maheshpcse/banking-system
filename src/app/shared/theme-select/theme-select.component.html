@@ -1,0 +1,42 @@
+<div
+  class="theme-select"
+  [class.is-open]="open"
+  [class.is-disabled]="disabled"
+  [class.has-value]="hasValue"
+>
+  <button
+    type="button"
+    class="theme-select__control"
+    [ngClass]="controlClass"
+    [disabled]="disabled"
+    [attr.aria-label]="ariaLabel || placeholder"
+    [attr.aria-expanded]="open"
+    [attr.name]="name || null"
+    (click)="toggle()"
+  >
+    <span class="theme-select__value" [class.is-placeholder]="!hasValue">{{ selectedLabel }}</span>
+    <span class="theme-select__chevron" aria-hidden="true"></span>
+  </button>
+
+  <div
+    class="theme-select__menu"
+    *ngIf="menuMounted"
+    [class.is-visible]="open"
+    role="listbox"
+  >
+    <button
+      type="button"
+      class="theme-select__option"
+      *ngFor="let option of options; trackBy: trackByValue"
+      role="option"
+      [class.is-selected]="option.value === value"
+      [class.is-disabled]="option.disabled"
+      [disabled]="option.disabled"
+      [attr.aria-selected]="option.value === value"
+      (click)="pick(option, $event)"
+    >
+      {{ option.label }}
+    </button>
+    <p class="theme-select__empty" *ngIf="!options.length">No options</p>
+  </div>
+</div>

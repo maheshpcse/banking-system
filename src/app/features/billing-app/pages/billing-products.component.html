@@ -35,20 +35,23 @@
       </div>
       <button type="button" class="btn btn--ghost" (click)="search()">Search</button>
 
-      <select class="input input--select" [(ngModel)]="sort" (ngModelChange)="onFilterChange()">
-        <option value="name-asc">Name A–Z</option>
-        <option value="name-desc">Name Z–A</option>
-        <option value="price-asc">Price low–high</option>
-        <option value="price-desc">Price high–low</option>
-        <option value="stock-asc">Stock low–high</option>
-      </select>
+      <app-theme-select
+        class="theme-select--compact"
+        controlClass="input input--select"
+        [(ngModel)]="sort"
+        [options]="sortOptions"
+        ariaLabel="Sort products"
+        (valueChange)="onFilterChange()"
+      ></app-theme-select>
 
-      <select class="input input--select" [(ngModel)]="stockFilter" (ngModelChange)="onFilterChange()">
-        <option value="all">All stock</option>
-        <option value="in">In stock</option>
-        <option value="low">Low (≤5)</option>
-        <option value="out">Out of stock</option>
-      </select>
+      <app-theme-select
+        class="theme-select--compact"
+        controlClass="input input--select"
+        [(ngModel)]="stockFilter"
+        [options]="stockOptions"
+        ariaLabel="Filter stock"
+        (valueChange)="onFilterChange()"
+      ></app-theme-select>
 
       <div class="seg" role="group" aria-label="View mode">
         <button type="button" [class.is-active]="view === 'list'" (click)="setView('list')">List</button>
@@ -63,6 +66,7 @@
       [class.is-animating]="panelAnimating"
     >
       <form
+        #addForm
         class="glass form"
         [class.is-hidden]="!showForm"
         [formGroup]="form"
@@ -99,7 +103,11 @@
         </div>
       </form>
 
-      <div class="main-panel glass">
+      <div
+        class="main-panel glass"
+        [style.height.px]="showForm && matchedPanelHeight ? matchedPanelHeight : null"
+      >
+        <div class="main-panel__body">
         <app-billing-panel-shimmer *ngIf="filterLoading" variant="catalog-data"></app-billing-panel-shimmer>
 
         <ng-container *ngIf="!filterLoading">
@@ -164,8 +172,10 @@
             </tbody>
           </table>
         </div>
+        </ng-container>
+        </div>
 
-        <div class="pager" *ngIf="filtered.length">
+        <div class="pager" *ngIf="!filterLoading && filtered.length">
           <span>{{ filtered.length }} products · page {{ page }} / {{ totalPages }}</span>
           <div class="pager__btns">
             <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="goPage(-1)">Prev</button>
@@ -174,7 +184,6 @@
             </button>
           </div>
         </div>
-        </ng-container>
       </div>
     </div>
   </ng-container>

@@ -12,6 +12,13 @@ export class ManagerReportsComponent implements OnInit {
   cadence: 'daily' | 'weekly' | 'biweekly' | 'monthly' = 'weekly';
   scheduled = false;
 
+  readonly cadenceOptions = [
+    { value: 'daily', label: 'Daily' },
+    { value: 'weekly', label: 'Weekly' },
+    { value: 'biweekly', label: 'Bi-weekly' },
+    { value: 'monthly', label: 'Monthly' }
+  ];
+
   ngOnInit(): void {
     withShimmerDelay(of(true), SHIMMER_MS).subscribe(() => {
       this.pageLoading = false;

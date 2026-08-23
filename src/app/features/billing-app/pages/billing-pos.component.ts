@@ -12,6 +12,8 @@ import {
 } from '../../../core/models/banking.models';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
+import { ThemeSelectOption } from '../../../shared/theme-select/theme-select.component';
+
 interface CartLine {
   productId: string;
   name: string;
@@ -41,6 +43,10 @@ export class BillingPosComponent implements OnInit {
   showPayModal = false;
   qrPhase: 'idle' | 'scanning' | 'success' | 'failed' = 'idle';
   activeInvoice: BillingBill | null = null;
+
+  get customerSelectOptions(): ThemeSelectOption[] {
+    return this.customers.map((c) => ({ value: c.id, label: c.name }));
+  }
 
   constructor(
     private readonly billing: BillingService,
