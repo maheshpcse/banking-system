@@ -49,6 +49,9 @@
         <span class="nav__badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
       </a>
       <a routerLink="/settings" routerLinkActive="is-active" (click)="onNavClick()">Account</a>
+    </nav>
+
+    <div class="nav__actions">
       <span
         class="nav__avatar"
         [ngClass]="'nav__avatar--' + avatarStyle"
@@ -58,22 +61,6 @@
         <img *ngIf="avatarSrc as src" [src]="src" alt="" />
         <ng-container *ngIf="!avatarSrc">{{ avatarInitials }}</ng-container>
       </span>
-      <!--
-        Future enhancement: dark / light mode toggle (not working as expected yet).
-        <button class="nav__mode btn btn--ghost" type="button" (click)="toggleColorMode()">
-          {{ isDarkMode ? 'Light' : 'Dark' }}
-        </button>
-        <button
-          class="nav__mode-icon"
-          type="button"
-          (click)="toggleColorMode()"
-          [attr.aria-label]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
-          [title]="isDarkMode ? 'Light mode' : 'Dark mode'"
-        >
-          <app-nb-icon class="nav__mode-glyph" [class.is-visible]="!isDarkMode" name="moon"></app-nb-icon>
-          <app-nb-icon class="nav__mode-glyph" [class.is-visible]="isDarkMode" name="sun"></app-nb-icon>
-        </button>
-      -->
       <button class="nav__logout" type="button" (click)="logout()">Sign out</button>
       <a
         *ngIf="canLaunchBilling"
@@ -82,6 +69,6 @@
         class="nav__billing-launch"
         (click)="onNavClick()"
       >Launch Billing</a>
-    </nav>
+    </div>
   </div>
 </header>

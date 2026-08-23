@@ -35,9 +35,9 @@ import { Component, Input } from '@angular/core';
         <div class="bps__panel">
           <div class="bps__toolbar">
             <div class="bps__bone bps__bone--md"></div>
-            <div class="bps__bone bps__bone--sm"></div>
+            <div class="bps__bone bps__bone--btn"></div>
           </div>
-          <div class="bps__row" *ngFor="let r of rows">
+          <div class="bps__row" *ngFor="let r of billRows">
             <div class="bps__bone bps__bone--fill" [style.width.%]="r"></div>
             <div class="bps__bone bps__bone--sm"></div>
           </div>
@@ -59,34 +59,25 @@ import { Component, Input } from '@angular/core';
         <div class="bps__panel">
           <div class="bps__toolbar">
             <div class="bps__bone bps__bone--md"></div>
-            <div class="bps__bone bps__bone--sm"></div>
+            <div class="bps__bone bps__bone--btn"></div>
           </div>
-          <div class="bps__row" *ngFor="let r of rows">
+          <div class="bps__row" *ngFor="let r of billRows">
             <div class="bps__bone bps__bone--fill" [style.width.%]="r"></div>
             <div class="bps__bone bps__bone--sm"></div>
           </div>
         </div>
       </ng-container>
 
-      <!-- Catalog data panels only (filters already visible) -->
+      <!-- Catalog data panel only (form stays mounted) -->
       <ng-container *ngIf="variant === 'catalog-data'">
-        <div class="bps__layout">
-          <div class="bps__panel bps__panel--form">
-            <div class="bps__bone bps__bone--md"></div>
-            <div class="bps__bone bps__bone--field" *ngFor="let f of fields"></div>
-            <div class="bps__bone bps__bone--btn bps__bone--accent"></div>
-          </div>
-          <div class="bps__panel">
-            <div class="bps__table-head">
-              <div class="bps__bone" *ngFor="let h of heads"></div>
-            </div>
-            <div class="bps__row bps__row--table" *ngFor="let r of catalogRows">
-              <div class="bps__dot"></div>
-              <div class="bps__bone bps__bone--fill"></div>
-              <div class="bps__bone bps__bone--sm"></div>
-              <div class="bps__bone bps__bone--xs"></div>
-            </div>
-          </div>
+        <div class="bps__table-head">
+          <div class="bps__bone" *ngFor="let h of heads"></div>
+        </div>
+        <div class="bps__row bps__row--table" *ngFor="let r of catalogDataRows">
+          <div class="bps__dot"></div>
+          <div class="bps__bone bps__bone--fill"></div>
+          <div class="bps__bone bps__bone--sm"></div>
+          <div class="bps__bone bps__bone--xs"></div>
         </div>
       </ng-container>
 
@@ -403,8 +394,7 @@ import { Component, Input } from '@angular/core';
         display: grid;
         grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.6fr);
         gap: 0.9rem;
-        align-items: stretch;
-        min-height: min(52vh, 480px);
+        align-items: start;
       }
 
       .bps__panel--form {
@@ -572,16 +562,18 @@ export class BillingPanelShimmerComponent {
   }
 
   readonly kpis = [1, 2, 3, 4];
-  readonly rows = [88, 76, 92, 70, 84];
+  readonly rows = [88, 76, 92];
+  readonly billRows = [88, 72];
   readonly segs = [1, 2, 3];
   readonly fields = [1, 2, 3, 4];
   readonly heads = [1, 2, 3, 4];
   readonly catalogRows = [1, 2, 3, 4, 5, 6];
+  readonly catalogDataRows = [1, 2, 3, 4];
   readonly chips = [1, 2, 3, 4, 5, 6];
   readonly cartRows = [1, 2, 3, 4];
   readonly totals = [1, 2, 3];
   readonly settingsFields = [1, 2, 3, 4];
   readonly methodTiles = [1, 2, 3, 4];
   readonly historyHeads = [1, 2, 3, 4];
-  readonly historyRows = [1, 2, 3, 4, 5, 6, 7, 8];
+  readonly historyRows = [1, 2, 3, 4, 5, 6];
 }

@@ -5,42 +5,28 @@
   --forsythia: #ffc801;
   --mint: #d9e8e2;
   --saffron: #ff9932;
+  --panel: rgba(255, 255, 255, 0.78);
   display: block;
-  width: 100%;
 }
 
 .bs-page {
   display: grid;
   gap: 1rem;
-  width: 100%;
 }
 
 .fade-up {
   animation: fade-up 0.45s ease both;
 }
 
-.hero {
-  padding: 1.35rem 1.5rem;
-  border-radius: 1.25rem;
-  background: linear-gradient(
-    118deg,
-    rgba(255, 200, 1, 0.32),
-    rgba(217, 232, 226, 0.8) 48%,
-    rgba(255, 255, 255, 0.75)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow: 0 14px 36px rgba(22, 50, 58, 0.06);
-
-  h2 {
-    margin: 0;
-    font-size: clamp(1.5rem, 2.4vw, 1.9rem);
-    letter-spacing: -0.03em;
-    color: var(--ink);
-  }
+.hero h2 {
+  margin: 0;
+  font-size: clamp(1.45rem, 2.2vw, 1.75rem);
+  letter-spacing: -0.03em;
+  color: var(--ink);
 }
 
 .eyebrow {
-  margin: 0 0 0.25rem;
+  margin: 0 0 0.2rem;
   font-size: 0.7rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -48,48 +34,43 @@
 }
 
 .lede {
-  margin: 0.4rem 0 0;
+  margin: 0.35rem 0 0;
   color: var(--muted);
-  max-width: 40rem;
-}
-
-.settings {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.9rem;
-  width: 100%;
+  max-width: 42rem;
 }
 
 .glass {
-  padding: 1.15rem 1.2rem;
-  border-radius: 1.2rem;
-  background: rgba(255, 255, 255, 0.78);
+  padding: 1rem 1.1rem;
+  border-radius: 1.15rem;
+  background: var(--panel);
   border: 1px solid rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(14px);
   box-shadow: 0 14px 36px rgba(22, 50, 58, 0.06);
 }
 
-.col {
+.settings {
   display: grid;
-  gap: 0.8rem;
-  align-content: start;
-
-  h3 {
-    margin: 0;
-    font-size: 1.05rem;
-  }
-
-  label {
-    display: grid;
-    gap: 0.3rem;
-    font-size: 0.82rem;
-    color: var(--muted);
-  }
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 0.9rem;
+  align-items: start;
 }
 
-.hint {
-  margin: -0.25rem 0 0;
-  font-size: 0.85rem;
+.col {
+  display: grid;
+  gap: 0.7rem;
+  align-content: start;
+}
+
+.col h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  color: var(--ink);
+}
+
+label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.82rem;
   color: var(--muted);
 }
 
@@ -98,14 +79,10 @@
   border: 1px solid var(--line);
   border-radius: 0.85rem;
   padding: 0.55rem 0.8rem;
-  background: rgba(255, 255, 255, 0.92);
-  outline: none;
+  background: rgba(255, 255, 255, 0.9);
   color: var(--ink);
-}
-
-.input:focus {
-  border-color: rgba(255, 153, 50, 0.55);
-  box-shadow: 0 0 0 3px rgba(255, 200, 1, 0.25);
+  outline: none;
+  font: inherit;
 }
 
 .input--area {
@@ -113,207 +90,166 @@
   min-height: 5.5rem;
 }
 
+.input:focus {
+  border-color: rgba(255, 153, 50, 0.55);
+  box-shadow: 0 0 0 3px rgba(255, 200, 1, 0.28);
+}
+
 .grid2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.65rem;
+  gap: 0.55rem;
 }
 
-.pay-themes {
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.methods {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
-.pay-theme {
-  border: 1px solid var(--line);
-  border-radius: 1.1rem;
-  min-height: 7.5rem;
-  padding: 0.85rem;
-  text-align: left;
-  cursor: pointer;
-  display: grid;
-  grid-template-rows: 1fr auto;
   gap: 0.55rem;
-  background: rgba(255, 255, 255, 0.88);
-  color: var(--ink);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
 }
 
-.pay-theme:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(22, 50, 58, 0.1);
-}
-
-.pay-theme:not(.is-on) {
-  opacity: 0.62;
-  filter: grayscale(0.2);
-}
-
-.pay-theme.is-on {
-  border-color: rgba(255, 153, 50, 0.45);
-  box-shadow: 0 12px 28px rgba(255, 153, 50, 0.14);
-}
-
-.pay-theme__art {
-  position: relative;
-  min-height: 3.6rem;
+.method {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 3.35rem;
+  padding: 0.55rem 0.7rem;
   border-radius: 0.85rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.method:hover {
+  border-color: rgba(255, 153, 50, 0.4);
+}
+
+.method.on {
+  border-color: rgba(255, 153, 50, 0.55);
+  background: linear-gradient(180deg, rgba(255, 248, 230, 0.95), #fff);
+  box-shadow: inset 0 0 0 1px rgba(255, 200, 1, 0.2);
+}
+
+.method__icon {
+  flex: 0 0 auto;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.55rem;
+  display: grid;
+  place-items: center;
+  position: relative;
   overflow: hidden;
 }
 
-.pay-theme__meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.5rem;
-
-  strong {
-    font-size: 0.95rem;
-    letter-spacing: -0.02em;
-  }
-
-  em {
-    font-style: normal;
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: var(--muted);
-  }
+.method__icon--cash {
+  background: linear-gradient(160deg, #e8f6ec, #d7eee0);
+  border: 1px solid rgba(46, 125, 70, 0.2);
 }
 
-.pay-theme.is-on .pay-theme__meta em {
-  color: #1f6b5c;
+.method__icon--card {
+  background: linear-gradient(160deg, #e8eef8, #d9e4f4);
+  border: 1px solid rgba(40, 74, 120, 0.18);
 }
 
-/* Cash — stacked banknotes */
-.pay-theme--cash .pay-theme__art {
-  background: linear-gradient(145deg, #d9e8e2, #f1f6f4 55%, #ffc80133);
+.method__icon--upi {
+  background: linear-gradient(160deg, #f3e9ff, #e8daf8);
+  border: 1px solid rgba(110, 70, 160, 0.18);
 }
 
-.pay-theme__bill {
+.method__icon--qr {
+  background: linear-gradient(160deg, #f2f4f7, #e6ebf1);
+  border: 1px solid rgba(40, 55, 75, 0.16);
+}
+
+.cash-bill {
   position: absolute;
-  left: 12%;
-  top: 22%;
-  width: 68%;
-  height: 42%;
-  border-radius: 0.35rem;
-  background:
-    linear-gradient(90deg, transparent 8%, rgba(31, 107, 92, 0.18) 8% 12%, transparent 12%),
-    linear-gradient(135deg, #2f9e7a, #1f6b5c);
-  box-shadow: 0 6px 14px rgba(22, 50, 58, 0.18);
-  transform: rotate(-6deg);
-}
-
-.pay-theme__bill--b {
-  left: 22%;
-  top: 36%;
-  background:
-    linear-gradient(90deg, transparent 8%, rgba(255, 200, 1, 0.35) 8% 12%, transparent 12%),
-    linear-gradient(135deg, #ffc801, #ff9932);
-  transform: rotate(5deg);
-}
-
-/* Card — compact plastic card motif (not ATM preview) */
-.pay-theme--card .pay-theme__art {
-  background: linear-gradient(145deg, #dbeafe, #eff6ff);
-}
-
-.pay-theme__card-face {
-  position: absolute;
-  inset: 18% 14%;
-  border-radius: 0.55rem;
-  background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.35), transparent 40%),
-    linear-gradient(145deg, #1a4fa0, #2f7dd1);
-  box-shadow: 0 8px 18px rgba(26, 79, 160, 0.28);
-}
-
-.pay-theme__card-face::before {
-  content: '';
-  position: absolute;
-  left: 12%;
-  top: 28%;
   width: 1.35rem;
+  height: 0.82rem;
+  border-radius: 0.12rem;
+  background: linear-gradient(135deg, #6fbf86, #3f9a5a);
+  border: 1px solid rgba(30, 90, 50, 0.28);
+  transform: rotate(-14deg) translate(-0.12rem, -0.1rem);
+  box-shadow: 0 1px 2px rgba(16, 40, 24, 0.12);
+}
+
+.cash-bill--front {
+  background: linear-gradient(135deg, #f0b35a, #d98a2e);
+  transform: rotate(10deg) translate(0.1rem, 0.12rem);
+  z-index: 1;
+}
+
+.card-body {
+  width: 1.55rem;
   height: 1rem;
-  border-radius: 0.2rem;
-  background: linear-gradient(135deg, #e8d28a, #c9a227);
+  border-radius: 0.18rem;
+  background: linear-gradient(135deg, #3d6fb8, #234a86);
+  position: relative;
+  box-shadow: 0 1px 2px rgba(20, 40, 70, 0.2);
 }
 
-.pay-theme__card-face::after {
-  content: '';
-  position: absolute;
-  left: 12%;
-  right: 12%;
-  bottom: 22%;
-  height: 0.28rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.55);
-}
-
-/* UPI — phone + pulse */
-.pay-theme--upi .pay-theme__art {
-  background: linear-gradient(145deg, #ffedd5, #fff7ed);
-}
-
-.pay-theme__phone {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 2.1rem;
-  height: 3.35rem;
-  transform: translate(-50%, -50%);
-  border-radius: 0.55rem;
-  border: 2px solid #c2410c;
-  background: linear-gradient(180deg, #fff7ed, #ffedd5);
-  box-shadow: 0 8px 16px rgba(194, 65, 12, 0.18);
-}
-
-.pay-theme__phone::before {
-  content: '';
-  position: absolute;
-  inset: 0.45rem 0.35rem 0.7rem;
-  border-radius: 0.25rem;
-  background:
-    radial-gradient(circle at 70% 30%, #ff9932 0 18%, transparent 19%),
-    linear-gradient(135deg, #ffc80155, #ff993255);
-}
-
-.pay-theme__phone::after {
-  content: 'UPI';
+.card-stripe {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0.22rem;
-  text-align: center;
-  font-size: 0.45rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: #9a3412;
+  top: 0.28rem;
+  height: 0.18rem;
+  background: rgba(10, 22, 40, 0.35);
 }
 
-/* QR — scan tile */
-.pay-theme--qr .pay-theme__art {
-  background: linear-gradient(145deg, #e2e8f0, #f8fafc);
-}
-
-.pay-theme__qr {
+.card-chip {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 2.8rem;
-  height: 2.8rem;
-  transform: translate(-50%, -50%);
-  border-radius: 0.35rem;
+  left: 0.16rem;
+  bottom: 0.16rem;
+  width: 0.28rem;
+  height: 0.22rem;
+  border-radius: 0.04rem;
+  background: linear-gradient(135deg, #f2d27a, #d4a84a);
+}
+
+.upi-mark {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #5b2f96;
+  line-height: 1;
+}
+
+.qr-mark {
+  width: 1.05rem;
+  height: 1.05rem;
   background:
-    linear-gradient(#16323a 0 0) 0 0 / 35% 35%,
-    linear-gradient(#16323a 0 0) 100% 0 / 35% 35%,
-    linear-gradient(#16323a 0 0) 0 100% / 35% 35%,
-    linear-gradient(#16323a 0 0) 100% 100% / 22% 22%,
-    linear-gradient(#16323a 0 0) 45% 45% / 18% 18%,
-    linear-gradient(#16323a 0 0) 70% 45% / 12% 12%,
-    linear-gradient(#16323a 0 0) 45% 70% / 12% 12%;
-  background-repeat: no-repeat;
-  box-shadow: inset 0 0 0 2px #16323a;
+    linear-gradient(#1f2a38, #1f2a38) 0 0 / 38% 38% no-repeat,
+    linear-gradient(#1f2a38, #1f2a38) 100% 0 / 38% 38% no-repeat,
+    linear-gradient(#1f2a38, #1f2a38) 0 100% / 38% 38% no-repeat,
+    linear-gradient(#1f2a38, #1f2a38) 62% 62% / 18% 18% no-repeat,
+    linear-gradient(#1f2a38, #1f2a38) 38% 38% / 12% 12% no-repeat;
+  border: 1px solid rgba(20, 32, 48, 0.2);
+  border-radius: 0.12rem;
+}
+
+.method__meta {
+  display: grid;
+  gap: 0.08rem;
+  min-width: 0;
+}
+
+.method__meta strong {
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.15;
+}
+
+.method__meta small {
+  color: var(--muted);
+  font-size: 0.72rem;
 }
 
 .settings__foot {
@@ -326,19 +262,20 @@
   border: 0;
   cursor: pointer;
   border-radius: 0.85rem;
-  padding: 0.6rem 1.15rem;
+  padding: 0.55rem 0.95rem;
   font-weight: 650;
+  font-size: 0.88rem;
 }
 
 .btn--primary {
   background: linear-gradient(135deg, var(--forsythia), var(--saffron));
   color: #16323a;
-  box-shadow: 0 10px 24px rgba(255, 153, 50, 0.28);
+  box-shadow: 0 10px 22px rgba(255, 153, 50, 0.28);
 }
 
 .btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  opacity: 0.55;
+  cursor: wait;
 }
 
 .sr-only {
@@ -356,7 +293,7 @@
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -364,10 +301,10 @@
   }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 900px) {
   .settings,
-  .grid2,
-  .pay-themes {
+  .methods,
+  .grid2 {
     grid-template-columns: 1fr;
   }
 }
