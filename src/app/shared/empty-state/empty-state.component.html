@@ -1,0 +1,13 @@
+<div class="empty-state" [attr.data-tone]="tone" role="status">
+  <div class="empty-state__art" aria-hidden="true">
+    <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect class="empty-state__desk" x="18" y="78" width="124" height="18" rx="6" />
+      <rect class="empty-state__folder" x="42" y="28" width="76" height="58" rx="10" />
+      <path class="empty-state__tab" d="M52 28h28l8 10h30v-4a6 6 0 0 0-6-6H52z" />
+      <circle class="empty-state__dot" cx="80" cy="58" r="10" />
+      <path class="empty-state__mark" d="M74 58h12M80 52v12" stroke-width="3" stroke-linecap="round" />
+    </svg>
+  </div>
+  <p class="empty-state__title">{{ title }}</p>
+  <p class="empty-state__message">{{ message }}</p>
+</div>

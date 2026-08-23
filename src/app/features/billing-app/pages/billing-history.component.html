@@ -11,7 +11,23 @@
     </header>
 
     <div class="filters">
-      <input class="input" type="search" placeholder="Search bill or customer" [(ngModel)]="query" />
+      <div class="search">
+        <input
+          class="input"
+          type="text"
+          placeholder="Search bill or customer"
+          [(ngModel)]="query"
+        />
+        <button
+          type="button"
+          class="search__clear"
+          *ngIf="query"
+          (click)="clearQuery()"
+          aria-label="Clear search"
+        >
+          ×
+        </button>
+      </div>
       <input class="input" type="date" [(ngModel)]="from" />
       <input class="input" type="date" [(ngModel)]="to" />
       <button type="button" class="btn btn--ghost" (click)="applyFilters()">Filter</button>
@@ -20,7 +36,11 @@
     <app-billing-panel-shimmer *ngIf="filterLoading" variant="history-data"></app-billing-panel-shimmer>
 
     <div class="timeline" *ngIf="!filterLoading">
-      <div class="empty" *ngIf="!bills.length">No invoices match these filters.</div>
+      <app-empty-state
+        *ngIf="!bills.length"
+        tone="billing"
+        message="No invoices match these filters."
+      ></app-empty-state>
       <article class="card" *ngFor="let bill of bills" (click)="openDetail(bill)">
         <div class="card__rail" aria-hidden="true"></div>
         <div class="card__body">
@@ -47,12 +67,14 @@
   <div
     class="drawer-backdrop"
     *ngIf="detailBill"
+    [class.is-leaving]="detailLeaving"
     data-backdrop="static"
     data-keyboard="false"
   ></div>
   <aside
     class="drawer"
     *ngIf="detailBill as bill"
+    [class.is-leaving]="detailLeaving"
     role="dialog"
     aria-modal="true"
     tabindex="-1"

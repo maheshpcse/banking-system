@@ -43,7 +43,11 @@
           <h3>Recent bills</h3>
           <a class="history-link" routerLink="/billing/history">View History</a>
         </div>
-        <div class="empty" *ngIf="!recentBills.length">No invoices yet — start from POS.</div>
+        <app-empty-state
+          *ngIf="!recentBills.length"
+          tone="billing"
+          message="No invoices yet — start from POS."
+        ></app-empty-state>
         <ul class="bills" *ngIf="recentBills.length">
           <li *ngFor="let bill of recentBills">
             <div>

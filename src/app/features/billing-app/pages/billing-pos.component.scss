@@ -56,7 +56,8 @@
   grid-template-columns: 1.35fr minmax(300px, 1fr);
   grid-template-areas:
     'left right'
-    'checkout checkout';
+    'checkout checkout'
+    'foot foot';
   gap: 0.9rem;
   align-items: stretch;
 }
@@ -92,7 +93,7 @@
 
 .checkout__body {
   display: grid;
-  grid-template-columns: minmax(140px, 0.35fr) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(160px, 0.4fr) minmax(0, 1fr);
   gap: 1rem;
   align-items: end;
 }
@@ -101,7 +102,8 @@
   margin: 0;
 }
 
-.checkout__actions {
+.pos__foot {
+  grid-area: foot;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -189,14 +191,26 @@
 
 .search__clear {
   position: absolute;
-  right: 0.5rem;
+  right: 0.45rem;
   top: 50%;
-    transform: translateY(-50%);
+  transform: translateY(-50%);
+  width: 1.65rem;
+  height: 1.65rem;
   border: 0;
-  background: transparent;
-  font-size: 1.15rem;
-  color: var(--muted);
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.22);
+  color: var(--ink);
+  font-size: 1.1rem;
+  line-height: 1;
   cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  z-index: 1;
+}
+
+.search__clear:hover {
+  background: rgba(196, 91, 108, 0.22);
 }
 
 .chips {
@@ -315,6 +329,7 @@
     border: 0;
     border-radius: 50%;
     background: var(--mint);
+    color: var(--ink);
     cursor: pointer;
     font-weight: 700;
     display: inline-flex;
@@ -322,6 +337,13 @@
     justify-content: center;
     line-height: 1;
     padding: 0;
+    transition: background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+  }
+
+  button:hover {
+    background: linear-gradient(135deg, var(--forsythia), var(--saffron));
+    color: #16323a;
+    box-shadow: 0 4px 12px rgba(255, 153, 50, 0.32);
   }
 
   em {
@@ -329,6 +351,7 @@
     min-width: 1.1rem;
     text-align: center;
     font-weight: 700;
+    font-size: 0.86rem;
     line-height: 1;
     display: inline-flex;
     align-items: center;
@@ -454,12 +477,18 @@
   inset: 0;
   background: rgba(22, 50, 58, 0.35);
   z-index: 80;
+  animation: fade-in 0.22s ease both;
+}
+
+.modal-backdrop.is-leaving {
+  animation: fade-out 0.2s ease both;
 }
 
 .modal {
   position: fixed;
   left: 50%;
   top: 50%;
+  transform: translate(-50%, -50%);
   z-index: 90;
   width: min(440px, calc(100vw - 1.5rem));
   padding: 1.15rem;
@@ -470,7 +499,11 @@
   backdrop-filter: blur(16px);
   display: grid;
   gap: 0.85rem;
-  animation: modal-in 0.35s ease both;
+  animation: modal-in 0.28s ease both;
+}
+
+.modal.is-leaving {
+  animation: modal-out 0.2s ease both;
 }
 
 .modal__head {
@@ -604,14 +637,40 @@
 @keyframes modal-in {
   from {
     opacity: 0;
-    /* Directional motion disabled.
-    transform: translate(-50%, calc(-50% + 10px));
-    */
     transform: translate(-50%, -50%);
   }
   to {
     opacity: 1;
     transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes modal-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 
@@ -621,7 +680,8 @@
     grid-template-areas:
       'left'
       'right'
-      'checkout';
+      'checkout'
+      'foot';
   }
 
   .pos__left,
@@ -636,7 +696,7 @@
     align-items: stretch;
   }
 
-  .checkout__actions {
+  .pos__foot {
     justify-content: flex-end;
   }
 

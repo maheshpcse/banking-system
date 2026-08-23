@@ -23,6 +23,8 @@ export class BillingHistoryComponent implements OnInit {
   detailBill: BillingBill | null = null;
   detailPayments: BillingPayment[] = [];
   detailLoading = false;
+  detailLeaving = false;
+  private detailTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private readonly billing: BillingService,
@@ -67,7 +69,18 @@ export class BillingHistoryComponent implements OnInit {
   }
 
   applyFilters(): void {
+    if (!this.query.trim() && !this.from && !this.to) {
+      void this.alerts.toastWarning(
+        'Enter a filter',
+        'Add a search term or date range before filtering.'
+      );
+      return;
+    }
     this.load(1, 'filter');
+  }
+
+  clearQuery(): void {
+    this.query = '';
   }
 
   prev(): void {
@@ -83,6 +96,11 @@ export class BillingHistoryComponent implements OnInit {
   }
 
   openDetail(bill: BillingBill): void {
+    if (this.detailTimer) {
+      clearTimeout(this.detailTimer);
+      this.detailTimer = null;
+    }
+    this.detailLeaving = false;
     this.detailBill = bill;
     this.detailPayments = [];
     this.detailLoading = true;
@@ -100,8 +118,16 @@ export class BillingHistoryComponent implements OnInit {
   }
 
   closeDetail(): void {
-    this.detailBill = null;
-    this.detailPayments = [];
+    if (!this.detailBill || this.detailLeaving) {
+      return;
+    }
+    this.detailLeaving = true;
+    this.detailTimer = setTimeout(() => {
+      this.detailBill = null;
+      this.detailPayments = [];
+      this.detailLeaving = false;
+      this.detailTimer = null;
+    }, 200);
   }
 
   statusClass(status: string): string {

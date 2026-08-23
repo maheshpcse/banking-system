@@ -129,7 +129,7 @@
 </section>
 
 <ng-template #emptyCustomers>
-  <p class="hint">No users found for this filter.</p>
+  <app-empty-state message="No users found for this filter."></app-empty-state>
 </ng-template>
 
 <ng-template #customersShimmer>
@@ -283,7 +283,10 @@
       [variant]="txView === 'chart' ? 'tx-chart' : txView === 'table' ? 'tx-table' : 'tx-timeline'"
     ></app-shimmer>
 
-    <p class="muted" *ngIf="!txLoading && !txViewLoading && !txItems.length">No transactions for this filter.</p>
+    <app-empty-state
+      *ngIf="!txLoading && !txViewLoading && !txItems.length"
+      message="No transactions for this filter."
+    ></app-empty-state>
 
     <div class="tx-chart" *ngIf="!txLoading && !txViewLoading && txView === 'chart' && txItems.length">
       <div class="tx-chart__row" *ngFor="let bar of chartBars">

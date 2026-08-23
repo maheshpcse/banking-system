@@ -36,7 +36,10 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
   showForm = true;
   panelAnimating = false;
   detail: BillingCustomer | null = null;
+  detailLeaving = false;
+  private detailTimer: ReturnType<typeof setTimeout> | null = null;
   matchedPanelHeight: number | null = null;
+  lockedPanelHeight: number | null = null;
 
   sort: CustomerSort = 'name-asc';
   bankingFilter: BankingFilter = 'all';
@@ -94,9 +97,19 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
     if (this.panelTimer) {
       clearTimeout(this.panelTimer);
     }
+    if (this.detailTimer) {
+      clearTimeout(this.detailTimer);
+    }
     this.formResizeObserver?.disconnect();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  get dataPanelHeight(): number | null {
+    if (this.showForm) {
+      return this.matchedPanelHeight;
+    }
+    return this.lockedPanelHeight ?? this.matchedPanelHeight;
   }
 
   toggleForm(): void {
@@ -115,16 +128,16 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
     this.formResizeObserver?.disconnect();
     this.formResizeObserver = null;
     if (!this.showForm || typeof ResizeObserver === 'undefined') {
-      this.matchedPanelHeight = null;
       return;
     }
     const el = this.addFormRef?.nativeElement;
     if (!el) {
-      this.matchedPanelHeight = null;
       return;
     }
     const sync = (): void => {
-      this.matchedPanelHeight = Math.ceil(el.getBoundingClientRect().height);
+      const height = Math.ceil(el.getBoundingClientRect().height);
+      this.matchedPanelHeight = height;
+      this.lockedPanelHeight = height;
       this.cdr.markForCheck();
     };
     this.formResizeObserver = new ResizeObserver(() => sync());
@@ -172,6 +185,10 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   search(): void {
+    if (!this.query.trim()) {
+      void this.alerts.toastWarning('Enter a search term', 'Type something before searching customers.');
+      return;
+    }
     this.page = 1;
     this.reloadForFilters();
   }
@@ -259,16 +276,34 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   openDetail(customer: BillingCustomer): void {
+    if (this.detailTimer) {
+      clearTimeout(this.detailTimer);
+      this.detailTimer = null;
+    }
+    this.detailLeaving = false;
     this.detail = customer;
   }
 
   closeDetail(): void {
-    this.detail = null;
+    if (!this.detail || this.detailLeaving) {
+      return;
+    }
+    this.detailLeaving = true;
+    this.detailTimer = setTimeout(() => {
+      this.detail = null;
+      this.detailLeaving = false;
+      this.detailTimer = null;
+    }, 200);
   }
 
   edit(customer: BillingCustomer): void {
     this.editingId = customer.id;
     this.showForm = true;
+    if (this.detailTimer) {
+      clearTimeout(this.detailTimer);
+      this.detailTimer = null;
+    }
+    this.detailLeaving = false;
     this.detail = null;
     this.form.patchValue({
       name: customer.name,

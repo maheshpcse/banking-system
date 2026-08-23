@@ -11,6 +11,8 @@ import { NbIconComponent } from './nb-icon/nb-icon.component';
 import { AccountNumberComponent } from './account-number/account-number.component';
 import { SecureSecretComponent } from './secure-secret/secure-secret.component';
 import { ThemeSelectComponent } from './theme-select/theme-select.component';
+import { EmptyStateComponent } from './empty-state/empty-state.component';
+import { PortalLaunchComponent } from './portal-launch/portal-launch.component';
 
 @NgModule({
   declarations: [
@@ -22,7 +24,9 @@ import { ThemeSelectComponent } from './theme-select/theme-select.component';
     NbIconComponent,
     AccountNumberComponent,
     SecureSecretComponent,
-    ThemeSelectComponent
+    ThemeSelectComponent,
+    EmptyStateComponent,
+    PortalLaunchComponent
   ],
   imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
   exports: [
@@ -38,7 +42,9 @@ import { ThemeSelectComponent } from './theme-select/theme-select.component';
     NbIconComponent,
     AccountNumberComponent,
     SecureSecretComponent,
-    ThemeSelectComponent
+    ThemeSelectComponent,
+    EmptyStateComponent,
+    PortalLaunchComponent
   ]
 })
 export class SharedModule {}

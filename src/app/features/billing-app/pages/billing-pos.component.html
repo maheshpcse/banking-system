@@ -33,7 +33,8 @@
               class="input"
               type="text"
               placeholder="Spotlight search products"
-              [(ngModel)]="productQuery"
+              [ngModel]="productQuery"
+              (ngModelChange)="onProductQueryChange($event)"
               (keyup.enter)="searchProducts()"
             />
             <button
@@ -46,8 +47,8 @@
               ×
             </button>
           </div>
-          <button type="button" class="btn btn--ghost" [disabled]="productLoading" (click)="searchProducts()">
-            {{ productLoading ? 'Finding…' : 'Find' }}
+          <button type="button" class="btn btn--ghost" [disabled]="findBusy" (click)="searchProducts()">
+            {{ findBusy ? 'Finding…' : 'Find' }}
           </button>
         </div>
 
@@ -66,7 +67,11 @@
                 <span>{{ p.price | currencyFormat }} · {{ p.stock }} left</span>
               </button>
             </div>
-            <div class="empty" *ngIf="!products.length">No products in spotlight.</div>
+            <app-empty-state
+              *ngIf="!products.length"
+              tone="billing"
+              message="No products in spotlight."
+            ></app-empty-state>
           </ng-container>
         </div>
       </div>
@@ -78,7 +83,11 @@
         </div>
 
         <div class="cart-scroll">
-          <div class="empty" *ngIf="!cart.length">Tap products to add lines.</div>
+          <app-empty-state
+            *ngIf="!cart.length"
+            tone="billing"
+            message="Tap products to add lines."
+          ></app-empty-state>
           <ul class="cart" *ngIf="cart.length">
             <li *ngFor="let line of cart">
               <div>
@@ -108,17 +117,6 @@
             <div><dt>Tax</dt><dd>{{ cartTax | currencyFormat }}</dd></div>
             <div class="totals__grand"><dt>Total</dt><dd>{{ cartGrandTotal | currencyFormat }}</dd></div>
           </dl>
-
-          <div class="checkout__actions">
-            <button
-              type="button"
-              class="btn btn--primary"
-              [disabled]="!cart.length || busy"
-              (click)="createInvoice()"
-            >
-              {{ busy ? 'Creating…' : 'Create invoice' }}
-            </button>
-          </div>
         </div>
 
         <div class="invoice" *ngIf="activeInvoice as bill">
@@ -139,17 +137,30 @@
           </div>
         </div>
       </div>
+
+      <div class="pos__foot">
+        <button
+          type="button"
+          class="btn btn--primary"
+          [disabled]="!cart.length || busy"
+          (click)="createInvoice()"
+        >
+          {{ busy ? 'Creating…' : 'Create invoice' }}
+        </button>
+      </div>
     </div>
 
     <div
       class="modal-backdrop"
-      *ngIf="showPayModal"
+      *ngIf="payModalOpen"
+      [class.is-leaving]="payModalLeaving"
       data-backdrop="static"
       data-keyboard="false"
     ></div>
     <div
       class="modal"
-      *ngIf="showPayModal && activeInvoice as bill"
+      *ngIf="payModalOpen && activeInvoice as bill"
+      [class.is-leaving]="payModalLeaving"
       role="dialog"
       aria-modal="true"
       tabindex="-1"
