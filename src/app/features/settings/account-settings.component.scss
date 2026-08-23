@@ -437,14 +437,13 @@
   max-height: none;
 }
 
-/* Card + ATM fields on top; residential address spans full width beneath with paired rows. */
+/* Card preview + ATM fields; residential address full width beneath (no nested card chrome). */
 .banking-layout {
   display: grid;
   grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.15fr);
   grid-template-areas:
     'card fields'
-    'address address'
-    'validity validity';
+    'address address';
   gap: 1.35rem;
   align-items: start;
   overflow: visible;
@@ -463,10 +462,6 @@
   display: grid;
   gap: 0.85rem;
   align-content: start;
-  padding: 1rem 1.1rem;
-  border-radius: 1rem;
-  background: rgba(241, 245, 249, 0.55);
-  border: 1px solid rgba(148, 163, 184, 0.18);
 }
 
 .banking-layout__address > label {
@@ -555,19 +550,15 @@
 }
 
 .banking-layout__validity {
-  grid-area: validity;
   display: grid;
   gap: 0.85rem;
   align-content: start;
-  max-width: 28rem;
+  margin-top: 0.35rem;
 }
 
 .banking-layout__address > .section-label,
 .banking-layout__validity > .section-label {
   margin: 0;
-  min-height: 1.35rem;
-  display: flex;
-  align-items: flex-end;
 }
 
 .banking-layout__fields {
@@ -681,18 +672,13 @@
     grid-template-areas:
       'card'
       'fields'
-      'address'
-      'validity';
+      'address';
   }
 
   .banking-layout__address .form-row--2,
   .form-row--2,
   .form-row--3 {
     grid-template-columns: 1fr;
-  }
-
-  .banking-layout__validity {
-    max-width: none;
   }
 }
 

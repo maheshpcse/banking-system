@@ -13,13 +13,13 @@
 
 .nav__inner {
   position: relative;
-  max-width: 1120px;
+  max-width: 1280px;
   margin: 0 auto;
   min-height: var(--nb-nav-height);
   padding: 0.75rem 1.25rem;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
   gap: 1rem;
 }
 
@@ -29,6 +29,7 @@
   gap: 0.7rem;
   text-decoration: none;
   color: var(--text);
+  justify-self: start;
 }
 
 .brand__mark {
@@ -51,8 +52,18 @@
 .nav__links {
   display: flex;
   align-items: center;
+  justify-content: center;
+  justify-self: center;
   gap: 0.35rem;
   flex-wrap: nowrap;
+}
+
+.nav__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  justify-self: end;
+  flex: 0 0 auto;
 }
 
 .nav__links a,
@@ -97,9 +108,16 @@
   background: rgba(95, 196, 176, 0.18);
 }
 
-@media (max-width: 760px) {
+@media (max-width: 960px) {
+  .nav__inner {
+    grid-template-columns: 1fr auto;
+  }
+
   .nav__toggle {
     display: inline-flex;
+    justify-self: end;
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .nav__links {
@@ -110,6 +128,7 @@
     top: calc(100% + 0.35rem);
     flex-direction: column;
     align-items: stretch;
+    justify-content: flex-start;
     padding: 0.55rem;
     border-radius: 1rem;
     background: rgba(255, 255, 255, 0.98);
@@ -120,6 +139,13 @@
 
   .nav__links.is-open {
     display: flex;
+  }
+
+  .nav__actions {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    justify-content: flex-end;
+    padding-top: 0.15rem;
   }
 }
 
