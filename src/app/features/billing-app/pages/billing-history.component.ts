@@ -11,6 +11,7 @@ import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 })
 export class BillingHistoryComponent implements OnInit {
   pageLoading = true;
+  filterLoading = false;
   query = '';
   from = '';
   to = '';
@@ -29,12 +30,16 @@ export class BillingHistoryComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.load();
+    this.load(1, 'full');
   }
 
-  load(page = 1): void {
-    this.pageLoading = true;
+  load(page = 1, mode: 'full' | 'filter' | 'page' = 'page'): void {
     this.page = page;
+    if (mode === 'full') {
+      this.pageLoading = true;
+    } else if (mode === 'filter') {
+      this.filterLoading = true;
+    }
     withShimmerDelay(
       this.billing.listBills({
         q: this.query.trim(),
@@ -43,7 +48,7 @@ export class BillingHistoryComponent implements OnInit {
         page: this.page,
         limit: this.limit
       }),
-      SHIMMER_MS
+      mode === 'full' || mode === 'filter' ? (mode === 'full' ? SHIMMER_MS : 280) : 0
     ).subscribe({
       next: (res) => {
         this.bills = res.items || [];
@@ -51,27 +56,29 @@ export class BillingHistoryComponent implements OnInit {
         this.pages = res.pages || 1;
         this.total = res.total || 0;
         this.pageLoading = false;
+        this.filterLoading = false;
       },
       error: async () => {
         this.pageLoading = false;
+        this.filterLoading = false;
         await this.alerts.error('Unable to load billing history.');
       }
     });
   }
 
   applyFilters(): void {
-    this.load(1);
+    this.load(1, 'filter');
   }
 
   prev(): void {
     if (this.page > 1) {
-      this.load(this.page - 1);
+      this.load(this.page - 1, 'page');
     }
   }
 
   next(): void {
     if (this.page < this.pages) {
-      this.load(this.page + 1);
+      this.load(this.page + 1, 'page');
     }
   }
 

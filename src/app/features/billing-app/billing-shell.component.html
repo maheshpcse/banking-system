@@ -6,19 +6,36 @@
         <p class="bs-rail__eyebrow">NovaBill</p>
         <strong>Billing System</strong>
       </div>
+      <button
+        type="button"
+        class="bs-rail__toggle"
+        (click)="toggleRail()"
+        [attr.aria-expanded]="!railCollapsed"
+        [attr.aria-label]="railCollapsed ? 'Expand side menu' : 'Collapse side menu'"
+        [title]="railCollapsed ? 'Expand menu' : 'Collapse menu'"
+      >
+        <svg class="bs-rail__toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <rect
+            x="3"
+            y="4"
+            width="7"
+            height="16"
+            rx="1.6"
+            [attr.fill]="railCollapsed ? 'currentColor' : 'currentColor'"
+            [attr.opacity]="railCollapsed ? 0.28 : 1"
+          ></rect>
+          <rect x="12" y="4" width="9" height="16" rx="1.6" fill="currentColor"></rect>
+          <polyline
+            [attr.points]="railCollapsed ? '14.8,9.5 18,12 14.8,14.5' : '9.2,9.5 6,12 9.2,14.5'"
+            fill="none"
+            stroke="#ff9932"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></polyline>
+        </svg>
+      </button>
     </div>
-
-    <button
-      type="button"
-      class="bs-rail__toggle"
-      (click)="toggleRail()"
-      [attr.aria-expanded]="!railCollapsed"
-      [attr.aria-label]="railCollapsed ? 'Expand side menu' : 'Minimize side menu'"
-      [title]="railCollapsed ? 'Expand menu' : 'Minimize menu'"
-    >
-      <span aria-hidden="true">{{ railCollapsed ? '»' : '«' }}</span>
-      <span class="bs-rail__toggle-label" *ngIf="!railCollapsed">Minimize</span>
-    </button>
 
     <nav class="bs-rail__nav">
       <a

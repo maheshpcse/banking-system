@@ -88,11 +88,11 @@
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.55fr);
+  grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.55fr);
   gap: 0.9rem;
   align-items: stretch;
   width: 100%;
-  min-height: min(58vh, 620px);
+  min-height: 640px;
   transition: grid-template-columns 0.35s ease;
 }
 
@@ -100,8 +100,12 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-.layout.is-animating .main-panel,
-.layout.is-animating .form {
+.layout.is-expanded .form,
+.form.is-hidden {
+  display: none;
+}
+
+.layout.is-animating .main-panel {
   animation: panel-fade 0.32s ease both;
 }
 
@@ -229,12 +233,20 @@
 }
 
 .main-panel {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.75rem;
   min-width: 0;
+  min-height: 640px;
   height: 100%;
-  min-height: 100%;
-  align-content: start;
+}
+
+.main-panel > .list,
+.main-panel > .grid-view,
+.main-panel > .table-wrap,
+.main-panel > .empty {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .list {
@@ -431,9 +443,12 @@
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-  padding-top: 0.35rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
   color: var(--muted);
   font-size: 0.85rem;
+  flex: 0 0 auto;
 }
 
 .pager__btns {

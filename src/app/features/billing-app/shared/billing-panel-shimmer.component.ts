@@ -5,7 +5,7 @@ import { Component, Input } from '@angular/core';
   template: `
     <div class="bps" [attr.data-variant]="variant" aria-hidden="true">
       <!-- Shared page head: title + actions -->
-      <div class="bps__head" *ngIf="variant !== 'settings'">
+      <div class="bps__head" *ngIf="showHead">
         <div class="bps__head-copy">
           <div class="bps__bone bps__bone--xs"></div>
           <div class="bps__bone bps__bone--title"></div>
@@ -17,12 +17,19 @@ import { Component, Input } from '@angular/core';
         </div>
       </div>
 
-      <!-- Desk: KPI row + Recent bills panel -->
+      <!-- Desk: KPI row + Live POS field + Recent bills -->
       <ng-container *ngIf="variant === 'desk'">
         <div class="bps__kpis">
           <div class="bps__kpi" *ngFor="let k of kpis">
             <div class="bps__bone bps__bone--xs"></div>
             <div class="bps__bone bps__bone--lg"></div>
+          </div>
+        </div>
+        <div class="bps__scene">
+          <div class="bps__bone bps__bone--scene"></div>
+          <div class="bps__scene-caption">
+            <div class="bps__bone bps__bone--xs"></div>
+            <div class="bps__bone bps__bone--md"></div>
           </div>
         </div>
         <div class="bps__panel">
@@ -32,6 +39,64 @@ import { Component, Input } from '@angular/core';
           </div>
           <div class="bps__row" *ngFor="let r of rows">
             <div class="bps__bone bps__bone--fill" [style.width.%]="r"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Desk pieces for partial reloads -->
+      <ng-container *ngIf="variant === 'desk-scene'">
+        <div class="bps__scene">
+          <div class="bps__bone bps__bone--scene"></div>
+          <div class="bps__scene-caption">
+            <div class="bps__bone bps__bone--xs"></div>
+            <div class="bps__bone bps__bone--md"></div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="variant === 'desk-bills'">
+        <div class="bps__panel">
+          <div class="bps__toolbar">
+            <div class="bps__bone bps__bone--md"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+          </div>
+          <div class="bps__row" *ngFor="let r of rows">
+            <div class="bps__bone bps__bone--fill" [style.width.%]="r"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Catalog data panels only (filters already visible) -->
+      <ng-container *ngIf="variant === 'catalog-data'">
+        <div class="bps__layout">
+          <div class="bps__panel bps__panel--form">
+            <div class="bps__bone bps__bone--md"></div>
+            <div class="bps__bone bps__bone--field" *ngFor="let f of fields"></div>
+            <div class="bps__bone bps__bone--btn bps__bone--accent"></div>
+          </div>
+          <div class="bps__panel">
+            <div class="bps__table-head">
+              <div class="bps__bone" *ngFor="let h of heads"></div>
+            </div>
+            <div class="bps__row bps__row--table" *ngFor="let r of catalogRows">
+              <div class="bps__dot"></div>
+              <div class="bps__bone bps__bone--fill"></div>
+              <div class="bps__bone bps__bone--sm"></div>
+              <div class="bps__bone bps__bone--xs"></div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- History timeline only -->
+      <ng-container *ngIf="variant === 'history-data'">
+        <div class="bps__panel">
+          <div class="bps__row bps__row--table" *ngFor="let r of historyRows">
+            <div class="bps__bone bps__bone--fill"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+            <div class="bps__bone bps__bone--xs"></div>
             <div class="bps__bone bps__bone--sm"></div>
           </div>
         </div>
@@ -262,6 +327,30 @@ import { Component, Input } from '@angular/core';
         background-size: 220% 100%;
       }
 
+      .bps__scene {
+        position: relative;
+        min-height: 210px;
+        border-radius: 1.25rem;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+      }
+
+      .bps__bone--scene {
+        width: 100%;
+        height: 210px;
+        border-radius: 0;
+        border: 0;
+      }
+
+      .bps__scene-caption {
+        position: absolute;
+        left: 1rem;
+        bottom: 0.9rem;
+        display: grid;
+        gap: 0.35rem;
+      }
+
       .bps__panel {
         padding: 1rem 1.1rem;
         border-radius: 1.15rem;
@@ -462,7 +551,25 @@ import { Component, Input } from '@angular/core';
   ]
 })
 export class BillingPanelShimmerComponent {
-  @Input() variant: 'desk' | 'catalog' | 'pos' | 'settings' | 'history' = 'desk';
+  @Input() variant:
+    | 'desk'
+    | 'desk-scene'
+    | 'desk-bills'
+    | 'catalog'
+    | 'catalog-data'
+    | 'pos'
+    | 'settings'
+    | 'history'
+    | 'history-data' = 'desk';
+
+  get showHead(): boolean {
+    return (
+      this.variant === 'desk' ||
+      this.variant === 'catalog' ||
+      this.variant === 'pos' ||
+      this.variant === 'history'
+    );
+  }
 
   readonly kpis = [1, 2, 3, 4];
   readonly rows = [88, 76, 92, 70, 84];

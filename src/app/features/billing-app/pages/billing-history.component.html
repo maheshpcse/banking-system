@@ -17,7 +17,9 @@
       <button type="button" class="btn btn--ghost" (click)="applyFilters()">Filter</button>
     </div>
 
-    <div class="timeline">
+    <app-billing-panel-shimmer *ngIf="filterLoading" variant="history-data"></app-billing-panel-shimmer>
+
+    <div class="timeline" *ngIf="!filterLoading">
       <div class="empty" *ngIf="!bills.length">No invoices match these filters.</div>
       <article class="card" *ngFor="let bill of bills" (click)="openDetail(bill)">
         <div class="card__rail" aria-hidden="true"></div>
@@ -35,7 +37,7 @@
       </article>
     </div>
 
-    <div class="pager" *ngIf="pages > 1">
+    <div class="pager" *ngIf="!filterLoading && pages > 1">
       <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
       <span>Page {{ page }} / {{ pages }} · {{ total }} total</span>
       <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>

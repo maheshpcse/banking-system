@@ -119,105 +119,201 @@
   gap: 0.65rem;
 }
 
-.pay-faces {
+.pay-themes {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
 }
 
-.pay-face {
-  position: relative;
-  overflow: hidden;
-  aspect-ratio: 1.586 / 1;
-  min-height: 6.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 1rem;
-  padding: 0.85rem 0.95rem;
+.pay-theme {
+  border: 1px solid var(--line);
+  border-radius: 1.1rem;
+  min-height: 7.5rem;
+  padding: 0.85rem;
   text-align: left;
   cursor: pointer;
-  color: #f4fbfd;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 14px 28px rgba(22, 50, 58, 0.14);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 0.55rem;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--ink);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
 }
 
-.pay-face:hover {
+.pay-theme:hover {
   transform: translateY(-2px);
-  box-shadow: 0 18px 34px rgba(22, 50, 58, 0.18);
+  box-shadow: 0 12px 28px rgba(22, 50, 58, 0.1);
 }
 
-.pay-face:not(.is-on) {
-  opacity: 0.55;
-  filter: grayscale(0.35);
+.pay-theme:not(.is-on) {
+  opacity: 0.62;
+  filter: grayscale(0.2);
 }
 
-.pay-face__chip {
-  width: 2rem;
-  height: 1.4rem;
-  border-radius: 0.3rem;
-  background: linear-gradient(135deg, #e8d28a, #c9a227 55%, #f3e2a8);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+.pay-theme.is-on {
+  border-color: rgba(255, 153, 50, 0.45);
+  box-shadow: 0 12px 28px rgba(255, 153, 50, 0.14);
 }
 
-.pay-face__brand {
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  font-weight: 700;
-  opacity: 0.85;
+.pay-theme__art {
+  position: relative;
+  min-height: 3.6rem;
+  border-radius: 0.85rem;
+  overflow: hidden;
 }
 
-.pay-face__status {
-  font-size: 1.05rem;
-  letter-spacing: -0.02em;
-  font-weight: 750;
+.pay-theme__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+
+  strong {
+    font-size: 0.95rem;
+    letter-spacing: -0.02em;
+  }
+
+  em {
+    font-style: normal;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--muted);
+  }
 }
 
-.pay-face__mark {
+.pay-theme.is-on .pay-theme__meta em {
+  color: #1f6b5c;
+}
+
+/* Cash — stacked banknotes */
+.pay-theme--cash .pay-theme__art {
+  background: linear-gradient(145deg, #d9e8e2, #f1f6f4 55%, #ffc80133);
+}
+
+.pay-theme__bill {
   position: absolute;
-  right: 0.85rem;
-  bottom: 0.75rem;
-  width: 2.2rem;
-  height: 1.35rem;
-  border-radius: 0.3rem;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-}
-
-.pay-face--cash {
+  left: 12%;
+  top: 22%;
+  width: 68%;
+  height: 42%;
+  border-radius: 0.35rem;
   background:
-    radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.28), transparent 42%),
-    linear-gradient(145deg, #1f6b5c 0%, #2f9e7a 48%, #ffc801 100%);
+    linear-gradient(90deg, transparent 8%, rgba(31, 107, 92, 0.18) 8% 12%, transparent 12%),
+    linear-gradient(135deg, #2f9e7a, #1f6b5c);
+  box-shadow: 0 6px 14px rgba(22, 50, 58, 0.18);
+  transform: rotate(-6deg);
 }
 
-.pay-face--card {
+.pay-theme__bill--b {
+  left: 22%;
+  top: 36%;
   background:
-    radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.26), transparent 42%),
-    linear-gradient(145deg, #0b2a6b 0%, #1a4fa0 45%, #2f7dd1 100%);
+    linear-gradient(90deg, transparent 8%, rgba(255, 200, 1, 0.35) 8% 12%, transparent 12%),
+    linear-gradient(135deg, #ffc801, #ff9932);
+  transform: rotate(5deg);
 }
 
-.pay-face--upi {
+/* Card — compact plastic card motif (not ATM preview) */
+.pay-theme--card .pay-theme__art {
+  background: linear-gradient(145deg, #dbeafe, #eff6ff);
+}
+
+.pay-theme__card-face {
+  position: absolute;
+  inset: 18% 14%;
+  border-radius: 0.55rem;
   background:
-    radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.24), transparent 42%),
-    linear-gradient(145deg, #4a1c0a 0%, #a34018 45%, #ff9932 100%);
+    linear-gradient(90deg, rgba(255, 255, 255, 0.35), transparent 40%),
+    linear-gradient(145deg, #1a4fa0, #2f7dd1);
+  box-shadow: 0 8px 18px rgba(26, 79, 160, 0.28);
 }
 
-.pay-face--qr {
+.pay-theme__card-face::before {
+  content: '';
+  position: absolute;
+  left: 12%;
+  top: 28%;
+  width: 1.35rem;
+  height: 1rem;
+  border-radius: 0.2rem;
+  background: linear-gradient(135deg, #e8d28a, #c9a227);
+}
+
+.pay-theme__card-face::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 22%;
+  height: 0.28rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* UPI — phone + pulse */
+.pay-theme--upi .pay-theme__art {
+  background: linear-gradient(145deg, #ffedd5, #fff7ed);
+}
+
+.pay-theme__phone {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.1rem;
+  height: 3.35rem;
+  transform: translate(-50%, -50%);
+  border-radius: 0.55rem;
+  border: 2px solid #c2410c;
+  background: linear-gradient(180deg, #fff7ed, #ffedd5);
+  box-shadow: 0 8px 16px rgba(194, 65, 12, 0.18);
+}
+
+.pay-theme__phone::before {
+  content: '';
+  position: absolute;
+  inset: 0.45rem 0.35rem 0.7rem;
+  border-radius: 0.25rem;
   background:
-    radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.24), transparent 42%),
-    linear-gradient(145deg, #16323a 0%, #2f6f68 48%, #dc143c 100%);
+    radial-gradient(circle at 70% 30%, #ff9932 0 18%, transparent 19%),
+    linear-gradient(135deg, #ffc80155, #ff993255);
 }
 
-.pay-face--upi .pay-face__mark {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(255, 200, 1, 0.55));
+.pay-theme__phone::after {
+  content: 'UPI';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.22rem;
+  text-align: center;
+  font-size: 0.45rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #9a3412;
 }
 
-.pay-face--card .pay-face__mark {
-  background: radial-gradient(circle at 35% 50%, #eb001b 0 42%, transparent 43%),
-    radial-gradient(circle at 65% 50%, #f79e1b 0 42%, transparent 43%);
-  border-color: transparent;
+/* QR — scan tile */
+.pay-theme--qr .pay-theme__art {
+  background: linear-gradient(145deg, #e2e8f0, #f8fafc);
+}
+
+.pay-theme__qr {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.8rem;
+  height: 2.8rem;
+  transform: translate(-50%, -50%);
+  border-radius: 0.35rem;
+  background:
+    linear-gradient(#16323a 0 0) 0 0 / 35% 35%,
+    linear-gradient(#16323a 0 0) 100% 0 / 35% 35%,
+    linear-gradient(#16323a 0 0) 0 100% / 35% 35%,
+    linear-gradient(#16323a 0 0) 100% 100% / 22% 22%,
+    linear-gradient(#16323a 0 0) 45% 45% / 18% 18%,
+    linear-gradient(#16323a 0 0) 70% 45% / 12% 12%,
+    linear-gradient(#16323a 0 0) 45% 70% / 12% 12%;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 2px #16323a;
 }
 
 .settings__foot {
@@ -271,7 +367,7 @@
 @media (max-width: 860px) {
   .settings,
   .grid2,
-  .pay-faces {
+  .pay-themes {
     grid-template-columns: 1fr;
   }
 }

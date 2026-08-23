@@ -170,6 +170,25 @@
   gap: 0.55rem;
 }
 
+.shimmer__hero--dashboard {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.shimmer-hero-chip {
+  flex: 0 0 auto;
+  min-width: 11rem;
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 10px 24px rgba(90, 120, 150, 0.06);
+  display: grid;
+  gap: 0.45rem;
+}
+
 .shimmer__hero--alerts {
   display: flex;
   justify-content: space-between;
@@ -1161,9 +1180,15 @@ html[data-nb-mode='dark'] .shimmer__auth-page {
   }
 
   .shimmer__hero--alerts,
-  .shimmer__hero--settings {
+  .shimmer__hero--settings,
+  .shimmer__hero--dashboard {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .shimmer-hero-chip {
+    align-self: stretch;
+    min-width: 0;
   }
 
   .shimmer-tools {
