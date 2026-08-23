@@ -103,13 +103,17 @@
 
       <div
         class="main-panel glass"
-        [style.height.px]="showForm && matchedPanelHeight ? matchedPanelHeight : null"
+        [style.height.px]="dataPanelHeight"
       >
         <div class="main-panel__body">
         <app-billing-panel-shimmer *ngIf="filterLoading" variant="catalog-data"></app-billing-panel-shimmer>
 
         <ng-container *ngIf="!filterLoading">
-        <div class="empty" *ngIf="!filtered.length">No customers match this search or filter.</div>
+        <app-empty-state
+          *ngIf="!filtered.length"
+          tone="billing"
+          message="No customers match this search or filter."
+        ></app-empty-state>
 
         <ul class="list" *ngIf="filtered.length && view === 'list'">
           <li *ngFor="let c of paged">
@@ -186,12 +190,14 @@
   <div
     class="detail-backdrop"
     *ngIf="detail"
+    [class.is-leaving]="detailLeaving"
     data-backdrop="static"
     data-keyboard="false"
   ></div>
   <div
     class="detail-modal"
     *ngIf="detail as c"
+    [class.is-leaving]="detailLeaving"
     role="dialog"
     aria-modal="true"
     tabindex="-1"

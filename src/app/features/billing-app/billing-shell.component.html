@@ -44,7 +44,7 @@
           <img *ngIf="avatarSrc as src" [src]="src" alt="" />
           <ng-container *ngIf="!avatarSrc">{{ avatarInitials }}</ng-container>
         </span>
-        <a class="bs-link" [routerLink]="bankingReturnUrl">{{ bankingReturnLabel }}</a>
+        <button type="button" class="bs-link" (click)="returnToBanking()">{{ bankingReturnLabel }}</button>
         <button type="button" class="bs-btn bs-btn--ghost" (click)="signOut()">Sign out</button>
       </div>
     </header>

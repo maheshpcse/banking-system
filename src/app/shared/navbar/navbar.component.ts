@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { PortalLaunchService } from '../../core/services/portal-launch.service';
 import { UserRole } from '../../core/models/banking.models';
 
 @Component({
@@ -14,7 +15,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
   unreadCount = 0;
   private sub?: Subscription;
 
-  constructor(public auth: AuthService, private readonly notifications: NotificationService) {}
+  constructor(
+    public auth: AuthService,
+    private readonly notifications: NotificationService,
+    private readonly portalLaunch: PortalLaunchService
+  ) {}
 
   get role(): UserRole {
     return this.auth.currentUser?.role || 'customer';
@@ -103,6 +108,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.closeMenu();
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }
+
+  launchBilling(): void {
+    this.closeMenu();
+    this.portalLaunch.launch('billing', '/billing');
   }
 
   /*

@@ -67,7 +67,7 @@
         </tbody>
       </table>
       <ng-template #noBills>
-        <p class="hint">No invoices yet from the Billing System.</p>
+        <app-empty-state message="No invoices yet from the Billing System."></app-empty-state>
       </ng-template>
     </app-animated-card>
 
@@ -86,7 +86,7 @@
           <button type="button" class="btn btn--primary" (click)="resolveComplaint(c, 'resolved')">Resolve</button>
         </div>
       </article>
-      <p class="hint" *ngIf="!complaints.length">No open disputes.</p>
+      <app-empty-state *ngIf="!complaints.length" message="No open disputes."></app-empty-state>
     </app-animated-card>
   </div>
 </section>

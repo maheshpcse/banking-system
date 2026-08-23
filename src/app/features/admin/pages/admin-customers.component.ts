@@ -190,7 +190,7 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
       });
     });
 
-    this.admin.getCustomer(user.id).subscribe({
+    withShimmerDelay(this.admin.getCustomer(user.id), SHIMMER_MS).subscribe({
       next: (detail) => {
         this.viewing = detail;
         this.drawerLoading = false;

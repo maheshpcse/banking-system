@@ -72,7 +72,7 @@
         </ng-template>
       </ng-container>
       <ng-template #noCustomers>
-        <p class="hint">No customer accounts yet.</p>
+        <app-empty-state message="No customer accounts yet."></app-empty-state>
       </ng-template>
     </app-animated-card>
 
@@ -210,7 +210,7 @@
               </table>
             </div>
             <ng-template #noVolume>
-              <p class="hint">No volume for this filter.</p>
+              <app-empty-state message="No volume for this filter."></app-empty-state>
             </ng-template>
           </div>
 
@@ -266,7 +266,7 @@
                 </table>
               </div>
               <ng-template #noDaily>
-                <p class="hint">No daily activity for this filter and date range.</p>
+                <app-empty-state message="No daily activity for this filter and date range."></app-empty-state>
               </ng-template>
             </ng-template>
           </div>

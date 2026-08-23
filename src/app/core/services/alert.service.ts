@@ -82,6 +82,27 @@ export class AlertService {
     });
   }
 
+  /** Top-center themed warning toast (empty search / filter guards). */
+  toastWarning(title: string, text?: string): Promise<SweetAlertResult> {
+    return Swal.fire({
+      toast: true,
+      position: 'top',
+      icon: 'warning',
+      title,
+      text,
+      showConfirmButton: false,
+      timer: 2600,
+      timerProgressBar: true,
+      background: this.theme.background,
+      color: this.theme.color,
+      customClass: {
+        popup: 'nb-toast nb-toast--warning',
+        title: 'nb-toast__title',
+        htmlContainer: 'nb-toast__text'
+      }
+    });
+  }
+
   success(text?: string, title: string = ALERT_TITLES.success): Promise<SweetAlertResult> {
     return Swal.fire({
       icon: 'success',

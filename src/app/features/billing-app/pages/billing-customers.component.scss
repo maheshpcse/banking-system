@@ -62,21 +62,29 @@
 
 .search {
   position: relative;
-  flex: 1 1 16rem;
-  min-width: 12rem;
+  flex: 0 1 11.5rem;
+  min-width: 9.5rem;
+  max-width: 13rem;
 }
 
 .search__clear {
   position: absolute;
-  right: 0.55rem;
+  right: 0.45rem;
   top: 50%;
-    transform: translateY(-50%);
+  transform: translateY(-50%);
+  width: 1.65rem;
+  height: 1.65rem;
   border: 0;
-  background: transparent;
-  font-size: 1.15rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.22);
+  color: var(--ink);
+  font-size: 1.1rem;
   line-height: 1;
-  color: var(--muted);
   cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  z-index: 1;
 }
 
 .glass {
@@ -658,14 +666,14 @@
 
 .name-btn:hover {
   color: #c45c26;
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .search__clear {
   position: absolute;
   right: 0.45rem;
   top: 50%;
-    transform: translateY(-50%);
+  transform: translateY(-50%);
   width: 1.65rem;
   height: 1.65rem;
   border: 0;
@@ -677,6 +685,8 @@
   cursor: pointer;
   display: inline-grid;
   place-items: center;
+  padding: 0;
+  z-index: 1;
 }
 
 .search__clear:hover {
@@ -695,6 +705,11 @@
   inset: 0;
   z-index: 80;
   background: rgba(22, 50, 58, 0.42);
+  animation: fade-in 0.22s ease both;
+}
+
+.detail-backdrop.is-leaving {
+  animation: fade-out 0.2s ease both;
 }
 
 .detail-modal {
@@ -713,6 +728,11 @@
   box-shadow: 0 28px 60px rgba(22, 50, 58, 0.22);
   display: grid;
   gap: 1.1rem;
+  animation: modal-fade-in 0.28s ease both;
+}
+
+.detail-modal.is-leaving {
+  animation: modal-fade-out 0.2s ease both;
 }
 
 .detail-modal__head {

@@ -1,0 +1,13 @@
+<div class="portal-launch" *ngIf="visible" [attr.data-target]="target" aria-live="polite">
+  <div class="portal-launch__card">
+    <div class="portal-launch__meter" aria-hidden="true">
+      <div class="portal-launch__ring"></div>
+      <span class="portal-launch__count">{{ progress }}</span>
+    </div>
+    <p class="portal-launch__label">
+      <span *ngFor="let ch of label.split(''); let i = index" [style.animationDelay.ms]="i * 45">{{
+        ch === ' ' ? '\u00A0' : ch
+      }}</span>
+    </p>
+  </div>
+</div>

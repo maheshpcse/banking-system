@@ -31,6 +31,8 @@ interface CartLine {
 export class BillingPosComponent implements OnInit {
   pageLoading = true;
   productLoading = false;
+  /** Only true while the Find button itself is running a search. */
+  findBusy = false;
   busy = false;
   paying = false;
   productQuery = '';
@@ -41,7 +43,9 @@ export class BillingPosComponent implements OnInit {
   discount = 0;
   selectedCustomerId = '';
   paymentMethod: BillingPaymentMethod = 'cash';
-  showPayModal = false;
+  payModalOpen = false;
+  payModalLeaving = false;
+  private payModalTimer: ReturnType<typeof setTimeout> | null = null;
   qrPhase: 'idle' | 'scanning' | 'success' | 'failed' = 'idle';
   activeInvoice: BillingBill | null = null;
 
@@ -119,23 +123,43 @@ export class BillingPosComponent implements OnInit {
     });
   }
 
+  onProductQueryChange(value: string): void {
+    const previous = this.productQuery;
+    this.productQuery = value;
+    if (!value.trim() && previous.trim()) {
+      this.reloadProducts(false);
+    }
+  }
+
   searchProducts(): void {
-    this.productLoading = true;
-    withShimmerDelay(this.billing.listProducts(this.productQuery.trim()), SHIMMER_MS).subscribe({
-      next: (res) => {
-        this.products = (res.items || []).filter((p) => p.active !== false);
-        this.productLoading = false;
-      },
-      error: async () => {
-        this.productLoading = false;
-        await this.alerts.error('Product search failed.');
-      }
-    });
+    if (!this.productQuery.trim()) {
+      void this.alerts.toastWarning('Enter a search term', 'Type something before finding products.');
+      return;
+    }
+    this.reloadProducts(true);
   }
 
   clearProductQuery(): void {
     this.productQuery = '';
-    this.searchProducts();
+    this.reloadProducts(false);
+  }
+
+  /** Refresh product chips. Find button only shows “Finding…” when fromFind is true. */
+  private reloadProducts(fromFind: boolean): void {
+    this.productLoading = true;
+    this.findBusy = fromFind;
+    withShimmerDelay(this.billing.listProducts(this.productQuery.trim()), SHIMMER_MS).subscribe({
+      next: (res) => {
+        this.products = (res.items || []).filter((p) => p.active !== false);
+        this.productLoading = false;
+        this.findBusy = false;
+      },
+      error: async () => {
+        this.productLoading = false;
+        this.findBusy = false;
+        await this.alerts.error('Product search failed.');
+      }
+    });
   }
 
   addToCart(product: BillingProduct): void {
@@ -178,7 +202,7 @@ export class BillingPosComponent implements OnInit {
     this.discount = 0;
     this.activeInvoice = null;
     this.qrPhase = 'idle';
-    this.showPayModal = false;
+    this.forceClosePayModal();
   }
 
   async createInvoice(): Promise<void> {
@@ -211,7 +235,7 @@ export class BillingPosComponent implements OnInit {
       this.activeInvoice = outcome.result.bill;
       this.cart = [];
       this.discount = 0;
-      this.showPayModal = true;
+      this.openPayModal();
       this.qrPhase = 'idle';
     }
   }
@@ -223,13 +247,35 @@ export class BillingPosComponent implements OnInit {
     if (!this.activeInvoice || this.activeInvoice.paymentStatus === 'paid') {
       return;
     }
-    this.showPayModal = true;
+    if (this.payModalTimer) {
+      clearTimeout(this.payModalTimer);
+      this.payModalTimer = null;
+    }
+    this.payModalLeaving = false;
+    this.payModalOpen = true;
     this.qrPhase = 'idle';
   }
 
   closePayModal(): void {
-    this.showPayModal = false;
+    if (!this.payModalOpen || this.payModalLeaving) {
+      return;
+    }
+    this.payModalLeaving = true;
     this.qrPhase = 'idle';
+    this.payModalTimer = setTimeout(() => {
+      this.payModalOpen = false;
+      this.payModalLeaving = false;
+      this.payModalTimer = null;
+    }, 200);
+  }
+
+  private forceClosePayModal(): void {
+    if (this.payModalTimer) {
+      clearTimeout(this.payModalTimer);
+      this.payModalTimer = null;
+    }
+    this.payModalOpen = false;
+    this.payModalLeaving = false;
   }
 
   async collectPayment(): Promise<void> {

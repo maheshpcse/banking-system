@@ -36,7 +36,11 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
   showForm = true;
   panelAnimating = false;
   detail: BillingProduct | null = null;
+  detailLeaving = false;
+  private detailTimer: ReturnType<typeof setTimeout> | null = null;
   matchedPanelHeight: number | null = null;
+  /** Locked to first form-measured height so Hide form keeps the same data-panel height. */
+  lockedPanelHeight: number | null = null;
 
   sort: ProductSort = 'name-asc';
   stockFilter: StockFilter = 'all';
@@ -97,9 +101,19 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
     if (this.panelTimer) {
       clearTimeout(this.panelTimer);
     }
+    if (this.detailTimer) {
+      clearTimeout(this.detailTimer);
+    }
     this.formResizeObserver?.disconnect();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  get dataPanelHeight(): number | null {
+    if (this.showForm) {
+      return this.matchedPanelHeight;
+    }
+    return this.lockedPanelHeight ?? this.matchedPanelHeight;
   }
 
   toggleForm(): void {
@@ -118,16 +132,16 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
     this.formResizeObserver?.disconnect();
     this.formResizeObserver = null;
     if (!this.showForm || typeof ResizeObserver === 'undefined') {
-      this.matchedPanelHeight = null;
       return;
     }
     const el = this.addFormRef?.nativeElement;
     if (!el) {
-      this.matchedPanelHeight = null;
       return;
     }
     const sync = (): void => {
-      this.matchedPanelHeight = Math.ceil(el.getBoundingClientRect().height);
+      const height = Math.ceil(el.getBoundingClientRect().height);
+      this.matchedPanelHeight = height;
+      this.lockedPanelHeight = height;
       this.cdr.markForCheck();
     };
     this.formResizeObserver = new ResizeObserver(() => sync());
@@ -174,6 +188,10 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
 
   onQueryChange(value: string): void {
     this.query = value;
+    if (!value.trim()) {
+      this.search$.next('');
+      return;
+    }
     this.search$.next(value.trim());
   }
 
@@ -183,6 +201,10 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   search(): void {
+    if (!this.query.trim()) {
+      void this.alerts.toastWarning('Enter a search term', 'Type something before searching products.');
+      return;
+    }
     this.page = 1;
     this.reloadForFilters();
   }
@@ -264,16 +286,34 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   openDetail(product: BillingProduct): void {
+    if (this.detailTimer) {
+      clearTimeout(this.detailTimer);
+      this.detailTimer = null;
+    }
+    this.detailLeaving = false;
     this.detail = product;
   }
 
   closeDetail(): void {
-    this.detail = null;
+    if (!this.detail || this.detailLeaving) {
+      return;
+    }
+    this.detailLeaving = true;
+    this.detailTimer = setTimeout(() => {
+      this.detail = null;
+      this.detailLeaving = false;
+      this.detailTimer = null;
+    }, 200);
   }
 
   edit(product: BillingProduct): void {
     this.editingId = product.id;
     this.showForm = true;
+    if (this.detailTimer) {
+      clearTimeout(this.detailTimer);
+      this.detailTimer = null;
+    }
+    this.detailLeaving = false;
     this.detail = null;
     this.form.patchValue({
       name: product.name,

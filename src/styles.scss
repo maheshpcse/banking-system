@@ -356,6 +356,16 @@ a:focus {
   border-color: rgba(196, 91, 108, 0.35) !important;
 }
 
+.nb-toast--warning {
+  background: linear-gradient(135deg, #fff9ef 0%, #f7f9fc 100%) !important;
+  border-color: rgba(255, 153, 50, 0.45) !important;
+}
+
+html[data-nb-billing='1'] .nb-toast--warning {
+  background: linear-gradient(135deg, #fff8e8 0%, #f4faf7 100%) !important;
+  border-color: rgba(255, 200, 1, 0.55) !important;
+}
+
 .nb-toast__title {
   font-family: var(--font-display) !important;
   font-size: 0.95rem !important;

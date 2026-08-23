@@ -1,0 +1,78 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.empty-state {
+  --es-ink: var(--text, #1d2a36);
+  --es-muted: var(--text-muted, #6b7c8f);
+  --es-accent: var(--accent, #5fc4b0);
+  --es-accent-soft: rgba(95, 196, 176, 0.18);
+  --es-panel: rgba(255, 255, 255, 0.72);
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 0.45rem;
+  padding: 1.75rem 1rem;
+}
+
+.empty-state[data-tone='billing'] {
+  --es-ink: #16323a;
+  --es-muted: #5b6b70;
+  --es-accent: #ff9932;
+  --es-accent-soft: rgba(255, 200, 1, 0.28);
+}
+
+.empty-state__art {
+  width: min(10.5rem, 42vw);
+  margin-bottom: 0.35rem;
+}
+
+.empty-state__art svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.empty-state__desk {
+  fill: var(--es-accent-soft);
+}
+
+.empty-state__folder {
+  fill: var(--es-panel);
+  stroke: var(--es-accent);
+  stroke-width: 2;
+}
+
+.empty-state__tab {
+  fill: var(--es-accent-soft);
+  stroke: var(--es-accent);
+  stroke-width: 1.5;
+}
+
+.empty-state__dot {
+  fill: var(--es-accent-soft);
+  stroke: var(--es-accent);
+  stroke-width: 2;
+}
+
+.empty-state__mark {
+  stroke: var(--es-accent);
+}
+
+.empty-state__title {
+  margin: 0;
+  font-family: var(--font-display, Georgia, serif);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--es-ink);
+  letter-spacing: -0.02em;
+}
+
+.empty-state__message {
+  margin: 0;
+  max-width: 28rem;
+  color: var(--es-muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}

@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
+import { PortalLaunchService } from '../../core/services/portal-launch.service';
 import { ShellBootService } from '../../core/services/shell-boot.service';
 
 const BOOTSTRAP_CSS_ID = 'nb-billing-bootstrap-css';
@@ -28,6 +29,7 @@ export class BillingShellComponent implements OnInit, OnDestroy {
   constructor(
     private readonly auth: AuthService,
     private readonly shellBoot: ShellBootService,
+    private readonly portalLaunch: PortalLaunchService,
     private readonly renderer: Renderer2
   ) {}
 
@@ -82,6 +84,10 @@ export class BillingShellComponent implements OnInit, OnDestroy {
 
   get operatorName(): string {
     return this.auth.currentUser?.fullName || this.auth.currentUser?.username || 'Operator';
+  }
+
+  returnToBanking(): void {
+    this.portalLaunch.launch('banking', this.bankingReturnUrl);
   }
 
   signOut(): void {
