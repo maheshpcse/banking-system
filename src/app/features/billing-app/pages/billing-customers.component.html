@@ -8,9 +8,6 @@
         <h2>Customers</h2>
         <p class="lede">Walk-up clients and optional banking account links — full-width desk.</p>
       </div>
-      <button type="button" class="btn btn--ghost" (click)="toggleForm()">
-        {{ showForm ? 'Hide form' : 'Add customer' }}
-      </button>
     </header>
 
     <div class="toolbar">
@@ -30,13 +27,13 @@
           (click)="clearQuery()"
           aria-label="Clear search"
         >
-          ×
+          <span aria-hidden="true">×</span>
         </button>
       </div>
       <button type="button" class="btn btn--ghost" (click)="search()">Search</button>
 
       <app-theme-select
-        class="theme-select--compact"
+        class="theme-select--compact theme-select--sort"
         controlClass="input input--select"
         [(ngModel)]="sort"
         [options]="sortOptions"
@@ -45,7 +42,7 @@
       ></app-theme-select>
 
       <app-theme-select
-        class="theme-select--compact"
+        class="theme-select--compact theme-select--sort"
         controlClass="input input--select"
         [(ngModel)]="bankingFilter"
         [options]="bankingOptions"
@@ -58,6 +55,10 @@
         <button type="button" [class.is-active]="view === 'grid'" (click)="setView('grid')">Grid</button>
         <button type="button" [class.is-active]="view === 'table'" (click)="setView('table')">Table</button>
       </div>
+
+      <button type="button" class="btn btn--ghost toolbar__add" (click)="toggleForm()">
+        {{ showForm ? 'Hide form' : 'Add customer' }}
+      </button>
     </div>
 
     <div
@@ -103,17 +104,23 @@
 
       <div
         class="main-panel glass"
+        [style.minHeight.px]="dataPanelHeight"
         [style.height.px]="dataPanelHeight"
       >
-        <div class="main-panel__body">
-        <app-billing-panel-shimmer *ngIf="filterLoading" variant="catalog-data"></app-billing-panel-shimmer>
+        <div class="main-panel__body" [class.is-empty]="!filterLoading && !filtered.length">
+          <app-billing-panel-shimmer
+            *ngIf="filterLoading"
+            [variant]="dataShimmerVariant"
+          ></app-billing-panel-shimmer>
 
-        <ng-container *ngIf="!filterLoading">
-        <app-empty-state
-          *ngIf="!filtered.length"
-          tone="billing"
-          message="No customers match this search or filter."
-        ></app-empty-state>
+          <ng-container *ngIf="!filterLoading">
+            <app-empty-state
+              *ngIf="!filtered.length"
+              tone="billing"
+              kind="customers"
+              [fill]="true"
+              message="No customers match this search or filter."
+            ></app-empty-state>
 
         <ul class="list" *ngIf="filtered.length && view === 'list'">
           <li *ngFor="let c of paged">
@@ -171,7 +178,7 @@
             </tbody>
           </table>
         </div>
-        </ng-container>
+          </ng-container>
         </div>
 
         <div class="pager" *ngIf="!filterLoading && filtered.length">

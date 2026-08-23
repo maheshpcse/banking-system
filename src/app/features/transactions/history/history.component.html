@@ -38,7 +38,8 @@
         </ul>
 
         <ng-template #emptyHistory>
-          <app-empty-state message="No transactions for this filter."></app-empty-state>
+          <app-empty-state kind="transactions"
+            message="No transactions for this filter."></app-empty-state>
         </ng-template>
 
         <div class="pager" *ngIf="pages > 1">

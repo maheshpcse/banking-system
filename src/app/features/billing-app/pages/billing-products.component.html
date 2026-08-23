@@ -8,9 +8,6 @@
         <h2>Products</h2>
         <p class="lede">Search stock, tune pricing, and archive quiet SKUs across the full workspace.</p>
       </div>
-      <button type="button" class="btn btn--ghost" (click)="toggleForm()">
-        {{ showForm ? 'Hide form' : 'Add product' }}
-      </button>
     </header>
 
     <div class="toolbar">
@@ -30,13 +27,13 @@
           (click)="clearQuery()"
           aria-label="Clear search"
         >
-          ×
+          <span aria-hidden="true">×</span>
         </button>
       </div>
       <button type="button" class="btn btn--ghost" (click)="search()">Search</button>
 
       <app-theme-select
-        class="theme-select--compact"
+        class="theme-select--compact theme-select--sort"
         controlClass="input input--select"
         [(ngModel)]="sort"
         [options]="sortOptions"
@@ -45,7 +42,7 @@
       ></app-theme-select>
 
       <app-theme-select
-        class="theme-select--compact"
+        class="theme-select--compact theme-select--sort"
         controlClass="input input--select"
         [(ngModel)]="stockFilter"
         [options]="stockOptions"
@@ -58,6 +55,10 @@
         <button type="button" [class.is-active]="view === 'grid'" (click)="setView('grid')">Grid</button>
         <button type="button" [class.is-active]="view === 'table'" (click)="setView('table')">Table</button>
       </div>
+
+      <button type="button" class="btn btn--ghost toolbar__add" (click)="toggleForm()">
+        {{ showForm ? 'Hide form' : 'Add product' }}
+      </button>
     </div>
 
     <div
@@ -105,86 +106,92 @@
 
       <div
         class="main-panel glass"
+        [style.minHeight.px]="dataPanelHeight"
         [style.height.px]="dataPanelHeight"
       >
-        <div class="main-panel__body">
-        <app-billing-panel-shimmer *ngIf="filterLoading" variant="catalog-data"></app-billing-panel-shimmer>
+        <div class="main-panel__body" [class.is-empty]="!filterLoading && !filtered.length">
+          <app-billing-panel-shimmer
+            *ngIf="filterLoading"
+            [variant]="dataShimmerVariant"
+          ></app-billing-panel-shimmer>
 
-        <ng-container *ngIf="!filterLoading">
-        <app-empty-state
-          *ngIf="!filtered.length"
-          tone="billing"
-          message="No products match this search or filter."
-        ></app-empty-state>
+          <ng-container *ngIf="!filterLoading">
+            <app-empty-state
+              *ngIf="!filtered.length"
+              tone="billing"
+              kind="products"
+              [fill]="true"
+              message="No products match this search or filter."
+            ></app-empty-state>
 
-        <ul class="list" *ngIf="filtered.length && view === 'list'">
-          <li *ngFor="let p of paged">
-            <button type="button" class="row" (click)="openDetail(p)">
-              <span
-                class="thumb"
-                [class.thumb--out]="p.stock <= 0"
-                [class.thumb--low]="p.stock > 0 && p.stock <= 5"
-                [class.thumb--ok]="p.stock > 5"
-                aria-hidden="true"
-              >
-                {{ (p.name || '?').slice(0, 1).toUpperCase() }}
-              </span>
-              <div class="row__body">
-                <strong>{{ p.name }}</strong>
-                <span>{{ p.sku || 'No SKU' }} · {{ stockLabel(p.stock) }} · {{ p.stock }}</span>
-              </div>
-              <em class="row__amount">{{ p.price | currencyFormat }}</em>
-            </button>
-            <div class="row__actions">
-              <button type="button" class="link" (click)="edit(p)">Edit</button>
-              <button type="button" class="link-danger" [disabled]="busy" (click)="archive(p)">Archive</button>
-            </div>
-          </li>
-        </ul>
-
-        <div class="grid-view" *ngIf="filtered.length && view === 'grid'">
-          <button type="button" class="card-tile" *ngFor="let p of paged" (click)="openDetail(p)">
-            <span [class]="stockTone(p.stock)" aria-hidden="true"></span>
-            <strong>{{ p.name }}</strong>
-            <span>{{ p.sku || 'No SKU' }}</span>
-            <em>{{ p.price | currencyFormat }}</em>
-            <small>{{ stockLabel(p.stock) }} · {{ p.stock }}</small>
-          </button>
-        </div>
-
-        <div class="table-wrap" *ngIf="filtered.length && view === 'table'">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>SKU</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>GST</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let p of paged">
-                <td>
-                  <button type="button" class="name-btn" (click)="openDetail(p)">
-                    <span [class]="stockTone(p.stock)" aria-hidden="true"></span>
-                    {{ p.name }}
-                  </button>
-                </td>
-                <td>{{ p.sku || '—' }}</td>
-                <td>{{ p.price | currencyFormat }}</td>
-                <td>{{ p.stock }} <small>({{ stockLabel(p.stock) }})</small></td>
-                <td>{{ p.gstPercentage }}%</td>
-                <td class="table__actions">
+            <ul class="list" *ngIf="filtered.length && view === 'list'">
+              <li *ngFor="let p of paged">
+                <button type="button" class="row" (click)="openDetail(p)">
+                  <span
+                    class="thumb"
+                    [class.thumb--out]="p.stock <= 0"
+                    [class.thumb--low]="p.stock > 0 && p.stock <= 5"
+                    [class.thumb--ok]="p.stock > 5"
+                    aria-hidden="true"
+                  >
+                    {{ (p.name || '?').slice(0, 1).toUpperCase() }}
+                  </span>
+                  <div class="row__body">
+                    <strong>{{ p.name }}</strong>
+                    <span>{{ p.sku || 'No SKU' }} · {{ stockLabel(p.stock) }} · {{ p.stock }}</span>
+                  </div>
+                  <em class="row__amount">{{ p.price | currencyFormat }}</em>
+                </button>
+                <div class="row__actions">
                   <button type="button" class="link" (click)="edit(p)">Edit</button>
                   <button type="button" class="link-danger" [disabled]="busy" (click)="archive(p)">Archive</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        </ng-container>
+                </div>
+              </li>
+            </ul>
+
+            <div class="grid-view" *ngIf="filtered.length && view === 'grid'">
+              <button type="button" class="card-tile" *ngFor="let p of paged" (click)="openDetail(p)">
+                <span [class]="stockTone(p.stock)" aria-hidden="true"></span>
+                <strong>{{ p.name }}</strong>
+                <span>{{ p.sku || 'No SKU' }}</span>
+                <em>{{ p.price | currencyFormat }}</em>
+                <small>{{ stockLabel(p.stock) }} · {{ p.stock }}</small>
+              </button>
+            </div>
+
+            <div class="table-wrap" *ngIf="filtered.length && view === 'table'">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>GST</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let p of paged">
+                    <td>
+                      <button type="button" class="name-btn" (click)="openDetail(p)">
+                        <span [class]="stockTone(p.stock)" aria-hidden="true"></span>
+                        {{ p.name }}
+                      </button>
+                    </td>
+                    <td>{{ p.sku || '—' }}</td>
+                    <td>{{ p.price | currencyFormat }}</td>
+                    <td>{{ p.stock }} <small>({{ stockLabel(p.stock) }})</small></td>
+                    <td>{{ p.gstPercentage }}%</td>
+                    <td class="table__actions">
+                      <button type="button" class="link" (click)="edit(p)">Edit</button>
+                      <button type="button" class="link-danger" [disabled]="busy" (click)="archive(p)">Archive</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </ng-container>
         </div>
 
         <div class="pager" *ngIf="!filterLoading && filtered.length">

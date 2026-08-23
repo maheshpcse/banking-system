@@ -39,5 +39,6 @@
     </article>
   </div>
 
-  <app-empty-state *ngIf="!items.length" message="No notifications yet."></app-empty-state>
+  <app-empty-state *ngIf="!items.length" kind="notifications"
+    message="No notifications yet."></app-empty-state>
 </section>

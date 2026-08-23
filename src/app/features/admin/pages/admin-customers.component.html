@@ -129,7 +129,8 @@
 </section>
 
 <ng-template #emptyCustomers>
-  <app-empty-state message="No users found for this filter."></app-empty-state>
+  <app-empty-state kind="customers"
+    message="No users found for this filter."></app-empty-state>
 </ng-template>
 
 <ng-template #customersShimmer>
@@ -285,6 +286,7 @@
 
     <app-empty-state
       *ngIf="!txLoading && !txViewLoading && !txItems.length"
+      kind="transactions"
       message="No transactions for this filter."
     ></app-empty-state>
 

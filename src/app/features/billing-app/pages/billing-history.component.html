@@ -35,10 +35,12 @@
 
     <app-billing-panel-shimmer *ngIf="filterLoading" variant="history-data"></app-billing-panel-shimmer>
 
-    <div class="timeline" *ngIf="!filterLoading">
+    <div class="timeline" *ngIf="!filterLoading" [class.is-empty]="!bills.length">
       <app-empty-state
         *ngIf="!bills.length"
         tone="billing"
+        kind="invoices"
+        [fill]="true"
         message="No invoices match these filters."
       ></app-empty-state>
       <article class="card" *ngFor="let bill of bills" (click)="openDetail(bill)">
