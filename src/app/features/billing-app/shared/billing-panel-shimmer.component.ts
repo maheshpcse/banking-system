@@ -148,7 +148,7 @@ import { Component, Input } from '@angular/core';
         </div>
       </ng-container>
 
-      <!-- POS: two columns -->
+      <!-- POS: picker + cart + checkout strip + create-invoice foot -->
       <ng-container *ngIf="variant === 'pos'">
         <div class="bps__pos">
           <div class="bps__panel bps__pos__picker">
@@ -171,10 +171,17 @@ import { Component, Input } from '@angular/core';
               <div class="bps__bone bps__bone--fill"></div>
               <div class="bps__bone bps__bone--xs"></div>
             </div>
-            <div class="bps__totals">
-              <div class="bps__bone bps__bone--sm" *ngFor="let t of totals"></div>
+          </div>
+          <div class="bps__panel bps__pos__checkout">
+            <div class="bps__checkout-body">
+              <div class="bps__bone bps__bone--field"></div>
+              <div class="bps__totals">
+                <div class="bps__bone bps__bone--sm" *ngFor="let t of totals"></div>
+              </div>
             </div>
-            <div class="bps__bone bps__bone--btn bps__bone--block bps__bone--accent"></div>
+          </div>
+          <div class="bps__pos__foot">
+            <div class="bps__bone bps__bone--btn bps__bone--accent bps__bone--invoice"></div>
           </div>
         </div>
       </ng-container>
@@ -576,13 +583,44 @@ import { Component, Input } from '@angular/core';
       .bps__pos {
         display: grid;
         grid-template-columns: 1.35fr 1fr;
+        grid-template-areas:
+          'picker cart'
+          'checkout checkout'
+          'foot foot';
         gap: 0.9rem;
         min-height: min(62vh, 560px);
       }
 
-      .bps__pos__picker,
-      .bps__pos__cart {
+      .bps__pos__picker {
+        grid-area: picker;
         min-height: 100%;
+      }
+
+      .bps__pos__cart {
+        grid-area: cart;
+        min-height: 100%;
+      }
+
+      .bps__pos__checkout {
+        grid-area: checkout;
+      }
+
+      .bps__checkout-body {
+        display: grid;
+        grid-template-columns: minmax(140px, 0.4fr) minmax(0, 1fr);
+        gap: 1rem;
+        align-items: end;
+      }
+
+      .bps__pos__foot {
+        grid-area: foot;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .bps__bone--invoice {
+        width: 8.5rem;
+        height: 2.5rem;
       }
 
       .bps__search-row {
@@ -649,6 +687,16 @@ import { Component, Input } from '@angular/core';
         .bps__layout,
         .bps__pos,
         .bps__settings {
+          grid-template-columns: 1fr;
+        }
+        .bps__pos {
+          grid-template-areas:
+            'picker'
+            'cart'
+            'checkout'
+            'foot';
+        }
+        .bps__checkout-body {
           grid-template-columns: 1fr;
         }
         .bps__chips {

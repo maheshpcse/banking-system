@@ -44,7 +44,7 @@
               (click)="clearProductQuery()"
               aria-label="Clear search"
             >
-              ×
+              <span aria-hidden="true">×</span>
             </button>
           </div>
           <button type="button" class="btn btn--ghost" [disabled]="findBusy" (click)="searchProducts()">

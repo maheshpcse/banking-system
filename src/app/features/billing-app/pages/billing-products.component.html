@@ -194,13 +194,22 @@
           </ng-container>
         </div>
 
-        <div class="pager" *ngIf="!filterLoading && filtered.length">
-          <span>{{ filtered.length }} products · page {{ page }} / {{ totalPages }}</span>
-          <div class="pager__btns">
-            <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="goPage(-1)">Prev</button>
-            <button type="button" class="btn btn--ghost" [disabled]="page >= totalPages" (click)="goPage(1)">
-              Next
-            </button>
+        <div class="pager" *ngIf="filtered.length || filterLoading">
+          <ng-container *ngIf="!filterLoading">
+            <span>{{ filtered.length }} products · page {{ page }} / {{ totalPages }}</span>
+            <div class="pager__btns">
+              <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="goPage(-1)">Prev</button>
+              <button type="button" class="btn btn--ghost" [disabled]="page >= totalPages" (click)="goPage(1)">
+                Next
+              </button>
+            </div>
+          </ng-container>
+          <div class="pager-shimmer" *ngIf="filterLoading" aria-hidden="true">
+            <span class="pager-shimmer__bone pager-shimmer__bone--label"></span>
+            <div class="pager-shimmer__btns">
+              <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
+              <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
+            </div>
           </div>
         </div>
       </div>
