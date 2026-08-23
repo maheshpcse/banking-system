@@ -1,0 +1,50 @@
+<section class="http-error" [attr.data-tone]="tone" [attr.data-code]="code" aria-live="polite">
+  <div class="http-error__canvas" aria-hidden="true">
+    <span class="http-error__orb http-error__orb--a"></span>
+    <span class="http-error__orb http-error__orb--b"></span>
+    <span class="http-error__orb http-error__orb--c"></span>
+    <span class="http-error__grid"></span>
+    <span class="http-error__sheen"></span>
+  </div>
+
+  <div class="http-error__frame">
+    <p class="http-error__brand">{{ brand }}</p>
+
+    <div class="http-error__code" aria-hidden="true">
+      <span
+        class="http-error__digit"
+        *ngFor="let d of digits; let i = index"
+        [style.animationDelay.ms]="120 + i * 90"
+        >{{ d }}</span
+      >
+      <span class="http-error__ring"></span>
+    </div>
+
+    <div class="http-error__art" aria-hidden="true">
+      <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect class="http-error__desk" x="18" y="86" width="124" height="16" rx="6" />
+        <path
+          class="http-error__folder"
+          d="M36 34h36l10 10h42a10 10 0 0 1 10 10v28a10 10 0 0 1-10 10H36a10 10 0 0 1-10-10V44a10 10 0 0 1 10-10z"
+        />
+        <circle class="http-error__lens" cx="80" cy="66" r="16" />
+        <path class="http-error__slash" d="M70 56l20 20M90 56L70 76" stroke-width="3.5" stroke-linecap="round" />
+      </svg>
+    </div>
+
+    <h1 class="http-error__title">{{ title }}</h1>
+    <p class="http-error__message">{{ message }}</p>
+    <p class="http-error__hint">{{ hint }}</p>
+
+    <div class="http-error__actions">
+      <button type="button" class="http-error__cta http-error__cta--primary" (click)="primaryAction()">
+        {{ primaryLabel }}
+      </button>
+      <button type="button" class="http-error__cta http-error__cta--ghost" (click)="goBack()">
+        {{ secondaryLabel }}
+      </button>
+    </div>
+
+    <p class="http-error__meta">HTTP {{ code }}</p>
+  </div>
+</section>

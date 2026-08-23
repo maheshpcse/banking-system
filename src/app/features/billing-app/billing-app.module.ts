@@ -10,6 +10,7 @@ import { BillingHistoryComponent } from './pages/billing-history.component';
 import { BillingSettingsComponent } from './pages/billing-settings.component';
 import { BillingSceneComponent } from './shared/billing-scene.component';
 import { BillingPanelShimmerComponent } from './shared/billing-panel-shimmer.component';
+import { BillingNotFoundRedirectComponent } from './pages/billing-not-found-redirect.component';
 
 const routes: Routes = [
   {
@@ -21,7 +22,8 @@ const routes: Routes = [
       { path: 'customers', component: BillingCustomersComponent },
       { path: 'pos', component: BillingPosComponent },
       { path: 'history', component: BillingHistoryComponent },
-      { path: 'settings', component: BillingSettingsComponent }
+      { path: 'settings', component: BillingSettingsComponent },
+      { path: '**', component: BillingNotFoundRedirectComponent }
     ]
   }
 ];
@@ -36,7 +38,8 @@ const routes: Routes = [
     BillingHistoryComponent,
     BillingSettingsComponent,
     BillingSceneComponent,
-    BillingPanelShimmerComponent
+    BillingPanelShimmerComponent,
+    BillingNotFoundRedirectComponent
   ],
   imports: [SharedModule, RouterModule.forChild(routes)]
 })

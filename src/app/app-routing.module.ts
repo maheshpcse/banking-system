@@ -58,7 +58,11 @@ const routes: Routes = [
     loadChildren: () =>
       import('./features/billing-app/billing-app.module').then((m) => m.BillingAppModule)
   },
-  { path: '**', redirectTo: '' }
+  {
+    path: 'error',
+    loadChildren: () => import('./features/error/error.module').then((m) => m.ErrorModule)
+  },
+  { path: '**', redirectTo: 'error/404' }
 ];
 
 @NgModule({
