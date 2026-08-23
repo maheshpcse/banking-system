@@ -337,17 +337,61 @@ a:focus {
   color: var(--text);
 }
 
-/* Theme-colored toasts (login / signup / empty-filter warnings) */
-.nb-toast {
+/* Theme-colored toasts — compact height; width grows with message */
+.nb-toast.swal2-popup.swal2-toast {
   border-radius: 0.9rem !important;
   border: 1px solid rgba(95, 196, 176, 0.35) !important;
   box-shadow: 0 14px 28px rgba(90, 120, 150, 0.14) !important;
   font-family: var(--font-body) !important;
-  padding: 0.75rem 2.1rem 0.75rem 0.95rem !important;
-  width: fit-content !important;
-  max-width: min(26rem, calc(100vw - 1.5rem)) !important;
-  display: grid !important;
-  gap: 0.2rem !important;
+  padding: 0.55rem 1.85rem 0.55rem 0.7rem !important;
+  width: auto !important;
+  max-width: min(32rem, calc(100vw - 1.5rem)) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  /* Keep SweetAlert2 toast’s horizontal layout (not a tall stacked grid). */
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  column-gap: 0.45rem !important;
+  row-gap: 0.1rem !important;
+  box-sizing: border-box !important;
+}
+
+.nb-toast .swal2-icon {
+  margin: 0 !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  min-width: 1.5rem !important;
+  border-width: 0.12rem !important;
+  flex: 0 0 auto !important;
+}
+
+.nb-toast .swal2-icon .swal2-icon-content {
+  font-size: 0.85rem !important;
+}
+
+.nb-toast .swal2-title {
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: 1 1 auto !important;
+  max-width: 100% !important;
+}
+
+.nb-toast .swal2-html-container {
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: 1 1 100% !important;
+  padding-left: calc(1.5rem + 0.45rem) !important;
+  text-align: left !important;
+}
+
+.nb-toast .swal2-html-container:empty {
+  display: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 0 !important;
 }
 
 .nb-toast .swal2-timer-progress-bar,
@@ -357,12 +401,13 @@ a:focus {
 
 .nb-toast__close {
   position: absolute !important;
-  top: 0.45rem !important;
-  right: 0.45rem !important;
-  width: 1.45rem !important;
-  height: 1.45rem !important;
+  top: 50% !important;
+  right: 0.35rem !important;
+  transform: translateY(-50%) !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
   border-radius: 999px !important;
-  font-size: 1.05rem !important;
+  font-size: 0.9rem !important;
   line-height: 1 !important;
   color: var(--text-muted) !important;
   box-shadow: none !important;
@@ -396,21 +441,21 @@ html[data-nb-billing='1'] .nb-toast--warning {
 
 .nb-toast__title {
   font-family: var(--font-display) !important;
-  font-size: 0.95rem !important;
+  font-size: 0.88rem !important;
   font-weight: 700 !important;
   color: var(--text) !important;
   white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  line-height: 1.35 !important;
-  padding-right: 0.35rem !important;
+  overflow-wrap: break-word !important;
+  line-height: 1.3 !important;
+  padding-right: 0.2rem !important;
 }
 
 .nb-toast__text {
-  font-size: 0.86rem !important;
+  font-size: 0.8rem !important;
   color: var(--text-muted) !important;
   white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  line-height: 1.4 !important;
+  overflow-wrap: break-word !important;
+  line-height: 1.3 !important;
   margin: 0 !important;
 }
 

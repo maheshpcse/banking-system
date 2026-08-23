@@ -113,32 +113,57 @@
 .theme-select__clear {
   position: absolute;
   right: 0.45rem;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
   width: 1.65rem;
   height: 1.65rem;
   border: 0;
   border-radius: 999px;
   background: rgba(148, 163, 184, 0.22);
   color: var(--ts-ink);
-  font-size: 1.1rem;
-  line-height: 1;
   cursor: pointer;
-  display: inline-grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   z-index: 2;
+  line-height: 0;
+  transform: none;
+}
+
+.theme-select__clear span {
+  display: block;
+  font-size: 1.05rem;
+  line-height: 1;
+  transform: translateY(-0.5px);
 }
 
 .theme-select__clear:hover {
   background: rgba(196, 91, 108, 0.22);
 }
 
+/* Clearable only: × takes the chevron’s old spot (left); chevron takes ×’s old spot (far right). */
 .theme-select.has-clear .theme-select__control {
-  padding-right: 4rem;
+  padding-right: 4.1rem;
+}
+
+.theme-select.has-clear .theme-select__clear {
+  right: 2.25rem;
 }
 
 .theme-select.has-clear .theme-select__chevron {
-  right: 2.35rem;
+  right: 0.4rem;
+}
+
+.theme-select.has-clear .theme-select__control.input,
+.theme-select.has-clear .theme-select__control.input--select {
+  padding-right: 3.85rem;
+}
+
+.theme-select.has-clear .theme-select__control.input ~ .theme-select__clear,
+.theme-select.has-clear .theme-select__control.input--select ~ .theme-select__clear {
+  right: 2.15rem;
 }
 
 .theme-select__menu {
@@ -222,15 +247,16 @@
 }
 
 :host(.theme-select--with-clear) .theme-select__control {
-  padding-right: 4rem;
+  padding-right: 4.1rem;
 }
 
 :host(.theme-select--with-clear) .theme-select__chevron {
-  right: 2.35rem;
+  right: 0.4rem;
 }
 
 :host(.theme-select--with-clear) .theme-select__clear {
-  display: inline-grid;
+  display: inline-flex;
+  right: 2.25rem;
 }
 
 :host(.theme-select--compact) {

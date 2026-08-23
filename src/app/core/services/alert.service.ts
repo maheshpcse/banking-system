@@ -70,7 +70,7 @@ export class AlertService {
       text,
       showConfirmButton: false,
       showCloseButton: true,
-      timer: 2000,
+      timer: 5000,
       timerProgressBar: false,
       background: this.theme.background,
       color: this.theme.color,
