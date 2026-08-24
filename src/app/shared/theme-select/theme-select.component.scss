@@ -100,13 +100,14 @@
   height: 0.55rem;
   border-right: 2px solid var(--ts-muted);
   border-bottom: 2px solid var(--ts-muted);
+  /* Always point down — no open flip animation. */
   transform: translateY(-50%) rotate(45deg);
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: border-color 0.2s ease;
   pointer-events: none;
 }
 
 .theme-select.is-open .theme-select__chevron {
-  transform: translateY(-50%) rotate(225deg);
+  transform: translateY(-50%) rotate(45deg);
   border-color: var(--ts-accent-deep);
 }
 
@@ -143,27 +144,32 @@
   background: rgba(196, 91, 108, 0.22);
 }
 
-/* Clearable only: × left of chevron, chevron far right — tight gap (~0.35rem). */
-.theme-select.has-clear .theme-select__control {
-  padding-right: 3.45rem;
+/*
+ * Clearable selects: reserve × + chevron space even before a value is chosen
+ * so the chevron never slides when × appears. × sits left; chevron stays fixed far-right.
+ */
+.theme-select.is-clearable .theme-select__control {
+  padding-right: 3.4rem;
+}
+
+.theme-select.is-clearable .theme-select__chevron {
+  right: 0.45rem;
+}
+
+.theme-select.is-clearable .theme-select__control.input,
+.theme-select.is-clearable .theme-select__control.input--select {
+  padding-right: 3.2rem;
 }
 
 .theme-select.has-clear .theme-select__clear {
-  right: 1.7rem;
+  right: 1.75rem;
 }
 
-.theme-select.has-clear .theme-select__chevron {
-  right: 0.4rem;
-}
-
-.theme-select.has-clear .theme-select__control.input,
-.theme-select.has-clear .theme-select__control.input--select {
-  padding-right: 3.25rem;
-}
-
+.theme-select.is-clearable .theme-select__control.input ~ .theme-select__clear,
+.theme-select.is-clearable .theme-select__control.input--select ~ .theme-select__clear,
 .theme-select.has-clear .theme-select__control.input ~ .theme-select__clear,
 .theme-select.has-clear .theme-select__control.input--select ~ .theme-select__clear {
-  right: 1.6rem;
+  right: 1.65rem;
 }
 
 .theme-select__menu {
@@ -247,16 +253,16 @@
 }
 
 :host(.theme-select--with-clear) .theme-select__control {
-  padding-right: 3.45rem;
+  padding-right: 3.4rem;
 }
 
 :host(.theme-select--with-clear) .theme-select__chevron {
-  right: 0.4rem;
+  right: 0.45rem;
 }
 
 :host(.theme-select--with-clear) .theme-select__clear {
   display: inline-flex;
-  right: 1.7rem;
+  right: 1.75rem;
 }
 
 :host(.theme-select--compact) {
