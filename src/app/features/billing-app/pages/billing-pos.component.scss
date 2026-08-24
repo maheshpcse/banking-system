@@ -93,36 +93,50 @@
 
 .checkout__body {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(11.5rem, 0.85fr);
-  gap: 0.85rem 1.1rem;
+  grid-template-columns: minmax(0, 1.25fr) minmax(12.5rem, 0.75fr);
+  gap: 0.85rem;
   align-items: stretch;
 }
 
 .checkout__controls {
   display: grid;
-  gap: 0.65rem;
+  gap: 0.7rem;
   align-content: start;
   min-width: 0;
+  padding: 0.85rem 0.9rem;
+  border-radius: 0.95rem;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(22, 50, 58, 0.08);
+  box-sizing: border-box;
 }
 
 .checkout__coupon {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.5rem;
+  gap: 0.55rem;
   align-items: end;
 }
 
 .checkout__apply {
+  flex: 0 0 auto;
   height: 2.5rem;
   min-height: 2.5rem;
-  align-self: end;
+  max-height: 2.5rem;
+  padding: 0 1rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   white-space: nowrap;
+  box-sizing: border-box;
+  align-self: end;
 }
 
 .coupon-note {
   margin: 0;
   font-size: 0.78rem;
   color: var(--muted);
+  line-height: 1.35;
 }
 
 .coupon-note .link {
@@ -137,7 +151,7 @@
 
 .checkout__discount {
   margin: 0;
-  max-width: 12rem;
+  max-width: 11rem;
 }
 
 .pos__foot {
@@ -397,9 +411,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    line-height: 1;
+    line-height: 0;
     padding: 0;
     transition: background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+  }
+
+  button span {
+    display: block;
+    font-size: 1.05rem;
+    line-height: 1;
+    transform: translateY(-0.5px);
   }
 
   button:hover {
@@ -431,12 +452,15 @@
 .totals {
   margin: 0;
   display: grid;
-  gap: 0.35rem;
-  align-content: start;
-  padding: 0.75rem 0.85rem;
+  gap: 0.4rem;
+  align-content: center;
+  height: 100%;
+  min-height: 100%;
+  padding: 0.85rem 0.95rem;
   border-radius: 0.95rem;
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(22, 50, 58, 0.08);
+  box-sizing: border-box;
 
   div {
     display: flex;

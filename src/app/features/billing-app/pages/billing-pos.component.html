@@ -99,9 +99,13 @@
                 <span>{{ line.unitPrice | currencyFormat }}</span>
               </div>
               <div class="stepper">
-                <button type="button" (click)="updateQty(line, -1)" aria-label="Decrease quantity">−</button>
+                <button type="button" (click)="updateQty(line, -1)" aria-label="Decrease quantity">
+                  <span aria-hidden="true">−</span>
+                </button>
                 <em>{{ line.quantity }}</em>
-                <button type="button" (click)="updateQty(line, 1)" aria-label="Increase quantity">+</button>
+                <button type="button" (click)="updateQty(line, 1)" aria-label="Increase quantity">
+                  <span aria-hidden="true">+</span>
+                </button>
               </div>
               <button type="button" class="link-danger" (click)="removeLine(line)" aria-label="Remove line">×</button>
             </li>

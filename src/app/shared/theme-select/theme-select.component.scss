@@ -145,31 +145,32 @@
 }
 
 /*
- * Clearable selects: reserve × + chevron space even before a value is chosen
- * so the chevron never slides when × appears. × sits left; chevron stays fixed far-right.
+ * Clearable selects: reserve × + chevron space so the chevron never slides.
+ * Chevron stays at the same right inset as non-clearable fields (Country / Sort).
+ * × sits just left of the chevron with a small gap.
  */
 .theme-select.is-clearable .theme-select__control {
-  padding-right: 3.4rem;
+  padding-right: 3.55rem;
 }
 
 .theme-select.is-clearable .theme-select__chevron {
-  right: 0.45rem;
+  right: 0.7rem;
 }
 
 .theme-select.is-clearable .theme-select__control.input,
 .theme-select.is-clearable .theme-select__control.input--select {
-  padding-right: 3.2rem;
+  padding-right: 3.35rem;
 }
 
 .theme-select.has-clear .theme-select__clear {
-  right: 1.75rem;
+  right: 2.15rem;
 }
 
 .theme-select.is-clearable .theme-select__control.input ~ .theme-select__clear,
 .theme-select.is-clearable .theme-select__control.input--select ~ .theme-select__clear,
 .theme-select.has-clear .theme-select__control.input ~ .theme-select__clear,
 .theme-select.has-clear .theme-select__control.input--select ~ .theme-select__clear {
-  right: 1.65rem;
+  right: 2.05rem;
 }
 
 .theme-select__menu {
@@ -253,16 +254,16 @@
 }
 
 :host(.theme-select--with-clear) .theme-select__control {
-  padding-right: 3.4rem;
+  padding-right: 3.55rem;
 }
 
 :host(.theme-select--with-clear) .theme-select__chevron {
-  right: 0.45rem;
+  right: 0.7rem;
 }
 
 :host(.theme-select--with-clear) .theme-select__clear {
   display: inline-flex;
-  right: 1.75rem;
+  right: 2.15rem;
 }
 
 :host(.theme-select--compact) {
