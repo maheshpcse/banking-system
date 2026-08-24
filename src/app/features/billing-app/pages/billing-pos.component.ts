@@ -140,14 +140,37 @@ export class BillingPosComponent implements OnInit {
   private async resumeBill(billId: string): Promise<void> {
     try {
       const res = await firstValueFrom(this.billing.getBill(billId));
-      this.activeInvoice = res.bill;
-      this.selectedCustomerId = res.bill.customerId || '';
+      const bill = res.bill;
+      this.activeInvoice = bill;
+      this.selectedCustomerId = bill.customerId || '';
+      this.cart = (bill.items || []).map((item) => {
+        const product = this.products.find((p) => p.id === item.productId);
+        return {
+          productId: item.productId,
+          name: item.name,
+          unitPrice: item.unitPrice,
+          gstPercentage: item.gstPercentage,
+          quantity: item.quantity,
+          stock: Math.max(item.quantity, product?.stock ?? item.quantity)
+        };
+      });
+      this.discount = Number(bill.discount) || 0;
+      if (bill.couponCode) {
+        const match = this.coupons.find(
+          (c) => c.code.toUpperCase() === String(bill.couponCode).toUpperCase()
+        );
+        this.appliedCoupon = match || null;
+        this.selectedCouponCode = bill.couponCode;
+      } else {
+        this.clearCoupon();
+        this.discount = Number(bill.discount) || 0;
+      }
       void this.router.navigate([], {
         relativeTo: this.route,
         queryParams: {},
         replaceUrl: true
       });
-      await this.openGateway(res.bill);
+      await this.openGateway(bill);
     } catch {
       await this.alerts.error('Unable to resume that bill on POS.');
     }
@@ -227,9 +250,17 @@ export class BillingPosComponent implements OnInit {
   }
 
   clearCart(): void {
+    this.resetCheckout();
+  }
+
+  /** Reset cart, discounts, coupon, and active invoice after a successful payment. */
+  private resetCheckout(): void {
     this.cart = [];
     this.discount = 0;
-    this.clearCoupon();
+    this.appliedCoupon = null;
+    this.selectedCouponCode = '';
+    this.selectedCustomerId = '';
+    this.productQuery = '';
     this.activeInvoice = null;
     this.gatewayOpen = false;
   }
@@ -339,6 +370,8 @@ export class BillingPosComponent implements OnInit {
     this.activeInvoice = event.bill;
     if (event.ok) {
       this.gatewayOpen = false;
+      this.resetCheckout();
+      void this.alerts.toastSuccess('Payment complete', 'Checkout cleared for the next bill.');
     }
   }
 

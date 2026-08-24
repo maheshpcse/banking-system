@@ -11,6 +11,7 @@ import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/
 export type FlowFilter = 'all' | 'deposit' | 'withdraw' | 'transfer';
 export type FlowCategoryKey = 'deposit' | 'withdraw' | 'transfer';
 export type RangeFilter = 'week' | 'month' | 'quarter' | 'half' | 'custom';
+export type BillingPulseFilter = 'all' | 'draft' | 'pending' | 'paid' | 'error' | 'failed';
 type ViewMode = 'chart' | 'table';
 
 export interface VolumeCategory {
@@ -79,7 +80,12 @@ export class ManagerOverviewComponent implements OnInit {
   /** Chart / table content shimmer when filters or range change */
   flowLoading = false;
   billingLoading = true;
+  billingFlowLoading = false;
   billingStats: BillingDashboardStats | null = null;
+  billingKpis: Array<{ label: string; display: string; pct: number; color: string }> = [];
+  billingStatusBars: Array<{ id: BillingPulseFilter; label: string; count: number; color: string }> = [];
+  billingView: ViewMode = 'chart';
+  billingFilter: BillingPulseFilter = 'all';
   customers = 0;
   pending = 0;
   unread = 0;
@@ -92,6 +98,15 @@ export class ManagerOverviewComponent implements OnInit {
     { id: 'deposit', label: 'Deposits' },
     { id: 'withdraw', label: 'Withdrawals' },
     { id: 'transfer', label: 'Transfers' }
+  ];
+
+  readonly billingFilters: Array<{ id: BillingPulseFilter; label: string }> = [
+    { id: 'all', label: 'All' },
+    { id: 'draft', label: 'Bill Created' },
+    { id: 'pending', label: 'Payment Pending' },
+    { id: 'paid', label: 'Payment Success' },
+    { id: 'error', label: 'Payment Error' },
+    { id: 'failed', label: 'Payment Failure' }
   ];
 
   /** Server currently reports the trailing 14 days — longer ranges show all of it. */
@@ -136,6 +151,7 @@ export class ManagerOverviewComponent implements OnInit {
         this.unread = this.notifications.unreadCount;
         this.analytics = analytics;
         this.billingStats = billing;
+        this.rebuildBillingPulse();
         this.billingLoading = false;
         this.pageLoading = false;
       },
@@ -147,10 +163,12 @@ export class ManagerOverviewComponent implements OnInit {
     });
   }
 
-  get billingKpis(): Array<{ label: string; display: string; pct: number; color: string }> {
+  private rebuildBillingPulse(): void {
     const s = this.billingStats;
     if (!s) {
-      return [];
+      this.billingKpis = [];
+      this.billingStatusBars = [];
+      return;
     }
     const values = [
       { label: 'Total sales', value: s.totalSales, display: this.formatMoney(s.totalSales), color: '#5fc4b0' },
@@ -159,26 +177,56 @@ export class ManagerOverviewComponent implements OnInit {
       { label: 'Customers', value: s.totalCustomers, display: String(s.totalCustomers), color: '#c45b6c' }
     ];
     const max = Math.max(1, ...values.map((v) => v.value));
-    return values.map((v) => ({
+    this.billingKpis = values.map((v) => ({
       label: v.label,
       display: v.display,
       pct: Math.max(8, Math.round((v.value / max) * 100)),
       color: v.color
     }));
+
+    const c = s.statusCounts || {};
+    const allBars: Array<{ id: BillingPulseFilter; label: string; count: number; color: string }> = [
+      { id: 'draft', label: 'Created', count: c.draft || 0, color: '#d97706' },
+      { id: 'pending', label: 'Pending', count: c.pending || 0, color: '#f59e0b' },
+      { id: 'paid', label: 'Success', count: c.paid || 0, color: '#059669' },
+      { id: 'error', label: 'Error', count: c.error || 0, color: '#ea580c' },
+      { id: 'failed', label: 'Failure', count: c.failed || 0, color: '#dc2626' }
+    ];
+    this.billingStatusBars =
+      this.billingFilter === 'all' ? allBars : allBars.filter((b) => b.id === this.billingFilter);
   }
 
-  get billingStatusBars(): Array<{ label: string; count: number; color: string }> {
-    const c = this.billingStats?.statusCounts;
-    if (!c) {
-      return [];
+  get billingFilterLabel(): string {
+    return this.billingFilters.find((f) => f.id === this.billingFilter)?.label || 'All';
+  }
+
+  get billingRecentRows(): BillingDashboardStats['recentBills'] {
+    const items = this.billingStats?.recentBills || [];
+    if (this.billingFilter === 'all') {
+      return items;
     }
-    return [
-      { label: 'Created', count: c.draft || 0, color: '#d97706' },
-      { label: 'Pending', count: c.pending || 0, color: '#f59e0b' },
-      { label: 'Success', count: c.paid || 0, color: '#059669' },
-      { label: 'Error', count: c.error || 0, color: '#ea580c' },
-      { label: 'Failure', count: c.failed || 0, color: '#dc2626' }
-    ];
+    return items.filter((b) => b.paymentStatus === this.billingFilter);
+  }
+
+  setBillingFilter(filter: BillingPulseFilter): void {
+    if (this.billingFilter === filter) {
+      return;
+    }
+    this.billingFilter = filter;
+    this.flashBillingFlow();
+  }
+
+  toggleBillingView(): void {
+    this.billingView = this.billingView === 'chart' ? 'table' : 'chart';
+    this.flashBillingFlow();
+  }
+
+  private flashBillingFlow(): void {
+    this.billingFlowLoading = true;
+    shimmerPause(SHIMMER_MS).subscribe(() => {
+      this.rebuildBillingPulse();
+      this.billingFlowLoading = false;
+    });
   }
 
   private formatMoney(n: number): string {

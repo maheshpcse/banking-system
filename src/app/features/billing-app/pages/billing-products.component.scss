@@ -600,12 +600,12 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: background 0.16s ease, color 0.16s ease;
+  transition: color 0.16s ease;
 }
 
 .icon-close:hover {
-  background: rgba(255, 153, 50, 0.22);
-  color: var(--saffron);
+  background: transparent;
+  color: var(--crimson, #dc143c);
 }
 
 .drawer__meta {
@@ -870,12 +870,12 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: background 0.16s ease, color 0.16s ease;
+  transition: color 0.16s ease;
 }
 
 .icon-close:hover {
-  background: rgba(255, 153, 50, 0.22);
-  color: var(--saffron);
+  background: transparent;
+  color: var(--crimson, #dc143c);
 }
 
 

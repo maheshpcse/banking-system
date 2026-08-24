@@ -506,6 +506,40 @@
   padding-right: 2.4rem;
 }
 
+.form--avatar .field-with-clear__control ::ng-deep .theme-select__clear,
+.form--avatar .field-with-clear__control .field-clear {
+  width: 1.85rem;
+  height: 1.85rem;
+  right: 0.45rem;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.form--avatar .field-with-clear__control ::ng-deep .theme-select__clear span,
+.form--avatar .field-with-clear__control .field-clear span {
+  font-size: 1.2rem;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.form--avatar .field-with-clear__control ::ng-deep .theme-select.is-clearable .theme-select__control {
+  padding-right: 3.75rem;
+}
+
+.form--avatar .field-with-clear__control ::ng-deep .theme-select.has-clear .theme-select__clear {
+  right: 2.15rem;
+}
+
+.form--avatar .field-with-clear__control .file-input {
+  padding-right: 2.75rem;
+  min-height: 2.95rem;
+}
+
 .field-clear {
   position: absolute;
   right: 0.4rem;

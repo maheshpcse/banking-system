@@ -16,6 +16,7 @@ const THREE_JS_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three
 })
 export class BillingShellComponent implements OnInit, OnDestroy {
   private bootstrapLink: HTMLLinkElement | null = null;
+  readonly year = new Date().getFullYear();
 
   readonly dockItems: Array<{ path: string; label: string; icon: string }> = [
     { path: '/billing', label: 'Dashboard', icon: 'dashboard' },

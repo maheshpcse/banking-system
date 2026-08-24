@@ -9,6 +9,7 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class HomeComponent implements OnInit {
   signupComplete = false;
+  readonly year = new Date().getFullYear();
 
   constructor(
     private auth: AuthService,

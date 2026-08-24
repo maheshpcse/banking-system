@@ -283,42 +283,125 @@
     accent="sand"
     title="Billing pulse"
     subtitle="NovaBill desk snapshot"
+    [tilt]="false"
   >
-    <div class="billing-pulse" *ngIf="billingStats; else noBillingStats">
-      <div class="billing-pulse__kpi" *ngFor="let kpi of billingKpis">
-        <div class="billing-pulse__meta">
-          <span>{{ kpi.label }}</span>
-          <strong>{{ kpi.display }}</strong>
-        </div>
-        <div class="billing-pulse__track">
-          <div
-            class="billing-pulse__fill"
-            [style.width.%]="kpi.pct"
-            [style.background]="kpi.color"
-          ></div>
-        </div>
-      </div>
-      <div class="billing-pulse__pipeline" *ngIf="billingStatusBars.length">
-        <p class="billing-pulse__pipeline-title">Invoice pipeline</p>
-        <div class="billing-pulse__stack" aria-hidden="true">
-          <span
-            *ngFor="let bar of billingStatusBars"
-            [style.flex-grow]="bar.count || 0.15"
-            [style.background]="bar.color"
-            [title]="bar.label + ': ' + bar.count"
-          ></span>
-        </div>
-        <ul class="billing-pulse__legend">
-          <li *ngFor="let bar of billingStatusBars">
-            <i [style.background]="bar.color"></i>
-            {{ bar.label }}
-            <em>{{ bar.count }}</em>
-          </li>
-        </ul>
+    <button
+      cardHeaderActions
+      type="button"
+      class="btn btn--ghost btn--compact flip-btn"
+      (click)="toggleBillingView(); $event.stopPropagation()"
+    >
+      <app-nb-icon name="transfer"></app-nb-icon>
+      {{ billingView === 'chart' ? 'Table view' : 'Chart view' }}
+    </button>
+
+    <div class="flow-toolbar" (click)="$event.stopPropagation()">
+      <div class="tools">
+        <button
+          type="button"
+          class="btn btn--ghost btn--compact"
+          *ngFor="let f of billingFilters"
+          [class.is-active]="billingFilter === f.id"
+          (click)="setBillingFilter(f.id)"
+        >
+          {{ f.label }}
+        </button>
       </div>
     </div>
+
+    <app-shimmer *ngIf="billingFlowLoading && billingView === 'chart'" variant="manager-flow-chart"></app-shimmer>
+    <app-shimmer *ngIf="billingFlowLoading && billingView === 'table'" variant="manager-flow-table"></app-shimmer>
+
+    <ng-container *ngIf="!billingFlowLoading && billingStats; else noBillingStats">
+      <ng-container *ngIf="billingView === 'chart'">
+        <div class="billing-pulse">
+          <div class="billing-pulse__kpi" *ngFor="let kpi of billingKpis">
+            <div class="billing-pulse__meta">
+              <span>{{ kpi.label }}</span>
+              <strong>{{ kpi.display }}</strong>
+            </div>
+            <div class="billing-pulse__track">
+              <div
+                class="billing-pulse__fill"
+                [style.width.%]="kpi.pct"
+                [style.background]="kpi.color"
+              ></div>
+            </div>
+          </div>
+          <div class="billing-pulse__pipeline" *ngIf="billingStatusBars.length">
+            <p class="billing-pulse__pipeline-title">Invoice pipeline <span>({{ billingFilterLabel }})</span></p>
+            <div class="billing-pulse__stack" aria-hidden="true">
+              <span
+                *ngFor="let bar of billingStatusBars"
+                [style.flex-grow]="bar.count || 0.15"
+                [style.background]="bar.color"
+                [title]="bar.label + ': ' + bar.count"
+              ></span>
+            </div>
+            <ul class="billing-pulse__legend">
+              <li *ngFor="let bar of billingStatusBars">
+                <i [style.background]="bar.color"></i>
+                {{ bar.label }}
+                <em>{{ bar.count }}</em>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="billingView === 'table'">
+        <div class="chart-block">
+          <p class="chart-block__title">Pipeline by status <span>({{ billingFilterLabel }})</span></p>
+          <div class="table-wrap" *ngIf="billingStatusBars.length; else noBillingRows">
+            <table class="data-table data-table--compact">
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let bar of billingStatusBars">
+                  <td>
+                    <strong><span class="legend__dot" [style.background]="bar.color"></span>{{ bar.label }}</strong>
+                  </td>
+                  <td>{{ bar.count }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="chart-block">
+          <p class="chart-block__title">Recent invoices <span>({{ billingFilterLabel }})</span></p>
+          <div class="table-wrap" *ngIf="billingRecentRows.length; else noBillingRows">
+            <table class="data-table data-table--compact">
+              <thead>
+                <tr>
+                  <th>Bill</th>
+                  <th>Customer</th>
+                  <th>Status</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let bill of billingRecentRows">
+                  <td><strong>{{ bill.billNumber }}</strong></td>
+                  <td>{{ bill.customerName }}</td>
+                  <td>{{ bill.paymentStatus }}</td>
+                  <td>{{ bill.grandTotal | currencyFormat }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <ng-template #noBillingRows>
+          <app-empty-state kind="transactions" message="No billing rows for this filter."></app-empty-state>
+        </ng-template>
+      </ng-container>
+    </ng-container>
+
     <ng-template #noBillingStats>
-      <p class="hint" *ngIf="!billingLoading">Billing stats unavailable right now.</p>
+      <p class="hint" *ngIf="!billingLoading && !billingFlowLoading">Billing stats unavailable right now.</p>
       <app-shimmer *ngIf="billingLoading" variant="manager-flow-chart"></app-shimmer>
     </ng-template>
   </app-animated-card>

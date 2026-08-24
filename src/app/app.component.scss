@@ -49,14 +49,64 @@
   overflow: hidden;
 }
 
-.app-signature {
-  margin: 1.25rem auto 1.5rem;
-  padding: 0 1rem;
-  text-align: center;
+.app-foot {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.85rem 1.25rem 1.1rem;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.app-foot__sig,
+.app-foot__copy {
   font-size: 0.72rem;
   letter-spacing: 0.04em;
   color: rgba(95, 120, 140, 0.72);
   font-weight: 550;
+}
+
+.app-foot__sig {
+  text-align: left;
+}
+
+.app-foot__copy {
+  text-align: right;
+}
+
+.app-foot--shimmer .app-foot__bone {
+  display: block;
+  height: 0.7rem;
+  width: 9rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    105deg,
+    rgba(217, 232, 226, 0.55) 18%,
+    rgba(95, 196, 176, 0.35) 42%,
+    rgba(217, 232, 226, 0.65) 62%
+  );
+  background-size: 220% 100%;
+  animation: app-foot-shimmer 1.25s ease-in-out infinite;
+}
+
+.app-foot--shimmer .app-foot__bone--copy {
+  width: 12rem;
+  margin-left: auto;
+}
+
+@keyframes app-foot-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
 }
 
 .ambient {

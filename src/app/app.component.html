@@ -21,9 +21,17 @@
     <div [hidden]="bootstrapping">
       <router-outlet></router-outlet>
     </div>
-    <footer class="app-signature" *ngIf="!isBillingSurface && !bootstrapping">
-      NovaBank · NovaBill · Secure demo banking &amp; billing
+    <footer
+      class="app-foot"
+      *ngIf="!isBillingSurface && !isMarketingSurface && !bootstrapping"
+    >
+      <span class="app-foot__sig">NovaBank · NovaBill</span>
+      <span class="app-foot__copy">© {{ year }} NovaBank. All rights reserved.</span>
     </footer>
+    <div class="app-foot app-foot--shimmer" *ngIf="!isBillingSurface && !isMarketingSurface && bootstrapping" aria-hidden="true">
+      <span class="app-foot__bone"></span>
+      <span class="app-foot__bone app-foot__bone--copy"></span>
+    </div>
   </main>
   <app-portal-launch></app-portal-launch>
 </div>

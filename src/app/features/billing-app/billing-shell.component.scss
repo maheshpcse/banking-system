@@ -306,15 +306,35 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.app-signature {
+.app-foot {
   flex: 0 0 auto;
-  margin: 0 auto 0.85rem;
-  padding: 0 1rem;
-  text-align: center;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.55rem 1.25rem 0.85rem;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.app-foot__sig,
+.app-foot__copy {
   font-size: 0.7rem;
   letter-spacing: 0.05em;
   color: rgba(91, 107, 112, 0.7);
   font-weight: 550;
+}
+
+.app-foot__sig {
+  text-align: left;
+}
+
+.app-foot__copy {
+  text-align: right;
 }
 
 @media (max-width: 960px) {

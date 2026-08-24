@@ -10,7 +10,7 @@
       </div>
     </header>
 
-    <div class="status-chips" role="tablist" aria-label="Payment status">
+    <div class="status-chips" role="tablist" aria-label="Payment status" *ngIf="!filterLoading">
       <button
         type="button"
         class="status-chip"
@@ -22,7 +22,7 @@
       </button>
     </div>
 
-    <div class="filters">
+    <div class="filters" *ngIf="!filterLoading">
       <div class="search">
         <input
           class="input"
@@ -101,9 +101,13 @@
     data-keyboard="false"
   >
     <div class="drawer__head">
-      <div>
+      <div *ngIf="!detailLoading">
         <h3>{{ bill.billNumber }}</h3>
         <p>{{ bill.customerName }}</p>
+      </div>
+      <div class="drawer__head-shimmer" *ngIf="detailLoading" aria-hidden="true">
+        <span class="drawer__head-bone drawer__head-bone--title"></span>
+        <span class="drawer__head-bone drawer__head-bone--sub"></span>
       </div>
       <button type="button" class="icon-close" (click)="closeDetail()" aria-label="Close">×</button>
     </div>
