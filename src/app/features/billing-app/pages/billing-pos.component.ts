@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AlertService } from '../../../core/services/alert.service';
@@ -47,6 +48,7 @@ export class BillingPosComponent implements OnInit {
   appliedCoupon: BillingCoupon | null = null;
   gatewayOpen = false;
   activeInvoice: BillingBill | null = null;
+  private resumeBillId = '';
 
   get customerSelectOptions(): ThemeSelectOption[] {
     return this.customers.map((c) => ({ value: c.id, label: c.name }));
@@ -63,10 +65,13 @@ export class BillingPosComponent implements OnInit {
 
   constructor(
     private readonly billing: BillingService,
-    private readonly alerts: AlertService
+    private readonly alerts: AlertService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
+    this.resumeBillId = String(this.route.snapshot.queryParamMap.get('billId') || '').trim();
     this.boot();
   }
 
@@ -121,12 +126,31 @@ export class BillingPosComponent implements OnInit {
         this.settings = bundle.settings.settings;
         this.coupons = bundle.coupons.items || [];
         this.pageLoading = false;
+        if (this.resumeBillId) {
+          void this.resumeBill(this.resumeBillId);
+        }
       },
       error: async () => {
         this.pageLoading = false;
         await this.alerts.error('Unable to open POS.');
       }
     });
+  }
+
+  private async resumeBill(billId: string): Promise<void> {
+    try {
+      const res = await firstValueFrom(this.billing.getBill(billId));
+      this.activeInvoice = res.bill;
+      this.selectedCustomerId = res.bill.customerId || '';
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true
+      });
+      await this.openGateway(res.bill);
+    } catch {
+      await this.alerts.error('Unable to resume that bill on POS.');
+    }
   }
 
   onProductQueryChange(value: string): void {
@@ -281,16 +305,28 @@ export class BillingPosComponent implements OnInit {
       this.activeInvoice = outcome.result.bill;
       this.cart = [];
       this.clearCoupon();
-      this.openGateway();
+      await this.openGateway();
     }
   }
 
-  openGateway(bill?: BillingBill): void {
+  async openGateway(bill?: BillingBill): Promise<void> {
     if (bill) {
       this.activeInvoice = bill;
     }
     if (!this.activeInvoice || this.activeInvoice.paymentStatus === 'paid') {
       return;
+    }
+    if (this.activeInvoice.paymentStatus === 'draft') {
+      try {
+        const res = await firstValueFrom(this.billing.awaitBillPayment(this.activeInvoice.id));
+        this.activeInvoice = res.bill;
+      } catch (err) {
+        await this.alerts.error(
+          (err as { error?: { message?: string } })?.error?.message ||
+            'Unable to move bill to payment pending.'
+        );
+        return;
+      }
     }
     this.gatewayOpen = true;
   }

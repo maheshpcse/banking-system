@@ -265,9 +265,5 @@
         <dd>{{ p.active === false ? 'Archived' : 'Active' }}</dd>
       </div>
     </dl>
-    <div class="detail-modal__actions">
-      <button type="button" class="btn btn--ghost" (click)="edit(p)">Edit</button>
-      <button type="button" class="btn btn--danger" [disabled]="busy" (click)="archive(p)">Archive</button>
-    </div>
   </div>
 </section>

@@ -21,6 +21,9 @@
     <div [hidden]="bootstrapping">
       <router-outlet></router-outlet>
     </div>
+    <footer class="app-signature" *ngIf="!isBillingSurface && !bootstrapping">
+      NovaBank · NovaBill · Secure demo banking &amp; billing
+    </footer>
   </main>
   <app-portal-launch></app-portal-launch>
 </div>

@@ -31,6 +31,7 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
   channel: NovaPayChannel = 'modal';
   method: BillingPaymentMethod = 'upi';
   simulateFail = false;
+  simulateError = false;
   busy = false;
   leaving = false;
   progress = 0;
@@ -165,6 +166,7 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
       methods: this.methods,
       method: this.method,
       simulateFail: this.simulateFail,
+      simulateError: this.simulateError,
       upiVpa: this.settings?.upiVpa || '',
       cardLabel: this.settings?.cardLabel || 'Card'
     };
@@ -245,6 +247,7 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
           billId: this.bill.id,
           paymentMethod: this.method,
           simulateFail: this.simulateFail,
+          simulateError: this.simulateError,
           provider: 'novapay',
           sessionId: this.sessionId,
           channel: this.channel,
@@ -304,7 +307,22 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
     this.otp = '';
     this.otpSent = false;
     this.simulateFail = false;
+    this.simulateError = false;
     this.method = this.methods[0] || 'cash';
+  }
+
+  onSimulateFail(checked: boolean): void {
+    this.simulateFail = checked;
+    if (checked) {
+      this.simulateError = false;
+    }
+  }
+
+  onSimulateError(checked: boolean): void {
+    this.simulateError = checked;
+    if (checked) {
+      this.simulateFail = false;
+    }
   }
 
   private startProgress(): void {
@@ -443,10 +461,15 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
     }).join('');
     view.innerHTML='<div><small>Amount due</small><div class="amt">$'+money(S.amount)+'</div><p>'+S.billNumber+'</p></div>'+
       '<div class="methods">'+ms+'</div>'+
-      '<label style="font-size:.8rem;color:#5b6b70"><input type="checkbox" id="fail"/> Simulate failure</label>'+
+      '<label style="font-size:.8rem;color:#5b6b70;display:block;margin:.35rem 0"><input type="checkbox" id="fail"/> Simulate failure</label>'+
+      '<label style="font-size:.8rem;color:#5b6b70;display:block;margin:.35rem 0"><input type="checkbox" id="err"/> Simulate error</label>'+
       '<button class="btn" id="pay">Pay securely</button>';
     view.querySelectorAll('button.m').forEach(function(b){b.onclick=function(){method=b.getAttribute('data-m');renderMethod();};});
-    document.getElementById('pay').onclick=function(){S.simulateFail=!!document.getElementById('fail').checked;pay();};
+    document.getElementById('pay').onclick=function(){
+      S.simulateFail=!!document.getElementById('fail').checked;
+      S.simulateError=!!document.getElementById('err').checked;
+      pay();
+    };
   }
   function renderProcessing(){
     view.innerHTML='<div class="spin"></div><p style="text-align:center">Contacting NovaPay rails…</p><div class="bar"><i id="bar"></i></div>';
@@ -467,7 +490,7 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
     renderProcessing();
     try{
       var res=await fetch(apiUrl(),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.token},
-        body:JSON.stringify({billId:S.billId,paymentMethod:method,simulateFail:!!S.simulateFail,provider:'novapay',sessionId:S.sessionId,channel:'tab'})});
+        body:JSON.stringify({billId:S.billId,paymentMethod:method,simulateFail:!!S.simulateFail,simulateError:!!S.simulateError,provider:'novapay',sessionId:S.sessionId,channel:'tab'})});
       var data=await res.json();
       if(window.__npClear) window.__npClear();
       var ok=res.ok && data.payment && data.payment.status==='success';

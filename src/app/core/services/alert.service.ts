@@ -41,18 +41,23 @@ export class AlertService {
     htmlContainer: 'nb-alert__text'
   };
 
-  /** Small top-right toast for login/signup feedback */
+  /** Top-center success toast (general app feedback). */
   toastSuccess(title: string, text?: string): Promise<SweetAlertResult> {
-    return this.fireToast('success', 'top-end', title, text, 'nb-toast--success');
+    return this.fireToast('success', 'top', title, text, 'nb-toast--success');
   }
 
   toastError(title: string, text?: string): Promise<SweetAlertResult> {
-    return this.fireToast('error', 'top-end', title, text, 'nb-toast--error');
+    return this.fireToast('error', 'top', title, text, 'nb-toast--error');
   }
 
   /** Top-center themed warning toast (empty search / filter guards). */
   toastWarning(title: string, text?: string): Promise<SweetAlertResult> {
     return this.fireToast('warning', 'top', title, text, 'nb-toast--warning');
+  }
+
+  /** Top-right corner success toast (login / signup welcome). */
+  toastSuccessCorner(title: string, text?: string): Promise<SweetAlertResult> {
+    return this.fireToast('success', 'top-end', title, text, 'nb-toast--success nb-toast--corner');
   }
 
   private fireToast(

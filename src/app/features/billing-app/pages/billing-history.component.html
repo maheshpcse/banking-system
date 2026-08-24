@@ -10,6 +10,18 @@
       </div>
     </header>
 
+    <div class="status-chips" role="tablist" aria-label="Payment status">
+      <button
+        type="button"
+        class="status-chip"
+        *ngFor="let chip of statusChips"
+        [class.is-active]="statusFilter === chip.id"
+        (click)="setStatusFilter(chip.id)"
+      >
+        {{ chip.label }}
+      </button>
+    </div>
+
     <div class="filters">
       <div class="search">
         <input
@@ -48,11 +60,16 @@
         <div class="card__body">
           <div class="card__top">
             <strong>{{ bill.billNumber }}</strong>
-            <span [class]="statusClass(bill.paymentStatus)">{{ bill.paymentStatus }}</span>
+            <span [class]="statusClass(bill.paymentStatus)">{{ statusLabel(bill.paymentStatus) }}</span>
           </div>
           <p>{{ bill.customerName }}</p>
           <div class="card__meta">
-            <span>{{ bill.createdAt | date: 'mediumDate' }}</span>
+            <span>
+              {{ bill.createdAt | date: 'mediumDate' }}
+              <ng-container *ngIf="bill.paymentStatus === 'paid' && bill.paidAt">
+                <br />Paid · {{ bill.paidAt | date: 'medium' }}
+              </ng-container>
+            </span>
             <em>{{ bill.grandTotal | currencyFormat }}</em>
           </div>
         </div>
@@ -91,10 +108,20 @@
       <button type="button" class="icon-close" (click)="closeDetail()" aria-label="Close">×</button>
     </div>
 
-    <app-billing-panel-shimmer *ngIf="detailLoading" variant="history"></app-billing-panel-shimmer>
+    <app-billing-panel-shimmer *ngIf="detailLoading" variant="history-drawer"></app-billing-panel-shimmer>
 
     <ng-container *ngIf="!detailLoading">
-      <div [class]="statusClass(bill.paymentStatus)">{{ bill.paymentStatus }}</div>
+      <div [class]="statusClass(bill.paymentStatus)">{{ statusLabel(bill.paymentStatus) }}</div>
+      <dl class="drawer__dates">
+        <div *ngIf="bill.createdAt">
+          <dt>Created</dt>
+          <dd>{{ bill.createdAt | date: 'medium' }}</dd>
+        </div>
+        <div *ngIf="bill.paidAt">
+          <dt>Paid</dt>
+          <dd>{{ bill.paidAt | date: 'medium' }}</dd>
+        </div>
+      </dl>
       <ul class="lines">
         <li *ngFor="let item of bill.items">
           <span>{{ item.name }} × {{ item.quantity }}</span>
@@ -112,7 +139,19 @@
         <div *ngFor="let p of detailPayments">
           <strong>{{ p.paymentMethod | uppercase }}</strong>
           <span>{{ p.status }} · {{ p.amount | currencyFormat }}</span>
+          <span *ngIf="p.createdAt">{{ p.createdAt | date: 'medium' }}</span>
         </div>
+      </div>
+      <div class="drawer__foot">
+        <button type="button" class="btn btn--ghost" (click)="printInvoice(bill)">Print</button>
+        <button
+          type="button"
+          class="btn btn--primary"
+          *ngIf="canContinueOnPos(bill.paymentStatus)"
+          (click)="continueOnPos(bill)"
+        >
+          Continue on POS
+        </button>
       </div>
     </ng-container>
   </aside>

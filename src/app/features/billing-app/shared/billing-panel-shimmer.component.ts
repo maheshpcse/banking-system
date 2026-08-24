@@ -148,7 +148,7 @@ import { Component, Input } from '@angular/core';
         </div>
       </ng-container>
 
-      <!-- POS: picker + cart + checkout strip + create-invoice foot -->
+      <!-- POS: picker + cart + coupon/amounts + create-invoice foot -->
       <ng-container *ngIf="variant === 'pos'">
         <div class="bps__pos">
           <div class="bps__panel bps__pos__picker">
@@ -172,12 +172,13 @@ import { Component, Input } from '@angular/core';
               <div class="bps__bone bps__bone--xs"></div>
             </div>
           </div>
-          <div class="bps__panel bps__pos__checkout">
-            <div class="bps__checkout-body">
-              <div class="bps__bone bps__bone--field"></div>
-              <div class="bps__totals">
-                <div class="bps__bone bps__bone--sm" *ngFor="let t of totals"></div>
-              </div>
+          <div class="bps__panel bps__pos__coupon">
+            <div class="bps__bone bps__bone--field"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+          </div>
+          <div class="bps__panel bps__pos__amounts">
+            <div class="bps__totals">
+              <div class="bps__bone bps__bone--sm" *ngFor="let t of totals"></div>
             </div>
           </div>
           <div class="bps__pos__foot">
@@ -192,7 +193,7 @@ import { Component, Input } from '@angular/core';
         </div>
       </ng-container>
 
-      <!-- Settings: hero + merchant form + compact method rows -->
+      <!-- Settings: hero + merchant form + compact method rows + coupons -->
       <ng-container *ngIf="variant === 'settings'">
         <div class="bps__hero">
           <div class="bps__bone bps__bone--xs"></div>
@@ -225,6 +226,22 @@ import { Component, Input } from '@angular/core';
         <div class="bps__settings-foot">
           <div class="bps__bone bps__bone--btn bps__bone--accent"></div>
         </div>
+        <div class="bps__panel bps__panel--coupons">
+          <div class="bps__toolbar">
+            <div class="bps__bone bps__bone--md"></div>
+            <div class="bps__bone bps__bone--btn"></div>
+          </div>
+          <div class="bps__settings-grid">
+            <div class="bps__bone bps__bone--field" *ngFor="let f of couponFields"></div>
+          </div>
+          <div class="bps__row" *ngFor="let r of couponRows">
+            <div class="bps__bone bps__bone--fill"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+          </div>
+        </div>
+        <div class="bps__settings-foot">
+          <div class="bps__bone bps__bone--btn bps__bone--accent"></div>
+        </div>
       </ng-container>
 
       <!-- History: toolbar + table -->
@@ -244,6 +261,43 @@ import { Component, Input } from '@angular/core';
             <div class="bps__bone bps__bone--sm"></div>
             <div class="bps__bone bps__bone--xs"></div>
             <div class="bps__bone bps__bone--sm"></div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- History drawer detail -->
+      <ng-container *ngIf="variant === 'history-drawer'">
+        <div class="bps__panel bps__panel--drawer">
+          <div class="bps__bone bps__bone--title"></div>
+          <div class="bps__bone bps__bone--sm"></div>
+          <div class="bps__drawer-section">
+            <div class="bps__bone bps__bone--section"></div>
+            <div class="bps__bone bps__bone--xs"></div>
+            <div class="bps__bone bps__bone--xs"></div>
+          </div>
+          <div class="bps__drawer-section">
+            <div class="bps__bone bps__bone--section"></div>
+            <div class="bps__row" *ngFor="let r of drawerLines">
+              <div class="bps__bone bps__bone--fill"></div>
+              <div class="bps__bone bps__bone--sm"></div>
+            </div>
+          </div>
+          <div class="bps__drawer-section">
+            <div class="bps__bone bps__bone--section"></div>
+            <div class="bps__totals">
+              <div class="bps__bone bps__bone--sm" *ngFor="let t of totals"></div>
+            </div>
+          </div>
+          <div class="bps__drawer-section">
+            <div class="bps__bone bps__bone--section"></div>
+            <div class="bps__row" *ngFor="let p of drawerPays">
+              <div class="bps__bone bps__bone--fill"></div>
+              <div class="bps__bone bps__bone--xs"></div>
+            </div>
+          </div>
+          <div class="bps__drawer-foot">
+            <div class="bps__bone bps__bone--btn"></div>
+            <div class="bps__bone bps__bone--btn bps__bone--accent"></div>
           </div>
         </div>
       </ng-container>
@@ -565,6 +619,32 @@ import { Component, Input } from '@angular/core';
         justify-content: flex-end;
       }
 
+      .bps__panel--coupons {
+        gap: 0.75rem;
+      }
+
+      .bps__panel--drawer {
+        gap: 0.75rem;
+      }
+
+      .bps__drawer-section {
+        display: grid;
+        gap: 0.45rem;
+        padding-top: 0.2rem;
+      }
+
+      .bps__bone--section {
+        width: 5.5rem;
+        height: 0.72rem;
+      }
+
+      .bps__drawer-foot {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        padding-top: 0.35rem;
+      }
+
       .bps__seg {
         display: inline-flex;
         gap: 0.35rem;
@@ -585,7 +665,7 @@ import { Component, Input } from '@angular/core';
         grid-template-columns: 1.35fr 1fr;
         grid-template-areas:
           'picker cart'
-          'checkout checkout'
+          'coupon amounts'
           'foot foot';
         gap: 0.9rem;
         min-height: min(62vh, 560px);
@@ -601,15 +681,12 @@ import { Component, Input } from '@angular/core';
         min-height: 100%;
       }
 
-      .bps__pos__checkout {
-        grid-area: checkout;
+      .bps__pos__coupon {
+        grid-area: coupon;
       }
 
-      .bps__checkout-body {
-        display: grid;
-        grid-template-columns: minmax(140px, 0.4fr) minmax(0, 1fr);
-        gap: 1rem;
-        align-items: end;
+      .bps__pos__amounts {
+        grid-area: amounts;
       }
 
       .bps__pos__foot {
@@ -693,11 +770,9 @@ import { Component, Input } from '@angular/core';
           grid-template-areas:
             'picker'
             'cart'
-            'checkout'
+            'coupon'
+            'amounts'
             'foot';
-        }
-        .bps__checkout-body {
-          grid-template-columns: 1fr;
         }
         .bps__chips {
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -740,7 +815,8 @@ export class BillingPanelShimmerComponent {
     | 'pos-products'
     | 'settings'
     | 'history'
-    | 'history-data' = 'desk';
+    | 'history-data'
+    | 'history-drawer' = 'desk';
 
   get showHead(): boolean {
     return (
@@ -764,6 +840,10 @@ export class BillingPanelShimmerComponent {
   readonly totals = [1, 2, 3];
   readonly settingsFields = [1, 2];
   readonly methodTiles = [1, 2, 3, 4];
+  readonly couponFields = [1, 2, 3, 4, 5, 6];
+  readonly couponRows = [1, 2, 3];
+  readonly drawerLines = [1, 2, 3, 4];
+  readonly drawerPays = [1, 2];
   readonly historyHeads = [1, 2, 3, 4];
   readonly historyRows = [1, 2, 3, 4, 5, 6];
 }

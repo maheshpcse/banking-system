@@ -345,7 +345,6 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
 
   edit(customer: BillingCustomer): void {
     this.editingId = customer.id;
-    this.showForm = true;
     if (this.detailTimer) {
       clearTimeout(this.detailTimer);
       this.detailTimer = null;
@@ -359,11 +358,28 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
       address: customer.address,
       bankingAccountNumber: customer.bankingAccountNumber || ''
     });
+    if (!this.showForm) {
+      this.panelAnimating = true;
+      this.showForm = true;
+      if (this.panelTimer) {
+        clearTimeout(this.panelTimer);
+      }
+      this.panelTimer = setTimeout(() => {
+        this.panelAnimating = false;
+        this.capturePanelHeight();
+        this.panelTimer = null;
+      }, 320);
+    }
+    this.formResizeObserver?.disconnect();
+    this.formResizeObserver = null;
   }
 
   cancelEdit(): void {
     this.editingId = null;
     this.form.reset({ name: '', email: '', phone: '', address: '', bankingAccountNumber: '' });
+    if (this.showForm) {
+      this.bindFormHeightObserver();
+    }
   }
 
   async save(): Promise<void> {

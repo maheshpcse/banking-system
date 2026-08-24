@@ -113,55 +113,53 @@
         </div>
       </aside>
 
-      <div class="pos__checkout glass">
-        <div class="checkout__body">
-          <div class="checkout__controls">
-            <div class="checkout__coupon">
-              <label class="field">
-                Coupon
-                <app-theme-select
-                  controlClass="input"
-                  [(ngModel)]="selectedCouponCode"
-                  [options]="couponSelectOptions"
-                  [clearable]="true"
-                  placeholder="Select coupon…"
-                  ariaLabel="Select coupon"
-                  (cleared)="clearCoupon()"
-                ></app-theme-select>
-              </label>
-              <button
-                type="button"
-                class="btn btn--ghost checkout__apply"
-                [disabled]="couponBusy || !selectedCouponCode"
-                (click)="applyCoupon()"
-              >
-                {{ couponBusy ? 'Applying…' : 'Apply' }}
-              </button>
-            </div>
-            <p class="coupon-note" *ngIf="appliedCoupon as c">
-              <strong>{{ c.code }}</strong> — {{ c.usageNote }}
-              <span *ngIf="c.bankNote"> · {{ c.bankNote }}</span>
-              <button type="button" class="link" (click)="clearCoupon()">Remove</button>
-            </p>
-            <label class="field checkout__discount">
-              Manual discount
-              <input
-                class="input"
-                type="number"
-                [(ngModel)]="discount"
-                min="0"
-                [disabled]="!!appliedCoupon"
-              />
-            </label>
-          </div>
-
-          <dl class="totals">
-            <div><dt>Subtotal</dt><dd>{{ cartSubtotal | currencyFormat }}</dd></div>
-            <div><dt>Discount</dt><dd>{{ safeDiscount | currencyFormat }}</dd></div>
-            <div><dt>Tax</dt><dd>{{ cartTax | currencyFormat }}</dd></div>
-            <div class="totals__grand"><dt>Total</dt><dd>{{ cartGrandTotal | currencyFormat }}</dd></div>
-          </dl>
+      <div class="pos__coupon glass">
+        <div class="checkout__coupon">
+          <label class="field">
+            Coupon
+            <app-theme-select
+              controlClass="input"
+              [(ngModel)]="selectedCouponCode"
+              [options]="couponSelectOptions"
+              [clearable]="true"
+              placeholder="Select coupon…"
+              ariaLabel="Select coupon"
+              (cleared)="clearCoupon()"
+            ></app-theme-select>
+          </label>
+          <button
+            type="button"
+            class="btn btn--ghost checkout__apply"
+            [disabled]="couponBusy || !selectedCouponCode"
+            (click)="applyCoupon()"
+          >
+            {{ couponBusy ? 'Applying…' : 'Apply' }}
+          </button>
         </div>
+        <p class="coupon-note" *ngIf="appliedCoupon as c">
+          <strong>{{ c.code }}</strong> — {{ c.usageNote }}
+          <span *ngIf="c.bankNote"> · {{ c.bankNote }}</span>
+          <button type="button" class="link" (click)="clearCoupon()">Remove</button>
+        </p>
+        <label class="field checkout__discount">
+          Manual discount
+          <input
+            class="input"
+            type="number"
+            [(ngModel)]="discount"
+            min="0"
+            [disabled]="!!appliedCoupon"
+          />
+        </label>
+      </div>
+
+      <div class="pos__amounts glass">
+        <dl class="totals">
+          <div><dt>Subtotal</dt><dd>{{ cartSubtotal | currencyFormat }}</dd></div>
+          <div><dt>Discount</dt><dd>{{ safeDiscount | currencyFormat }}</dd></div>
+          <div><dt>Tax</dt><dd>{{ cartTax | currencyFormat }}</dd></div>
+          <div class="totals__grand"><dt>Total</dt><dd>{{ cartGrandTotal | currencyFormat }}</dd></div>
+        </dl>
 
         <div class="invoice" *ngIf="activeInvoice as bill">
           <div>

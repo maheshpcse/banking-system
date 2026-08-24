@@ -77,6 +77,7 @@ export class BillingService {
     customerId?: string;
     from?: string;
     to?: string;
+    paymentStatus?: string;
     page?: number;
     limit?: number;
   } = {}): Observable<{ items: BillingBill[]; page: number; limit: number; total: number; pages: number }> {
@@ -99,6 +100,13 @@ export class BillingService {
     return this.http.get<{ bill: BillingBill; payments: BillingPayment[] }>(`${this.base}/bills/${id}`);
   }
 
+  awaitBillPayment(id: string): Observable<{ message: string; bill: BillingBill }> {
+    return this.http.post<{ message: string; bill: BillingBill }>(
+      `${this.base}/bills/${id}/await-payment`,
+      {}
+    );
+  }
+
   createBill(payload: {
     customerId: string;
     items: Array<{ productId: string; quantity: number }>;
@@ -113,6 +121,7 @@ export class BillingService {
     billId: string;
     paymentMethod: BillingPaymentMethod;
     simulateFail?: boolean;
+    simulateError?: boolean;
     provider?: string;
     sessionId?: string;
     channel?: string;
