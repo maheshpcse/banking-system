@@ -67,6 +67,7 @@ export class AlertService {
     text: string | undefined,
     toneClass: string
   ): Promise<SweetAlertResult> {
+    const isCorner = toneClass.includes('nb-toast--corner');
     return Swal.fire({
       toast: true,
       position,
@@ -74,17 +75,31 @@ export class AlertService {
       title,
       text,
       showConfirmButton: false,
-      showCloseButton: true,
+      showCloseButton: false,
       timer: 5000,
       timerProgressBar: false,
       background: this.theme.background,
       color: this.theme.color,
-      width: 'auto',
+      width: isCorner ? undefined : 'auto',
       customClass: {
         popup: `nb-toast ${toneClass}`,
         title: 'nb-toast__title',
-        htmlContainer: 'nb-toast__text',
-        closeButton: 'nb-toast__close'
+        htmlContainer: 'nb-toast__text'
+      },
+      didOpen: (popup) => {
+        if (!isCorner) {
+          return;
+        }
+        // Grow login toast to the rendered message length (SweetAlert2 defaults to ~360px).
+        const titleEl = popup.querySelector('.swal2-title') as HTMLElement | null;
+        const textEl = popup.querySelector('.swal2-html-container') as HTMLElement | null;
+        const iconEl = popup.querySelector('.swal2-icon') as HTMLElement | null;
+        const titleW = titleEl?.scrollWidth || 0;
+        const textW = textEl?.scrollWidth || 0;
+        const iconW = iconEl ? iconEl.offsetWidth + 12 : 0;
+        const contentW = Math.max(titleW, textW) + iconW + 28;
+        popup.style.setProperty('width', `${Math.min(contentW, window.innerWidth - 24)}px`, 'important');
+        popup.style.setProperty('max-width', 'min(42rem, calc(100vw - 1.5rem))', 'important');
       }
     });
   }

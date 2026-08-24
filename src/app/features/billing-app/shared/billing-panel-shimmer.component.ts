@@ -105,18 +105,6 @@ import { Component, Input } from '@angular/core';
         </div>
       </ng-container>
 
-      <!-- History timeline only -->
-      <ng-container *ngIf="variant === 'history-data'">
-        <div class="bps__panel">
-          <div class="bps__row bps__row--table" *ngFor="let r of historyRows">
-            <div class="bps__bone bps__bone--fill"></div>
-            <div class="bps__bone bps__bone--sm"></div>
-            <div class="bps__bone bps__bone--xs"></div>
-            <div class="bps__bone bps__bone--sm"></div>
-          </div>
-        </div>
-      </ng-container>
-
       <!-- Catalog: toolbar + form/data panels -->
       <ng-container *ngIf="variant === 'catalog'">
         <div class="bps__toolbar bps__toolbar--wrap">
@@ -127,6 +115,7 @@ import { Component, Input } from '@angular/core';
           <div class="bps__seg">
             <span *ngFor="let s of segs"></span>
           </div>
+          <div class="bps__bone bps__bone--btn bps__bone--hide"></div>
         </div>
         <div class="bps__layout">
           <div class="bps__panel bps__panel--form">
@@ -145,6 +134,19 @@ import { Component, Input } from '@angular/core';
               <div class="bps__bone bps__bone--xs"></div>
             </div>
           </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="variant === 'catalog-toolbar'">
+        <div class="bps__toolbar bps__toolbar--wrap">
+          <div class="bps__bone bps__bone--search"></div>
+          <div class="bps__bone bps__bone--btn"></div>
+          <div class="bps__bone bps__bone--select"></div>
+          <div class="bps__bone bps__bone--select"></div>
+          <div class="bps__seg">
+            <span *ngFor="let s of segs"></span>
+          </div>
+          <div class="bps__bone bps__bone--btn bps__bone--hide"></div>
         </div>
       </ng-container>
 
@@ -246,6 +248,9 @@ import { Component, Input } from '@angular/core';
 
       <!-- History: toolbar + table -->
       <ng-container *ngIf="variant === 'history'">
+        <div class="bps__chips-row">
+          <div class="bps__bone bps__bone--chip" *ngFor="let c of historyChips"></div>
+        </div>
         <div class="bps__toolbar bps__toolbar--wrap">
           <div class="bps__bone bps__bone--search"></div>
           <div class="bps__bone bps__bone--select"></div>
@@ -253,14 +258,29 @@ import { Component, Input } from '@angular/core';
           <div class="bps__bone bps__bone--btn"></div>
         </div>
         <div class="bps__panel">
-          <div class="bps__table-head">
-            <div class="bps__bone" *ngFor="let h of historyHeads"></div>
+          <div class="bps__row bps__row--card" *ngFor="let r of historyRows">
+            <div class="bps__bone bps__bone--rail"></div>
+            <div class="bps__list-copy">
+              <div class="bps__bone bps__bone--fill"></div>
+              <div class="bps__bone bps__bone--sm"></div>
+              <div class="bps__bone bps__bone--xs"></div>
+            </div>
           </div>
-          <div class="bps__row bps__row--table" *ngFor="let r of historyRows">
-            <div class="bps__bone bps__bone--fill"></div>
-            <div class="bps__bone bps__bone--sm"></div>
-            <div class="bps__bone bps__bone--xs"></div>
-            <div class="bps__bone bps__bone--sm"></div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="variant === 'history-data'">
+        <div class="bps__chips-row">
+          <div class="bps__bone bps__bone--chip" *ngFor="let c of historyChips"></div>
+        </div>
+        <div class="bps__panel">
+          <div class="bps__row bps__row--card" *ngFor="let r of historyRows">
+            <div class="bps__bone bps__bone--rail"></div>
+            <div class="bps__list-copy">
+              <div class="bps__bone bps__bone--fill"></div>
+              <div class="bps__bone bps__bone--sm"></div>
+              <div class="bps__bone bps__bone--xs"></div>
+            </div>
           </div>
         </div>
       </ng-container>
@@ -268,8 +288,10 @@ import { Component, Input } from '@angular/core';
       <!-- History drawer detail -->
       <ng-container *ngIf="variant === 'history-drawer'">
         <div class="bps__panel bps__panel--drawer">
-          <div class="bps__bone bps__bone--title"></div>
-          <div class="bps__bone bps__bone--sm"></div>
+          <div class="bps__drawer-head-shimmer">
+            <div class="bps__bone bps__bone--title"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+          </div>
           <div class="bps__drawer-section">
             <div class="bps__bone bps__bone--section"></div>
             <div class="bps__bone bps__bone--xs"></div>
@@ -711,6 +733,44 @@ import { Component, Input } from '@angular/core';
         gap: 0.55rem;
       }
 
+      .bps__chips-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+
+      .bps__bone--chip {
+        width: 6.5rem;
+        height: 2rem;
+        border-radius: 999px;
+      }
+
+      .bps__bone--hide {
+        width: 6.25rem;
+        height: 2.35rem;
+        margin-left: auto;
+      }
+
+      .bps__row--card {
+        display: grid;
+        grid-template-columns: 10px 1fr;
+        gap: 0.75rem;
+        align-items: start;
+        padding: 0.35rem 0;
+      }
+
+      .bps__bone--rail {
+        width: 10px;
+        height: 3.6rem;
+        border-radius: 999px;
+      }
+
+      .bps__drawer-head-shimmer {
+        display: grid;
+        gap: 0.35rem;
+        margin-bottom: 0.25rem;
+      }
+
       .bps__chip {
         height: 4.2rem;
         border-radius: 0.95rem;
@@ -807,6 +867,7 @@ export class BillingPanelShimmerComponent {
     | 'desk-scene'
     | 'desk-bills'
     | 'catalog'
+    | 'catalog-toolbar'
     | 'catalog-data'
     | 'catalog-data-list'
     | 'catalog-data-grid'
@@ -836,6 +897,7 @@ export class BillingPanelShimmerComponent {
   readonly catalogRows = [1, 2, 3, 4, 5, 6];
   readonly catalogDataRows = [1, 2, 3, 4];
   readonly chips = [1, 2, 3, 4, 5, 6];
+  readonly historyChips = [1, 2, 3, 4, 5, 6];
   readonly cartRows = [1, 2, 3, 4];
   readonly totals = [1, 2, 3];
   readonly settingsFields = [1, 2];

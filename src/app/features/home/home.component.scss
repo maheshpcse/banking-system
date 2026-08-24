@@ -434,6 +434,37 @@
   }
 }
 
+.home__foot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem 1.1rem;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.home__foot-sig,
+.home__foot-copy {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: rgba(45, 70, 82, 0.62);
+  font-weight: 600;
+}
+
+.home__foot-sig {
+  text-align: left;
+}
+
+.home__foot-copy {
+  text-align: right;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .home__glow,
   .home__rail,

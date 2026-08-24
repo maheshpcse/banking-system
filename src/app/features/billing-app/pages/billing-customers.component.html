@@ -10,7 +10,7 @@
       </div>
     </header>
 
-    <div class="toolbar">
+    <div class="toolbar" *ngIf="!filterLoading">
       <div class="search">
         <input
           type="text"
@@ -60,6 +60,7 @@
         {{ showForm ? 'Hide form' : 'Add customer' }}
       </button>
     </div>
+    <app-billing-panel-shimmer *ngIf="filterLoading" variant="catalog-toolbar"></app-billing-panel-shimmer>
 
     <div
       class="layout"

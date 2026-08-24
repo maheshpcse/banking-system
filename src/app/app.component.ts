@@ -18,6 +18,7 @@ export class AppComponent implements OnInit, OnDestroy {
   hasStickyNav = false;
   bootstrapping = false;
   bootVariant: 'dashboard' | 'history' | 'transfer' | 'settings' | 'form' = 'dashboard';
+  readonly year = new Date().getFullYear();
 
   private readonly subs = new Subscription();
 
