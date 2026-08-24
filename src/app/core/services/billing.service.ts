@@ -77,6 +77,7 @@ export class BillingService {
     customerId?: string;
     from?: string;
     to?: string;
+    paymentStatus?: string;
     page?: number;
     limit?: number;
   } = {}): Observable<{ items: BillingBill[]; page: number; limit: number; total: number; pages: number }> {
@@ -97,6 +98,13 @@ export class BillingService {
 
   getBill(id: string): Observable<{ bill: BillingBill; payments: BillingPayment[] }> {
     return this.http.get<{ bill: BillingBill; payments: BillingPayment[] }>(`${this.base}/bills/${id}`);
+  }
+
+  awaitBillPayment(id: string): Observable<{ message: string; bill: BillingBill }> {
+    return this.http.post<{ message: string; bill: BillingBill }>(
+      `${this.base}/bills/${id}/await-payment`,
+      {}
+    );
   }
 
   createBill(payload: {

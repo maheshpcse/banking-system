@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AdminAnalytics, AdminRequestRow, AdminService } from '../../../core/services/admin.service';
+import { BillingService } from '../../../core/services/billing.service';
+import { BillingDashboardStats } from '../../../core/models/banking.models';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/shimmer';
@@ -75,6 +78,8 @@ export class ManagerOverviewComponent implements OnInit {
   pageLoading = true;
   /** Chart / table content shimmer when filters or range change */
   flowLoading = false;
+  billingLoading = true;
+  billingStats: BillingDashboardStats | null = null;
   customers = 0;
   pending = 0;
   unread = 0;
@@ -110,6 +115,7 @@ export class ManagerOverviewComponent implements OnInit {
 
   constructor(
     private readonly admin: AdminService,
+    private readonly billing: BillingService,
     private readonly notifications: NotificationService,
     private readonly alerts: AlertService
   ) {}
@@ -119,21 +125,53 @@ export class ManagerOverviewComponent implements OnInit {
       forkJoin({
         customers: this.admin.refreshCustomers(1, 5),
         requests: this.admin.refreshRequests(),
-        analytics: this.admin.getAnalytics()
+        analytics: this.admin.getAnalytics(),
+        billing: this.billing.getStats().pipe(catchError(() => of(null)))
       }),
       SHIMMER_MS
     ).subscribe({
-      next: ({ customers, requests, analytics }) => {
+      next: ({ customers, requests, analytics, billing }) => {
         this.customers = customers.pagination.total;
         this.pending = requests.filter((r: AdminRequestRow) => r.status === 'under_review').length;
         this.unread = this.notifications.unreadCount;
         this.analytics = analytics;
+        this.billingStats = billing;
+        this.billingLoading = false;
         this.pageLoading = false;
       },
       error: async (err: { error?: { message?: string } }) => {
         this.pageLoading = false;
+        this.billingLoading = false;
         await this.alerts.error(err?.error?.message || 'Unable to load manager desk');
       }
+    });
+  }
+
+  get billingKpis(): Array<{ label: string; display: string; pct: number; color: string }> {
+    const s = this.billingStats;
+    if (!s) {
+      return [];
+    }
+    const values = [
+      { label: 'Total sales', value: s.totalSales, display: this.formatMoney(s.totalSales), color: '#5fc4b0' },
+      { label: 'Orders', value: s.totalOrders, display: String(s.totalOrders), color: '#6aa8e8' },
+      { label: 'Products', value: s.totalProducts, display: String(s.totalProducts), color: '#d4a017' },
+      { label: 'Customers', value: s.totalCustomers, display: String(s.totalCustomers), color: '#c45b6c' }
+    ];
+    const max = Math.max(1, ...values.map((v) => v.value));
+    return values.map((v) => ({
+      label: v.label,
+      display: v.display,
+      pct: Math.max(8, Math.round((v.value / max) * 100)),
+      color: v.color
+    }));
+  }
+
+  private formatMoney(n: number): string {
+    return (Number(n) || 0).toLocaleString(undefined, {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0
     });
   }
 

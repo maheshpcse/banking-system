@@ -309,6 +309,7 @@ export interface BillingBill {
   paymentStatus: BillingPaymentStatus;
   paymentMethod?: BillingPaymentMethod | null;
   notes?: string;
+  paidAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

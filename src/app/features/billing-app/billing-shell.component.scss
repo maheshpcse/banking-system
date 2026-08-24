@@ -306,6 +306,17 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.app-signature {
+  flex: 0 0 auto;
+  margin: 0 auto 0.85rem;
+  padding: 0 1rem;
+  text-align: center;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: rgba(91, 107, 112, 0.7);
+  font-weight: 550;
+}
+
 @media (max-width: 960px) {
   .bs-shell {
     grid-template-columns: 1fr;

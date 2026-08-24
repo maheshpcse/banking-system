@@ -49,6 +49,16 @@
   overflow: hidden;
 }
 
+.app-signature {
+  margin: 1.25rem auto 1.5rem;
+  padding: 0 1rem;
+  text-align: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: rgba(95, 120, 140, 0.72);
+  font-weight: 550;
+}
+
 .ambient {
   position: fixed;
   inset: 0;

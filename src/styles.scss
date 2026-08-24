@@ -463,6 +463,12 @@ a:focus {
   border-color: rgba(255, 153, 50, 0.45) !important;
 }
 
+/* Corner login toast — same fit-content growth as centered toasts */
+.nb-toast--corner.swal2-popup.swal2-toast {
+  width: fit-content !important;
+  max-width: min(36rem, calc(100vw - 1.5rem)) !important;
+}
+
 html[data-nb-billing='1'] .nb-toast--warning {
   background: linear-gradient(135deg, #fff8e8 0%, #f4faf7 100%) !important;
   border-color: rgba(255, 200, 1, 0.55) !important;

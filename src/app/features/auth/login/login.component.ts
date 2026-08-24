@@ -95,14 +95,14 @@ export class LoginComponent implements OnInit, OnDestroy {
           this.loading = false;
           this.shellBoot.begin();
           this.portalLaunch.launch('billing', dest);
-          void this.alerts.toastSuccess('Welcome back', 'Opening Billing System…');
+          void this.alerts.toastSuccessCorner('Welcome back', 'Opening Billing System…');
           return;
         }
         this.shellBoot.begin();
         void this.router.navigateByUrl(dest).then((ok) => {
           this.loading = false;
           if (ok) {
-            this.alerts.toastSuccess('Welcome back', 'You are signed in to NovaBank.');
+            this.alerts.toastSuccessCorner('Welcome back', 'You are signed in to NovaBank.');
           } else {
             this.shellBoot.complete();
           }

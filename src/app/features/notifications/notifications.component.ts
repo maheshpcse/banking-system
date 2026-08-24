@@ -22,6 +22,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     { id: 'transfer', label: 'Transfers' },
     { id: 'account', label: 'Account' },
     { id: 'admin', label: 'Admin' },
+    { id: 'billing', label: 'Bills / Invoices' },
+    { id: 'complaint', label: 'Complaints' },
     { id: 'security', label: 'Security' },
     { id: 'system', label: 'System' }
   ];

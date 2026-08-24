@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AlertService } from '../../../core/services/alert.service';
 import { BillingService } from '../../../core/services/billing.service';
-import { BillingBill, BillingPayment } from '../../../core/models/banking.models';
+import { BillingBill, BillingPayment, BillingPaymentStatus } from '../../../core/models/banking.models';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
+
+type StatusFilter = '' | BillingPaymentStatus;
 
 @Component({
   selector: 'app-billing-history',
@@ -15,6 +18,7 @@ export class BillingHistoryComponent implements OnInit {
   query = '';
   from = '';
   to = '';
+  statusFilter: StatusFilter = '';
   page = 1;
   pages = 1;
   total = 0;
@@ -26,9 +30,18 @@ export class BillingHistoryComponent implements OnInit {
   detailLeaving = false;
   private detailTimer: ReturnType<typeof setTimeout> | null = null;
 
+  readonly statusChips: Array<{ id: StatusFilter; label: string }> = [
+    { id: '', label: 'All' },
+    { id: 'draft', label: 'Bill Created' },
+    { id: 'pending', label: 'Payment Pending' },
+    { id: 'paid', label: 'Payment Success' },
+    { id: 'failed', label: 'Payment Failed' }
+  ];
+
   constructor(
     private readonly billing: BillingService,
-    private readonly alerts: AlertService
+    private readonly alerts: AlertService,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
@@ -47,6 +60,7 @@ export class BillingHistoryComponent implements OnInit {
         q: this.query.trim(),
         from: this.from || undefined,
         to: this.to || undefined,
+        paymentStatus: this.statusFilter || undefined,
         page: this.page,
         limit: this.limit
       }),
@@ -68,11 +82,19 @@ export class BillingHistoryComponent implements OnInit {
     });
   }
 
+  setStatusFilter(id: StatusFilter): void {
+    if (this.statusFilter === id) {
+      return;
+    }
+    this.statusFilter = id;
+    this.load(1, 'filter');
+  }
+
   applyFilters(): void {
-    if (!this.query.trim() && !this.from && !this.to) {
+    if (!this.query.trim() && !this.from && !this.to && !this.statusFilter) {
       void this.alerts.toastWarning(
         'Enter a filter',
-        'Add a search term or date range before filtering.'
+        'Add a search term, date range, or status before filtering.'
       );
       return;
     }
@@ -128,6 +150,60 @@ export class BillingHistoryComponent implements OnInit {
       this.detailLeaving = false;
       this.detailTimer = null;
     }, 200);
+  }
+
+  continueOnPos(bill: BillingBill): void {
+    void this.router.navigate(['/billing/pos'], { queryParams: { billId: bill.id } });
+  }
+
+  canContinueOnPos(status: string): boolean {
+    return status === 'draft' || status === 'pending' || status === 'failed';
+  }
+
+  printInvoice(bill: BillingBill): void {
+    const lines = bill.items
+      .map(
+        (i) =>
+          `<tr><td>${i.name}</td><td>${i.quantity}</td><td>${i.unitPrice.toFixed(2)}</td><td>${i.lineTotal.toFixed(2)}</td></tr>`
+      )
+      .join('');
+    const html = `<!doctype html><html><head><title>${bill.billNumber}</title>
+      <style>body{font-family:system-ui,sans-serif;padding:24px;color:#16323a}
+      h1{font-size:18px;margin:0 0 8px}table{width:100%;border-collapse:collapse;margin-top:16px}
+      th,td{border-bottom:1px solid #d9e8e2;padding:8px;text-align:left;font-size:13px}
+      .tot{margin-top:16px;font-weight:700}</style></head><body>
+      <h1>Invoice ${bill.billNumber}</h1>
+      <div>${bill.customerName}</div>
+      <table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+      <tbody>${lines}</tbody></table>
+      <div class="tot">Grand total: ${bill.grandTotal.toFixed(2)} · ${bill.paymentStatus}</div>
+      </body></html>`;
+    const win = window.open('', '_blank', 'noopener,noreferrer,width=720,height=900');
+    if (!win) {
+      void this.alerts.warning('Allow pop-ups to print the invoice.');
+      return;
+    }
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    win.print();
+  }
+
+  statusLabel(status: string): string {
+    switch (status) {
+      case 'draft':
+        return 'Bill Created';
+      case 'pending':
+        return 'Payment Pending';
+      case 'paid':
+        return 'Payment Success';
+      case 'failed':
+        return 'Payment Failed';
+      case 'refunded':
+        return 'Refunded';
+      default:
+        return status || 'Unknown';
+    }
   }
 
   statusClass(status: string): string {
