@@ -175,12 +175,6 @@
         </label>
       </div>
 
-      <div class="coupons__actions">
-        <button type="button" class="btn btn--primary" [disabled]="couponBusy" (click)="saveCoupon()">
-          {{ couponBusy ? 'Saving…' : editingCouponId ? 'Update coupon' : 'Add coupon' }}
-        </button>
-      </div>
-
       <div class="coupon-list" *ngIf="coupons.length; else noCoupons">
         <article class="coupon-row" *ngFor="let c of coupons" [class.is-off]="!c.active">
           <div>
@@ -206,5 +200,11 @@
         <p class="hint">No coupons yet — add one above for POS selection.</p>
       </ng-template>
     </section>
+
+    <div class="coupons__foot">
+      <button type="button" class="btn btn--primary" [disabled]="couponBusy" (click)="saveCoupon()">
+        {{ couponBusy ? 'Saving…' : editingCouponId ? 'Update coupon' : 'Add coupon' }}
+      </button>
+    </div>
   </ng-container>
 </section>

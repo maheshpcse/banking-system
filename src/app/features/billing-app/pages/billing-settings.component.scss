@@ -360,6 +360,12 @@ label {
   justify-content: flex-end;
 }
 
+.coupons__foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.15rem;
+}
+
 .coupon-list {
   display: grid;
   gap: 0.55rem;
