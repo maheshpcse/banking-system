@@ -1,0 +1,145 @@
+<div
+  class="npg"
+  *ngIf="open"
+  [class.is-leaving]="leaving"
+  [class.is-tab]="channel === 'tab' && step === 'processing'"
+  role="dialog"
+  aria-modal="true"
+  aria-label="NovaPay checkout"
+>
+  <div class="npg__veil" data-backdrop="static"></div>
+
+  <div class="npg__panel" [attr.data-step]="step">
+    <header class="npg__head">
+      <div class="npg__brand">
+        <span class="npg__mark" aria-hidden="true">N</span>
+        <div>
+          <strong>NovaPay</strong>
+          <small>{{ merchantName }}</small>
+        </div>
+      </div>
+      <button type="button" class="npg__x" (click)="close()" [disabled]="busy && step === 'processing'" aria-label="Close">
+        ×
+      </button>
+    </header>
+
+    <div class="npg__amount" *ngIf="bill">
+      <span>Amount due</span>
+      <em>{{ amount | currencyFormat }}</em>
+      <small>{{ bill.billNumber }} · {{ bill.customerName }}</small>
+    </div>
+
+    <!-- METHOD -->
+    <section class="npg__stage" *ngIf="step === 'method'">
+      <h3>Choose payment rail</h3>
+      <p class="npg__hint">PhonePe / Razorpay–style checkout · theme-colored secure theater</p>
+      <div class="npg__rails">
+        <button
+          type="button"
+          class="rail"
+          *ngFor="let m of methods"
+          [class.is-on]="method === m"
+          (click)="selectMethod(m)"
+        >
+          <span class="rail__icon" [attr.data-m]="m" aria-hidden="true"></span>
+          <span>
+            <strong>{{ methodLabel(m) }}</strong>
+            <small *ngIf="m === 'cash'">Instant counter settle</small>
+            <small *ngIf="m === 'card'">OTP-secured card rail</small>
+            <small *ngIf="m === 'upi'">Collect via VPA intent</small>
+            <small *ngIf="m === 'qr'">Animated QR capture</small>
+          </span>
+        </button>
+      </div>
+      <label class="npg__fail">
+        <input type="checkbox" [(ngModel)]="simulateFail" />
+        Simulate failure (demo)
+      </label>
+      <div class="npg__actions">
+        <button type="button" class="btn btn--ghost" (click)="openInNewTab()">Open in new tab</button>
+        <button type="button" class="btn btn--primary" (click)="continueFromMethod()">Continue</button>
+      </div>
+    </section>
+
+    <!-- AUTH -->
+    <section class="npg__stage" *ngIf="step === 'auth'">
+      <button type="button" class="npg__back" (click)="backToMethod()">← Change method</button>
+
+      <ng-container *ngIf="method === 'card'">
+        <h3>Card details</h3>
+        <div class="npg__card-visual" aria-hidden="true">
+          <span class="chip"></span>
+          <span class="pan">•••• •••• •••• {{ cardLast4 || '••••' }}</span>
+          <span class="name">{{ cardName || 'CARDHOLDER' }}</span>
+        </div>
+        <div class="npg__grid">
+          <label>Name on card<input class="input" [(ngModel)]="cardName" autocomplete="cc-name" /></label>
+          <label class="span2">Card number<input class="input" [(ngModel)]="cardNumber" inputmode="numeric" autocomplete="cc-number" placeholder="4111 1111 1111 1111" /></label>
+          <label>Expiry<input class="input" [(ngModel)]="cardExpiry" placeholder="MM/YY" autocomplete="cc-exp" /></label>
+          <label>CVV<input class="input" [(ngModel)]="cardCvv" inputmode="numeric" autocomplete="cc-csc" /></label>
+          <label class="span2" *ngIf="otpSent">Demo OTP<input class="input" [(ngModel)]="otp" inputmode="numeric" placeholder="123456" /></label>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="method === 'upi'">
+        <h3>UPI intent</h3>
+        <div class="npg__upi">
+          <span class="upi-pulse" aria-hidden="true"></span>
+          <label>Customer VPA<input class="input" [(ngModel)]="upiVpa" placeholder="name@bank" /></label>
+          <p class="npg__hint">Request will be approved on the customer’s banking UPI app (simulated).</p>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="method === 'qr'">
+        <h3>Scan to pay</h3>
+        <div class="npg__qr" aria-hidden="true">
+          <div class="npg__qr-frame">
+            <span class="npg__qr-scan"></span>
+          </div>
+          <p>Align the merchant QR — capture starts when you pay</p>
+        </div>
+      </ng-container>
+
+      <div class="npg__actions">
+        <button type="button" class="btn btn--primary btn--block" (click)="authorizeAndPay()">
+          {{ method === 'card' && !otpSent ? 'Send OTP' : 'Pay ' + (amount | currencyFormat) }}
+        </button>
+      </div>
+    </section>
+
+    <!-- PROCESSING -->
+    <section class="npg__stage npg__stage--center" *ngIf="step === 'processing'">
+      <div class="npg__orbit" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <h3 *ngIf="channel === 'modal'">Processing with NovaPay…</h3>
+      <h3 *ngIf="channel === 'tab'">Secure tab checkout in progress…</h3>
+      <p class="npg__hint">
+        {{ method === 'qr' ? 'Capturing QR payload' : method === 'upi' ? 'Waiting for UPI approval' : method === 'card' ? 'Clearing card network' : 'Settling cash tender' }}
+      </p>
+      <div class="npg__progress" aria-hidden="true">
+        <i [style.width.%]="progress"></i>
+      </div>
+      <p class="npg__session">Session {{ sessionId }}</p>
+    </section>
+
+    <!-- RESULT -->
+    <section class="npg__stage npg__stage--center" *ngIf="step === 'result'">
+      <div class="npg__result" [class.is-ok]="resultOk" [class.is-bad]="resultOk === false" aria-hidden="true">
+        <span *ngIf="resultOk">✓</span>
+        <span *ngIf="resultOk === false">!</span>
+      </div>
+      <h3 [class.ok]="resultOk" [class.bad]="resultOk === false">
+        {{ resultOk ? 'Payment successful' : 'Payment failed' }}
+      </h3>
+      <p class="npg__hint">{{ resultMessage }}</p>
+      <p class="npg__session" *ngIf="transactionRef">Ref · {{ transactionRef }}</p>
+      <div class="npg__actions npg__actions--center">
+        <button type="button" class="btn btn--ghost" *ngIf="!resultOk" (click)="retry()">Try again</button>
+        <button type="button" class="btn btn--primary" (click)="done()">
+          {{ resultOk ? 'Return to POS' : 'Close' }}
+        </button>
+      </div>
+    </section>
+  </div>
+</div>

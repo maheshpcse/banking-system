@@ -302,11 +302,37 @@ export interface BillingBill {
   items: BillingBillItem[];
   subtotal: number;
   discount: number;
+  couponCode?: string | null;
+  couponId?: string | null;
   tax: number;
   grandTotal: number;
   paymentStatus: BillingPaymentStatus;
   paymentMethod?: BillingPaymentMethod | null;
   notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type BillingCouponKind = 'general' | 'payment' | 'bank';
+export type BillingCouponDiscountType = 'percent' | 'fixed';
+export type BillingCouponPaymentScope = 'any' | BillingPaymentMethod | 'bank';
+
+export interface BillingCoupon {
+  id: string;
+  code: string;
+  title: string;
+  kind: BillingCouponKind;
+  discountType: BillingCouponDiscountType;
+  value: number;
+  paymentScopes: BillingCouponPaymentScope[];
+  usageNote: string;
+  bankNote?: string;
+  minSubtotal: number;
+  maxDiscount?: number | null;
+  expiresAt?: string | null;
+  maxUses?: number | null;
+  usedCount?: number;
+  active: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

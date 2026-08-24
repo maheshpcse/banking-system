@@ -143,13 +143,13 @@
   background: rgba(196, 91, 108, 0.22);
 }
 
-/* Clearable only: × takes the chevron’s old spot (left); chevron takes ×’s old spot (far right). */
+/* Clearable only: × left of chevron, chevron far right — tight gap (~0.35rem). */
 .theme-select.has-clear .theme-select__control {
-  padding-right: 4.1rem;
+  padding-right: 3.45rem;
 }
 
 .theme-select.has-clear .theme-select__clear {
-  right: 2.25rem;
+  right: 1.7rem;
 }
 
 .theme-select.has-clear .theme-select__chevron {
@@ -158,12 +158,12 @@
 
 .theme-select.has-clear .theme-select__control.input,
 .theme-select.has-clear .theme-select__control.input--select {
-  padding-right: 3.85rem;
+  padding-right: 3.25rem;
 }
 
 .theme-select.has-clear .theme-select__control.input ~ .theme-select__clear,
 .theme-select.has-clear .theme-select__control.input--select ~ .theme-select__clear {
-  right: 2.15rem;
+  right: 1.6rem;
 }
 
 .theme-select__menu {
@@ -247,7 +247,7 @@
 }
 
 :host(.theme-select--with-clear) .theme-select__control {
-  padding-right: 4.1rem;
+  padding-right: 3.45rem;
 }
 
 :host(.theme-select--with-clear) .theme-select__chevron {
@@ -256,7 +256,7 @@
 
 :host(.theme-select--with-clear) .theme-select__clear {
   display: inline-flex;
-  right: 2.25rem;
+  right: 1.7rem;
 }
 
 :host(.theme-select--compact) {
