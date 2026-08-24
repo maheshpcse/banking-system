@@ -343,15 +343,15 @@ a:focus {
   border: 1px solid rgba(95, 196, 176, 0.35) !important;
   box-shadow: 0 14px 28px rgba(90, 120, 150, 0.14) !important;
   font-family: var(--font-body) !important;
-  padding: 0.6rem 2rem 0.6rem 0.75rem !important;
-  width: auto !important;
-  max-width: min(32rem, calc(100vw - 1.5rem)) !important;
-  min-width: 0 !important;
+  padding: 0.65rem 2.1rem 0.65rem 0.8rem !important;
+  width: fit-content !important;
+  max-width: min(36rem, calc(100vw - 1.5rem)) !important;
+  min-width: 12rem !important;
   min-height: 0 !important;
   height: auto !important;
   box-sizing: border-box !important;
   display: grid !important;
-  grid-template-columns: auto minmax(0, 1fr) !important;
+  grid-template-columns: auto max-content !important;
   grid-template-rows: auto auto !important;
   align-items: center !important;
   column-gap: 0.55rem !important;
@@ -392,17 +392,21 @@ a:focus {
   grid-column: 2 !important;
   grid-row: 1 !important;
   margin: 0 !important;
-  padding: 0 1.1rem 0 0 !important;
-  justify-self: stretch !important;
+  padding: 0 0.85rem 0 0 !important;
+  justify-self: start !important;
+  width: max-content !important;
+  max-width: min(30rem, calc(100vw - 7rem)) !important;
 }
 
 .nb-toast .swal2-html-container {
   grid-column: 2 !important;
   grid-row: 2 !important;
   margin: 0 !important;
-  padding: 0 1.1rem 0 0 !important;
-  justify-self: stretch !important;
+  padding: 0 0.85rem 0 0 !important;
+  justify-self: start !important;
   text-align: left !important;
+  width: max-content !important;
+  max-width: min(30rem, calc(100vw - 7rem)) !important;
 }
 
 .nb-toast .swal2-html-container:empty {
@@ -420,7 +424,7 @@ a:focus {
 .nb-toast__close {
   position: absolute !important;
   top: 50% !important;
-  right: 0.35rem !important;
+  right: 0.4rem !important;
   transform: translateY(-50%) !important;
   width: 1.25rem !important;
   height: 1.25rem !important;
@@ -435,6 +439,13 @@ a:focus {
 .nb-toast__close:hover {
   background: rgba(196, 91, 108, 0.2) !important;
   color: var(--text) !important;
+}
+
+/* Search / filter validation warnings: close sits top-right */
+.nb-toast--warning .nb-toast__close {
+  top: 0.4rem !important;
+  right: 0.4rem !important;
+  transform: none !important;
 }
 
 .nb-toast--success {
