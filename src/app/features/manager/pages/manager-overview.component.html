@@ -298,6 +298,24 @@
           ></div>
         </div>
       </div>
+      <div class="billing-pulse__pipeline" *ngIf="billingStatusBars.length">
+        <p class="billing-pulse__pipeline-title">Invoice pipeline</p>
+        <div class="billing-pulse__stack" aria-hidden="true">
+          <span
+            *ngFor="let bar of billingStatusBars"
+            [style.flex-grow]="bar.count || 0.15"
+            [style.background]="bar.color"
+            [title]="bar.label + ': ' + bar.count"
+          ></span>
+        </div>
+        <ul class="billing-pulse__legend">
+          <li *ngFor="let bar of billingStatusBars">
+            <i [style.background]="bar.color"></i>
+            {{ bar.label }}
+            <em>{{ bar.count }}</em>
+          </li>
+        </ul>
+      </div>
     </div>
     <ng-template #noBillingStats>
       <p class="hint" *ngIf="!billingLoading">Billing stats unavailable right now.</p>

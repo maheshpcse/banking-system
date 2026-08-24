@@ -351,7 +351,6 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
 
   edit(product: BillingProduct): void {
     this.editingId = product.id;
-    this.showForm = true;
     if (this.detailTimer) {
       clearTimeout(this.detailTimer);
       this.detailTimer = null;
@@ -365,11 +364,29 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
       stock: product.stock,
       gstPercentage: product.gstPercentage
     });
+    if (!this.showForm) {
+      this.panelAnimating = true;
+      this.showForm = true;
+      if (this.panelTimer) {
+        clearTimeout(this.panelTimer);
+      }
+      this.panelTimer = setTimeout(() => {
+        this.panelAnimating = false;
+        this.capturePanelHeight();
+        this.panelTimer = null;
+      }, 320);
+    }
+    // Freeze panel height while editing so Cancel/title growth does not scroll the page.
+    this.formResizeObserver?.disconnect();
+    this.formResizeObserver = null;
   }
 
   cancelEdit(): void {
     this.editingId = null;
     this.form.reset({ name: '', sku: '', price: 0, stock: 0, gstPercentage: 18 });
+    if (this.showForm) {
+      this.bindFormHeightObserver();
+    }
   }
 
   async save(): Promise<void> {

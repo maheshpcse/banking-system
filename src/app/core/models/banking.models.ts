@@ -254,7 +254,7 @@ export interface AppNotification {
 }
 
 export type BillingPaymentMethod = 'cash' | 'card' | 'upi' | 'qr';
-export type BillingPaymentStatus = 'draft' | 'pending' | 'paid' | 'failed' | 'refunded';
+export type BillingPaymentStatus = 'draft' | 'pending' | 'paid' | 'failed' | 'error' | 'refunded';
 export type BillingComplaintStatus =
   | 'open'
   | 'accepted'
@@ -343,7 +343,7 @@ export interface BillingPayment {
   billId: string;
   billNumber: string;
   paymentMethod: BillingPaymentMethod;
-  status: 'pending' | 'success' | 'failed';
+  status: 'pending' | 'success' | 'failed' | 'error';
   amount: number;
   transactionRef: string;
   meta?: Record<string, unknown>;
@@ -371,6 +371,14 @@ export interface BillingDashboardStats {
   totalProducts: number;
   totalCustomers: number;
   openComplaints: number;
+  statusCounts?: {
+    draft?: number;
+    pending?: number;
+    paid?: number;
+    failed?: number;
+    error?: number;
+    refunded?: number;
+  };
   recentBills: BillingBill[];
 }
 

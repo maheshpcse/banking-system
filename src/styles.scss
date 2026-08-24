@@ -441,11 +441,11 @@ a:focus {
   color: var(--text) !important;
 }
 
-/* Search / filter validation warnings: close sits top-right */
+/* Warning toasts: keep × vertically centered like other toasts */
 .nb-toast--warning .nb-toast__close {
-  top: 0.4rem !important;
+  top: 50% !important;
   right: 0.4rem !important;
-  transform: none !important;
+  transform: translateY(-50%) !important;
 }
 
 .nb-toast--success {
@@ -463,10 +463,16 @@ a:focus {
   border-color: rgba(255, 153, 50, 0.45) !important;
 }
 
-/* Corner login toast — same fit-content growth as centered toasts */
+/* Corner login toast — grow with message length */
 .nb-toast--corner.swal2-popup.swal2-toast {
-  width: fit-content !important;
-  max-width: min(36rem, calc(100vw - 1.5rem)) !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: min(40rem, calc(100vw - 1.5rem)) !important;
+}
+
+.nb-toast--corner .nb-toast__title,
+.nb-toast--corner .nb-toast__text {
+  white-space: nowrap !important;
 }
 
 html[data-nb-billing='1'] .nb-toast--warning {

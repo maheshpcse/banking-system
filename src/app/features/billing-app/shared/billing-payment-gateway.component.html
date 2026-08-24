@@ -52,8 +52,12 @@
         </button>
       </div>
       <label class="npg__fail">
-        <input type="checkbox" [(ngModel)]="simulateFail" />
-        Simulate failure (demo)
+        <input type="checkbox" [ngModel]="simulateFail" (ngModelChange)="onSimulateFail($event)" />
+        Simulate payment failure (demo)
+      </label>
+      <label class="npg__fail">
+        <input type="checkbox" [ngModel]="simulateError" (ngModelChange)="onSimulateError($event)" />
+        Simulate payment error (demo)
       </label>
       <div class="npg__actions">
         <button type="button" class="btn btn--ghost" (click)="openInNewTab()">Open in new tab</button>

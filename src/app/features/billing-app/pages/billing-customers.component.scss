@@ -120,6 +120,7 @@
   align-items: start;
   width: 100%;
   transition: grid-template-columns 0.35s ease;
+  overflow-anchor: none;
 }
 
 .layout.is-expanded {
@@ -574,10 +575,23 @@
 .icon-close {
   border: 0;
   background: transparent;
-  font-size: 1.5rem;
-  line-height: 1;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  font-size: 1.35rem;
+  line-height: 0;
   cursor: pointer;
   color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.icon-close:hover {
+  background: rgba(255, 153, 50, 0.22);
+  color: var(--saffron);
 }
 
 .drawer__meta {
@@ -828,9 +842,22 @@
 .icon-close {
   border: 0;
   background: transparent;
-  font-size: 1.5rem;
-  line-height: 1;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  font-size: 1.35rem;
+  line-height: 0;
   cursor: pointer;
   color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.icon-close:hover {
+  background: rgba(255, 153, 50, 0.22);
+  color: var(--saffron);
 }
 

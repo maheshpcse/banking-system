@@ -35,7 +35,8 @@ export class BillingHistoryComponent implements OnInit {
     { id: 'draft', label: 'Bill Created' },
     { id: 'pending', label: 'Payment Pending' },
     { id: 'paid', label: 'Payment Success' },
-    { id: 'failed', label: 'Payment Failed' }
+    { id: 'error', label: 'Payment Error' },
+    { id: 'failed', label: 'Payment Failure' }
   ];
 
   constructor(
@@ -157,7 +158,7 @@ export class BillingHistoryComponent implements OnInit {
   }
 
   canContinueOnPos(status: string): boolean {
-    return status === 'draft' || status === 'pending' || status === 'failed';
+    return status === 'draft' || status === 'pending' || status === 'failed' || status === 'error';
   }
 
   printInvoice(bill: BillingBill): void {
@@ -197,8 +198,10 @@ export class BillingHistoryComponent implements OnInit {
         return 'Payment Pending';
       case 'paid':
         return 'Payment Success';
+      case 'error':
+        return 'Payment Error';
       case 'failed':
-        return 'Payment Failed';
+        return 'Payment Failure';
       case 'refunded':
         return 'Refunded';
       default:

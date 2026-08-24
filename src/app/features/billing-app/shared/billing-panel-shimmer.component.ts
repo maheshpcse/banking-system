@@ -270,13 +270,30 @@ import { Component, Input } from '@angular/core';
         <div class="bps__panel bps__panel--drawer">
           <div class="bps__bone bps__bone--title"></div>
           <div class="bps__bone bps__bone--sm"></div>
-          <div class="bps__bone bps__bone--xs"></div>
-          <div class="bps__row" *ngFor="let r of drawerLines">
-            <div class="bps__bone bps__bone--fill"></div>
-            <div class="bps__bone bps__bone--sm"></div>
+          <div class="bps__drawer-section">
+            <div class="bps__bone bps__bone--section"></div>
+            <div class="bps__bone bps__bone--xs"></div>
+            <div class="bps__bone bps__bone--xs"></div>
           </div>
-          <div class="bps__totals">
-            <div class="bps__bone bps__bone--sm" *ngFor="let t of totals"></div>
+          <div class="bps__drawer-section">
+            <div class="bps__bone bps__bone--section"></div>
+            <div class="bps__row" *ngFor="let r of drawerLines">
+              <div class="bps__bone bps__bone--fill"></div>
+              <div class="bps__bone bps__bone--sm"></div>
+            </div>
+          </div>
+          <div class="bps__drawer-section">
+            <div class="bps__bone bps__bone--section"></div>
+            <div class="bps__totals">
+              <div class="bps__bone bps__bone--sm" *ngFor="let t of totals"></div>
+            </div>
+          </div>
+          <div class="bps__drawer-section">
+            <div class="bps__bone bps__bone--section"></div>
+            <div class="bps__row" *ngFor="let p of drawerPays">
+              <div class="bps__bone bps__bone--fill"></div>
+              <div class="bps__bone bps__bone--xs"></div>
+            </div>
           </div>
           <div class="bps__drawer-foot">
             <div class="bps__bone bps__bone--btn"></div>
@@ -610,6 +627,17 @@ import { Component, Input } from '@angular/core';
         gap: 0.75rem;
       }
 
+      .bps__drawer-section {
+        display: grid;
+        gap: 0.45rem;
+        padding-top: 0.2rem;
+      }
+
+      .bps__bone--section {
+        width: 5.5rem;
+        height: 0.72rem;
+      }
+
       .bps__drawer-foot {
         display: flex;
         justify-content: flex-end;
@@ -815,6 +843,7 @@ export class BillingPanelShimmerComponent {
   readonly couponFields = [1, 2, 3, 4, 5, 6];
   readonly couponRows = [1, 2, 3];
   readonly drawerLines = [1, 2, 3, 4];
+  readonly drawerPays = [1, 2];
   readonly historyHeads = [1, 2, 3, 4];
   readonly historyRows = [1, 2, 3, 4, 5, 6];
 }

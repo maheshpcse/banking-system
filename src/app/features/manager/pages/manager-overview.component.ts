@@ -167,6 +167,20 @@ export class ManagerOverviewComponent implements OnInit {
     }));
   }
 
+  get billingStatusBars(): Array<{ label: string; count: number; color: string }> {
+    const c = this.billingStats?.statusCounts;
+    if (!c) {
+      return [];
+    }
+    return [
+      { label: 'Created', count: c.draft || 0, color: '#d97706' },
+      { label: 'Pending', count: c.pending || 0, color: '#f59e0b' },
+      { label: 'Success', count: c.paid || 0, color: '#059669' },
+      { label: 'Error', count: c.error || 0, color: '#ea580c' },
+      { label: 'Failure', count: c.failed || 0, color: '#dc2626' }
+    ];
+  }
+
   private formatMoney(n: number): string {
     return (Number(n) || 0).toLocaleString(undefined, {
       style: 'currency',

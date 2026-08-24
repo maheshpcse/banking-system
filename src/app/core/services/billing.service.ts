@@ -121,6 +121,7 @@ export class BillingService {
     billId: string;
     paymentMethod: BillingPaymentMethod;
     simulateFail?: boolean;
+    simulateError?: boolean;
     provider?: string;
     sessionId?: string;
     channel?: string;
