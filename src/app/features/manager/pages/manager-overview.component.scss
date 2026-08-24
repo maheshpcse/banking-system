@@ -325,19 +325,6 @@
 .billing-pulse__kpi {
   display: grid;
   gap: 0.35rem;
-  animation: billing-pulse-in 0.45s ease both;
-}
-
-.billing-pulse__kpi:nth-child(2) {
-  animation-delay: 0.06s;
-}
-
-.billing-pulse__kpi:nth-child(3) {
-  animation-delay: 0.12s;
-}
-
-.billing-pulse__kpi:nth-child(4) {
-  animation-delay: 0.18s;
 }
 
 .billing-pulse__meta {
