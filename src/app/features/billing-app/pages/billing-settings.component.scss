@@ -312,7 +312,130 @@ label {
 @media (max-width: 900px) {
   .settings,
   .methods,
-  .grid2 {
+  .grid2,
+  .coupons__form {
     grid-template-columns: 1fr;
   }
+}
+
+.coupons {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.coupons__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.coupons h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  color: var(--ink);
+}
+
+.coupons__form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.coupons__form label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.coupons__form .span2 {
+  grid-column: span 2;
+}
+
+.coupons__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.coupon-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.coupon-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.95rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.coupon-row.is-off {
+  opacity: 0.62;
+}
+
+.coupon-row strong {
+  display: block;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+}
+
+.coupon-row span {
+  display: block;
+  font-size: 0.86rem;
+  color: var(--ink);
+}
+
+.coupon-row small {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.coupon-row .note {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.note--bank {
+  color: #8a4b1f;
+}
+
+.coupon-row__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  flex: 0 0 auto;
+}
+
+.link {
+  border: 0;
+  background: transparent;
+  color: #c45c26;
+  cursor: pointer;
+  font-weight: 650;
+  padding: 0;
+}
+
+.link-danger {
+  border: 0;
+  background: transparent;
+  color: var(--crimson, #dc143c);
+  cursor: pointer;
+  font-weight: 650;
+  padding: 0;
+}
+
+.badge {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.25);
+  color: var(--muted);
 }

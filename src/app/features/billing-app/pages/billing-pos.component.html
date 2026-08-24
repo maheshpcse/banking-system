@@ -111,13 +111,48 @@
 
       <div class="pos__checkout glass">
         <div class="checkout__body">
+          <div class="checkout__coupon">
+            <label class="field">
+              Coupon
+              <app-theme-select
+                controlClass="input"
+                [(ngModel)]="selectedCouponCode"
+                [options]="couponSelectOptions"
+                [clearable]="true"
+                placeholder="Select coupon…"
+                ariaLabel="Select coupon"
+                (cleared)="clearCoupon()"
+              ></app-theme-select>
+            </label>
+            <button
+              type="button"
+              class="btn btn--ghost"
+              [disabled]="couponBusy || !selectedCouponCode"
+              (click)="applyCoupon()"
+            >
+              {{ couponBusy ? 'Applying…' : 'Apply' }}
+            </button>
+          </div>
+          <p class="coupon-note" *ngIf="appliedCoupon as c">
+            <strong>{{ c.code }}</strong> — {{ c.usageNote }}
+            <span *ngIf="c.bankNote"> · {{ c.bankNote }}</span>
+            <button type="button" class="link" (click)="clearCoupon()">Remove</button>
+          </p>
+
           <label class="field checkout__discount">
-            Discount
-            <input class="input" type="number" [(ngModel)]="discount" min="0" />
+            Manual discount
+            <input
+              class="input"
+              type="number"
+              [(ngModel)]="discount"
+              min="0"
+              [disabled]="!!appliedCoupon"
+            />
           </label>
 
           <dl class="totals">
             <div><dt>Subtotal</dt><dd>{{ cartSubtotal | currencyFormat }}</dd></div>
+            <div><dt>Discount</dt><dd>{{ safeDiscount | currencyFormat }}</dd></div>
             <div><dt>Tax</dt><dd>{{ cartTax | currencyFormat }}</dd></div>
             <div class="totals__grand"><dt>Total</dt><dd>{{ cartGrandTotal | currencyFormat }}</dd></div>
           </dl>
@@ -134,7 +169,7 @@
               type="button"
               class="btn btn--primary"
               *ngIf="bill.paymentStatus !== 'paid'"
-              (click)="openPayModal()"
+              (click)="openGateway()"
             >
               Take payment
             </button>
@@ -154,54 +189,13 @@
       </div>
     </div>
 
-    <div
-      class="modal-backdrop"
-      *ngIf="payModalOpen"
-      [class.is-leaving]="payModalLeaving"
-      data-backdrop="static"
-      data-keyboard="false"
-    ></div>
-    <div
-      class="modal"
-      *ngIf="payModalOpen && activeInvoice as bill"
-      [class.is-leaving]="payModalLeaving"
-      role="dialog"
-      aria-modal="true"
-      tabindex="-1"
-      data-backdrop="static"
-      data-keyboard="false"
-    >
-      <div class="modal__head">
-        <h3>Collect payment</h3>
-        <button type="button" class="icon-close" (click)="closePayModal()" aria-label="Close">×</button>
-      </div>
-      <p class="modal__lede">{{ bill.billNumber }} · {{ bill.grandTotal | currencyFormat }}</p>
-
-      <div class="methods">
-        <button
-          type="button"
-          class="method"
-          *ngFor="let m of enabledMethods"
-          [class.is-active]="paymentMethod === m"
-          (click)="paymentMethod = m"
-        >
-          {{ methodLabel(m) }}
-        </button>
-      </div>
-
-      <div class="qr" *ngIf="paymentMethod === 'qr'" [attr.data-phase]="qrPhase">
-        <div class="qr__frame">
-          <span class="qr__scan"></span>
-        </div>
-        <p *ngIf="qrPhase === 'idle'">Ready to scan customer QR</p>
-        <p *ngIf="qrPhase === 'scanning'">Scanning…</p>
-        <p *ngIf="qrPhase === 'success'">Payment captured</p>
-        <p *ngIf="qrPhase === 'failed'">Scan failed — retry</p>
-      </div>
-
-      <button type="button" class="btn btn--primary btn--block" [disabled]="paying" (click)="collectPayment()">
-        {{ paying ? 'Processing…' : 'Confirm payment' }}
-      </button>
-    </div>
+    <app-billing-payment-gateway
+      [open]="gatewayOpen"
+      [bill]="activeInvoice"
+      [settings]="settings"
+      [methods]="enabledMethods"
+      (closed)="onGatewayClosed()"
+      (completed)="onGatewayCompleted($event)"
+    ></app-billing-payment-gateway>
   </ng-container>
 </section>

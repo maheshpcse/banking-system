@@ -5,7 +5,7 @@
     <header class="hero">
       <p class="eyebrow">Gateway</p>
       <h2>Billing settings</h2>
-      <p class="lede">Merchant identity on the left · payment rails on the right.</p>
+      <p class="lede">Merchant identity · payment rails · coupons for POS checkout.</p>
     </header>
 
     <form class="settings" [formGroup]="form" (ngSubmit)="save()">
@@ -33,14 +33,9 @@
 
       <div class="glass col">
         <h3>Payment methods</h3>
-        <p class="hint">Toggle rails available at checkout. Icons stay small and clear.</p>
+        <p class="hint">Toggle rails available in NovaPay checkout. Icons stay small and clear.</p>
         <div class="methods">
-          <button
-            type="button"
-            class="method"
-            [class.on]="form.value.cash"
-            (click)="toggleMethod('cash')"
-          >
+          <button type="button" class="method" [class.on]="form.value.cash" (click)="toggleMethod('cash')">
             <span class="method__icon method__icon--cash" aria-hidden="true">
               <span class="cash-bill"></span>
               <span class="cash-bill cash-bill--front"></span>
@@ -50,12 +45,7 @@
               <small>{{ form.value.cash ? 'Enabled' : 'Off' }}</small>
             </span>
           </button>
-          <button
-            type="button"
-            class="method"
-            [class.on]="form.value.card"
-            (click)="toggleMethod('card')"
-          >
+          <button type="button" class="method" [class.on]="form.value.card" (click)="toggleMethod('card')">
             <span class="method__icon method__icon--card" aria-hidden="true">
               <span class="card-body">
                 <span class="card-stripe"></span>
@@ -67,12 +57,7 @@
               <small>{{ form.value.card ? 'Enabled' : 'Off' }}</small>
             </span>
           </button>
-          <button
-            type="button"
-            class="method"
-            [class.on]="form.value.upi"
-            (click)="toggleMethod('upi')"
-          >
+          <button type="button" class="method" [class.on]="form.value.upi" (click)="toggleMethod('upi')">
             <span class="method__icon method__icon--upi" aria-hidden="true">
               <span class="upi-mark">UPI</span>
             </span>
@@ -81,12 +66,7 @@
               <small>{{ form.value.upi ? 'Enabled' : 'Off' }}</small>
             </span>
           </button>
-          <button
-            type="button"
-            class="method"
-            [class.on]="form.value.qr"
-            (click)="toggleMethod('qr')"
-          >
+          <button type="button" class="method" [class.on]="form.value.qr" (click)="toggleMethod('qr')">
             <span class="method__icon method__icon--qr" aria-hidden="true">
               <span class="qr-mark"></span>
             </span>
@@ -111,5 +91,120 @@
         </button>
       </div>
     </form>
+
+    <section class="glass coupons" [formGroup]="couponForm">
+      <div class="coupons__head">
+        <div>
+          <h3>Coupons</h3>
+          <p class="hint">
+            Create general, payment-type, and bank-linked coupons with expiry and usage notes. Applied at POS.
+          </p>
+        </div>
+        <button type="button" class="btn btn--ghost" *ngIf="editingCouponId" (click)="resetCouponForm()">
+          Cancel edit
+        </button>
+      </div>
+
+      <div class="coupons__form">
+        <label>
+          Code
+          <input class="input" formControlName="code" placeholder="SAVE10" />
+        </label>
+        <label>
+          Title
+          <input class="input" formControlName="title" placeholder="Weekend saver" />
+        </label>
+        <label>
+          Kind
+          <app-theme-select
+            controlClass="input input--select"
+            formControlName="kind"
+            [options]="kindOptions"
+            ariaLabel="Coupon kind"
+          ></app-theme-select>
+        </label>
+        <label>
+          Discount type
+          <app-theme-select
+            controlClass="input input--select"
+            formControlName="discountType"
+            [options]="discountTypeOptions"
+            ariaLabel="Discount type"
+          ></app-theme-select>
+        </label>
+        <label>
+          Value
+          <input class="input" type="number" formControlName="value" min="0" />
+        </label>
+        <label>
+          Payment scope
+          <app-theme-select
+            controlClass="input input--select"
+            formControlName="paymentScopes"
+            [options]="scopeOptions"
+            ariaLabel="Payment scope"
+          ></app-theme-select>
+        </label>
+        <label class="span2">
+          Usage note
+          <input class="input" formControlName="usageNote" placeholder="Short note shown when applying at POS" />
+        </label>
+        <label class="span2" *ngIf="isBankKind">
+          Bank note
+          <input
+            class="input"
+            formControlName="bankNote"
+            placeholder="Required for bank-linked coupons (settlement / account rules)"
+          />
+        </label>
+        <label>
+          Min subtotal
+          <input class="input" type="number" formControlName="minSubtotal" min="0" />
+        </label>
+        <label>
+          Max discount
+          <input class="input" type="number" formControlName="maxDiscount" min="0" />
+        </label>
+        <label>
+          Expires
+          <input class="input" type="date" formControlName="expiresAt" />
+        </label>
+        <label>
+          Max uses
+          <input class="input" type="number" formControlName="maxUses" min="1" />
+        </label>
+      </div>
+
+      <div class="coupons__actions">
+        <button type="button" class="btn btn--primary" [disabled]="couponBusy" (click)="saveCoupon()">
+          {{ couponBusy ? 'Saving…' : editingCouponId ? 'Update coupon' : 'Add coupon' }}
+        </button>
+      </div>
+
+      <div class="coupon-list" *ngIf="coupons.length; else noCoupons">
+        <article class="coupon-row" *ngFor="let c of coupons" [class.is-off]="!c.active">
+          <div>
+            <strong>{{ c.code }}</strong>
+            <span>{{ c.title }} · {{ c.discountType === 'percent' ? c.value + '%' : ('$' + c.value) }}</span>
+            <small>
+              {{ c.kind }} · {{ scopeLabel(c.paymentScopes) }}
+              <ng-container *ngIf="c.expiresAt"> · expires {{ c.expiresAt | date: 'mediumDate' }}</ng-container>
+            </small>
+            <p class="note">{{ c.usageNote }}</p>
+            <p class="note note--bank" *ngIf="c.bankNote">{{ c.bankNote }}</p>
+          </div>
+          <div class="coupon-row__actions">
+            <button type="button" class="link" (click)="startEditCoupon(c)">Edit</button>
+            <button type="button" class="link-danger" *ngIf="c.active" [disabled]="couponBusy" (click)="deleteCoupon(c)">
+              Deactivate
+            </button>
+            <span class="badge" *ngIf="!c.active">Inactive</span>
+          </div>
+        </article>
+      </div>
+      <ng-template #noCoupons>
+        <p class="hint">No coupons yet — add one above for POS selection.</p>
+      </ng-template>
+    </section>
   </ng-container>
 </section>

@@ -6,6 +6,7 @@ import {
   BillingBill,
   BillingComplaint,
   BillingComplaintStatus,
+  BillingCoupon,
   BillingCustomer,
   BillingDashboardStats,
   BillingGatewaySettings,
@@ -102,6 +103,7 @@ export class BillingService {
     customerId: string;
     items: Array<{ productId: string; quantity: number }>;
     discount?: number;
+    couponCode?: string;
     notes?: string;
   }): Observable<{ message: string; bill: BillingBill }> {
     return this.http.post<{ message: string; bill: BillingBill }>(`${this.base}/bills`, payload);
@@ -111,11 +113,53 @@ export class BillingService {
     billId: string;
     paymentMethod: BillingPaymentMethod;
     simulateFail?: boolean;
+    provider?: string;
+    sessionId?: string;
+    channel?: string;
+    cardLast4?: string;
+    upiVpa?: string;
   }): Observable<{ message: string; payment: BillingPayment; bill: BillingBill }> {
     return this.http.post<{ message: string; payment: BillingPayment; bill: BillingBill }>(
       `${this.base}/payments`,
       payload
     );
+  }
+
+  listCoupons(includeInactive = false): Observable<{ items: BillingCoupon[] }> {
+    let params = new HttpParams();
+    if (includeInactive) params = params.set('includeInactive', '1');
+    return this.http.get<{ items: BillingCoupon[] }>(`${this.base}/coupons`, { params });
+  }
+
+  validateCoupon(payload: {
+    code: string;
+    subtotal: number;
+    paymentMethod?: BillingPaymentMethod | string;
+  }): Observable<{ message: string; discount: number; coupon: BillingCoupon }> {
+    return this.http.post<{ message: string; discount: number; coupon: BillingCoupon }>(
+      `${this.base}/coupons/validate`,
+      payload
+    );
+  }
+
+  createCoupon(
+    payload: Partial<BillingCoupon>
+  ): Observable<{ message: string; coupon: BillingCoupon }> {
+    return this.http.post<{ message: string; coupon: BillingCoupon }>(`${this.base}/coupons`, payload);
+  }
+
+  updateCoupon(
+    id: string,
+    payload: Partial<BillingCoupon>
+  ): Observable<{ message: string; coupon: BillingCoupon }> {
+    return this.http.put<{ message: string; coupon: BillingCoupon }>(
+      `${this.base}/coupons/${id}`,
+      payload
+    );
+  }
+
+  deleteCoupon(id: string): Observable<{ message: string; coupon: BillingCoupon }> {
+    return this.http.delete<{ message: string; coupon: BillingCoupon }>(`${this.base}/coupons/${id}`);
   }
 
   listComplaints(status = ''): Observable<{ items: BillingComplaint[] }> {

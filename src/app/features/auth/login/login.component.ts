@@ -5,6 +5,7 @@ import { Subscription, of } from 'rxjs';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { PortalLaunchService } from '../../../core/services/portal-launch.service';
 import { ShellBootService } from '../../../core/services/shell-boot.service';
 import { fieldError } from '../../../core/utils/form-errors';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
@@ -40,6 +41,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly shellBoot: ShellBootService,
+    private readonly portalLaunch: PortalLaunchService,
     private readonly notifications: NotificationService
   ) {}
 
@@ -79,15 +81,24 @@ export class LoginComponent implements OnInit, OnDestroy {
         const next = this.route.snapshot.queryParamMap.get('next');
         let dest =
           role === 'admin' ? '/admin' : role === 'manager' ? '/manager' : '/dashboard';
+        let billingLaunch = false;
         if (next === 'billing') {
           if (this.auth.currentUser?.isSuperAdmin) {
             dest = '/manager/billing';
           } else if (role === 'manager' || role === 'admin') {
             dest = '/billing';
+            billingLaunch = true;
           }
         }
-        this.shellBoot.begin();
         this.notifications.startRealtime();
+        if (billingLaunch) {
+          this.loading = false;
+          this.shellBoot.begin();
+          this.portalLaunch.launch('billing', dest);
+          void this.alerts.toastSuccess('Welcome back', 'Opening Billing System…');
+          return;
+        }
+        this.shellBoot.begin();
         void this.router.navigateByUrl(dest).then((ok) => {
           this.loading = false;
           if (ok) {

@@ -98,23 +98,14 @@
             <span>Professional preset</span>
             <div class="field-with-clear__control">
               <app-theme-select
-                class="theme-select--with-clear"
                 formControlName="presetId"
                 [options]="presetSelectOptions"
+                [clearable]="true"
                 placeholder="Select preset"
                 ariaLabel="Professional preset"
                 (valueChange)="onPresetChange()"
+                (cleared)="clearPreset()"
               ></app-theme-select>
-              <button
-                type="button"
-                class="field-clear"
-                *ngIf="avatarForm.value.presetId"
-                (click)="clearPreset($event)"
-                aria-label="Clear preset"
-                title="Clear preset"
-              >
-                ×
-              </button>
             </div>
           </label>
 

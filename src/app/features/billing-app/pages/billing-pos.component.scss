@@ -93,9 +93,34 @@
 
 .checkout__body {
   display: grid;
-  grid-template-columns: minmax(160px, 0.4fr) minmax(0, 1fr);
-  gap: 1rem;
+  grid-template-columns: minmax(200px, 0.55fr) minmax(0, 1fr);
+  gap: 0.75rem 1rem;
+  align-items: start;
+}
+
+.checkout__coupon {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
   align-items: end;
+  grid-column: 1 / -1;
+}
+
+.coupon-note {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  grid-column: 1 / -1;
+}
+
+.coupon-note .link {
+  margin-left: 0.45rem;
+  border: 0;
+  background: transparent;
+  color: #c45c26;
+  cursor: pointer;
+  font-weight: 650;
+  padding: 0;
 }
 
 .checkout__discount {

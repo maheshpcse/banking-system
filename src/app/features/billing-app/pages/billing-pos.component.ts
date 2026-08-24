@@ -5,13 +5,14 @@ import { AlertService } from '../../../core/services/alert.service';
 import { BillingService } from '../../../core/services/billing.service';
 import {
   BillingBill,
+  BillingCoupon,
   BillingCustomer,
   BillingGatewaySettings,
+  BillingPayment,
   BillingPaymentMethod,
   BillingProduct
 } from '../../../core/models/banking.models';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
-
 import { ThemeSelectOption } from '../../../shared/theme-select/theme-select.component';
 
 interface CartLine {
@@ -31,26 +32,33 @@ interface CartLine {
 export class BillingPosComponent implements OnInit {
   pageLoading = true;
   productLoading = false;
-  /** Only true while the Find button itself is running a search. */
   findBusy = false;
   busy = false;
-  paying = false;
+  couponBusy = false;
   productQuery = '';
   products: BillingProduct[] = [];
   customers: BillingCustomer[] = [];
+  coupons: BillingCoupon[] = [];
   settings: BillingGatewaySettings | null = null;
   cart: CartLine[] = [];
   discount = 0;
   selectedCustomerId = '';
-  paymentMethod: BillingPaymentMethod = 'cash';
-  payModalOpen = false;
-  payModalLeaving = false;
-  private payModalTimer: ReturnType<typeof setTimeout> | null = null;
-  qrPhase: 'idle' | 'scanning' | 'success' | 'failed' = 'idle';
+  selectedCouponCode = '';
+  appliedCoupon: BillingCoupon | null = null;
+  gatewayOpen = false;
   activeInvoice: BillingBill | null = null;
 
   get customerSelectOptions(): ThemeSelectOption[] {
     return this.customers.map((c) => ({ value: c.id, label: c.name }));
+  }
+
+  get couponSelectOptions(): ThemeSelectOption[] {
+    return this.coupons
+      .filter((c) => c.active !== false)
+      .map((c) => ({
+        value: c.code,
+        label: `${c.code} · ${c.discountType === 'percent' ? c.value + '%' : '$' + c.value}`
+      }));
   }
 
   constructor(
@@ -102,7 +110,8 @@ export class BillingPosComponent implements OnInit {
           .pipe(catchError(() => of({ items: [] as BillingCustomer[] }))),
         settings: this.billing
           .getSettings()
-          .pipe(catchError(() => of({ settings: null as BillingGatewaySettings | null })))
+          .pipe(catchError(() => of({ settings: null as BillingGatewaySettings | null }))),
+        coupons: this.billing.listCoupons().pipe(catchError(() => of({ items: [] as BillingCoupon[] })))
       }),
       SHIMMER_MS
     ).subscribe({
@@ -110,10 +119,7 @@ export class BillingPosComponent implements OnInit {
         this.products = (bundle.products.items || []).filter((p) => p.active !== false);
         this.customers = bundle.customers.items || [];
         this.settings = bundle.settings.settings;
-        const methods = this.enabledMethods;
-        if (methods.length) {
-          this.paymentMethod = methods[0];
-        }
+        this.coupons = bundle.coupons.items || [];
         this.pageLoading = false;
       },
       error: async () => {
@@ -144,7 +150,6 @@ export class BillingPosComponent implements OnInit {
     this.reloadProducts(false);
   }
 
-  /** Refresh product chips. Find button only shows “Finding…” when fromFind is true. */
   private reloadProducts(fromFind: boolean): void {
     this.productLoading = true;
     this.findBusy = fromFind;
@@ -200,9 +205,48 @@ export class BillingPosComponent implements OnInit {
   clearCart(): void {
     this.cart = [];
     this.discount = 0;
+    this.clearCoupon();
     this.activeInvoice = null;
-    this.qrPhase = 'idle';
-    this.forceClosePayModal();
+    this.gatewayOpen = false;
+  }
+
+  async applyCoupon(): Promise<void> {
+    const code = String(this.selectedCouponCode || '').trim();
+    if (!code) {
+      void this.alerts.toastWarning('Select a coupon', 'Pick a coupon before applying.');
+      return;
+    }
+    if (!this.cart.length) {
+      void this.alerts.toastWarning('Cart empty', 'Add products before applying a coupon.');
+      return;
+    }
+    this.couponBusy = true;
+    try {
+      const res = await firstValueFrom(
+        withShimmerDelay(
+          this.billing.validateCoupon({ code, subtotal: this.cartSubtotal }),
+          SHIMMER_MS
+        )
+      );
+      this.appliedCoupon = res.coupon;
+      this.discount = res.discount;
+      this.selectedCouponCode = res.coupon.code;
+      void this.alerts.toastSuccess('Coupon applied', res.coupon.usageNote || res.message);
+    } catch (err) {
+      this.appliedCoupon = null;
+      void this.alerts.toastWarning(
+        'Coupon not applied',
+        (err as { error?: { message?: string } })?.error?.message || 'Invalid coupon.'
+      );
+    } finally {
+      this.couponBusy = false;
+    }
+  }
+
+  clearCoupon(): void {
+    this.appliedCoupon = null;
+    this.selectedCouponCode = '';
+    this.discount = 0;
   }
 
   async createInvoice(): Promise<void> {
@@ -211,7 +255,8 @@ export class BillingPosComponent implements OnInit {
       return;
     }
     const items = this.cart.map((c) => ({ productId: c.productId, quantity: c.quantity }));
-    const discount = this.safeDiscount;
+    const discount = this.appliedCoupon ? undefined : this.safeDiscount;
+    const couponCode = this.appliedCoupon?.code;
     this.busy = true;
     const outcome = await this.alerts.confirmAction({
       text: `Create invoice for ${this.cartGrandTotal.toFixed(2)}?`,
@@ -222,7 +267,8 @@ export class BillingPosComponent implements OnInit {
           this.billing.createBill({
             customerId: this.selectedCustomerId,
             items,
-            discount
+            discount,
+            couponCode
           }),
           SHIMMER_MS
         ),
@@ -234,95 +280,29 @@ export class BillingPosComponent implements OnInit {
     if (outcome.ok) {
       this.activeInvoice = outcome.result.bill;
       this.cart = [];
-      this.discount = 0;
-      this.openPayModal();
-      this.qrPhase = 'idle';
+      this.clearCoupon();
+      this.openGateway();
     }
   }
 
-  openPayModal(bill?: BillingBill): void {
+  openGateway(bill?: BillingBill): void {
     if (bill) {
       this.activeInvoice = bill;
     }
     if (!this.activeInvoice || this.activeInvoice.paymentStatus === 'paid') {
       return;
     }
-    if (this.payModalTimer) {
-      clearTimeout(this.payModalTimer);
-      this.payModalTimer = null;
-    }
-    this.payModalLeaving = false;
-    this.payModalOpen = true;
-    this.qrPhase = 'idle';
+    this.gatewayOpen = true;
   }
 
-  closePayModal(): void {
-    if (!this.payModalOpen || this.payModalLeaving) {
-      return;
-    }
-    this.payModalLeaving = true;
-    this.qrPhase = 'idle';
-    this.payModalTimer = setTimeout(() => {
-      this.payModalOpen = false;
-      this.payModalLeaving = false;
-      this.payModalTimer = null;
-    }, 200);
+  onGatewayClosed(): void {
+    this.gatewayOpen = false;
   }
 
-  private forceClosePayModal(): void {
-    if (this.payModalTimer) {
-      clearTimeout(this.payModalTimer);
-      this.payModalTimer = null;
-    }
-    this.payModalOpen = false;
-    this.payModalLeaving = false;
-  }
-
-  async collectPayment(): Promise<void> {
-    if (!this.activeInvoice || this.activeInvoice.paymentStatus === 'paid') {
-      return;
-    }
-    const billId = this.activeInvoice.id;
-    const method = this.paymentMethod;
-    this.paying = true;
-    if (method === 'qr') {
-      this.qrPhase = 'scanning';
-    }
-
-    const outcome = await this.alerts.confirmAction({
-      text: `Collect ${this.activeInvoice.grandTotal.toFixed(2)} via ${this.methodLabel(method)}?`,
-      confirmText: 'Confirm payment',
-      loadingText: method === 'qr' ? 'Scanning QR…' : 'Processing payment…',
-      action: async () => {
-        if (method === 'qr') {
-          await new Promise((r) => setTimeout(r, 1400));
-        }
-        return firstValueFrom(
-          withShimmerDelay(
-            this.billing.payBill({
-              billId,
-              paymentMethod: method
-            }),
-            SHIMMER_MS
-          )
-        );
-      },
-      successMessage: (res) => res.message || 'Payment recorded',
-      errorMessage: (err) =>
-        (err as { error?: { message?: string } })?.error?.message || 'Payment failed.'
-    });
-
-    this.paying = false;
-    if (outcome.ok) {
-      this.activeInvoice = outcome.result.bill;
-      this.qrPhase = method === 'qr' ? 'success' : 'idle';
-      if (outcome.result.bill.paymentStatus === 'paid') {
-        setTimeout(() => this.closePayModal(), 700);
-      }
-    } else if (!outcome.cancelled) {
-      this.qrPhase = method === 'qr' ? 'failed' : 'idle';
-    } else {
-      this.qrPhase = 'idle';
+  onGatewayCompleted(event: { bill: BillingBill; payment: BillingPayment; ok: boolean }): void {
+    this.activeInvoice = event.bill;
+    if (event.ok) {
+      this.gatewayOpen = false;
     }
   }
 
@@ -357,16 +337,6 @@ export class BillingPosComponent implements OnInit {
     win.document.close();
     win.focus();
     win.print();
-  }
-
-  methodLabel(method: BillingPaymentMethod): string {
-    if (method === 'card') {
-      return this.settings?.cardLabel || 'Card';
-    }
-    if (method === 'upi') {
-      return this.settings?.upiVpa ? `UPI (${this.settings.upiVpa})` : 'UPI';
-    }
-    return method.toUpperCase();
   }
 
   private round(n: number): number {
