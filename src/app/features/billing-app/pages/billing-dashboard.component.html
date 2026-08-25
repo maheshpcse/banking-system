@@ -57,6 +57,10 @@
             </div>
             <div class="bills__meta">
               <span [class]="statusClass(bill.paymentStatus)">{{ statusLabel(bill.paymentStatus) }}</span>
+              <span
+                *ngIf="bill.paymentMethod"
+                [class]="methodClass(bill.paymentMethod)"
+              >{{ methodLabel(bill.paymentMethod) }}</span>
               <em>{{ bill.grandTotal | currencyFormat }}</em>
             </div>
           </li>

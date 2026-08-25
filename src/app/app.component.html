@@ -15,7 +15,7 @@
     <div class="ambient__coin ambient__coin--c"></div>
     <div class="ambient__sheen"></div>
   </div>
-  <app-navbar *ngIf="!isBillingSurface"></app-navbar>
+  <app-navbar *ngIf="!isBillingSurface && !isMarketingSurface"></app-navbar>
   <main [class.main--billing]="isBillingSurface">
     <app-shimmer *ngIf="bootstrapping" [variant]="bootVariant"></app-shimmer>
     <div [hidden]="bootstrapping">

@@ -194,7 +194,8 @@
         <button
           type="button"
           class="btn btn--primary"
-          [disabled]="!cart.length || busy"
+          [disabled]="!cart.length || busy || !!activeInvoice"
+          [attr.title]="activeInvoice ? 'Resume payment on the open invoice — Create invoice is disabled' : null"
           (click)="createInvoice()"
         >
           {{ busy ? 'Creating…' : 'Create invoice' }}

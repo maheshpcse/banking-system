@@ -104,6 +104,7 @@ export class BillingHistoryComponent implements OnInit {
 
   clearQuery(): void {
     this.query = '';
+    this.load(1, 'filter');
   }
 
   prev(): void {
@@ -159,6 +160,35 @@ export class BillingHistoryComponent implements OnInit {
 
   canContinueOnPos(status: string): boolean {
     return status === 'draft' || status === 'pending' || status === 'failed' || status === 'error';
+  }
+
+  canDeleteBill(status: string): boolean {
+    return status === 'draft' || status === 'pending' || status === 'failed' || status === 'error';
+  }
+
+  async deleteBill(bill: BillingBill, event?: Event): Promise<void> {
+    event?.stopPropagation();
+    if (!this.canDeleteBill(bill.paymentStatus)) {
+      return;
+    }
+    const outcome = await this.alerts.confirmAction({
+      text: `Delete ${bill.billNumber}? Stock will be restored and this invoice removed from history.`,
+      confirmText: 'Delete invoice',
+      loadingText: 'Deleting invoice…',
+      action: () => withShimmerDelay(this.billing.deleteBill(bill.id), SHIMMER_MS),
+      successMessage: (res) => res.message || 'Invoice deleted',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Unable to delete invoice.'
+    });
+    if (!outcome.ok) {
+      return;
+    }
+    if (this.detailBill?.id === bill.id) {
+      this.detailBill = null;
+      this.detailPayments = [];
+      this.detailLeaving = false;
+    }
+    this.load(this.page, 'filter');
   }
 
   printInvoice(bill: BillingBill): void {

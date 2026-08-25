@@ -107,6 +107,10 @@ export class BillingService {
     );
   }
 
+  deleteBill(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.base}/bills/${id}`);
+  }
+
   createBill(payload: {
     customerId: string;
     items: Array<{ productId: string; quantity: number }>;

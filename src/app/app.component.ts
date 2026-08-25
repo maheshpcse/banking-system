@@ -82,9 +82,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.showAmbient =
       !this.isBillingSurface && (!this.isMarketingSurface || this.shellBoot.isBootstrapping);
     this.hasStickyNav =
-      this.auth.isAuthenticated() &&
-      !this.isBillingSurface &&
-      (!this.isMarketingSurface || this.shellBoot.isBootstrapping);
+      this.auth.isAuthenticated() && !this.isBillingSurface && !this.isMarketingSurface;
     this.bootVariant = this.variantForUrl(path);
     this.applyAppearance(this.auth.currentUser);
     if (typeof document !== 'undefined') {
