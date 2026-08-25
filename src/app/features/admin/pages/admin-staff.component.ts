@@ -72,7 +72,13 @@ export class AdminStaffComponent implements OnInit {
   }
 
   isActiveStaff(user: User): boolean {
-    return (user.staffStatus || 'active') === 'active';
+    const staff = user.staffStatus || 'active';
+    const account = user.accountStatus || 'active';
+    return staff === 'active' && account !== 'deleted';
+  }
+
+  canDeactivateStaff(user: User): boolean {
+    return this.isActiveStaff(user) && user.accountStatus !== 'blocked';
   }
 
   async approve(user: User): Promise<void> {

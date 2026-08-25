@@ -192,7 +192,7 @@
           </div>
           <div class="coupon-row__actions">
             <button type="button" class="link" (click)="startEditCoupon(c)">Edit</button>
-            <button type="button" class="link-danger" *ngIf="c.active" [disabled]="couponBusy" (click)="deactivateCoupon(c)">
+            <button type="button" class="link link--warn" *ngIf="c.active" [disabled]="couponBusy" (click)="deactivateCoupon(c)">
               Deactivate
             </button>
             <button type="button" class="link-danger" [disabled]="couponBusy" (click)="deleteCoupon(c)">

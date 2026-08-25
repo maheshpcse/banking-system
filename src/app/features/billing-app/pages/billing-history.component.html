@@ -69,6 +69,12 @@
               <ng-container *ngIf="bill.paymentStatus === 'paid' && bill.paidAt">
                 <br />Paid · {{ bill.paidAt | date: 'medium' }}
               </ng-container>
+              <ng-container *ngIf="bill.paymentStatus === 'pending' && bill.paymentExpiresAt">
+                <br />Expires · {{ bill.paymentExpiresAt | date: 'medium' }}
+              </ng-container>
+              <ng-container *ngIf="statusReason(bill) as reason">
+                <br /><span class="card__reason">{{ reason }}</span>
+              </ng-container>
             </span>
             <em>{{ bill.grandTotal | currencyFormat }}</em>
           </div>
@@ -125,6 +131,7 @@
 
     <ng-container *ngIf="!detailLoading">
       <div [class]="statusClass(bill.paymentStatus)">{{ statusLabel(bill.paymentStatus) }}</div>
+      <p class="drawer__reason" *ngIf="statusReason(bill) as reason">{{ reason }}</p>
       <dl class="drawer__dates">
         <div *ngIf="bill.createdAt">
           <dt>Created</dt>
@@ -133,6 +140,10 @@
         <div *ngIf="bill.paidAt">
           <dt>Paid</dt>
           <dd>{{ bill.paidAt | date: 'medium' }}</dd>
+        </div>
+        <div *ngIf="bill.paymentStatus === 'pending' && bill.paymentExpiresAt">
+          <dt>Payment expires</dt>
+          <dd>{{ bill.paymentExpiresAt | date: 'medium' }}</dd>
         </div>
       </dl>
       <ul class="lines">

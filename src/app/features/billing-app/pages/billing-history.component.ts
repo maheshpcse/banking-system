@@ -242,4 +242,18 @@ export class BillingHistoryComponent implements OnInit {
   statusClass(status: string): string {
     return `pill pill--${status || 'draft'}`;
   }
+
+  statusReason(bill: BillingBill): string {
+    const reason = String(bill.statusReason || '').trim();
+    if (reason) {
+      return reason;
+    }
+    if (bill.paymentStatus === 'error') {
+      return 'Gateway error while processing payment.';
+    }
+    if (bill.paymentStatus === 'failed') {
+      return 'Payment was declined or the payment window expired.';
+    }
+    return '';
+  }
 }

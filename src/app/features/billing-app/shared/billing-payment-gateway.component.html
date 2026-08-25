@@ -148,8 +148,9 @@
 
     <!-- RATE -->
     <section class="npg__stage" *ngIf="step === 'rate'">
-      <h3>Rate products</h3>
-      <p class="npg__hint">How were these items? Tap 1–5 stars, then submit — or skip.</p>
+      <div class="npg__result is-ok" aria-hidden="true"><span>✓</span></div>
+      <h3 class="ok">Payment successful</h3>
+      <p class="npg__hint">Rate these products to finish checkout — or skip.</p>
       <ul class="npg__rate-list" *ngIf="itemRatings.length; else noRateItems">
         <li *ngFor="let row of itemRatings">
           <div class="npg__rate-item">

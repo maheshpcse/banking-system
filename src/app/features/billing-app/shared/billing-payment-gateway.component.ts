@@ -348,10 +348,13 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
       this.resultOk = res.payment.status === 'success';
       this.resultMessage = res.message || (this.resultOk ? 'Payment successful' : 'Payment failed');
       this.transactionRef = res.payment.transactionRef;
-      this.step = 'result';
       this.busy = false;
       this.pendingCompletion = { bill: res.bill, payment: res.payment, ok: !!this.resultOk };
-      if (!this.resultOk) {
+      if (this.resultOk) {
+        this.buildItemRatings();
+        this.step = 'rate';
+      } else {
+        this.step = 'result';
         this.emitCompletion();
       }
     } catch (err) {
@@ -476,14 +479,20 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
         this.resultOk = !!data.ok;
         this.resultMessage = data.message || (data.ok ? 'Payment successful' : 'Payment failed');
         this.transactionRef = data.transactionRef || '';
-        this.step = 'result';
         this.busy = false;
         this.channel = 'tab';
         if (data.bill && data.payment) {
+          this.bill = data.bill;
           this.pendingCompletion = { bill: data.bill, payment: data.payment, ok: !!data.ok };
-          if (!data.ok) {
+          if (data.ok) {
+            this.buildItemRatings();
+            this.step = 'rate';
+          } else {
+            this.step = 'result';
             this.emitCompletion();
           }
+        } else {
+          this.step = 'result';
         }
         try {
           localStorage.removeItem('novapay_checkout_result');

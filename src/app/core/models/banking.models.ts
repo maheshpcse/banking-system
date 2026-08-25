@@ -314,9 +314,29 @@ export interface BillingBill {
   paymentMethod?: BillingPaymentMethod | null;
   notes?: string;
   paidAt?: string | null;
+  paymentExpiresAt?: string | null;
+  statusReason?: string;
+  rewardsAwarded?: boolean;
   ratedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface BillingPurchase {
+  id: string;
+  billId: string;
+  billNumber: string;
+  customerId: string;
+  customerName: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+  paymentMethod?: BillingPaymentMethod | null;
+  paidAt?: string | null;
+  rated?: boolean;
+  grandTotal?: number;
 }
 
 export type BillingCouponKind = 'general' | 'payment' | 'bank';

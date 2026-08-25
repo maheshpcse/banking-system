@@ -97,7 +97,13 @@
                       Activate
                     </button>
                     <button type="button" (click)="setStatus(user, 'blocked')">Block</button>
-                    <button type="button" (click)="setStatus(user, 'deactivated')">Deactivate</button>
+                    <button
+                      type="button"
+                      *ngIf="user.accountStatus !== 'blocked'"
+                      (click)="setStatus(user, 'deactivated')"
+                    >
+                      Deactivate
+                    </button>
                     <button type="button" *ngIf="isSuperAdmin" (click)="resetLoginAttempts(user)">
                       Reset login lock
                     </button>

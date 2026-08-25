@@ -60,6 +60,7 @@
                 <button
                   type="button"
                   class="btn btn--ghost btn--compact"
+                  *ngIf="canDeactivateStaff(user)"
                   (click)="setStaffStatus(user, 'deactivated')"
                 >
                   Deactivate
