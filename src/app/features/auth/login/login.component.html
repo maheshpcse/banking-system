@@ -15,104 +15,108 @@
       <p>{{ isBillingLogin ? 'Manager or Admin access for NovaBill POS.' : 'Use your username or email with your password.' }}</p>
     </div>
 
-    <app-animated-card
-      class="auth-panel"
+    <div
+      class="auth-panel-wrap"
       [class.auth-land]="!isBillingLogin"
       [class.auth-land--panel]="!isBillingLogin"
-      [title]="isBillingLogin ? 'Billing portal' : 'Welcome back'"
-      [subtitle]="isBillingLogin ? 'NovaBill login' : 'Sign in'"
-      accent="sky"
-      [tilt]="false"
     >
-      <form class="form" [formGroup]="form" (ngSubmit)="submit()">
-        <label>
-          <span>Username or email</span>
-          <input
-            type="text"
-            formControlName="identifier"
-            autocomplete="username"
-            placeholder="alex or you@email.com"
-          />
-          <p class="form__field-error" *ngIf="fieldError(form.controls.identifier, 'Username or email') as msg">
-            {{ msg }}
-          </p>
-        </label>
-        <label>
-          <span>Password</span>
-          <div class="password-field">
-            <input
-              [type]="showPassword ? 'text' : 'password'"
-              formControlName="password"
-              autocomplete="current-password"
-              placeholder="••••••••"
-            />
-            <button
-              type="button"
-              class="password-field__toggle"
-              (click)="showPassword = !showPassword"
-              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <ng-container *ngIf="!showPassword; else hideIcon">
-                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </ng-container>
-                <ng-template #hideIcon>
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94"></path>
-                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"></path>
-                  <path d="M14.12 14.12a3 3 0 0 1-4.24-4.24"></path>
-                  <path d="M1 1l22 22"></path>
-                </ng-template>
-              </svg>
-            </button>
-          </div>
-          <p class="form__field-error" *ngIf="fieldError(form.controls.password, 'Password') as msg">
-            {{ msg }}
-          </p>
-        </label>
-
-        <p class="form__error" *ngIf="formError">{{ formError }}</p>
-
-        <div class="unlock-box" *ngIf="locked" role="region" aria-label="Request unlock" [formGroup]="unlockForm">
-          <p class="unlock-box__lede">
-            Ask a Super Admin to clear your sign-in lock. They will get an Alerts notification.
-          </p>
+      <app-animated-card
+        class="auth-panel"
+        [title]="isBillingLogin ? 'Billing portal' : 'Welcome back'"
+        [subtitle]="isBillingLogin ? 'NovaBill login' : 'Sign in'"
+        accent="sky"
+        [tilt]="false"
+      >
+        <form class="form" [formGroup]="form" (ngSubmit)="submit()">
           <label>
-            <span>Optional note</span>
-            <textarea
-              formControlName="message"
-              rows="2"
-              maxlength="500"
-              placeholder="Why you need access restored…"
-            ></textarea>
+            <span>Username or email</span>
+            <input
+              type="text"
+              formControlName="identifier"
+              autocomplete="username"
+              placeholder="alex or you@email.com"
+            />
+            <p class="form__field-error" *ngIf="fieldError(form.controls.identifier, 'Username or email') as msg">
+              {{ msg }}
+            </p>
           </label>
-          <button
-            class="btn btn--ghost"
-            type="button"
-            [disabled]="unlockLoading"
-            (click)="requestUnlock()"
-          >
-            {{ unlockLoading ? 'Sending…' : 'Request Super Admin unlock' }}
+          <label>
+            <span>Password</span>
+            <div class="password-field">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password"
+                autocomplete="current-password"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                class="password-field__toggle"
+                (click)="showPassword = !showPassword"
+                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <ng-container *ngIf="!showPassword; else hideIcon">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </ng-container>
+                  <ng-template #hideIcon>
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94"></path>
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"></path>
+                    <path d="M14.12 14.12a3 3 0 0 1-4.24-4.24"></path>
+                    <path d="M1 1l22 22"></path>
+                  </ng-template>
+                </svg>
+              </button>
+            </div>
+            <p class="form__field-error" *ngIf="fieldError(form.controls.password, 'Password') as msg">
+              {{ msg }}
+            </p>
+          </label>
+
+          <p class="form__error" *ngIf="formError">{{ formError }}</p>
+
+          <div class="unlock-box" *ngIf="locked" role="region" aria-label="Request unlock" [formGroup]="unlockForm">
+            <p class="unlock-box__lede">
+              Ask a Super Admin to clear your sign-in lock. They will get an Alerts notification.
+            </p>
+            <label>
+              <span>Optional note</span>
+              <textarea
+                formControlName="message"
+                rows="2"
+                maxlength="500"
+                placeholder="Why you need access restored…"
+              ></textarea>
+            </label>
+            <button
+              class="btn btn--ghost"
+              type="button"
+              [disabled]="unlockLoading"
+              (click)="requestUnlock()"
+            >
+              {{ unlockLoading ? 'Sending…' : 'Request Super Admin unlock' }}
+            </button>
+            <p class="unlock-box__ok" *ngIf="unlockNotice">{{ unlockNotice }}</p>
+          </div>
+
+          <button class="btn btn--primary" type="submit" [disabled]="loading">
+            {{ loading ? 'Signing in…' : 'Sign in' }}
           </button>
-          <p class="unlock-box__ok" *ngIf="unlockNotice">{{ unlockNotice }}</p>
-        </div>
+        </form>
 
-        <button class="btn btn--primary" type="submit" [disabled]="loading">
-          {{ loading ? 'Signing in…' : 'Sign in' }}
-        </button>
-      </form>
-
-      <p class="auth-switch">
-        <a routerLink="/auth/forgot-password">Forgot password?</a>
-      </p>
-      <p class="auth-switch" *ngIf="!isBillingLogin">
-        New here?
-        <a routerLink="/auth/register">Create an account</a>
-      </p>
-      <p class="auth-switch auth-switch--home">
-        <a routerLink="/">Back to home</a>
-      </p>
-    </app-animated-card>
+        <p class="auth-switch">
+          <a routerLink="/auth/forgot-password">Forgot password?</a>
+        </p>
+        <p class="auth-switch" *ngIf="!isBillingLogin">
+          New here?
+          <a routerLink="/auth/register">Create an account</a>
+        </p>
+        <p class="auth-switch auth-switch--home">
+          <a routerLink="/">Back to home</a>
+        </p>
+      </app-animated-card>
+    </div>
 
     <p
       class="auth-footnote"
