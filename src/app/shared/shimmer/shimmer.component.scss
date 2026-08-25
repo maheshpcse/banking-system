@@ -590,7 +590,7 @@
 }
 
 .shimmer__auth-band--a {
-  width: min(42vw, 18rem);
+  width: 70%;
   height: 0.85rem;
   top: 18%;
   left: 8%;
@@ -604,9 +604,22 @@
   animation: shimmer-wave 1.35s ease-in-out infinite;
 }
 
-.shimmer__auth-band--a,
 .shimmer__auth-band--b {
-  display: none;
+  width: 62%;
+  height: 0.7rem;
+  bottom: 16%;
+  left: 20%;
+  right: auto;
+  transform: none;
+  background: linear-gradient(
+    90deg,
+    rgba(214, 230, 240, 0.3) 0%,
+    rgba(186, 214, 240, 0.7) 50%,
+    rgba(214, 230, 240, 0.3) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-wave 1.35s ease-in-out infinite;
+  animation-delay: 0.2s;
 }
 
 .shimmer__auth-stage {
@@ -615,6 +628,7 @@
   width: min(440px, 100%);
   display: grid;
   gap: 1.35rem;
+  overflow: hidden;
 }
 
 .shimmer__auth-copy {

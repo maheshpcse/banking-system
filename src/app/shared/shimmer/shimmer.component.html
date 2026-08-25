@@ -745,17 +745,17 @@
     <ng-container *ngSwitchCase="'auth'">
       <div class="shimmer__auth-page" [attr.data-auth-panel]="panel || 'login'">
         <div class="shimmer__auth-mesh" aria-hidden="true"></div>
-        <div
-          class="shimmer__auth-band shimmer__auth-band--a"
-          *ngIf="panel !== 'staff-status'"
-          aria-hidden="true"
-        ></div>
-        <div
-          class="shimmer__auth-band shimmer__auth-band--b"
-          *ngIf="panel !== 'staff-status'"
-          aria-hidden="true"
-        ></div>
         <div class="shimmer__auth-stage">
+          <div
+            class="shimmer__auth-band shimmer__auth-band--a"
+            *ngIf="panel !== 'staff-status'"
+            aria-hidden="true"
+          ></div>
+          <div
+            class="shimmer__auth-band shimmer__auth-band--b"
+            *ngIf="panel !== 'staff-status'"
+            aria-hidden="true"
+          ></div>
           <div class="shimmer__auth-copy">
             <div class="shimmer-line shimmer-line--brand"></div>
             <div class="shimmer-line shimmer-line--title"></div>
