@@ -195,6 +195,26 @@
   }
 }
 
+.card__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.55rem;
+}
+
+.link-danger {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: #dc2626;
+  cursor: pointer;
+}
+
+.link-danger:hover {
+  text-decoration: underline;
+}
+
 .pill {
   font-size: 0.72rem;
   letter-spacing: 0.02em;
@@ -440,6 +460,12 @@
   background: linear-gradient(135deg, #ffc801, #ff9932);
   color: #16323a;
   box-shadow: 0 10px 22px rgba(255, 153, 50, 0.28);
+}
+
+.btn--danger {
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.28);
+  color: #b91c1c;
 }
 
 .empty {

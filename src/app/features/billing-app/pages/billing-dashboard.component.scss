@@ -192,7 +192,7 @@ h2 {
     display: block;
   }
 
-  span {
+  > div:first-child > span {
     color: var(--muted);
     font-size: 0.85rem;
   }
@@ -209,7 +209,7 @@ h2 {
   }
 }
 
-.status {
+.bills__meta .status {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -217,35 +217,46 @@ h2 {
   color: var(--muted);
 }
 
-.bills__meta .status,
-.bills__meta .status--paid,
-.bills__meta .status--pending,
-.bills__meta .status--draft,
-.bills__meta .status--failed,
-.bills__meta .status--error,
-.bills__meta .status--refunded {
+.bills li .bills__meta .status--paid {
+  color: #1f6b5c;
+}
+
+.bills li .bills__meta .status--pending,
+.bills li .bills__meta .status--draft {
+  color: var(--saffron);
+}
+
+.bills li .bills__meta .status--failed,
+.bills li .bills__meta .status--error {
+  color: var(--crimson);
+}
+
+.bills li .bills__meta .status--refunded {
+  color: #64748b;
+}
+
+.bills li .bills__meta .method {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-weight: 700;
+  color: var(--muted);
 }
 
-.bills__meta .status--paid {
+.bills li .bills__meta .method--cash {
   color: #1f6b5c;
 }
 
-.bills__meta .status--pending,
-.bills__meta .status--draft {
+.bills li .bills__meta .method--card {
+  color: #2563eb;
+}
+
+.bills li .bills__meta .method--upi {
   color: var(--saffron);
 }
 
-.bills__meta .status--failed,
-.bills__meta .status--error {
-  color: var(--crimson);
-}
-
-.bills__meta .status--refunded {
-  color: #64748b;
+.bills li .bills__meta .method--qr {
+  color: #7c3aed;
 }
 
 .empty {

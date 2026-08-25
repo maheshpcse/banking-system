@@ -309,6 +309,13 @@ export class BillingPosComponent implements OnInit {
   }
 
   async createInvoice(): Promise<void> {
+    if (this.activeInvoice) {
+      void this.alerts.toastWarning(
+        'Invoice already open',
+        'Finish or reset the resumed bill before creating another invoice.'
+      );
+      return;
+    }
     if (!this.selectedCustomerId || !this.cart.length) {
       void this.alerts.warning('Choose a customer and add at least one product.');
       return;

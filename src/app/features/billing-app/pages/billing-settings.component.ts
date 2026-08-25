@@ -304,6 +304,8 @@ export class BillingSettingsComponent implements OnInit {
   resetSettingsForm(): void {
     if (this.savedSettings) {
       this.patchForm(this.savedSettings);
+      this.form.markAsPristine();
+      this.form.markAsUntouched();
       return;
     }
     this.form.reset({
@@ -316,5 +318,7 @@ export class BillingSettingsComponent implements OnInit {
       upiVpa: '',
       cardLabel: 'Card'
     });
+    this.form.markAsPristine();
+    this.form.markAsUntouched();
   }
 }

@@ -72,6 +72,15 @@
             </span>
             <em>{{ bill.grandTotal | currencyFormat }}</em>
           </div>
+          <div class="card__actions" *ngIf="canDeleteBill(bill.paymentStatus)">
+            <button
+              type="button"
+              class="link-danger"
+              (click)="deleteBill(bill, $event)"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       </article>
     </div>
@@ -148,6 +157,14 @@
       </div>
       <div class="drawer__foot">
         <button type="button" class="btn btn--ghost" (click)="printInvoice(bill)">Print</button>
+        <button
+          type="button"
+          class="btn btn--danger"
+          *ngIf="canDeleteBill(bill.paymentStatus)"
+          (click)="deleteBill(bill)"
+        >
+          Delete
+        </button>
         <button
           type="button"
           class="btn btn--primary"

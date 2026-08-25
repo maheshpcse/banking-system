@@ -278,9 +278,15 @@ label {
   box-shadow: 0 10px 22px rgba(255, 153, 50, 0.28);
 }
 
+.btn--ghost {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
 .btn:disabled {
   opacity: 0.55;
-  cursor: wait;
+  cursor: not-allowed;
 }
 
 .sr-only {

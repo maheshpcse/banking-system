@@ -84,4 +84,23 @@ export class BillingDashboardComponent implements OnInit {
         return status || 'Unknown';
     }
   }
+
+  methodClass(method: string): string {
+    return `method method--${method || 'cash'}`;
+  }
+
+  methodLabel(method: string): string {
+    switch (method) {
+      case 'cash':
+        return 'Cash';
+      case 'card':
+        return 'Card';
+      case 'upi':
+        return 'UPI';
+      case 'qr':
+        return 'QR';
+      default:
+        return method || '';
+    }
+  }
 }
