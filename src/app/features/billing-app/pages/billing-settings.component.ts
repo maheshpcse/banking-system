@@ -258,13 +258,13 @@ export class BillingSettingsComponent implements OnInit {
     }
   }
 
-  async deleteCoupon(coupon: BillingCoupon): Promise<void> {
+  async deactivateCoupon(coupon: BillingCoupon): Promise<void> {
     this.couponBusy = true;
     const outcome = await this.alerts.confirmAction({
       text: `Deactivate coupon ${coupon.code}?`,
       confirmText: 'Deactivate',
       loadingText: 'Deactivating…',
-      action: () => withShimmerDelay(this.billing.deleteCoupon(coupon.id), SHIMMER_MS),
+      action: () => withShimmerDelay(this.billing.deactivateCoupon(coupon.id), SHIMMER_MS),
       successMessage: (res) => res.message || 'Coupon deactivated',
       errorMessage: (err) =>
         (err as { error?: { message?: string } })?.error?.message || 'Unable to deactivate coupon.'
@@ -273,6 +273,26 @@ export class BillingSettingsComponent implements OnInit {
     if (outcome.ok) {
       const saved = outcome.result.coupon;
       this.coupons = this.coupons.map((c) => (c.id === saved.id ? saved : c));
+      if (this.editingCouponId === coupon.id) {
+        this.resetCouponForm();
+      }
+    }
+  }
+
+  async deleteCoupon(coupon: BillingCoupon): Promise<void> {
+    this.couponBusy = true;
+    const outcome = await this.alerts.confirmAction({
+      text: `Permanently delete coupon ${coupon.code}? This cannot be undone.`,
+      confirmText: 'Delete',
+      loadingText: 'Deleting…',
+      action: () => withShimmerDelay(this.billing.deleteCoupon(coupon.id), SHIMMER_MS),
+      successMessage: (res) => res.message || 'Coupon deleted',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Unable to delete coupon.'
+    });
+    this.couponBusy = false;
+    if (outcome.ok) {
+      this.coupons = this.coupons.filter((c) => c.id !== coupon.id);
       if (this.editingCouponId === coupon.id) {
         this.resetCouponForm();
       }

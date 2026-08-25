@@ -126,8 +126,8 @@
         </div>
       </div>
 
-      <p class="hint hint--range" *ngIf="rangeExceedsAvailableData">
-        Showing all available transaction history — the ledger currently reports up to the trailing 14 days.
+      <p class="hint hint--range" *ngIf="rangeHasNoFlowData">
+        No transaction flow in this range yet — try a wider window or another type filter.
       </p>
 
       <app-shimmer *ngIf="flowLoading && view === 'chart'" variant="manager-flow-chart"></app-shimmer>

@@ -11,7 +11,8 @@ export type AccountStatus =
   | 'active'
   | 'rejected'
   | 'blocked'
-  | 'deactivated';
+  | 'deactivated'
+  | 'deleted';
 
 export type ApplicationStepStatus = 'complete' | 'current' | 'upcoming' | 'rejected';
 
@@ -271,6 +272,8 @@ export interface BillingProduct {
   stock: number;
   gstPercentage: number;
   active: boolean;
+  ratingCount?: number;
+  ratingAvg?: number;
   createdAt?: string;
 }
 
@@ -281,6 +284,7 @@ export interface BillingCustomer {
   phone: string;
   address: string;
   bankingAccountNumber?: string | null;
+  rewardPoints?: number;
   createdAt?: string;
 }
 
@@ -310,6 +314,7 @@ export interface BillingBill {
   paymentMethod?: BillingPaymentMethod | null;
   notes?: string;
   paidAt?: string | null;
+  ratedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

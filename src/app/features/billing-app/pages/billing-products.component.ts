@@ -469,4 +469,13 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
     }
     return 'In stock';
   }
+
+  ratingLabel(p: { ratingAvg?: number; ratingCount?: number }): string {
+    const count = Number(p.ratingCount) || 0;
+    if (!count) {
+      return 'No ratings';
+    }
+    const avg = Number(p.ratingAvg) || 0;
+    return `${avg.toFixed(1)} ★ · ${count} rating${count === 1 ? '' : 's'}`;
+  }
 }

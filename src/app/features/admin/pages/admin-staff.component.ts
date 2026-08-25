@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { User } from '../../../core/models/banking.models';
+import { AccountStatus, User } from '../../../core/models/banking.models';
 import { AdminService } from '../../../core/services/admin.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/shimmer';
@@ -71,6 +71,10 @@ export class AdminStaffComponent implements OnInit {
     });
   }
 
+  isActiveStaff(user: User): boolean {
+    return (user.staffStatus || 'active') === 'active';
+  }
+
   async approve(user: User): Promise<void> {
     await this.alerts.confirmAction({
       text: `Activate ${user.fullName} (${this.formatStatus(user.role)}) for portal sign-in?`,
@@ -93,6 +97,35 @@ export class AdminStaffComponent implements OnInit {
       successMessage: 'Staff registration declined.',
       errorMessage: (err) =>
         (err as { error?: { message?: string } })?.error?.message || 'Unable to decline staff'
+    });
+    this.items = this.admin.listStaffPendingSnapshot();
+  }
+
+  async setStaffStatus(user: User, status: AccountStatus): Promise<void> {
+    await this.alerts.confirmAction({
+      text: `Set ${user.fullName} to ${this.formatStatus(status)}?`,
+      confirmText: 'Update',
+      loadingText: 'Updating status…',
+      action: async () => this.admin.setStaffStatus(user.id, status),
+      successMessage: () => `Staff status updated to ${this.formatStatus(status)}.`,
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Unable to update staff status'
+    });
+    this.items = this.admin.listStaffPendingSnapshot();
+  }
+
+  async removeStaff(user: User): Promise<void> {
+    await this.alerts.confirmAction({
+      text: `Permanently delete ${user.fullName} from the staff directory?`,
+      confirmText: 'Delete',
+      loadingText: 'Deleting staff…',
+      action: async () => {
+        await this.admin.removeStaff(user.id);
+        return true;
+      },
+      successMessage: 'Staff account deleted.',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Unable to delete staff'
     });
     this.items = this.admin.listStaffPendingSnapshot();
   }

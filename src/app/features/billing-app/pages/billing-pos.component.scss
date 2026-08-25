@@ -516,12 +516,26 @@
 
 .link {
   color: #1f6b5c;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.link:hover {
+  color: var(--saffron);
+  text-decoration: none;
 }
 
 .link-danger {
   color: var(--crimson);
   font-size: 1.1rem;
   line-height: 1;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.link-danger:hover {
+  color: #a01030;
+  text-decoration: none;
 }
 
 .invoice {

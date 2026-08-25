@@ -197,8 +197,20 @@ export class AdminService {
     return res.user || null;
   }
 
-  getAnalytics(): Observable<AdminAnalytics> {
-    return this.http.get<AdminAnalytics>(`${environment.apiUrl}/admin/analytics`);
+  getAnalytics(params?: { from?: string; to?: string; type?: string }): Observable<AdminAnalytics> {
+    let httpParams = new HttpParams();
+    if (params?.from) {
+      httpParams = httpParams.set('from', params.from);
+    }
+    if (params?.to) {
+      httpParams = httpParams.set('to', params.to);
+    }
+    if (params?.type) {
+      httpParams = httpParams.set('type', params.type);
+    }
+    return this.http.get<AdminAnalytics>(`${environment.apiUrl}/admin/analytics`, {
+      params: httpParams
+    });
   }
 
   listStaffPendingSnapshot(): User[] {
@@ -239,6 +251,24 @@ export class AdminService {
     );
     await firstValueFrom(this.listStaff('all'));
     return res.user || null;
+  }
+
+  async setStaffStatus(userId: string, status: AccountStatus): Promise<User | null> {
+    const res = await firstValueFrom(
+      this.http.patch<{ message: string; user: User }>(
+        `${environment.apiUrl}/admin/staff/${userId}/status`,
+        { status }
+      )
+    );
+    await firstValueFrom(this.listStaff('all'));
+    return res.user || null;
+  }
+
+  async removeStaff(userId: string): Promise<void> {
+    await firstValueFrom(
+      this.http.delete<{ message: string }>(`${environment.apiUrl}/admin/staff/${userId}`)
+    );
+    await firstValueFrom(this.listStaff('all'));
   }
 
   listLimitRequestsSnapshot(): User[] {
