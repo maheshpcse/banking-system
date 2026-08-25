@@ -444,6 +444,22 @@ label {
   text-decoration: none;
 }
 
+.link--warn {
+  border: 0;
+  background: transparent;
+  color: #c27803;
+  cursor: pointer;
+  font-weight: 650;
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.link--warn:hover {
+  color: var(--saffron);
+  text-decoration: none;
+}
+
 .link-danger {
   border: 0;
   background: transparent;

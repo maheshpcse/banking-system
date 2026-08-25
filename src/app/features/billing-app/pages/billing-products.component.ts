@@ -472,10 +472,25 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
 
   ratingLabel(p: { ratingAvg?: number; ratingCount?: number }): string {
     const count = Number(p.ratingCount) || 0;
+    const avg = Number(p.ratingAvg) || 0;
     if (!count) {
-      return 'No ratings';
+      return '0';
+    }
+    return `${avg.toFixed(1)} · ${count}`;
+  }
+
+  starFill(p: { ratingAvg?: number; ratingCount?: number }, index: number): 'full' | 'half' | 'empty' {
+    const count = Number(p.ratingCount) || 0;
+    if (!count) {
+      return 'empty';
     }
     const avg = Number(p.ratingAvg) || 0;
-    return `${avg.toFixed(1)} ★ · ${count} rating${count === 1 ? '' : 's'}`;
+    if (avg >= index) {
+      return 'full';
+    }
+    if (avg >= index - 0.5) {
+      return 'half';
+    }
+    return 'empty';
   }
 }

@@ -139,7 +139,17 @@
                   <div class="row__body">
                     <strong>{{ p.name }}</strong>
                     <span>{{ p.sku || 'No SKU' }} · {{ stockLabel(p.stock) }} · {{ p.stock }}</span>
-                    <span class="row__rating">{{ ratingLabel(p) }}</span>
+                    <span class="row__rating" [attr.aria-label]="'Rating ' + ratingLabel(p)">
+                      <span class="stars" aria-hidden="true">
+                        <span
+                          class="star"
+                          *ngFor="let s of [1, 2, 3, 4, 5]"
+                          [class.is-full]="starFill(p, s) === 'full'"
+                          [class.is-half]="starFill(p, s) === 'half'"
+                        >★</span>
+                      </span>
+                      <small>{{ ratingLabel(p) }}</small>
+                    </span>
                   </div>
                   <em class="row__amount">{{ p.price | currencyFormat }}</em>
                 </button>
@@ -157,7 +167,17 @@
                 <span>{{ p.sku || 'No SKU' }}</span>
                 <em>{{ p.price | currencyFormat }}</em>
                 <small>{{ stockLabel(p.stock) }} · {{ p.stock }}</small>
-                <small class="rating-line">{{ ratingLabel(p) }}</small>
+                <small class="rating-line" [attr.aria-label]="'Rating ' + ratingLabel(p)">
+                  <span class="stars" aria-hidden="true">
+                    <span
+                      class="star"
+                      *ngFor="let s of [1, 2, 3, 4, 5]"
+                      [class.is-full]="starFill(p, s) === 'full'"
+                      [class.is-half]="starFill(p, s) === 'half'"
+                    >★</span>
+                  </span>
+                  {{ ratingLabel(p) }}
+                </small>
               </button>
             </div>
 
@@ -185,7 +205,17 @@
                     <td>{{ p.sku || '—' }}</td>
                     <td>{{ p.price | currencyFormat }}</td>
                     <td>{{ p.stock }} <small>({{ stockLabel(p.stock) }})</small></td>
-                    <td>{{ ratingLabel(p) }}</td>
+                    <td>
+                      <span class="stars" aria-hidden="true">
+                        <span
+                          class="star"
+                          *ngFor="let s of [1, 2, 3, 4, 5]"
+                          [class.is-full]="starFill(p, s) === 'full'"
+                          [class.is-half]="starFill(p, s) === 'half'"
+                        >★</span>
+                      </span>
+                      <small>{{ ratingLabel(p) }}</small>
+                    </td>
                     <td>{{ p.gstPercentage }}%</td>
                     <td class="table__actions">
                       <button type="button" class="link" (click)="edit(p)">Edit</button>
@@ -266,7 +296,17 @@
       </div>
       <div>
         <dt>Rating</dt>
-        <dd>{{ ratingLabel(p) }}</dd>
+        <dd>
+          <span class="stars" aria-hidden="true">
+            <span
+              class="star"
+              *ngFor="let s of [1, 2, 3, 4, 5]"
+              [class.is-full]="starFill(p, s) === 'full'"
+              [class.is-half]="starFill(p, s) === 'half'"
+            >★</span>
+          </span>
+          {{ ratingLabel(p) }}
+        </dd>
       </div>
       <div>
         <dt>Status</dt>

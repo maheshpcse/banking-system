@@ -12,7 +12,8 @@ import {
   BillingGatewaySettings,
   BillingPayment,
   BillingPaymentMethod,
-  BillingProduct
+  BillingProduct,
+  BillingPurchase
 } from '../models/banking.models';
 
 @Injectable({ providedIn: 'root' })
@@ -190,6 +191,40 @@ export class BillingService {
       `${this.base}/bills/${id}/ratings`,
       { ratings }
     );
+  }
+
+  listPurchases(filters: {
+    q?: string;
+    customerId?: string;
+    productId?: string;
+    paymentMethod?: string;
+    from?: string;
+    to?: string;
+    page?: number;
+    limit?: number;
+  } = {}): Observable<{
+    items: BillingPurchase[];
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  }> {
+    let params = new HttpParams();
+    if (filters.q) params = params.set('q', filters.q);
+    if (filters.customerId) params = params.set('customerId', filters.customerId);
+    if (filters.productId) params = params.set('productId', filters.productId);
+    if (filters.paymentMethod) params = params.set('paymentMethod', filters.paymentMethod);
+    if (filters.from) params = params.set('from', filters.from);
+    if (filters.to) params = params.set('to', filters.to);
+    if (filters.page) params = params.set('page', String(filters.page));
+    if (filters.limit) params = params.set('limit', String(filters.limit));
+    return this.http.get<{
+      items: BillingPurchase[];
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    }>(`${this.base}/purchases`, { params });
   }
 
   listComplaints(status = ''): Observable<{ items: BillingComplaint[] }> {

@@ -195,6 +195,21 @@
   }
 }
 
+.card__reason {
+  color: #b45309 !important;
+  font-weight: 650;
+}
+
+.drawer__reason {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.75rem;
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
 .card__actions {
   display: flex;
   justify-content: flex-end;

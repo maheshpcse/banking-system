@@ -1,0 +1,120 @@
+<section class="page fade-up">
+  <app-billing-panel-shimmer *ngIf="pageLoading" variant="history"></app-billing-panel-shimmer>
+
+  <ng-container *ngIf="!pageLoading">
+    <header class="page__head">
+      <div>
+        <p class="eyebrow">Ledger</p>
+        <h2>Purchases</h2>
+        <p class="lede">Paid product lines from settled invoices — filter by customer, SKU, rail, or date.</p>
+      </div>
+      <div class="view-toggle" role="tablist" aria-label="Purchase views">
+        <button type="button" [class.is-active]="view === 'list'" (click)="setView('list')">List</button>
+        <button type="button" [class.is-active]="view === 'grid'" (click)="setView('grid')">Grid</button>
+        <button type="button" [class.is-active]="view === 'table'" (click)="setView('table')">Table</button>
+      </div>
+    </header>
+
+    <div class="filters">
+      <div class="search">
+        <input class="input" type="text" placeholder="Search bill, customer, or product" [(ngModel)]="query" />
+        <button type="button" class="search__clear" *ngIf="query" (click)="clearQuery()" aria-label="Clear search">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <app-theme-select
+        controlClass="input input--select"
+        [(ngModel)]="customerId"
+        [options]="customerOptions"
+        ariaLabel="Customer filter"
+      ></app-theme-select>
+      <app-theme-select
+        controlClass="input input--select"
+        [(ngModel)]="productId"
+        [options]="productOptions"
+        ariaLabel="Product filter"
+      ></app-theme-select>
+      <app-theme-select
+        controlClass="input input--select"
+        [(ngModel)]="paymentMethod"
+        [options]="methodOptions"
+        ariaLabel="Payment method"
+      ></app-theme-select>
+      <input class="input" type="date" [(ngModel)]="from" />
+      <input class="input" type="date" [(ngModel)]="to" />
+      <button type="button" class="btn btn--ghost" (click)="applyFilters()">Filter</button>
+    </div>
+
+    <app-billing-panel-shimmer *ngIf="filterLoading" variant="history-data"></app-billing-panel-shimmer>
+
+    <ng-container *ngIf="!filterLoading">
+      <app-empty-state
+        *ngIf="!items.length"
+        tone="billing"
+        kind="invoices"
+        [fill]="true"
+        message="No paid purchases match these filters."
+      ></app-empty-state>
+
+      <ul class="list" *ngIf="items.length && view === 'list'">
+        <li *ngFor="let row of items">
+          <div>
+            <strong>{{ row.productName }}</strong>
+            <span>{{ row.customerName }} · {{ row.billNumber }}</span>
+            <small>
+              {{ row.paidAt | date: 'medium' }} · {{ methodLabel(row.paymentMethod) }}
+              <ng-container *ngIf="row.rated"> · Rated</ng-container>
+            </small>
+          </div>
+          <div class="list__meta">
+            <span>× {{ row.quantity }}</span>
+            <em>{{ row.lineTotal | currencyFormat }}</em>
+          </div>
+        </li>
+      </ul>
+
+      <div class="grid" *ngIf="items.length && view === 'grid'">
+        <article *ngFor="let row of items">
+          <strong>{{ row.productName }}</strong>
+          <span>{{ row.customerName }}</span>
+          <small>{{ row.billNumber }} · {{ methodLabel(row.paymentMethod) }}</small>
+          <em>{{ row.lineTotal | currencyFormat }}</em>
+          <small>{{ row.paidAt | date: 'mediumDate' }} · qty {{ row.quantity }}</small>
+        </article>
+      </div>
+
+      <div class="table-wrap" *ngIf="items.length && view === 'table'">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Customer</th>
+              <th>Invoice</th>
+              <th>Method</th>
+              <th>Qty</th>
+              <th>Total</th>
+              <th>Paid</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of items">
+              <td>{{ row.productName }}</td>
+              <td>{{ row.customerName }}</td>
+              <td>{{ row.billNumber }}</td>
+              <td>{{ methodLabel(row.paymentMethod) }}</td>
+              <td>{{ row.quantity }}</td>
+              <td>{{ row.lineTotal | currencyFormat }}</td>
+              <td>{{ row.paidAt | date: 'medium' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pager" *ngIf="pages > 1">
+        <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
+        <span>Page {{ page }} / {{ pages }} · {{ total }} total</span>
+        <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
+      </div>
+    </ng-container>
+  </ng-container>
+</section>

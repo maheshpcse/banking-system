@@ -918,3 +918,35 @@
     transform: translate(-50%, -50%);
   }
 }
+
+.row__rating,
+.rating-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.stars {
+  display: inline-flex;
+  gap: 0.05rem;
+  line-height: 1;
+}
+
+.star {
+  color: rgba(148, 163, 184, 0.55);
+  font-size: 0.95rem;
+  letter-spacing: -0.05em;
+}
+
+.star.is-full {
+  color: #f5a524;
+  text-shadow: 0 0 0.35rem rgba(245, 165, 36, 0.35);
+}
+
+.star.is-half {
+  background: linear-gradient(90deg, #f5a524 50%, rgba(148, 163, 184, 0.55) 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
