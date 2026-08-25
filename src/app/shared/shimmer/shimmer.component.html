@@ -619,6 +619,72 @@
       </div>
     </ng-container>
 
+    <ng-container *ngSwitchCase="'manager-billing-chart'">
+      <div class="shimmer-billing-pulse" aria-hidden="true">
+        <div class="shimmer-billing-pulse__kpi" *ngFor="let i of [1, 2, 3, 4]">
+          <div class="shimmer-billing-pulse__meta">
+            <div class="shimmer-line shimmer-line--xs"></div>
+            <div class="shimmer-line shimmer-line--sm"></div>
+          </div>
+          <div class="shimmer-billing-pulse__track">
+            <span [style.width.%]="barWidths[i - 1]"></span>
+          </div>
+        </div>
+        <div class="shimmer-billing-pulse__pipeline">
+          <div class="shimmer-line shimmer-line--xs"></div>
+          <div class="shimmer-billing-pulse__stack">
+            <span *ngFor="let i of [1, 2, 3, 4, 5]"></span>
+          </div>
+          <div class="shimmer-billing-pulse__legend">
+            <div class="shimmer-line shimmer-line--xs" *ngFor="let i of [1, 2, 3, 4, 5]"></div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'manager-billing-table'">
+      <div class="shimmer-billing-pulse" aria-hidden="true">
+        <div class="shimmer-flow__block">
+          <div class="shimmer-line shimmer-line--sm"></div>
+          <div class="shimmer-data-table">
+            <div class="shimmer-data-table__head" style="grid-template-columns: 1.4fr 0.6fr">
+              <div class="shimmer-data-table__cell" *ngFor="let c of [0, 1]">
+                <div class="shimmer-line shimmer-line--xs"></div>
+              </div>
+            </div>
+            <div
+              class="shimmer-data-table__row"
+              *ngFor="let i of [1, 2, 3, 4, 5]"
+              style="grid-template-columns: 1.4fr 0.6fr"
+            >
+              <div class="shimmer-data-table__cell" *ngFor="let c of [0, 1]">
+                <div class="shimmer-line" [class.shimmer-line--sm]="c === 0" [class.shimmer-line--xs]="c !== 0"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="shimmer-flow__block" style="margin-top: 1rem">
+          <div class="shimmer-line shimmer-line--sm"></div>
+          <div class="shimmer-data-table">
+            <div class="shimmer-data-table__head" style="grid-template-columns: repeat(4, minmax(0, 1fr))">
+              <div class="shimmer-data-table__cell" *ngFor="let c of [0, 1, 2, 3]">
+                <div class="shimmer-line shimmer-line--xs"></div>
+              </div>
+            </div>
+            <div
+              class="shimmer-data-table__row"
+              *ngFor="let i of [1, 2, 3, 4]"
+              style="grid-template-columns: repeat(4, minmax(0, 1fr))"
+            >
+              <div class="shimmer-data-table__cell" *ngFor="let c of [0, 1, 2, 3]">
+                <div class="shimmer-line" [class.shimmer-line--sm]="c === 0" [class.shimmer-line--xs]="c !== 0"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
     <ng-container *ngSwitchCase="'manager-reports'">
       <div class="shimmer__hero shimmer__hero--admin">
         <div class="shimmer-line shimmer-line--brand"></div>

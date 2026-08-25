@@ -260,6 +260,7 @@ label {
   grid-column: 1 / -1;
   display: flex;
   justify-content: flex-end;
+  gap: 0.55rem;
 }
 
 .btn {
@@ -363,6 +364,7 @@ label {
 .coupons__foot {
   display: flex;
   justify-content: flex-end;
+  gap: 0.55rem;
   margin-top: 0.15rem;
 }
 

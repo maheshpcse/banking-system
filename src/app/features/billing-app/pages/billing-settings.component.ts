@@ -24,6 +24,7 @@ export class BillingSettingsComponent implements OnInit {
   couponBusy = false;
   coupons: BillingCoupon[] = [];
   editingCouponId: string | null = null;
+  private savedSettings: BillingGatewaySettings | null = null;
 
   form = this.fb.group({
     merchantName: ['', [Validators.required, Validators.minLength(2)]],
@@ -287,6 +288,7 @@ export class BillingSettingsComponent implements OnInit {
     if (!settings) {
       return;
     }
+    this.savedSettings = settings;
     this.form.patchValue({
       merchantName: settings.merchantName || '',
       supportNote: settings.supportNote || '',
@@ -296,6 +298,23 @@ export class BillingSettingsComponent implements OnInit {
       qr: settings.methods?.qr !== false,
       upiVpa: settings.upiVpa || '',
       cardLabel: settings.cardLabel || 'Card'
+    });
+  }
+
+  resetSettingsForm(): void {
+    if (this.savedSettings) {
+      this.patchForm(this.savedSettings);
+      return;
+    }
+    this.form.reset({
+      merchantName: '',
+      supportNote: '',
+      cash: true,
+      card: true,
+      upi: true,
+      qr: true,
+      upiVpa: '',
+      cardLabel: 'Card'
     });
   }
 }

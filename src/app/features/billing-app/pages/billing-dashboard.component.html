@@ -56,7 +56,7 @@
               <span>{{ bill.customerName }}</span>
             </div>
             <div class="bills__meta">
-              <span [class]="statusClass(bill.paymentStatus)">{{ bill.paymentStatus }}</span>
+              <span [class]="statusClass(bill.paymentStatus)">{{ statusLabel(bill.paymentStatus) }}</span>
               <em>{{ bill.grandTotal | currencyFormat }}</em>
             </div>
           </li>

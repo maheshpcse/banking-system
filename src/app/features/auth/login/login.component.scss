@@ -212,10 +212,52 @@
   }
 }
 
+/* Banking login only — home-style staggered landing fade */
+.auth-page--land .auth-land {
+  opacity: 0;
+  animation: auth-land-fade-in 0.9s var(--ease-out) forwards;
+}
+
+.auth-page--land .auth-land--brand {
+  animation-delay: 0.08s;
+  animation-name: auth-land-fade-in-up;
+}
+
+.auth-page--land .auth-land--panel {
+  animation-delay: 0.28s;
+  animation-name: auth-land-fade-in-up;
+}
+
+.auth-page--land .auth-land--foot {
+  animation-delay: 0.48s;
+  animation-name: auth-land-fade-in;
+}
+
+@keyframes auth-land-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes auth-land-fade-in-up {
+  from {
+    opacity: 0;
+    /* transform omitted — opacity landing only */
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .auth-page__mesh,
-  .auth-page__band {
+  .auth-page__band,
+  .auth-page--land .auth-land {
     animation: none;
+    opacity: 1;
   }
 }
 

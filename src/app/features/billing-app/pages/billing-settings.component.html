@@ -86,6 +86,9 @@
       </div>
 
       <div class="settings__foot">
+        <button type="button" class="btn btn--ghost" (click)="resetSettingsForm()" [disabled]="busy">
+          Reset
+        </button>
         <button type="submit" class="btn btn--primary" [disabled]="busy">
           {{ busy ? 'Saving…' : 'Save settings' }}
         </button>
@@ -202,6 +205,9 @@
     </section>
 
     <div class="coupons__foot">
+      <button type="button" class="btn btn--ghost" (click)="resetCouponForm()" [disabled]="couponBusy">
+        Reset
+      </button>
       <button type="button" class="btn btn--primary" [disabled]="couponBusy" (click)="saveCoupon()">
         {{ couponBusy ? 'Saving…' : editingCouponId ? 'Update coupon' : 'Add coupon' }}
       </button>

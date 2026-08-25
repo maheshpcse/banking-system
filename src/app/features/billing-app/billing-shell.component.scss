@@ -304,6 +304,8 @@
   padding: 0.85rem 1.5rem 1.75rem;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
 }
 
 .app-foot {
@@ -315,8 +317,8 @@
   justify-content: space-between;
   gap: 1rem;
   width: 100%;
-  margin: 0;
-  padding: 0.55rem 1.25rem 0.85rem;
+  margin: 1.5rem 0 0.35rem;
+  padding: 0;
   box-sizing: border-box;
   pointer-events: none;
 }

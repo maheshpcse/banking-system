@@ -10,7 +10,7 @@
       </div>
     </header>
 
-    <div class="status-chips" role="tablist" aria-label="Payment status" *ngIf="!filterLoading">
+    <div class="status-chips" role="tablist" aria-label="Payment status">
       <button
         type="button"
         class="status-chip"
@@ -22,7 +22,7 @@
       </button>
     </div>
 
-    <div class="filters" *ngIf="!filterLoading">
+    <div class="filters">
       <div class="search">
         <input
           class="input"
@@ -65,7 +65,7 @@
           <p>{{ bill.customerName }}</p>
           <div class="card__meta">
             <span>
-              {{ bill.createdAt | date: 'mediumDate' }}
+              {{ bill.createdAt | date: 'medium' }}
               <ng-container *ngIf="bill.paymentStatus === 'paid' && bill.paidAt">
                 <br />Paid · {{ bill.paidAt | date: 'medium' }}
               </ng-container>

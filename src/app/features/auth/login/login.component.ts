@@ -1,14 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, of } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { PortalLaunchService } from '../../../core/services/portal-launch.service';
 import { ShellBootService } from '../../../core/services/shell-boot.service';
 import { fieldError } from '../../../core/utils/form-errors';
-import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
   selector: 'app-login',
@@ -16,13 +15,15 @@ import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  pageLoading = true;
+  pageLoading = false;
   loading = false;
   unlockLoading = false;
   showPassword = false;
   formError = '';
   unlockNotice = '';
   locked = false;
+  /** Banking login gets home-style landing fade; billing login (?next=billing) does not. */
+  isBillingLogin = false;
   form = this.fb.group({
     identifier: ['', [Validators.required, Validators.minLength(3)]],
     password: ['', [Validators.required, Validators.minLength(6)]]
@@ -46,6 +47,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.isBillingLogin = this.route.snapshot.queryParamMap.get('next') === 'billing';
     this.formSub = this.form.valueChanges.subscribe(() => {
       if (this.formError) {
         this.formError = '';
@@ -54,9 +56,8 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.unlockNotice = '';
       }
     });
-    withShimmerDelay(of(true), SHIMMER_MS).subscribe(() => {
-      this.pageLoading = false;
-    });
+    // Login page: no CSS shimmer — content lands with fade animation (banking only).
+    this.pageLoading = false;
   }
 
   ngOnDestroy(): void {

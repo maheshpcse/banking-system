@@ -217,17 +217,35 @@ h2 {
   color: var(--muted);
 }
 
-.status--paid {
+.bills__meta .status,
+.bills__meta .status--paid,
+.bills__meta .status--pending,
+.bills__meta .status--draft,
+.bills__meta .status--failed,
+.bills__meta .status--error,
+.bills__meta .status--refunded {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.bills__meta .status--paid {
   color: #1f6b5c;
 }
 
-.status--pending,
-.status--draft {
+.bills__meta .status--pending,
+.bills__meta .status--draft {
   color: var(--saffron);
 }
 
-.status--failed {
+.bills__meta .status--failed,
+.bills__meta .status--error {
   color: var(--crimson);
+}
+
+.bills__meta .status--refunded {
+  color: #64748b;
 }
 
 .empty {

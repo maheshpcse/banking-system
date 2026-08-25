@@ -309,8 +309,8 @@
       </div>
     </div>
 
-    <app-shimmer *ngIf="billingFlowLoading && billingView === 'chart'" variant="manager-flow-chart"></app-shimmer>
-    <app-shimmer *ngIf="billingFlowLoading && billingView === 'table'" variant="manager-flow-table"></app-shimmer>
+    <app-shimmer *ngIf="billingFlowLoading && billingView === 'chart'" variant="manager-billing-chart"></app-shimmer>
+    <app-shimmer *ngIf="billingFlowLoading && billingView === 'table'" variant="manager-billing-table"></app-shimmer>
 
     <ng-container *ngIf="!billingFlowLoading && billingStats; else noBillingStats">
       <ng-container *ngIf="billingView === 'chart'">

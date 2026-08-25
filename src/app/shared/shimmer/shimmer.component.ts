@@ -29,6 +29,8 @@ export class ShimmerComponent {
     | 'manager-overview'
     | 'manager-flow-chart'
     | 'manager-flow-table'
+    | 'manager-billing-chart'
+    | 'manager-billing-table'
     | 'manager-reports'
     | 'manager-billing'
     | 'home'
