@@ -7,6 +7,7 @@ import { ForgotPasswordComponent } from './forgot-password/forgot-password.compo
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { StaffSignupComponent } from './staff-signup/staff-signup.component';
 import { StaffStatusComponent } from './staff-status/staff-status.component';
+import { ContactAdminComponent } from './contact-admin/contact-admin.component';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { StaffStatusComponent } from './staff-status/staff-status.component';
     ForgotPasswordComponent,
     ResetPasswordComponent,
     StaffSignupComponent,
-    StaffStatusComponent
+    StaffStatusComponent,
+    ContactAdminComponent
   ],
   imports: [SharedModule, AuthRoutingModule]
 })

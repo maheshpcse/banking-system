@@ -74,6 +74,23 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/request-unlock`, payload);
   }
 
+  getSupportInfo(): Observable<{ supportEmail: string; contactPath: string }> {
+    return this.http.get<{ supportEmail: string; contactPath: string }>(
+      `${environment.apiUrl}/auth/support-info`
+    );
+  }
+
+  /** Public — blocked/deactivated users request restore access (no auth). */
+  contactAdmin(payload: {
+    identifier: string;
+    message?: string;
+  }): Observable<{ message: string; supportEmail?: string }> {
+    return this.http.post<{ message: string; supportEmail?: string }>(
+      `${environment.apiUrl}/auth/contact-admin`,
+      payload
+    );
+  }
+
   resetPassword(payload: {
     resetToken: string;
     password: string;

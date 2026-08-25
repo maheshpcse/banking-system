@@ -3,6 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription, of } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { AlertService } from '../../../core/services/alert.service';
 import { fieldError } from '../../../core/utils/form-errors';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
@@ -25,6 +26,7 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
   constructor(
     private readonly fb: FormBuilder,
     private readonly auth: AuthService,
+    private readonly alerts: AlertService,
     private readonly router: Router
   ) {}
 
@@ -64,9 +66,24 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
           }
         });
       },
-      error: (err) => {
+      error: async (err) => {
         this.loading = false;
-        this.formError = err?.error?.message || 'Unable to verify that account.';
+        const code = err?.error?.code;
+        const message = err?.error?.message || 'Unable to verify that account.';
+        if (code === 'ACCOUNT_BLOCKED' || code === 'ACCOUNT_DEACTIVATED') {
+          const action = await this.alerts.accountRestricted({
+            title: code === 'ACCOUNT_BLOCKED' ? 'Account blocked' : 'Account deactivated',
+            text: message,
+            supportEmail: err?.error?.supportEmail
+          });
+          if (action === 'contact') {
+            void this.router.navigateByUrl(
+              `/auth/contact-admin?identifier=${encodeURIComponent(identifier)}`
+            );
+          }
+          return;
+        }
+        this.formError = message;
       }
     });
   }

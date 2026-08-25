@@ -189,6 +189,52 @@ export class AlertService {
     return !!result.isConfirmed;
   }
 
+  /**
+   * Blocked / deactivated account modal — email support or open Contact administrator.
+   * Returns 'contact' | 'email' | 'close'.
+   */
+  async accountRestricted(options: {
+    title: string;
+    text: string;
+    supportEmail?: string;
+  }): Promise<'contact' | 'email' | 'close'> {
+    const email = String(options.supportEmail || 'support@novabank.local').trim();
+    const safeText = String(options.text || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    const result = await Swal.fire({
+      icon: 'warning',
+      title: options.title,
+      html: `
+        <p class="nb-alert__text">${safeText}</p>
+        <p class="nb-alert__hint" style="margin:0.9rem 0 0;color:#5f7a8c;font-size:0.92rem;">
+          Administration email:
+          <a href="mailto:${email}" style="color:#0f766e;font-weight:650;text-decoration:none;">${email}</a>
+        </p>
+      `,
+      showDenyButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'Contact administrator',
+      denyButtonText: 'Email support',
+      cancelButtonText: 'Close',
+      reverseButtons: true,
+      ...this.theme,
+      ...this.staticBackdrop,
+      customClass: this.alertClasses
+    });
+    if (result.isConfirmed) {
+      return 'contact';
+    }
+    if (result.isDenied) {
+      if (typeof window !== 'undefined') {
+        window.location.href = `mailto:${email}?subject=${encodeURIComponent('NovaBank account access')}`;
+      }
+      return 'email';
+    }
+    return 'close';
+  }
+
   confirm(options: {
     text?: string;
     confirmText?: string;
