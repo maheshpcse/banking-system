@@ -158,17 +158,35 @@ export class BillingHistoryComponent implements OnInit {
     void this.router.navigate(['/billing/pos'], { queryParams: { billId: bill.id } });
   }
 
-  canContinueOnPos(status: string): boolean {
+  canContinueOnPos(bill: BillingBill | string): boolean {
+    const status = typeof bill === 'string' ? bill : bill.paymentStatus;
+    if (typeof bill !== 'string' && this.isExpiredFailure(bill)) {
+      return false;
+    }
     return status === 'draft' || status === 'pending' || status === 'failed' || status === 'error';
   }
 
-  canDeleteBill(status: string): boolean {
+  canDeleteBill(bill: BillingBill | string): boolean {
+    const status = typeof bill === 'string' ? bill : bill.paymentStatus;
+    if (typeof bill !== 'string' && this.isExpiredFailure(bill)) {
+      return false;
+    }
     return status === 'draft' || status === 'pending' || status === 'failed' || status === 'error';
+  }
+
+  /** Pending window expired → Payment Failure (no retry / delete). */
+  isExpiredFailure(bill: BillingBill): boolean {
+    if (bill.paymentStatus !== 'failed') {
+      return false;
+    }
+    return String(bill.statusReason || '')
+      .toLowerCase()
+      .includes('payment window expired');
   }
 
   async deleteBill(bill: BillingBill, event?: Event): Promise<void> {
     event?.stopPropagation();
-    if (!this.canDeleteBill(bill.paymentStatus)) {
+    if (!this.canDeleteBill(bill)) {
       return;
     }
     const outcome = await this.alerts.confirmAction({

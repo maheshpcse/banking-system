@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AlertService } from '../../../core/services/alert.service';
 import { BillingService } from '../../../core/services/billing.service';
 import {
+  BillingBill,
   BillingCustomer,
   BillingPaymentMethod,
   BillingProduct,
@@ -36,6 +37,13 @@ export class BillingPurchasesComponent implements OnInit {
   customers: BillingCustomer[] = [];
   products: BillingProduct[] = [];
   view: PurchaseView = 'list';
+  detailRow: BillingPurchase | null = null;
+  detailBill: BillingBill | null = null;
+  detailCustomer: BillingCustomer | null = null;
+  detailLoading = false;
+  detailLeaving = false;
+  private detailTimer: ReturnType<typeof setTimeout> | null = null;
+  private viewTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly methodOptions: ThemeSelectOption[] = [
     { value: '', label: 'All methods' },
@@ -59,6 +67,19 @@ export class BillingPurchasesComponent implements OnInit {
       { value: '', label: 'All products' },
       ...this.products.map((p) => ({ value: p.id, label: p.name }))
     ];
+  }
+
+  get dataShimmerVariant():
+    | 'purchases-data-list'
+    | 'purchases-data-grid'
+    | 'purchases-data-table' {
+    if (this.view === 'list') {
+      return 'purchases-data-list';
+    }
+    if (this.view === 'grid') {
+      return 'purchases-data-grid';
+    }
+    return 'purchases-data-table';
   }
 
   ngOnInit(): void {
@@ -89,10 +110,35 @@ export class BillingPurchasesComponent implements OnInit {
   }
 
   setView(view: PurchaseView): void {
+    if (this.view === view || this.filterLoading) {
+      return;
+    }
     this.view = view;
+    this.filterLoading = true;
+    if (this.viewTimer) {
+      clearTimeout(this.viewTimer);
+    }
+    this.viewTimer = setTimeout(() => {
+      this.filterLoading = false;
+      this.viewTimer = null;
+    }, 280);
   }
 
   applyFilters(): void {
+    if (
+      !this.query.trim() &&
+      !this.from &&
+      !this.to &&
+      !this.customerId &&
+      !this.productId &&
+      !this.paymentMethod
+    ) {
+      void this.alerts.toastWarning(
+        'Enter a filter',
+        'Add a search term, customer, product, method, or date before filtering.'
+      );
+      return;
+    }
     this.load(1, 'filter');
   }
 
@@ -105,7 +151,7 @@ export class BillingPurchasesComponent implements OnInit {
     this.page = page;
     if (mode === 'full') {
       this.pageLoading = true;
-    } else if (mode === 'filter') {
+    } else {
       this.filterLoading = true;
     }
     withShimmerDelay(
@@ -119,7 +165,7 @@ export class BillingPurchasesComponent implements OnInit {
         page: this.page,
         limit: this.limit
       }),
-      mode === 'full' || mode === 'filter' ? (mode === 'full' ? SHIMMER_MS : 280) : 0
+      mode === 'full' ? SHIMMER_MS : 280
     ).subscribe({
       next: (res) => {
         this.applyPage(res);
@@ -146,11 +192,67 @@ export class BillingPurchasesComponent implements OnInit {
     }
   }
 
+  openDetail(row: BillingPurchase): void {
+    if (this.detailTimer) {
+      clearTimeout(this.detailTimer);
+      this.detailTimer = null;
+    }
+    this.detailLeaving = false;
+    this.detailRow = row;
+    this.detailBill = null;
+    this.detailCustomer = this.customers.find((c) => c.id === row.customerId) || null;
+    this.detailLoading = true;
+    withShimmerDelay(this.billing.getBill(row.billId), SHIMMER_MS).subscribe({
+      next: (res) => {
+        this.detailBill = res.bill;
+        if (!this.detailCustomer && res.bill.customerId) {
+          this.detailCustomer = this.customers.find((c) => c.id === res.bill.customerId) || null;
+        }
+        this.detailLoading = false;
+      },
+      error: async () => {
+        this.detailLoading = false;
+        await this.alerts.error('Unable to open purchase detail.');
+      }
+    });
+  }
+
+  closeDetail(): void {
+    if (!this.detailRow || this.detailLeaving) {
+      return;
+    }
+    this.detailLeaving = true;
+    this.detailTimer = setTimeout(() => {
+      this.detailRow = null;
+      this.detailBill = null;
+      this.detailCustomer = null;
+      this.detailLeaving = false;
+      this.detailTimer = null;
+    }, 200);
+  }
+
   methodLabel(method?: BillingPaymentMethod | string | null): string {
     if (!method) {
       return '—';
     }
     return String(method).toUpperCase();
+  }
+
+  statusLabel(status?: string | null): string {
+    switch (status) {
+      case 'paid':
+        return 'Payment Success';
+      case 'pending':
+        return 'Payment Pending';
+      case 'failed':
+        return 'Payment Failure';
+      case 'error':
+        return 'Payment Error';
+      case 'draft':
+        return 'Bill Created';
+      default:
+        return status || 'Paid';
+    }
   }
 
   private applyPage(res: {
@@ -161,7 +263,7 @@ export class BillingPurchasesComponent implements OnInit {
   }): void {
     this.items = res.items || [];
     this.page = res.page;
-    this.pages = res.pages || 1;
+    this.pages = Math.max(1, res.pages || 1);
     this.total = res.total || 0;
   }
 }

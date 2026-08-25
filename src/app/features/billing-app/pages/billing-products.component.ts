@@ -470,21 +470,21 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
     return 'In stock';
   }
 
-  ratingLabel(p: { ratingAvg?: number; ratingCount?: number }): string {
+  ratingAria(p: { ratingAvg?: number; ratingCount?: number }): string {
     const count = Number(p.ratingCount) || 0;
     const avg = Number(p.ratingAvg) || 0;
     if (!count) {
-      return '0';
+      return 'No ratings yet';
     }
-    return `${avg.toFixed(1)} · ${count}`;
+    return `Average rating ${avg.toFixed(1)} from ${count} rating${count === 1 ? '' : 's'}`;
   }
 
   starFill(p: { ratingAvg?: number; ratingCount?: number }, index: number): 'full' | 'half' | 'empty' {
     const count = Number(p.ratingCount) || 0;
-    if (!count) {
+    const avg = Number(p.ratingAvg) || 0;
+    if (!count || avg <= 0) {
       return 'empty';
     }
-    const avg = Number(p.ratingAvg) || 0;
     if (avg >= index) {
       return 'full';
     }

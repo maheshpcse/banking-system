@@ -334,7 +334,9 @@ export interface BillingPurchase {
   unitPrice: number;
   lineTotal: number;
   paymentMethod?: BillingPaymentMethod | null;
+  paymentStatus?: BillingPaymentStatus | string;
   paidAt?: string | null;
+  createdAt?: string | null;
   rated?: boolean;
   grandTotal?: number;
 }

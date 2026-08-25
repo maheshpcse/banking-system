@@ -139,7 +139,7 @@
                   <div class="row__body">
                     <strong>{{ p.name }}</strong>
                     <span>{{ p.sku || 'No SKU' }} · {{ stockLabel(p.stock) }} · {{ p.stock }}</span>
-                    <span class="row__rating" [attr.aria-label]="'Rating ' + ratingLabel(p)">
+                    <span class="row__rating" [attr.aria-label]="ratingAria(p)">
                       <span class="stars" aria-hidden="true">
                         <span
                           class="star"
@@ -148,7 +148,6 @@
                           [class.is-half]="starFill(p, s) === 'half'"
                         >★</span>
                       </span>
-                      <small>{{ ratingLabel(p) }}</small>
                     </span>
                   </div>
                   <em class="row__amount">{{ p.price | currencyFormat }}</em>
@@ -167,7 +166,7 @@
                 <span>{{ p.sku || 'No SKU' }}</span>
                 <em>{{ p.price | currencyFormat }}</em>
                 <small>{{ stockLabel(p.stock) }} · {{ p.stock }}</small>
-                <small class="rating-line" [attr.aria-label]="'Rating ' + ratingLabel(p)">
+                <small class="rating-line" [attr.aria-label]="ratingAria(p)">
                   <span class="stars" aria-hidden="true">
                     <span
                       class="star"
@@ -176,7 +175,6 @@
                       [class.is-half]="starFill(p, s) === 'half'"
                     >★</span>
                   </span>
-                  {{ ratingLabel(p) }}
                 </small>
               </button>
             </div>
@@ -206,7 +204,7 @@
                     <td>{{ p.price | currencyFormat }}</td>
                     <td>{{ p.stock }} <small>({{ stockLabel(p.stock) }})</small></td>
                     <td>
-                      <span class="stars" aria-hidden="true">
+                      <span class="stars" [attr.aria-label]="ratingAria(p)">
                         <span
                           class="star"
                           *ngFor="let s of [1, 2, 3, 4, 5]"
@@ -214,7 +212,6 @@
                           [class.is-half]="starFill(p, s) === 'half'"
                         >★</span>
                       </span>
-                      <small>{{ ratingLabel(p) }}</small>
                     </td>
                     <td>{{ p.gstPercentage }}%</td>
                     <td class="table__actions">
@@ -297,7 +294,7 @@
       <div>
         <dt>Rating</dt>
         <dd>
-          <span class="stars" aria-hidden="true">
+          <span class="stars" [attr.aria-label]="ratingAria(p)">
             <span
               class="star"
               *ngFor="let s of [1, 2, 3, 4, 5]"
@@ -305,7 +302,6 @@
               [class.is-half]="starFill(p, s) === 'half'"
             >★</span>
           </span>
-          {{ ratingLabel(p) }}
         </dd>
       </div>
       <div>
