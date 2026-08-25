@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, of } from 'rxjs';
+import { Subscription, timer } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { fieldError } from '../../../core/utils/form-errors';
@@ -15,8 +16,9 @@ import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 export class ContactAdminComponent implements OnInit, OnDestroy {
   pageLoading = true;
   loading = false;
+  submitted = false;
+  countdown = 5;
   formError = '';
-  formNotice = '';
   supportEmail = 'support@novabank.local';
   form = this.fb.group({
     identifier: ['', [Validators.required, Validators.minLength(3)]],
@@ -25,6 +27,7 @@ export class ContactAdminComponent implements OnInit, OnDestroy {
 
   readonly fieldError = fieldError;
   private formSub?: Subscription;
+  private countdownSub?: Subscription;
 
   get mailHref(): string {
     return `mailto:${this.supportEmail}?subject=${encodeURIComponent('NovaBank account access')}`;
@@ -61,45 +64,60 @@ export class ContactAdminComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.formSub?.unsubscribe();
+    this.countdownSub?.unsubscribe();
+  }
+
+  goHome(): void {
+    this.countdownSub?.unsubscribe();
+    void this.router.navigateByUrl('/');
   }
 
   submit(): void {
-    if (this.form.invalid || this.loading) {
+    if (this.form.invalid || this.loading || this.submitted) {
       this.form.markAllAsTouched();
       return;
     }
     this.loading = true;
     this.formError = '';
-    this.formNotice = '';
     const identifier = String(this.form.value.identifier || '').trim();
     const message = String(this.form.value.message || '').trim();
     this.auth.contactAdmin({ identifier, message: message || undefined }).subscribe({
-      next: async (res) => {
+      next: (res) => {
         this.loading = false;
-        this.formNotice = res.message || 'Request sent to administrators.';
         if (res.supportEmail) {
           this.supportEmail = res.supportEmail;
         }
-        await this.alerts.toastSuccess('Request sent', 'Administrators were notified.');
+        this.submitted = true;
+        this.startCountdown();
       },
       error: async (err) => {
         this.loading = false;
         const code = err?.error?.code;
-        const message = err?.error?.message || 'Unable to send contact request.';
+        const msg = err?.error?.message || 'Unable to send contact request.';
         if (err?.error?.supportEmail) {
           this.supportEmail = err.error.supportEmail;
         }
         if (code === 'CONTACT_DUPLICATE') {
-          await this.alerts.info(message, 'Request already open');
-          this.formError = message;
+          await this.alerts.info(msg, 'Request already open');
+          this.formError = msg;
           return;
         }
-        if (code === 'ACCOUNT_BLOCKED' || code === 'ACCOUNT_DEACTIVATED') {
-          this.formError = message;
-          return;
-        }
-        this.formError = message;
+        this.formError = msg;
       }
     });
+  }
+
+  private startCountdown(): void {
+    this.countdown = 5;
+    this.countdownSub?.unsubscribe();
+    this.countdownSub = timer(0, 1000)
+      .pipe(take(6))
+      .subscribe((tick) => {
+        if (tick < 5) {
+          this.countdown = 5 - tick;
+          return;
+        }
+        void this.router.navigateByUrl('/');
+      });
   }
 }
