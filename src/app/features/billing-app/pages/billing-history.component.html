@@ -78,7 +78,7 @@
             </span>
             <em>{{ bill.grandTotal | currencyFormat }}</em>
           </div>
-          <div class="card__actions" *ngIf="canDeleteBill(bill.paymentStatus)">
+          <div class="card__actions" *ngIf="canDeleteBill(bill)">
             <button
               type="button"
               class="link-danger"
@@ -171,7 +171,7 @@
         <button
           type="button"
           class="btn btn--danger"
-          *ngIf="canDeleteBill(bill.paymentStatus)"
+          *ngIf="canDeleteBill(bill)"
           (click)="deleteBill(bill)"
         >
           Delete
@@ -179,7 +179,7 @@
         <button
           type="button"
           class="btn btn--primary"
-          *ngIf="canContinueOnPos(bill.paymentStatus)"
+          *ngIf="canContinueOnPos(bill)"
           (click)="continueOnPos(bill)"
         >
           Continue on POS

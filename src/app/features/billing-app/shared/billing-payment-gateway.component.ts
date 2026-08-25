@@ -128,6 +128,13 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
       void this.alerts.toastWarning('Pick a rating', 'Select 1–5 stars for at least one product.');
       return;
     }
+    if (ratings.length < this.itemRatings.length) {
+      void this.alerts.toastWarning(
+        'Rate each product',
+        'Set 1–5 stars for every product on this invoice to update catalog averages.'
+      );
+      return;
+    }
     this.ratingBusy = true;
     try {
       await firstValueFrom(this.billing.rateBill(this.bill.id, ratings));

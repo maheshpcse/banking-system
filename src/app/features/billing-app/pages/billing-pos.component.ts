@@ -382,6 +382,8 @@ export class BillingPosComponent implements OnInit {
     if (event.ok) {
       this.gatewayOpen = false;
       this.resetCheckout();
+      // Refresh catalog so stock + product rating averages reflect the settled bill.
+      this.reloadProducts(false);
       void this.alerts.toastSuccess('Payment complete', 'Checkout cleared for the next bill.');
     }
   }

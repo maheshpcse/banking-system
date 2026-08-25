@@ -1,5 +1,5 @@
 <section class="page fade-up">
-  <app-billing-panel-shimmer *ngIf="pageLoading" variant="history"></app-billing-panel-shimmer>
+  <app-billing-panel-shimmer *ngIf="pageLoading" variant="purchases"></app-billing-panel-shimmer>
 
   <ng-container *ngIf="!pageLoading">
     <header class="page__head">
@@ -45,7 +45,7 @@
       <button type="button" class="btn btn--ghost" (click)="applyFilters()">Filter</button>
     </div>
 
-    <app-billing-panel-shimmer *ngIf="filterLoading" variant="history-data"></app-billing-panel-shimmer>
+    <app-billing-panel-shimmer *ngIf="filterLoading" [variant]="dataShimmerVariant"></app-billing-panel-shimmer>
 
     <ng-container *ngIf="!filterLoading">
       <app-empty-state
@@ -57,7 +57,7 @@
       ></app-empty-state>
 
       <ul class="list" *ngIf="items.length && view === 'list'">
-        <li *ngFor="let row of items">
+        <li *ngFor="let row of items" (click)="openDetail(row)">
           <div>
             <strong>{{ row.productName }}</strong>
             <span>{{ row.customerName }} · {{ row.billNumber }}</span>
@@ -74,7 +74,7 @@
       </ul>
 
       <div class="grid" *ngIf="items.length && view === 'grid'">
-        <article *ngFor="let row of items">
+        <article *ngFor="let row of items" (click)="openDetail(row)">
           <strong>{{ row.productName }}</strong>
           <span>{{ row.customerName }}</span>
           <small>{{ row.billNumber }} · {{ methodLabel(row.paymentMethod) }}</small>
@@ -97,7 +97,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let row of items">
+            <tr *ngFor="let row of items" (click)="openDetail(row)">
               <td>{{ row.productName }}</td>
               <td>{{ row.customerName }}</td>
               <td>{{ row.billNumber }}</td>
@@ -110,11 +110,124 @@
         </table>
       </div>
 
-      <div class="pager" *ngIf="pages > 1">
+      <div class="pager" *ngIf="total > 0">
         <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
         <span>Page {{ page }} / {{ pages }} · {{ total }} total</span>
         <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
       </div>
     </ng-container>
   </ng-container>
+
+  <div
+    class="drawer-backdrop"
+    *ngIf="detailRow"
+    [class.is-leaving]="detailLeaving"
+    data-backdrop="static"
+    data-keyboard="false"
+  ></div>
+  <aside
+    class="drawer"
+    *ngIf="detailRow as row"
+    [class.is-leaving]="detailLeaving"
+    role="dialog"
+    aria-modal="true"
+    tabindex="-1"
+    data-backdrop="static"
+    data-keyboard="false"
+  >
+    <div class="drawer__head">
+      <div *ngIf="!detailLoading">
+        <h3>{{ row.productName }}</h3>
+        <p>{{ row.billNumber }} · {{ row.customerName }}</p>
+      </div>
+      <div class="drawer__head-shimmer" *ngIf="detailLoading" aria-hidden="true">
+        <span class="drawer__head-bone drawer__head-bone--title"></span>
+        <span class="drawer__head-bone drawer__head-bone--sub"></span>
+      </div>
+      <button type="button" class="icon-close" (click)="closeDetail()" aria-label="Close">×</button>
+    </div>
+
+    <app-billing-panel-shimmer *ngIf="detailLoading" variant="history-drawer"></app-billing-panel-shimmer>
+
+    <ng-container *ngIf="!detailLoading">
+      <div class="pill pill--paid">{{ statusLabel(detailBill?.paymentStatus || 'paid') }}</div>
+
+      <dl class="drawer__facts">
+        <div>
+          <dt>Purchased</dt>
+          <dd>{{ row.paidAt | date: 'medium' }}</dd>
+        </div>
+        <div>
+          <dt>Payment method</dt>
+          <dd>{{ methodLabel(row.paymentMethod) }}</dd>
+        </div>
+        <div>
+          <dt>Quantity</dt>
+          <dd>× {{ row.quantity }}</dd>
+        </div>
+        <div>
+          <dt>Unit price</dt>
+          <dd>{{ row.unitPrice | currencyFormat }}</dd>
+        </div>
+        <div>
+          <dt>Line total</dt>
+          <dd>{{ row.lineTotal | currencyFormat }}</dd>
+        </div>
+        <div *ngIf="detailBill as bill">
+          <dt>Invoice total</dt>
+          <dd>{{ bill.grandTotal | currencyFormat }}</dd>
+        </div>
+        <div>
+          <dt>Rating</dt>
+          <dd>{{ row.rated ? 'Rated on this invoice' : 'Not rated yet' }}</dd>
+        </div>
+      </dl>
+
+      <section class="drawer__block" *ngIf="detailCustomer as customer; else customerFallback">
+        <h4>Customer</h4>
+        <dl class="drawer__facts">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ customer.name }}</dd>
+          </div>
+          <div *ngIf="customer.email">
+            <dt>Email</dt>
+            <dd>{{ customer.email }}</dd>
+          </div>
+          <div *ngIf="customer.phone">
+            <dt>Phone</dt>
+            <dd>{{ customer.phone }}</dd>
+          </div>
+          <div *ngIf="customer.address">
+            <dt>Address</dt>
+            <dd>{{ customer.address }}</dd>
+          </div>
+          <div *ngIf="customer.bankingAccountNumber">
+            <dt>Bank account</dt>
+            <dd>{{ customer.bankingAccountNumber }}</dd>
+          </div>
+        </dl>
+      </section>
+      <ng-template #customerFallback>
+        <section class="drawer__block">
+          <h4>Customer</h4>
+          <p class="drawer__muted">{{ row.customerName }}</p>
+        </section>
+      </ng-template>
+
+      <section class="drawer__block" *ngIf="detailBill as bill">
+        <h4>Invoice lines</h4>
+        <ul class="lines">
+          <li *ngFor="let item of bill.items" [class.is-focus]="item.productId === row.productId">
+            <span>{{ item.name }} × {{ item.quantity }}</span>
+            <em>{{ item.lineTotal | currencyFormat }}</em>
+          </li>
+        </ul>
+      </section>
+
+      <div class="drawer__foot">
+        <button type="button" class="btn btn--ghost" (click)="closeDetail()">Close</button>
+      </div>
+    </ng-container>
+  </aside>
 </section>

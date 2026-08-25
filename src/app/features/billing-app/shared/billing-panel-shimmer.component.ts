@@ -11,8 +11,11 @@ import { Component, Input } from '@angular/core';
           <div class="bps__bone bps__bone--title"></div>
           <div class="bps__bone bps__bone--lede"></div>
         </div>
-        <div class="bps__head-actions" *ngIf="variant === 'desk' || variant === 'catalog'">
+        <div class="bps__head-actions" *ngIf="variant === 'desk' || variant === 'catalog' || variant === 'purchases'">
           <div class="bps__bone bps__bone--btn"></div>
+          <div class="bps__seg" *ngIf="variant === 'purchases'">
+            <span *ngFor="let s of segs"></span>
+          </div>
           <div class="bps__bone bps__bone--btn bps__bone--accent" *ngIf="variant === 'desk'"></div>
         </div>
       </div>
@@ -263,7 +266,6 @@ import { Component, Input } from '@angular/core';
             <div class="bps__list-copy">
               <div class="bps__bone bps__bone--fill"></div>
               <div class="bps__bone bps__bone--sm"></div>
-              <div class="bps__bone bps__bone--xs"></div>
             </div>
           </div>
         </div>
@@ -276,9 +278,95 @@ import { Component, Input } from '@angular/core';
             <div class="bps__list-copy">
               <div class="bps__bone bps__bone--fill"></div>
               <div class="bps__bone bps__bone--sm"></div>
-              <div class="bps__bone bps__bone--xs"></div>
             </div>
           </div>
+        </div>
+      </ng-container>
+
+      <!-- Purchases: full page head + filters + list -->
+      <ng-container *ngIf="variant === 'purchases'">
+        <div class="bps__toolbar bps__toolbar--wrap">
+          <div class="bps__bone bps__bone--search"></div>
+          <div class="bps__bone bps__bone--select"></div>
+          <div class="bps__bone bps__bone--select"></div>
+          <div class="bps__bone bps__bone--select"></div>
+          <div class="bps__bone bps__bone--select"></div>
+          <div class="bps__bone bps__bone--select"></div>
+          <div class="bps__bone bps__bone--btn"></div>
+        </div>
+        <div class="bps__list">
+          <div class="bps__list-row bps__list-row--plain" *ngFor="let r of purchasesListRows">
+            <div class="bps__list-copy">
+              <div class="bps__bone bps__bone--md"></div>
+              <div class="bps__bone bps__bone--xs"></div>
+              <div class="bps__bone bps__bone--xs"></div>
+            </div>
+            <div class="bps__list-meta">
+              <div class="bps__bone bps__bone--xs"></div>
+              <div class="bps__bone bps__bone--sm"></div>
+            </div>
+          </div>
+        </div>
+        <div class="bps__pager">
+          <div class="bps__bone bps__bone--btn"></div>
+          <div class="bps__bone bps__bone--md"></div>
+          <div class="bps__bone bps__bone--btn"></div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="variant === 'purchases-data-list'">
+        <div class="bps__list">
+          <div class="bps__list-row bps__list-row--plain" *ngFor="let r of purchasesListRows">
+            <div class="bps__list-copy">
+              <div class="bps__bone bps__bone--md"></div>
+              <div class="bps__bone bps__bone--xs"></div>
+              <div class="bps__bone bps__bone--xs"></div>
+            </div>
+            <div class="bps__list-meta">
+              <div class="bps__bone bps__bone--xs"></div>
+              <div class="bps__bone bps__bone--sm"></div>
+            </div>
+          </div>
+        </div>
+        <div class="bps__pager">
+          <div class="bps__bone bps__bone--btn"></div>
+          <div class="bps__bone bps__bone--md"></div>
+          <div class="bps__bone bps__bone--btn"></div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="variant === 'purchases-data-grid'">
+        <div class="bps__grid">
+          <div class="bps__grid-tile" *ngFor="let r of purchasesGridRows">
+            <div class="bps__bone bps__bone--md"></div>
+            <div class="bps__bone bps__bone--xs"></div>
+            <div class="bps__bone bps__bone--xs"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+          </div>
+        </div>
+        <div class="bps__pager">
+          <div class="bps__bone bps__bone--btn"></div>
+          <div class="bps__bone bps__bone--md"></div>
+          <div class="bps__bone bps__bone--btn"></div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="variant === 'purchases-data-table'">
+        <div class="bps__panel">
+          <div class="bps__table-head">
+            <div class="bps__bone" *ngFor="let h of purchasesTableHeads"></div>
+          </div>
+          <div class="bps__row bps__row--table" *ngFor="let r of purchasesTableRows">
+            <div class="bps__bone bps__bone--fill"></div>
+            <div class="bps__bone bps__bone--sm"></div>
+            <div class="bps__bone bps__bone--xs"></div>
+            <div class="bps__bone bps__bone--xs"></div>
+          </div>
+        </div>
+        <div class="bps__pager">
+          <div class="bps__bone bps__bone--btn"></div>
+          <div class="bps__bone bps__bone--md"></div>
+          <div class="bps__bone bps__bone--btn"></div>
         </div>
       </ng-container>
 
@@ -557,10 +645,28 @@ import { Component, Input } from '@angular/core';
         background: rgba(241, 246, 244, 0.55);
       }
 
+      .bps__list-row--plain {
+        grid-template-columns: 1fr auto;
+      }
+
       .bps__list-copy {
         display: grid;
         gap: 0.35rem;
         min-width: 0;
+      }
+
+      .bps__list-meta {
+        display: grid;
+        gap: 0.3rem;
+        justify-items: end;
+      }
+
+      .bps__pager {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 0.35rem;
       }
 
       .bps__thumb {
@@ -874,14 +980,19 @@ export class BillingPanelShimmerComponent {
     | 'settings'
     | 'history'
     | 'history-data'
-    | 'history-drawer' = 'desk';
+    | 'history-drawer'
+    | 'purchases'
+    | 'purchases-data-list'
+    | 'purchases-data-grid'
+    | 'purchases-data-table' = 'desk';
 
   get showHead(): boolean {
     return (
       this.variant === 'desk' ||
       this.variant === 'catalog' ||
       this.variant === 'pos' ||
-      this.variant === 'history'
+      this.variant === 'history' ||
+      this.variant === 'purchases'
     );
   }
 
@@ -904,5 +1015,9 @@ export class BillingPanelShimmerComponent {
   readonly drawerLines = [1, 2, 3, 4];
   readonly drawerPays = [1, 2];
   readonly historyHeads = [1, 2, 3, 4];
-  readonly historyRows = [1, 2, 3, 4, 5, 6];
+  readonly historyRows = [1, 2];
+  readonly purchasesListRows = [1, 2, 3, 4];
+  readonly purchasesGridRows = [1, 2, 3, 4, 5, 6];
+  readonly purchasesTableRows = [1, 2, 3, 4, 5];
+  readonly purchasesTableHeads = [1, 2, 3, 4, 5, 6, 7];
 }

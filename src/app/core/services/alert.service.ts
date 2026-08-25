@@ -55,9 +55,9 @@ export class AlertService {
     return this.fireToast('warning', 'top', title, text, 'nb-toast--warning');
   }
 
-  /** Top-right corner success toast (login / signup welcome). */
+  /** Top-center success toast (login / signup welcome). */
   toastSuccessCorner(title: string, text?: string): Promise<SweetAlertResult> {
-    return this.fireToast('success', 'top-end', title, text, 'nb-toast--success nb-toast--corner');
+    return this.fireToast('success', 'top', title, text, 'nb-toast--success nb-toast--corner');
   }
 
   private fireToast(
