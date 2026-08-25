@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   formError = '';
   unlockNotice = '';
   locked = false;
-  /** Banking login gets home-style landing fade; billing login (?next=billing) does not. */
+  /** True when opened as Billing login (`?next=billing`). */
   isBillingLogin = false;
   form = this.fb.group({
     identifier: ['', [Validators.required, Validators.minLength(3)]],
