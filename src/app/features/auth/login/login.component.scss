@@ -219,18 +219,25 @@
 }
 
 .auth-page--land .auth-land--brand {
-  animation-delay: 0.08s;
-  animation-name: auth-land-fade-in-up;
+  animation: auth-land-fade-in-up 0.9s var(--ease-out) 0.08s forwards;
 }
 
 .auth-page--land .auth-land--panel {
-  animation-delay: 0.28s;
-  animation-name: auth-land-fade-in-up;
+  animation: auth-land-fade-in-up 0.9s var(--ease-out) 0.28s forwards;
 }
 
 .auth-page--land .auth-land--foot {
-  animation-delay: 0.48s;
-  animation-name: auth-land-fade-in;
+  animation: auth-land-fade-in 0.9s var(--ease-out) 0.48s forwards;
+}
+
+.auth-panel-wrap {
+  display: block;
+  width: 100%;
+}
+
+.auth-panel-wrap .auth-panel {
+  display: block;
+  width: 100%;
 }
 
 @keyframes auth-land-fade-in {
