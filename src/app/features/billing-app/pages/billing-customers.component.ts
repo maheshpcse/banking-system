@@ -322,6 +322,11 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
       .join('');
   }
 
+  rewardsLabel(points?: number): string {
+    const n = Number(points) || 0;
+    return `${n} point${n === 1 ? '' : 's'}`;
+  }
+
   openDetail(customer: BillingCustomer): void {
     if (this.detailTimer) {
       clearTimeout(this.detailTimer);

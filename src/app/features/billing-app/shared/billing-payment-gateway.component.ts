@@ -10,8 +10,14 @@ import {
 } from '../../../core/models/banking.models';
 import { environment } from '../../../../environments/environment';
 
-export type NovaPayStep = 'method' | 'auth' | 'processing' | 'result';
+export type NovaPayStep = 'method' | 'auth' | 'processing' | 'result' | 'rate';
 export type NovaPayChannel = 'modal' | 'tab';
+
+interface ItemRating {
+  productId: string;
+  name: string;
+  stars: number;
+}
 
 @Component({
   selector: 'app-billing-payment-gateway',
@@ -47,6 +53,9 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
   upiVpa = '';
   otp = '';
   otpSent = false;
+  itemRatings: ItemRating[] = [];
+  ratingBusy = false;
+  private pendingCompletion: { bill: BillingBill; payment: BillingPayment; ok: boolean } | null = null;
 
   private leaveTimer: ReturnType<typeof setTimeout> | null = null;
   private progressTimer: ReturnType<typeof setInterval> | null = null;
@@ -84,6 +93,9 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
     if (this.busy && this.step === 'processing') {
       return;
     }
+    if (this.pendingCompletion) {
+      this.emitCompletion();
+    }
     this.leaving = true;
     this.leaveTimer = setTimeout(() => {
       this.leaving = false;
@@ -91,6 +103,85 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
       this.closed.emit();
       this.resetSession();
     }, 220);
+  }
+
+  goToRate(): void {
+    if (!this.resultOk || !this.bill) {
+      return;
+    }
+    this.buildItemRatings();
+    this.step = 'rate';
+  }
+
+  setStars(row: ItemRating, stars: number): void {
+    row.stars = stars;
+  }
+
+  async submitRatings(): Promise<void> {
+    if (!this.bill || this.ratingBusy) {
+      return;
+    }
+    const ratings = this.itemRatings
+      .filter((r) => r.stars >= 1 && r.stars <= 5)
+      .map((r) => ({ productId: r.productId, stars: r.stars }));
+    if (!ratings.length) {
+      void this.alerts.toastWarning('Pick a rating', 'Select 1–5 stars for at least one product.');
+      return;
+    }
+    this.ratingBusy = true;
+    try {
+      await firstValueFrom(this.billing.rateBill(this.bill.id, ratings));
+      void this.alerts.toastSuccess('Thanks', 'Product ratings saved.');
+      this.finishAndClose();
+    } catch (err) {
+      void this.alerts.toastWarning(
+        'Rating failed',
+        (err as { error?: { message?: string } })?.error?.message || 'Unable to save ratings.'
+      );
+    } finally {
+      this.ratingBusy = false;
+    }
+  }
+
+  skipRatings(): void {
+    this.finishAndClose();
+  }
+
+  done(): void {
+    this.finishAndClose();
+  }
+
+  private finishAndClose(): void {
+    this.emitCompletion();
+    this.leaving = true;
+    this.leaveTimer = setTimeout(() => {
+      this.leaving = false;
+      this.open = false;
+      this.closed.emit();
+      this.resetSession();
+    }, 220);
+  }
+
+  private emitCompletion(): void {
+    if (!this.pendingCompletion) {
+      return;
+    }
+    const payload = this.pendingCompletion;
+    this.pendingCompletion = null;
+    this.completed.emit(payload);
+  }
+
+  private buildItemRatings(): void {
+    const seen = new Set<string>();
+    this.itemRatings = [];
+    for (const item of this.bill?.items || []) {
+      const productId = String(item.productId || '').trim();
+      if (!productId || seen.has(productId)) {
+        continue;
+      }
+      seen.add(productId);
+      this.itemRatings.push({ productId, name: item.name || 'Product', stars: 0 });
+    }
   }
 
   selectMethod(method: BillingPaymentMethod): void {
@@ -200,13 +291,11 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
     this.resultOk = null;
     this.resultMessage = '';
     this.transactionRef = '';
+    this.pendingCompletion = null;
+    this.itemRatings = [];
     this.step = 'method';
     this.progress = 0;
     this.busy = false;
-  }
-
-  done(): void {
-    this.close();
   }
 
   methodLabel(method: BillingPaymentMethod): string {
@@ -261,7 +350,10 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
       this.transactionRef = res.payment.transactionRef;
       this.step = 'result';
       this.busy = false;
-      this.completed.emit({ bill: res.bill, payment: res.payment, ok: !!this.resultOk });
+      this.pendingCompletion = { bill: res.bill, payment: res.payment, ok: !!this.resultOk };
+      if (!this.resultOk) {
+        this.emitCompletion();
+      }
     } catch (err) {
       this.finishProgress(100);
       this.resultOk = false;
@@ -270,7 +362,7 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
       this.step = 'result';
       this.busy = false;
       if (this.bill) {
-        this.completed.emit({
+        this.pendingCompletion = {
           bill: { ...this.bill, paymentStatus: 'failed', paymentMethod: this.method },
           payment: {
             id: '',
@@ -282,7 +374,8 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
             transactionRef: ''
           },
           ok: false
-        });
+        };
+        this.emitCompletion();
       }
     }
   }
@@ -308,6 +401,9 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
     this.otpSent = false;
     this.simulateFail = false;
     this.simulateError = false;
+    this.itemRatings = [];
+    this.ratingBusy = false;
+    this.pendingCompletion = null;
     this.method = this.methods[0] || 'cash';
   }
 
@@ -384,7 +480,10 @@ export class BillingPaymentGatewayComponent implements OnChanges, OnDestroy {
         this.busy = false;
         this.channel = 'tab';
         if (data.bill && data.payment) {
-          this.completed.emit({ bill: data.bill, payment: data.payment, ok: !!data.ok });
+          this.pendingCompletion = { bill: data.bill, payment: data.payment, ok: !!data.ok };
+          if (!data.ok) {
+            this.emitCompletion();
+          }
         }
         try {
           localStorage.removeItem('novapay_checkout_result');

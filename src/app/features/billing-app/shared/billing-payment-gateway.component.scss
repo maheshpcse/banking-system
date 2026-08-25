@@ -243,6 +243,56 @@
   justify-content: center;
 }
 
+.npg__rate-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+  max-height: min(40vh, 18rem);
+  overflow: auto;
+}
+
+.npg__rate-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(22, 50, 58, 0.08);
+}
+
+.npg__rate-item strong {
+  font-size: 0.9rem;
+  letter-spacing: -0.01em;
+}
+
+.npg__stars {
+  display: inline-flex;
+  gap: 0.15rem;
+}
+
+.star {
+  border: 0;
+  background: transparent;
+  color: rgba(22, 50, 58, 0.28);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.1rem 0.15rem;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.star:hover {
+  transform: scale(1.08);
+}
+
+.star.is-on {
+  color: var(--saffron);
+}
+
 .btn {
   border: 0;
   cursor: pointer;

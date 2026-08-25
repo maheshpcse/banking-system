@@ -139,6 +139,7 @@
                   <div class="row__body">
                     <strong>{{ p.name }}</strong>
                     <span>{{ p.sku || 'No SKU' }} · {{ stockLabel(p.stock) }} · {{ p.stock }}</span>
+                    <span class="row__rating">{{ ratingLabel(p) }}</span>
                   </div>
                   <em class="row__amount">{{ p.price | currencyFormat }}</em>
                 </button>
@@ -156,6 +157,7 @@
                 <span>{{ p.sku || 'No SKU' }}</span>
                 <em>{{ p.price | currencyFormat }}</em>
                 <small>{{ stockLabel(p.stock) }} · {{ p.stock }}</small>
+                <small class="rating-line">{{ ratingLabel(p) }}</small>
               </button>
             </div>
 
@@ -167,6 +169,7 @@
                     <th>SKU</th>
                     <th>Price</th>
                     <th>Stock</th>
+                    <th>Rating</th>
                     <th>GST</th>
                     <th></th>
                   </tr>
@@ -182,6 +185,7 @@
                     <td>{{ p.sku || '—' }}</td>
                     <td>{{ p.price | currencyFormat }}</td>
                     <td>{{ p.stock }} <small>({{ stockLabel(p.stock) }})</small></td>
+                    <td>{{ ratingLabel(p) }}</td>
                     <td>{{ p.gstPercentage }}%</td>
                     <td class="table__actions">
                       <button type="button" class="link" (click)="edit(p)">Edit</button>
@@ -259,6 +263,10 @@
       <div>
         <dt>GST</dt>
         <dd>{{ p.gstPercentage }}%</dd>
+      </div>
+      <div>
+        <dt>Rating</dt>
+        <dd>{{ ratingLabel(p) }}</dd>
       </div>
       <div>
         <dt>Status</dt>

@@ -133,6 +133,18 @@ export class LoginComponent implements OnInit, OnDestroy {
           void this.alerts.info(message, 'Registration not approved');
           return;
         }
+        if (code === 'ACCOUNT_BLOCKED') {
+          void this.alerts.info(message, 'Account blocked');
+          return;
+        }
+        if (code === 'ACCOUNT_DEACTIVATED') {
+          void this.alerts.info(message, 'Account deactivated');
+          return;
+        }
+        if (code === 'ACCOUNT_DELETED') {
+          void this.alerts.info(message, 'Account deleted');
+          return;
+        }
         if (code === 'LOGIN_LOCKED') {
           this.locked = true;
           this.formError = message;

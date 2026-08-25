@@ -140,8 +140,47 @@
       <p class="npg__session" *ngIf="transactionRef">Ref · {{ transactionRef }}</p>
       <div class="npg__actions npg__actions--center">
         <button type="button" class="btn btn--ghost" *ngIf="!resultOk" (click)="retry()">Try again</button>
-        <button type="button" class="btn btn--primary" (click)="done()">
-          {{ resultOk ? 'Return to POS' : 'Close' }}
+        <button type="button" class="btn btn--ghost" *ngIf="resultOk" (click)="done()">Return to POS</button>
+        <button type="button" class="btn btn--primary" *ngIf="resultOk" (click)="goToRate()">Rate products</button>
+        <button type="button" class="btn btn--primary" *ngIf="!resultOk" (click)="done()">Close</button>
+      </div>
+    </section>
+
+    <!-- RATE -->
+    <section class="npg__stage" *ngIf="step === 'rate'">
+      <h3>Rate products</h3>
+      <p class="npg__hint">How were these items? Tap 1–5 stars, then submit — or skip.</p>
+      <ul class="npg__rate-list" *ngIf="itemRatings.length; else noRateItems">
+        <li *ngFor="let row of itemRatings">
+          <div class="npg__rate-item">
+            <strong>{{ row.name }}</strong>
+            <div class="npg__stars" role="group" [attr.aria-label]="'Rate ' + row.name">
+              <button
+                type="button"
+                class="star"
+                *ngFor="let s of [1, 2, 3, 4, 5]"
+                [class.is-on]="row.stars >= s"
+                (click)="setStars(row, s)"
+                [attr.aria-label]="s + ' star' + (s === 1 ? '' : 's')"
+              >
+                ★
+              </button>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <ng-template #noRateItems>
+        <p class="npg__hint">No products on this invoice to rate.</p>
+      </ng-template>
+      <div class="npg__actions">
+        <button type="button" class="btn btn--ghost" [disabled]="ratingBusy" (click)="skipRatings()">Skip</button>
+        <button
+          type="button"
+          class="btn btn--primary"
+          [disabled]="ratingBusy || !itemRatings.length"
+          (click)="submitRatings()"
+        >
+          {{ ratingBusy ? 'Saving…' : 'Submit ratings' }}
         </button>
       </div>
     </section>

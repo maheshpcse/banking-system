@@ -171,8 +171,25 @@ export class BillingService {
     );
   }
 
-  deleteCoupon(id: string): Observable<{ message: string; coupon: BillingCoupon }> {
-    return this.http.delete<{ message: string; coupon: BillingCoupon }>(`${this.base}/coupons/${id}`);
+  deleteCoupon(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.base}/coupons/${id}`);
+  }
+
+  deactivateCoupon(id: string): Observable<{ message: string; coupon: BillingCoupon }> {
+    return this.http.post<{ message: string; coupon: BillingCoupon }>(
+      `${this.base}/coupons/${id}/deactivate`,
+      {}
+    );
+  }
+
+  rateBill(
+    id: string,
+    ratings: Array<{ productId: string; stars: number }>
+  ): Observable<{ message: string; products?: BillingProduct[] }> {
+    return this.http.post<{ message: string; products?: BillingProduct[] }>(
+      `${this.base}/bills/${id}/ratings`,
+      { ratings }
+    );
   }
 
   listComplaints(status = ''): Observable<{ items: BillingComplaint[] }> {

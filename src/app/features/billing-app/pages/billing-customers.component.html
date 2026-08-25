@@ -129,6 +129,7 @@
               <div class="row__body">
                 <strong>{{ c.name }}</strong>
                 <span>{{ c.phone || c.email || 'No contact' }}</span>
+                <span class="row__rating">Rewards · {{ rewardsLabel(c.rewardPoints) }}</span>
               </div>
               <em class="row__amount">{{ c.bankingAccountNumber ? 'Linked' : 'Walk-up' }}</em>
             </button>
@@ -145,6 +146,7 @@
             <strong>{{ c.name }}</strong>
             <span>{{ c.phone || c.email || 'No contact' }}</span>
             <small>{{ c.bankingAccountNumber ? 'Banking linked' : 'Walk-up only' }}</small>
+            <small class="rating-line">Rewards · {{ rewardsLabel(c.rewardPoints) }}</small>
           </button>
         </div>
 
@@ -155,6 +157,7 @@
                 <th>Customer</th>
                 <th>Phone</th>
                 <th>Email</th>
+                <th>Rewards</th>
                 <th>Banking</th>
                 <th></th>
               </tr>
@@ -169,6 +172,7 @@
                 </td>
                 <td>{{ c.phone || '—' }}</td>
                 <td>{{ c.email || '—' }}</td>
+                <td>{{ rewardsLabel(c.rewardPoints) }}</td>
                 <td>{{ c.bankingAccountNumber || '—' }}</td>
                 <td class="table__actions">
                   <button type="button" class="link" (click)="edit(c)">Edit</button>
@@ -244,6 +248,10 @@
       <div>
         <dt>Banking account</dt>
         <dd>{{ c.bankingAccountNumber || '—' }}</dd>
+      </div>
+      <div>
+        <dt>Reward points</dt>
+        <dd>{{ rewardsLabel(c.rewardPoints) }}</dd>
       </div>
     </dl>
   </div>

@@ -109,9 +109,7 @@ export class ManagerOverviewComponent implements OnInit {
     { id: 'failed', label: 'Payment Failure' }
   ];
 
-  /** Server currently reports the trailing 14 days — longer ranges show all of it. */
-  private static readonly AVAILABLE_DAYS = 14;
-
+  /** Preferred range options — server analytics accepts from/to filters. */
   range: RangeFilter = 'month';
   customStart = '';
   customEnd = '';
@@ -140,7 +138,7 @@ export class ManagerOverviewComponent implements OnInit {
       forkJoin({
         customers: this.admin.refreshCustomers(1, 5),
         requests: this.admin.refreshRequests(),
-        analytics: this.admin.getAnalytics(),
+        analytics: this.admin.getAnalytics(this.analyticsQuery()),
         billing: this.billing.getStats().pipe(catchError(() => of(null)))
       }),
       SHIMMER_MS
@@ -242,7 +240,7 @@ export class ManagerOverviewComponent implements OnInit {
       return;
     }
     this.filter = filter;
-    this.flashFlow();
+    this.reloadAnalytics();
   }
 
   toggleView(): void {
@@ -259,11 +257,11 @@ export class ManagerOverviewComponent implements OnInit {
       this.customEnd = this.isoDay(end);
       this.customStart = this.isoDay(start);
     }
-    this.flashFlow();
+    this.reloadAnalytics();
   }
 
   onCustomRangeChange(): void {
-    this.flashFlow();
+    this.reloadAnalytics();
   }
 
   private flashFlow(): void {
@@ -273,17 +271,36 @@ export class ManagerOverviewComponent implements OnInit {
     });
   }
 
+  private analyticsQuery(): { from?: string; to?: string; type?: string } {
+    const days = this.dayLabels;
+    const from = days[0];
+    const to = days[days.length - 1];
+    const type = this.filter === 'all' ? undefined : this.filter;
+    return { from, to, type };
+  }
+
+  private reloadAnalytics(): void {
+    this.flowLoading = true;
+    const params = this.analyticsQuery();
+    withShimmerDelay(this.admin.getAnalytics(params), SHIMMER_MS).subscribe({
+      next: (analytics) => {
+        this.analytics = analytics;
+        this.flowLoading = false;
+      },
+      error: async (err: { error?: { message?: string } }) => {
+        this.flowLoading = false;
+        await this.alerts.error(err?.error?.message || 'Unable to reload analytics');
+      }
+    });
+  }
+
   get rangeLabel(): string {
     return this.rangeOptions.find((r) => r.id === this.range)?.label || 'Last 30 days';
   }
 
-  /** True once the selected window exceeds the data the server currently reports. */
-  get rangeExceedsAvailableData(): boolean {
-    if (this.range === 'custom') {
-      return this.dayLabels.length > ManagerOverviewComponent.AVAILABLE_DAYS;
-    }
-    const option = this.rangeOptions.find((r) => r.id === this.range);
-    return (option?.days || 0) > ManagerOverviewComponent.AVAILABLE_DAYS;
+  /** Soft empty-range notice when the selected window has no flow rows. */
+  get rangeHasNoFlowData(): boolean {
+    return !(this.analytics?.dailyFlow || []).length && !(this.analytics?.volumeByType || []).length;
   }
 
   isFilterActive(key: FlowCategoryKey): boolean {
@@ -434,7 +451,7 @@ export class ManagerOverviewComponent implements OnInit {
       return this.buildDayRange(this.customStart, this.customEnd);
     }
     const option = this.rangeOptions.find((r) => r.id === this.range);
-    const days = Math.min(option?.days || 30, ManagerOverviewComponent.AVAILABLE_DAYS);
+    const days = option?.days || 30;
     return this.buildLastNDays(days);
   }
 
@@ -523,7 +540,7 @@ export class ManagerOverviewComponent implements OnInit {
     const start = new Date(`${startStr}T00:00:00`);
     const end = new Date(`${endStr}T00:00:00`);
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start > end) {
-      return this.buildLastNDays(ManagerOverviewComponent.AVAILABLE_DAYS);
+      return this.buildLastNDays(30);
     }
     const days: string[] = [];
     const cursor = new Date(start);

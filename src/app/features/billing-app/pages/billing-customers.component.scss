@@ -459,10 +459,18 @@
 
 .link:hover {
   color: var(--saffron);
+  text-decoration: none;
 }
 
 .link-danger {
   color: var(--crimson);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.link-danger:hover {
+  color: #a01030;
+  text-decoration: none;
 }
 
 .pager {
