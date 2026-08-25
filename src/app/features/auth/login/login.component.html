@@ -2,6 +2,7 @@
   class="auth-page auth-page--login"
   [class.auth-page--land]="!isBillingLogin"
   [class.auth-page--billing-login]="isBillingLogin"
+  *ngIf="!pageLoading; else authShimmer"
 >
   <div class="auth-page__stage">
     <div class="auth-page__mesh" aria-hidden="true"></div>
@@ -126,3 +127,7 @@
     </p>
   </div>
 </section>
+
+<ng-template #authShimmer>
+  <app-shimmer variant="auth" panel="login"></app-shimmer>
+</ng-template>

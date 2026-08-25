@@ -1,13 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, of } from 'rxjs';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { PortalLaunchService } from '../../../core/services/portal-launch.service';
 import { ShellBootService } from '../../../core/services/shell-boot.service';
 import { fieldError } from '../../../core/utils/form-errors';
+import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
   selector: 'app-login',
@@ -15,7 +16,7 @@ import { fieldError } from '../../../core/utils/form-errors';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  pageLoading = false;
+  pageLoading = true;
   loading = false;
   unlockLoading = false;
   showPassword = false;
@@ -56,8 +57,9 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.unlockNotice = '';
       }
     });
-    // Login page: no CSS shimmer — content lands with fade animation (banking only).
-    this.pageLoading = false;
+    withShimmerDelay(of(true), SHIMMER_MS).subscribe(() => {
+      this.pageLoading = false;
+    });
   }
 
   ngOnDestroy(): void {
