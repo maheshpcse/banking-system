@@ -1,61 +1,88 @@
-<section class="auth-page auth-page--contact" *ngIf="!pageLoading; else authShimmer">
-  <div class="auth-page__stage">
-    <div class="auth-page__mesh" aria-hidden="true"></div>
+<section
+  class="contact-admin"
+  *ngIf="!pageLoading; else authShimmer"
+  [class.contact-admin--thanks]="submitted"
+>
+  <div class="contact-admin__glow" aria-hidden="true"></div>
+  <div class="contact-admin__panel">
+    <ng-container *ngIf="!submitted; else thanksTpl">
+      <header class="contact-admin__header">
+        <p class="contact-admin__eyebrow">Account recovery</p>
+        <h1 class="contact-admin__title">Contact administrator</h1>
+        <p class="contact-admin__lead">
+          For blocked or deactivated accounts only. Confirm your username or email so staff can
+          review and restore access. You can also email
+          <a class="mailto" [href]="mailHref">{{ supportEmail }}</a>.
+        </p>
+      </header>
 
-    <div class="auth-page__copy">
-      <p class="auth-page__brand">NovaBank</p>
-      <h1>Contact administrator</h1>
-      <p>
-        For blocked or deactivated accounts only. You can also email
-        <a class="mailto" [href]="'mailto:' + supportEmail">{{ supportEmail }}</a>.
-      </p>
-    </div>
-
-    <app-animated-card
-      class="auth-panel"
-      title="Restore access request"
-      subtitle="One open request per account"
-      accent="sky"
-      [tilt]="false"
-    >
-      <form class="form" [formGroup]="form" (ngSubmit)="submit()">
-        <label>
-          <span>Username or email</span>
+      <form class="contact-admin__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <label class="field">
+          <span class="field__label">Username or email</span>
           <input
+            class="field__input"
             type="text"
             formControlName="identifier"
             autocomplete="username"
             placeholder="alex or you@email.com"
           />
-          <p class="form__field-error" *ngIf="fieldError(form.controls.identifier, 'Username or email') as msg">
+          <p class="field__error" *ngIf="fieldError(form.controls.identifier, 'Username or email') as msg">
             {{ msg }}
           </p>
         </label>
-        <label>
-          <span>Optional note</span>
+
+        <label class="field">
+          <span class="field__label">Optional note</span>
           <textarea
+            class="field__input field__textarea"
             formControlName="message"
-            rows="4"
+            rows="3"
+            maxlength="600"
             placeholder="Briefly explain why you need access restored"
           ></textarea>
         </label>
 
         <p class="form__error" *ngIf="formError">{{ formError }}</p>
-        <p class="form__notice" *ngIf="formNotice">{{ formNotice }}</p>
 
-        <button class="btn btn--primary" type="submit" [disabled]="loading">
-          {{ loading ? 'Sending…' : 'Send request' }}
-        </button>
+        <div class="contact-admin__actions">
+          <button class="btn btn--primary" type="submit" [disabled]="loading || form.invalid">
+            {{ loading ? 'Sending…' : 'Send request' }}
+          </button>
+          <a class="btn btn--ghost" routerLink="/auth/login">Back to sign in</a>
+        </div>
       </form>
+    </ng-container>
 
-      <p class="auth-switch">
-        Prefer email?
-        <a class="mailto" [href]="mailHref">{{ supportEmail }}</a>
-      </p>
-      <p class="auth-switch auth-switch--home">
-        <a routerLink="/auth/login">Back to sign in</a>
-      </p>
-    </app-animated-card>
+    <ng-template #thanksTpl>
+      <div class="thanks" role="status" aria-live="polite">
+        <div class="thanks__mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2" opacity="0.35" />
+            <path
+              d="M14 25.5 20.5 32 34 16"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <p class="thanks__eyebrow">Request received</p>
+        <h2 class="thanks__title">Thanks for reaching out</h2>
+        <p class="thanks__lead">
+          Your message is with our administrators. We will review your account and follow up once a
+          decision is made.
+        </p>
+        <div class="thanks__countdown" aria-hidden="true">
+          <span class="thanks__count">{{ countdown }}</span>
+          <span class="thanks__count-label">Returning home in {{ countdown }}s</span>
+        </div>
+        <div class="thanks__ring" aria-hidden="true">
+          <span class="thanks__ring-fill" [style.width.%]="((5 - countdown) / 5) * 100"></span>
+        </div>
+        <button type="button" class="thanks__home" (click)="goHome()">Back To Home</button>
+      </div>
+    </ng-template>
   </div>
 </section>
 

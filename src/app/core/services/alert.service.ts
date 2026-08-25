@@ -215,8 +215,8 @@ export class AlertService {
       `,
       showDenyButton: true,
       showCancelButton: true,
-      confirmButtonText: 'Contact administrator',
-      denyButtonText: 'Email support',
+      confirmButtonText: 'Email support',
+      denyButtonText: 'Contact administrator',
       cancelButtonText: 'Close',
       reverseButtons: true,
       ...this.theme,
@@ -224,13 +224,13 @@ export class AlertService {
       customClass: this.alertClasses
     });
     if (result.isConfirmed) {
-      return 'contact';
-    }
-    if (result.isDenied) {
       if (typeof window !== 'undefined') {
         window.location.href = `mailto:${email}?subject=${encodeURIComponent('NovaBank account access')}`;
       }
       return 'email';
+    }
+    if (result.isDenied) {
+      return 'contact';
     }
     return 'close';
   }
