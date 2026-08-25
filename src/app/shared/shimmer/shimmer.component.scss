@@ -14,7 +14,9 @@
 .shimmer--notifications-grid,
 .shimmer--admin-requests-list,
 .shimmer--manager-flow-chart,
-.shimmer--manager-flow-table {
+.shimmer--manager-flow-table,
+.shimmer--manager-billing-chart,
+.shimmer--manager-billing-table {
   padding: 0;
   margin: 0;
   max-width: none;
@@ -602,20 +604,9 @@
   animation: shimmer-wave 1.35s ease-in-out infinite;
 }
 
+.shimmer__auth-band--a,
 .shimmer__auth-band--b {
-  width: min(36vw, 14rem);
-  height: 0.7rem;
-  bottom: 16%;
-  right: 10%;
-  background: linear-gradient(
-    90deg,
-    rgba(214, 230, 240, 0.3) 0%,
-    rgba(186, 214, 240, 0.7) 50%,
-    rgba(214, 230, 240, 0.3) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer-wave 1.35s ease-in-out infinite;
-  animation-delay: 0.2s;
+  display: none;
 }
 
 .shimmer__auth-stage {
@@ -1032,6 +1023,74 @@ html[data-nb-mode='dark'] .shimmer__auth-page {
   display: grid;
   gap: 1.15rem;
   min-height: 16rem;
+}
+
+.shimmer-billing-pulse {
+  display: grid;
+  gap: 0.85rem;
+  min-height: 14rem;
+}
+
+.shimmer-billing-pulse__kpi {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.shimmer-billing-pulse__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.shimmer-billing-pulse__meta .shimmer-line--xs { width: 5.5rem; }
+.shimmer-billing-pulse__meta .shimmer-line--sm { width: 4rem; }
+
+.shimmer-billing-pulse__track {
+  height: 0.55rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.16);
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(105deg, rgba(217, 232, 226, 0.55) 18%, rgba(95, 196, 176, 0.45) 42%, rgba(217, 232, 226, 0.65) 62%);
+    background-size: 220% 100%;
+    animation: shimmer-wave 1.35s ease-in-out infinite;
+  }
+}
+
+.shimmer-billing-pulse__pipeline {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.shimmer-billing-pulse__stack {
+  display: flex;
+  height: 0.85rem;
+  border-radius: 999px;
+  overflow: hidden;
+  gap: 2px;
+  background: rgba(148, 163, 184, 0.14);
+
+  span {
+    flex: 1;
+    background: linear-gradient(105deg, rgba(217, 232, 226, 0.55) 18%, rgba(255, 200, 1, 0.4) 42%, rgba(217, 232, 226, 0.65) 62%);
+    background-size: 220% 100%;
+    animation: shimmer-wave 1.35s ease-in-out infinite;
+  }
+}
+
+.shimmer-billing-pulse__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.85rem;
+
+  .shimmer-line--xs { width: 4.5rem; }
 }
 
 .shimmer-flow__block {

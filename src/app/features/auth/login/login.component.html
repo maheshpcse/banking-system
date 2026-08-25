@@ -1,16 +1,28 @@
-<section class="auth-page auth-page--login" *ngIf="!pageLoading; else authShimmer">
+<section
+  class="auth-page auth-page--login"
+  [class.auth-page--land]="!isBillingLogin"
+  [class.auth-page--billing-login]="isBillingLogin"
+>
   <div class="auth-page__stage">
     <div class="auth-page__mesh" aria-hidden="true"></div>
     <div class="auth-page__band auth-page__band--a" aria-hidden="true"></div>
     <div class="auth-page__band auth-page__band--b" aria-hidden="true"></div>
 
-    <div class="auth-page__copy">
-      <p class="auth-page__brand">NovaBank</p>
-      <h1>Sign in to your vault</h1>
-      <p>Use your username or email with your password.</p>
+    <div class="auth-page__copy" [class.auth-land]="!isBillingLogin" [class.auth-land--brand]="!isBillingLogin">
+      <p class="auth-page__brand">{{ isBillingLogin ? 'NovaBill' : 'NovaBank' }}</p>
+      <h1>{{ isBillingLogin ? 'Sign in to Billing' : 'Sign in to your vault' }}</h1>
+      <p>{{ isBillingLogin ? 'Manager or Admin access for NovaBill POS.' : 'Use your username or email with your password.' }}</p>
     </div>
 
-    <app-animated-card class="auth-panel" title="Welcome back" subtitle="Sign in" accent="sky" [tilt]="false">
+    <app-animated-card
+      class="auth-panel"
+      [class.auth-land]="!isBillingLogin"
+      [class.auth-land--panel]="!isBillingLogin"
+      [title]="isBillingLogin ? 'Billing portal' : 'Welcome back'"
+      [subtitle]="isBillingLogin ? 'NovaBill login' : 'Sign in'"
+      accent="sky"
+      [tilt]="false"
+    >
       <form class="form" [formGroup]="form" (ngSubmit)="submit()">
         <label>
           <span>Username or email</span>
@@ -92,7 +104,7 @@
       <p class="auth-switch">
         <a routerLink="/auth/forgot-password">Forgot password?</a>
       </p>
-      <p class="auth-switch">
+      <p class="auth-switch" *ngIf="!isBillingLogin">
         New here?
         <a routerLink="/auth/register">Create an account</a>
       </p>
@@ -101,7 +113,12 @@
       </p>
     </app-animated-card>
 
-    <p class="auth-footnote">
+    <p
+      class="auth-footnote"
+      [class.auth-land]="!isBillingLogin"
+      [class.auth-land--foot]="!isBillingLogin"
+      *ngIf="!isBillingLogin"
+    >
       Bank staff?
       <a routerLink="/auth/staff-signup">Request manager/admin access</a>
       ·
@@ -109,7 +126,3 @@
     </p>
   </div>
 </section>
-
-<ng-template #authShimmer>
-  <app-shimmer variant="auth" panel="login"></app-shimmer>
-</ng-template>

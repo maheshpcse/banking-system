@@ -253,6 +253,10 @@ export class BillingPosComponent implements OnInit {
     this.resetCheckout();
   }
 
+  resetCheckoutPublic(): void {
+    this.resetCheckout();
+  }
+
   /** Reset cart, discounts, coupon, and active invoice after a successful payment. */
   private resetCheckout(): void {
     this.cart = [];

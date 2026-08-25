@@ -270,9 +270,6 @@ import { Component, Input } from '@angular/core';
       </ng-container>
 
       <ng-container *ngIf="variant === 'history-data'">
-        <div class="bps__chips-row">
-          <div class="bps__bone bps__bone--chip" *ngFor="let c of historyChips"></div>
-        </div>
         <div class="bps__panel">
           <div class="bps__row bps__row--card" *ngFor="let r of historyRows">
             <div class="bps__bone bps__bone--rail"></div>

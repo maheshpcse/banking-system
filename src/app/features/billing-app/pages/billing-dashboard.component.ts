@@ -65,4 +65,23 @@ export class BillingDashboardComponent implements OnInit {
   statusClass(status: string): string {
     return `status status--${status || 'draft'}`;
   }
+
+  statusLabel(status: string): string {
+    switch (status) {
+      case 'draft':
+        return 'Bill Created';
+      case 'pending':
+        return 'Pending';
+      case 'paid':
+        return 'Paid';
+      case 'failed':
+        return 'Failure';
+      case 'error':
+        return 'Error';
+      case 'refunded':
+        return 'Refunded';
+      default:
+        return status || 'Unknown';
+    }
+  }
 }

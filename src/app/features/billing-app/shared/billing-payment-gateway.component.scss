@@ -31,11 +31,11 @@
 .npg__panel {
   position: relative;
   z-index: 1;
-  width: min(28rem, 100%);
-  max-height: min(92vh, 44rem);
+  width: min(48rem, calc(100vw - 2rem));
+  max-height: min(92vh, 52rem);
   overflow: hidden;
   border-radius: 1.35rem;
-  padding: 1.05rem 1.1rem 1.2rem;
+  padding: 1.15rem 1.35rem 1.35rem;
   background: linear-gradient(165deg, rgba(255, 252, 245, 0.97), rgba(255, 255, 255, 0.94) 45%, rgba(238, 246, 242, 0.96));
   border: 1px solid rgba(255, 255, 255, 0.85);
   box-shadow: 0 28px 64px rgba(22, 50, 58, 0.22);
@@ -155,8 +155,15 @@
 
 .npg__rails {
   display: grid;
-  gap: 0.45rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
   margin-top: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .npg__rails {
+    grid-template-columns: 1fr;
+  }
 }
 
 .rail {
