@@ -1,0 +1,105 @@
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription, of } from 'rxjs';
+import { AuthService } from '../../../core/services/auth.service';
+import { AlertService } from '../../../core/services/alert.service';
+import { fieldError } from '../../../core/utils/form-errors';
+import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
+
+@Component({
+  selector: 'app-contact-admin',
+  templateUrl: './contact-admin.component.html',
+  styleUrls: ['./contact-admin.component.scss']
+})
+export class ContactAdminComponent implements OnInit, OnDestroy {
+  pageLoading = true;
+  loading = false;
+  formError = '';
+  formNotice = '';
+  supportEmail = 'support@novabank.local';
+  form = this.fb.group({
+    identifier: ['', [Validators.required, Validators.minLength(3)]],
+    message: ['', [Validators.maxLength(600)]]
+  });
+
+  readonly fieldError = fieldError;
+  private formSub?: Subscription;
+
+  get mailHref(): string {
+    return `mailto:${this.supportEmail}?subject=${encodeURIComponent('NovaBank account access')}`;
+  }
+
+  constructor(
+    private readonly fb: FormBuilder,
+    private readonly auth: AuthService,
+    private readonly alerts: AlertService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router
+  ) {}
+
+  ngOnInit(): void {
+    const preset = String(this.route.snapshot.queryParamMap.get('identifier') || '').trim();
+    if (preset) {
+      this.form.patchValue({ identifier: preset });
+    }
+    this.formSub = this.form.valueChanges.subscribe(() => {
+      if (this.formError) {
+        this.formError = '';
+      }
+    });
+    withShimmerDelay(this.auth.getSupportInfo(), SHIMMER_MS).subscribe({
+      next: (info) => {
+        this.supportEmail = info.supportEmail || this.supportEmail;
+        this.pageLoading = false;
+      },
+      error: () => {
+        this.pageLoading = false;
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.formSub?.unsubscribe();
+  }
+
+  submit(): void {
+    if (this.form.invalid || this.loading) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.loading = true;
+    this.formError = '';
+    this.formNotice = '';
+    const identifier = String(this.form.value.identifier || '').trim();
+    const message = String(this.form.value.message || '').trim();
+    this.auth.contactAdmin({ identifier, message: message || undefined }).subscribe({
+      next: async (res) => {
+        this.loading = false;
+        this.formNotice = res.message || 'Request sent to administrators.';
+        if (res.supportEmail) {
+          this.supportEmail = res.supportEmail;
+        }
+        await this.alerts.toastSuccess('Request sent', 'Administrators were notified.');
+      },
+      error: async (err) => {
+        this.loading = false;
+        const code = err?.error?.code;
+        const message = err?.error?.message || 'Unable to send contact request.';
+        if (err?.error?.supportEmail) {
+          this.supportEmail = err.error.supportEmail;
+        }
+        if (code === 'CONTACT_DUPLICATE') {
+          await this.alerts.info(message, 'Request already open');
+          this.formError = message;
+          return;
+        }
+        if (code === 'ACCOUNT_BLOCKED' || code === 'ACCOUNT_DEACTIVATED') {
+          this.formError = message;
+          return;
+        }
+        this.formError = message;
+      }
+    });
+  }
+}

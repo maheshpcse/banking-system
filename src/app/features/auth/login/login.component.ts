@@ -133,16 +133,29 @@ export class LoginComponent implements OnInit, OnDestroy {
           void this.alerts.info(message, 'Registration not approved');
           return;
         }
-        if (code === 'ACCOUNT_BLOCKED') {
-          void this.alerts.info(message, 'Account blocked');
-          return;
-        }
-        if (code === 'ACCOUNT_DEACTIVATED') {
-          void this.alerts.info(message, 'Account deactivated');
+        if (code === 'ACCOUNT_BLOCKED' || code === 'ACCOUNT_DEACTIVATED') {
+          const identifier = encodeURIComponent(String(payload.identifier || '').trim());
+          const action = await this.alerts.accountRestricted({
+            title: code === 'ACCOUNT_BLOCKED' ? 'Account blocked' : 'Account deactivated',
+            text: message,
+            supportEmail: err?.error?.supportEmail
+          });
+          if (action === 'contact') {
+            void this.router.navigateByUrl(`/auth/contact-admin?identifier=${identifier}`);
+          }
           return;
         }
         if (code === 'ACCOUNT_DELETED') {
-          void this.alerts.info(message, 'Account deleted');
+          const goRegister = await this.alerts.infoWithAction({
+            title: 'Account deleted',
+            text: message,
+            confirmText: 'Create account',
+            cancelText: 'Close',
+            actionHint: 'You can re-register with the same email or username.'
+          });
+          if (goRegister) {
+            void this.router.navigateByUrl('/auth/register');
+          }
           return;
         }
         if (code === 'LOGIN_LOCKED') {

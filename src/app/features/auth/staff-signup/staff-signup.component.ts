@@ -94,9 +94,25 @@ export class StaffSignupComponent implements OnInit, OnDestroy {
             queryParams: { identifier: String(raw.username).trim().toLowerCase() }
           });
         },
-        error: (err) => {
+        error: async (err) => {
           this.loading = false;
-          this.formError = err?.error?.message || 'Unable to submit staff registration.';
+          const code = err?.error?.code;
+          const message = err?.error?.message || 'Unable to submit staff registration.';
+          if (code === 'ACCOUNT_BLOCKED' || code === 'ACCOUNT_DEACTIVATED') {
+            const identifier = encodeURIComponent(
+              String(this.form.value.email || this.form.value.username || '').trim()
+            );
+            const action = await this.alerts.accountRestricted({
+              title: code === 'ACCOUNT_BLOCKED' ? 'Account blocked' : 'Account deactivated',
+              text: message,
+              supportEmail: err?.error?.supportEmail
+            });
+            if (action === 'contact') {
+              void this.router.navigateByUrl(`/auth/contact-admin?identifier=${identifier}`);
+            }
+            return;
+          }
+          this.formError = message;
         }
       });
   }

@@ -3,6 +3,7 @@ import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@ang
 import { Router } from '@angular/router';
 import { Subscription, of } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { AlertService } from '../../../core/services/alert.service';
 import { fieldError } from '../../../core/utils/form-errors';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
@@ -40,6 +41,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   constructor(
     private readonly fb: FormBuilder,
     private readonly auth: AuthService,
+    private readonly alerts: AlertService,
     private readonly router: Router
   ) {}
 
@@ -79,9 +81,25 @@ export class RegisterComponent implements OnInit, OnDestroy {
           this.loading = false;
           void this.router.navigate(['/'], { queryParams: { registered: '1' } });
         },
-        error: (err) => {
+        error: async (err) => {
           this.loading = false;
-          this.formError = err?.error?.message || 'Unable to create account.';
+          const code = err?.error?.code;
+          const message = err?.error?.message || 'Unable to create account.';
+          if (code === 'ACCOUNT_BLOCKED' || code === 'ACCOUNT_DEACTIVATED') {
+            const identifier = encodeURIComponent(
+              String(this.form.value.email || this.form.value.username || '').trim()
+            );
+            const action = await this.alerts.accountRestricted({
+              title: code === 'ACCOUNT_BLOCKED' ? 'Account blocked' : 'Account deactivated',
+              text: message,
+              supportEmail: err?.error?.supportEmail
+            });
+            if (action === 'contact') {
+              void this.router.navigateByUrl(`/auth/contact-admin?identifier=${identifier}`);
+            }
+            return;
+          }
+          this.formError = message;
         }
       });
   }

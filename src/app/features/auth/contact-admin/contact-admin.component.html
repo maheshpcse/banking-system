@@ -1,0 +1,64 @@
+<section class="auth-page auth-page--contact" *ngIf="!pageLoading; else authShimmer">
+  <div class="auth-page__stage">
+    <div class="auth-page__mesh" aria-hidden="true"></div>
+
+    <div class="auth-page__copy">
+      <p class="auth-page__brand">NovaBank</p>
+      <h1>Contact administrator</h1>
+      <p>
+        For blocked or deactivated accounts only. You can also email
+        <a class="mailto" [href]="'mailto:' + supportEmail">{{ supportEmail }}</a>.
+      </p>
+    </div>
+
+    <app-animated-card
+      class="auth-panel"
+      title="Restore access request"
+      subtitle="One open request per account"
+      accent="sky"
+      [tilt]="false"
+    >
+      <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+        <label>
+          <span>Username or email</span>
+          <input
+            type="text"
+            formControlName="identifier"
+            autocomplete="username"
+            placeholder="alex or you@email.com"
+          />
+          <p class="form__field-error" *ngIf="fieldError(form.controls.identifier, 'Username or email') as msg">
+            {{ msg }}
+          </p>
+        </label>
+        <label>
+          <span>Optional note</span>
+          <textarea
+            formControlName="message"
+            rows="4"
+            placeholder="Briefly explain why you need access restored"
+          ></textarea>
+        </label>
+
+        <p class="form__error" *ngIf="formError">{{ formError }}</p>
+        <p class="form__notice" *ngIf="formNotice">{{ formNotice }}</p>
+
+        <button class="btn btn--primary" type="submit" [disabled]="loading">
+          {{ loading ? 'Sending…' : 'Send request' }}
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        Prefer email?
+        <a class="mailto" [href]="mailHref">{{ supportEmail }}</a>
+      </p>
+      <p class="auth-switch auth-switch--home">
+        <a routerLink="/auth/login">Back to sign in</a>
+      </p>
+    </app-animated-card>
+  </div>
+</section>
+
+<ng-template #authShimmer>
+  <app-shimmer variant="form"></app-shimmer>
+</ng-template>
