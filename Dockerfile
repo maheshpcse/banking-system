@@ -3,7 +3,8 @@
 # =============================================================================
 
 # ---- Stage 1: build ----
-FROM node:18-alpine AS build
+# Use a stable Node LTS image; node:18-alpine can fail during npm ci in CI containers.
+FROM node:20-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
