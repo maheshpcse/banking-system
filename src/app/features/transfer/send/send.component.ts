@@ -46,6 +46,21 @@ export class SendComponent implements OnInit, OnDestroy {
     return this.lifecycle.canMoveMoney(this.auth.currentUser);
   }
 
+  get bankingRestricted(): boolean {
+    return this.lifecycle.isBankingRestricted(this.auth.currentUser);
+  }
+
+  get moneyGateMessage(): string | null {
+    if (!this.bankingRestricted) {
+      return null;
+    }
+    return this.lifecycle.moneyBlockReason(this.auth.currentUser, 'online');
+  }
+
+  get supportMailHref(): string {
+    return `mailto:support@novabank.local?subject=${encodeURIComponent('NovaBank banking access')}`;
+  }
+
   limitPct(used: number, limit: number): number {
     if (!limit || limit <= 0) {
       return 0;

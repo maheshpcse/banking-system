@@ -73,12 +73,24 @@ export class AdminStaffComponent implements OnInit {
 
   isActiveStaff(user: User): boolean {
     const staff = user.staffStatus || 'active';
-    const account = user.accountStatus || 'active';
-    return staff === 'active' && account !== 'deleted';
+    const login = user.loginStatus || 'active';
+    return staff === 'active' && login !== 'deleted';
   }
 
   canDeactivateStaff(user: User): boolean {
-    return this.isActiveStaff(user) && user.accountStatus !== 'blocked';
+    return this.isActiveStaff(user) && (user.loginStatus || 'active') !== 'blocked';
+  }
+
+  loginStatusOf(user: User): string {
+    return user.loginStatus || 'active';
+  }
+
+  isLoginBlocked(user: User): boolean {
+    return this.loginStatusOf(user) === 'blocked';
+  }
+
+  isLoginDeactivated(user: User): boolean {
+    return this.loginStatusOf(user) === 'deactivated';
   }
 
   async approve(user: User): Promise<void> {
@@ -109,11 +121,11 @@ export class AdminStaffComponent implements OnInit {
 
   async setStaffStatus(user: User, status: AccountStatus): Promise<void> {
     await this.alerts.confirmAction({
-      text: `Set ${user.fullName} to ${this.formatStatus(status)}?`,
+      text: `Set login access for ${user.fullName} to ${this.formatStatus(status)}?`,
       confirmText: 'Update',
-      loadingText: 'Updating status…',
+      loadingText: 'Updating login status…',
       action: async () => this.admin.setStaffStatus(user.id, status),
-      successMessage: () => `Staff status updated to ${this.formatStatus(status)}.`,
+      successMessage: () => `Staff login status updated to ${this.formatStatus(status)}.`,
       errorMessage: (err) =>
         (err as { error?: { message?: string } })?.error?.message || 'Unable to update staff status'
     });

@@ -102,7 +102,18 @@
     </app-animated-card>
 
     <app-animated-card class="equal-card" accent="sky" title="Quick action" subtitle="Move money">
-      <div class="locked-note" *ngIf="!canMoveMoney">
+      <div class="locked-note" *ngIf="!canMoveMoney && bankingRestricted">
+        <p class="locked-note__text">
+          <app-nb-icon name="shield"></app-nb-icon>
+          <span>{{ moneyGateMessage || 'Banking access is restricted. You can still sign in.' }}</span>
+        </p>
+        <div class="locked-note__actions">
+          <a class="btn btn--ghost" routerLink="/auth/contact-admin">Contact administrator</a>
+          <a class="btn btn--ghost" [href]="supportMailHref">Email support</a>
+        </div>
+      </div>
+
+      <div class="locked-note" *ngIf="!canMoveMoney && !bankingRestricted">
         <p class="locked-note__text">
           <app-nb-icon name="shield"></app-nb-icon>
           <span>Deposit and withdraw are locked until your account number is generated and activated.</span>

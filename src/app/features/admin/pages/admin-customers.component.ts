@@ -1,14 +1,30 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AccountStatus, Transaction, User, UserRole } from '../../../core/models/banking.models';
+import {
+  AccountStatus,
+  LoginStatus,
+  Transaction,
+  User,
+  UserRole,
+  effectiveBankingStatus
+} from '../../../core/models/banking.models';
 import { AdminPagination, AdminService } from '../../../core/services/admin.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/shimmer';
-import { formatStatusLabel } from '../../../core/utils/status-label';
+import { formatStatusLabel, statusPillClass } from '../../../core/utils/status-label';
 
 type RoleFilter = 'all' | 'customer' | 'manager' | 'admin';
-type StatusFilter = 'all' | 'active' | 'blocked' | 'deactivated' | 'deleted';
+type LoginStatusFilter = 'all' | LoginStatus;
+type BankingStatusFilter =
+  | 'all'
+  | 'active'
+  | 'blocked'
+  | 'suspended'
+  | 'deactivated'
+  | 'under_review'
+  | 'address_required'
+  | 'rejected';
 type TxFilter = 'all' | 'deposit' | 'withdraw' | 'transfer_in' | 'transfer_out';
 type TxView = 'timeline' | 'chart' | 'table';
 
@@ -28,19 +44,30 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   drawerOpen = false;
   drawerLoading = false;
   roleFilter: RoleFilter = 'customer';
-  statusFilter: StatusFilter = 'all';
+  loginStatusFilter: LoginStatusFilter = 'all';
+  bankingStatusFilter: BankingStatusFilter = 'all';
   readonly roleFilters: { id: RoleFilter; label: string }[] = [
     { id: 'all', label: 'All Roles' },
     { id: 'customer', label: 'Customers' },
     { id: 'manager', label: 'Managers' },
     { id: 'admin', label: 'Admins' }
   ];
-  readonly statusFilters: { id: StatusFilter; label: string }[] = [
+  readonly loginStatusFilters: { id: LoginStatusFilter; label: string }[] = [
     { id: 'all', label: 'All' },
     { id: 'active', label: 'Active' },
     { id: 'blocked', label: 'Blocked' },
     { id: 'deactivated', label: 'Deactivated' },
     { id: 'deleted', label: 'Deleted' }
+  ];
+  readonly bankingStatusFilters: { id: BankingStatusFilter; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'active', label: 'Active' },
+    { id: 'blocked', label: 'Blocked' },
+    { id: 'suspended', label: 'Suspended' },
+    { id: 'deactivated', label: 'Deactivated' },
+    { id: 'under_review', label: 'Under review' },
+    { id: 'address_required', label: 'Address required' },
+    { id: 'rejected', label: 'Rejected' }
   ];
 
   txModalOpen = false;
@@ -60,6 +87,7 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   ];
 
   readonly formatStatus = formatStatusLabel;
+  readonly statusPillClass = statusPillClass;
   private drawerCloseTimer: ReturnType<typeof setTimeout> | null = null;
   private txModalCloseTimer: ReturnType<typeof setTimeout> | null = null;
   private subUsers?: Subscription;
@@ -82,7 +110,7 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   get pageLede(): string {
     return this.isSuperAdmin
       ? 'View and control customers, managers, and admins across NovaBank.'
-      : 'Activate, block, deactivate, or remove customer accounts.';
+      : 'Manage customer sign-in and banking ledger access separately.';
   }
 
   get chartBars(): { label: string; total: number; pct: number }[] {
@@ -150,11 +178,19 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     this.loadPage(1, false);
   }
 
-  setStatusFilter(id: StatusFilter): void {
-    if (this.statusFilter === id) {
+  setLoginStatusFilter(id: LoginStatusFilter): void {
+    if (this.loginStatusFilter === id) {
       return;
     }
-    this.statusFilter = id;
+    this.loginStatusFilter = id;
+    this.loadPage(1, false);
+  }
+
+  setBankingStatusFilter(id: BankingStatusFilter): void {
+    if (this.bankingStatusFilter === id) {
+      return;
+    }
+    this.bankingStatusFilter = id;
     this.loadPage(1, false);
   }
 
@@ -164,14 +200,22 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     } else {
       this.listLoading = true;
     }
-    const opts: { scope?: 'all' | 'customers'; role?: string; status?: string } = {};
+    const opts: {
+      scope?: 'all' | 'customers';
+      role?: string;
+      loginStatus?: string;
+      bankingStatus?: string;
+    } = {};
     if (this.isSuperAdmin && this.roleFilter === 'all') {
       opts.scope = 'all';
     } else if (this.isSuperAdmin) {
       opts.role = this.roleFilter;
     }
-    if (this.statusFilter && this.statusFilter !== 'all') {
-      opts.status = this.statusFilter;
+    if (this.loginStatusFilter && this.loginStatusFilter !== 'all') {
+      opts.loginStatus = this.loginStatusFilter;
+    }
+    if (this.bankingStatusFilter && this.bankingStatusFilter !== 'all') {
+      opts.bankingStatus = this.bankingStatusFilter;
     }
     withShimmerDelay(this.admin.refreshCustomers(page, 5, opts), SHIMMER_MS).subscribe({
       next: () => {
@@ -187,25 +231,63 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Hide the ⋮ menu for deleted customers (and non-customer roles). */
+  loginStatusOf(user: User): LoginStatus {
+    return user.loginStatus || 'active';
+  }
+
+  bankingStatusOf(user: User): AccountStatus {
+    return effectiveBankingStatus(user) || 'pending';
+  }
+
+  /** Hide the ⋮ menu for deleted login (and non-customer roles). */
   showActionMenu(user: User): boolean {
     if ((user.role || 'customer') !== 'customer') {
       return false;
     }
-    return (user.accountStatus || '') !== 'deleted';
+    return this.loginStatusOf(user) !== 'deleted';
   }
 
-  isBlocked(user: User): boolean {
-    return user.accountStatus === 'blocked';
+  isLoginBlocked(user: User): boolean {
+    return this.loginStatusOf(user) === 'blocked';
   }
 
-  isActiveLike(user: User): boolean {
-    const status = user.accountStatus || '';
+  isLoginActive(user: User): boolean {
+    return this.loginStatusOf(user) === 'active';
+  }
+
+  isLoginDeactivated(user: User): boolean {
+    return this.loginStatusOf(user) === 'deactivated';
+  }
+
+  isBankingActiveLike(user: User): boolean {
+    const status = this.bankingStatusOf(user);
     return status === 'active' || status === 'approved';
   }
 
-  isDeactivated(user: User): boolean {
-    return user.accountStatus === 'deactivated';
+  isBankingBlocked(user: User): boolean {
+    return this.bankingStatusOf(user) === 'blocked';
+  }
+
+  isBankingSuspended(user: User): boolean {
+    return this.bankingStatusOf(user) === 'suspended';
+  }
+
+  isBankingDeactivated(user: User): boolean {
+    return this.bankingStatusOf(user) === 'deactivated';
+  }
+
+  isBankingKycPending(user: User): boolean {
+    const status = this.bankingStatusOf(user);
+    return (
+      status === 'address_required' ||
+      status === 'under_review' ||
+      status === 'rejected' ||
+      status === 'pending'
+    );
+  }
+
+  bankingRestrictedWhileLoginActive(user: User): boolean {
+    return this.isLoginActive(user) && (this.isBankingBlocked(user) || this.isBankingSuspended(user) || this.isBankingDeactivated(user));
   }
 
   toggleMenu(event: Event, userId: string): void {
@@ -340,16 +422,30 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     }
   }
 
-  async setStatus(user: User, status: AccountStatus): Promise<void> {
+  async setLoginStatus(user: User, status: LoginStatus): Promise<void> {
     this.menuOpenId = null;
     await this.alerts.confirmAction({
-      text: `Set ${user.fullName} to ${this.formatStatus(status)}?`,
-      confirmText: 'Update',
-      loadingText: 'Updating status…',
-      action: async () => this.admin.setStatus(user.id, status),
-      successMessage: () => `Status updated to ${this.formatStatus(status)}.`,
+      text: `Set login access for ${user.fullName} to ${this.formatStatus(status)}?`,
+      confirmText: 'Update login',
+      loadingText: 'Updating login status…',
+      action: async () => this.admin.setLoginStatus(user.id, status),
+      successMessage: () => `Login status updated to ${this.formatStatus(status)}.`,
       errorMessage: (err) =>
-        (err as { error?: { message?: string } })?.error?.message || 'Unable to update status'
+        (err as { error?: { message?: string } })?.error?.message || 'Unable to update login status'
+    });
+  }
+
+  async setBankingStatus(user: User, status: AccountStatus): Promise<void> {
+    this.menuOpenId = null;
+    await this.alerts.confirmAction({
+      text: `Set banking access for ${user.fullName} to ${this.formatStatus(status)}?`,
+      confirmText: 'Update banking',
+      loadingText: 'Updating banking status…',
+      action: async () => this.admin.setBankingStatus(user.id, status),
+      successMessage: () => `Banking status updated to ${this.formatStatus(status)}.`,
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message ||
+        'Unable to update banking status'
     });
   }
 

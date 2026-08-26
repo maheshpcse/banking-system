@@ -29,7 +29,8 @@
             <th>Username</th>
             <th>Email</th>
             <th>Role</th>
-            <th>Status</th>
+            <th>Staff</th>
+            <th>Login</th>
             <th class="actions-col">Actions</th>
           </tr>
         </thead>
@@ -48,14 +49,32 @@
                 {{ formatStatus(user.staffStatus || 'active') }}
               </span>
             </td>
+            <td>
+              <span class="pill" [attr.data-status]="loginStatusOf(user)">
+                {{ formatStatus(loginStatusOf(user)) }}
+              </span>
+            </td>
             <td class="actions-col">
               <div class="request-card__actions" *ngIf="(user.staffStatus || 'active') === 'pending_approval'">
                 <button type="button" class="btn btn--ghost btn--compact" (click)="reject(user)">Decline</button>
                 <button type="button" class="btn btn--primary btn--compact" (click)="approve(user)">Activate</button>
               </div>
               <div class="request-card__actions" *ngIf="isActiveStaff(user)">
-                <button type="button" class="btn btn--ghost btn--compact" (click)="setStaffStatus(user, 'blocked')">
-                  Block
+                <button
+                  type="button"
+                  class="btn btn--ghost btn--compact"
+                  *ngIf="!isLoginBlocked(user)"
+                  (click)="setStaffStatus(user, 'blocked')"
+                >
+                  Block login
+                </button>
+                <button
+                  type="button"
+                  class="btn btn--ghost btn--compact"
+                  *ngIf="isLoginBlocked(user)"
+                  (click)="setStaffStatus(user, 'active')"
+                >
+                  Unblock login
                 </button>
                 <button
                   type="button"
@@ -63,7 +82,15 @@
                   *ngIf="canDeactivateStaff(user)"
                   (click)="setStaffStatus(user, 'deactivated')"
                 >
-                  Deactivate
+                  Deactivate login
+                </button>
+                <button
+                  type="button"
+                  class="btn btn--ghost btn--compact"
+                  *ngIf="isLoginDeactivated(user)"
+                  (click)="setStaffStatus(user, 'active')"
+                >
+                  Activate login
                 </button>
                 <button type="button" class="btn btn--ghost btn--compact" (click)="removeStaff(user)">Delete</button>
               </div>
@@ -90,5 +117,5 @@
 </ng-template>
 
 <ng-template #listShimmer>
-  <app-shimmer variant="data-table" [columns]="6" [rows]="6"></app-shimmer>
+  <app-shimmer variant="data-table" [columns]="7" [rows]="6"></app-shimmer>
 </ng-template>

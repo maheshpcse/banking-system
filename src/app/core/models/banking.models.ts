@@ -3,6 +3,9 @@ export type UserRole = 'customer' | 'manager' | 'admin';
 /** Staff (manager/admin) approval lifecycle — customers are always 'active' */
 export type StaffStatus = 'active' | 'pending_approval' | 'rejected';
 
+/** Portal / sign-in access — independent of banking ledger KYC status */
+export type LoginStatus = 'active' | 'blocked' | 'deactivated' | 'deleted';
+
 export type AccountStatus =
   | 'pending'
   | 'address_required'
@@ -11,8 +14,16 @@ export type AccountStatus =
   | 'active'
   | 'rejected'
   | 'blocked'
+  | 'suspended'
   | 'deactivated'
   | 'deleted';
+
+/** Prefer bankingAccountStatus when present; fall back to accountStatus. */
+export function effectiveBankingStatus(
+  user: { bankingAccountStatus?: AccountStatus | null; accountStatus?: AccountStatus | null } | null | undefined
+): AccountStatus | undefined {
+  return user?.bankingAccountStatus || user?.accountStatus || undefined;
+}
 
 export type ApplicationStepStatus = 'complete' | 'current' | 'upcoming' | 'rejected';
 
@@ -147,7 +158,12 @@ export interface User {
   isSuperAdmin?: boolean;
   /** Manager/admin approval lifecycle; customers are always 'active' */
   staffStatus?: StaffStatus;
+  /** Portal sign-in access (independent of banking) */
+  loginStatus?: LoginStatus;
+  /** Banking / ledger / KYC status */
   accountStatus?: AccountStatus;
+  /** Explicit alias for accountStatus (banking/ledger/KYC) */
+  bankingAccountStatus?: AccountStatus;
   address?: UserAddress | null;
   card?: BankCard | null;
   application?: AccountApplication | null;
@@ -453,7 +469,9 @@ export interface AdminUserRow {
   email: string;
   username?: string;
   role: UserRole;
+  loginStatus?: LoginStatus;
   accountStatus: AccountStatus;
+  bankingAccountStatus?: AccountStatus;
   accountNumber: string | null;
   balance: number;
   createdAt?: string;

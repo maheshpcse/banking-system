@@ -72,7 +72,7 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
         const message = err?.error?.message || 'Unable to verify that account.';
         if (code === 'ACCOUNT_BLOCKED' || code === 'ACCOUNT_DEACTIVATED') {
           const action = await this.alerts.accountRestricted({
-            title: code === 'ACCOUNT_BLOCKED' ? 'Account blocked' : 'Account deactivated',
+            title: code === 'ACCOUNT_BLOCKED' ? 'Sign-in blocked' : 'Sign-in deactivated',
             text: message,
             supportEmail: err?.error?.supportEmail
           });
