@@ -9,7 +9,14 @@
 
   <div class="layout">
     <app-animated-card accent="sky" title="New transfer" subtitle="Secure">
-      <div class="locked-note" *ngIf="!canTransfer">
+      <div class="locked-note" *ngIf="!canTransfer && bankingRestricted">
+        <p>{{ moneyGateMessage || 'Banking access is restricted. You can still sign in.' }}</p>
+        <div class="locked-note__actions">
+          <a class="btn btn--ghost" routerLink="/auth/contact-admin">Contact administrator</a>
+          <a class="btn btn--ghost" [href]="supportMailHref">Email support</a>
+        </div>
+      </div>
+      <div class="locked-note" *ngIf="!canTransfer && !bankingRestricted">
         <p>Transfers unlock after your account is active and online payments are enabled.</p>
         <a class="btn btn--ghost" routerLink="/settings" [queryParams]="{ tab: 'cardinfo' }">Open card controls</a>
       </div>

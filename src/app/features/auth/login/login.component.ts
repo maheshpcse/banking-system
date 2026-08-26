@@ -147,7 +147,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         if (code === 'ACCOUNT_BLOCKED' || code === 'ACCOUNT_DEACTIVATED') {
           const identifier = encodeURIComponent(String(payload.identifier || '').trim());
           const action = await this.alerts.accountRestricted({
-            title: code === 'ACCOUNT_BLOCKED' ? 'Account blocked' : 'Account deactivated',
+            title: code === 'ACCOUNT_BLOCKED' ? 'Sign-in blocked' : 'Sign-in deactivated',
             text: message,
             supportEmail: err?.error?.supportEmail
           });

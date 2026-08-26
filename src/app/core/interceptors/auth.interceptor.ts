@@ -21,7 +21,15 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401 && !request.url.includes('/auth/login')) {
+        const code = String((error.error as { code?: string } | null)?.code || '');
+        const loginLockedOut =
+          error.status === 403 &&
+          (code === 'ACCOUNT_BLOCKED' || code === 'ACCOUNT_DEACTIVATED' || code === 'ACCOUNT_DELETED');
+        if (
+          (error.status === 401 || loginLockedOut) &&
+          !request.url.includes('/auth/login') &&
+          !request.url.includes('/auth/contact-admin')
+        ) {
           this.auth.logout();
         }
         return throwError(() => error);

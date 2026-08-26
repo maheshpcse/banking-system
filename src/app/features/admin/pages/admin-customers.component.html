@@ -18,15 +18,32 @@
     </button>
   </div>
 
-  <div class="filters" role="tablist" aria-label="Account status">
-    <button
-      type="button"
-      *ngFor="let kind of statusFilters"
-      [class.is-active]="statusFilter === kind.id"
-      (click)="setStatusFilter(kind.id)"
-    >
-      {{ kind.label }}
-    </button>
+  <div class="filter-row">
+    <span class="filter-row__label">Login</span>
+    <div class="filters filters--inline" role="tablist" aria-label="Login status">
+      <button
+        type="button"
+        *ngFor="let kind of loginStatusFilters"
+        [class.is-active]="loginStatusFilter === kind.id"
+        (click)="setLoginStatusFilter(kind.id)"
+      >
+        {{ kind.label }}
+      </button>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <span class="filter-row__label">Banking</span>
+    <div class="filters filters--inline" role="tablist" aria-label="Banking status">
+      <button
+        type="button"
+        *ngFor="let kind of bankingStatusFilters"
+        [class.is-active]="bankingStatusFilter === kind.id"
+        (click)="setBankingStatusFilter(kind.id)"
+      >
+        {{ kind.label }}
+      </button>
+    </div>
   </div>
 
   <ng-container *ngIf="!listLoading; else listShimmer">
@@ -37,7 +54,8 @@
             <th>User</th>
             <th>Role</th>
             <th>Account</th>
-            <th>Status</th>
+            <th>Login</th>
+            <th>Banking</th>
             <th>Balance</th>
             <th class="actions-col">Actions</th>
           </tr>
@@ -70,8 +88,23 @@
               </div>
             </td>
             <td>
-              <span class="pill" [attr.data-status]="user.accountStatus">
-                {{ formatStatus(user.accountStatus || 'pending') }}
+              <span
+                class="pill"
+                [ngClass]="statusPillClass('login', loginStatusOf(user))"
+                [attr.data-status]="loginStatusOf(user)"
+                [attr.data-axis]="'login'"
+              >
+                {{ formatStatus(loginStatusOf(user)) }}
+              </span>
+            </td>
+            <td>
+              <span
+                class="pill"
+                [ngClass]="statusPillClass('banking', bankingStatusOf(user))"
+                [attr.data-status]="bankingStatusOf(user)"
+                [attr.data-axis]="'banking'"
+              >
+                {{ formatStatus(bankingStatusOf(user)) }}
               </span>
             </td>
             <td>{{ user.balance | currencyFormat }}</td>
@@ -99,45 +132,59 @@
                       <circle cx="12" cy="19" r="1.6"></circle>
                     </svg>
                   </button>
-                  <div class="menu__panel" *ngIf="menuOpenId === user.id">
-                    <!-- blocked: Unblock + Delete -->
-                    <ng-container *ngIf="isBlocked(user)">
-                      <button type="button" (click)="setStatus(user, 'active')">Unblock / Release</button>
-                      <button type="button" *ngIf="isSuperAdmin" (click)="resetLoginAttempts(user)">
-                        Reset login lock
+                  <div class="menu__panel menu__panel--wide" *ngIf="menuOpenId === user.id">
+                    <p class="menu__section">Login</p>
+                    <ng-container *ngIf="isLoginBlocked(user)">
+                      <button type="button" (click)="setLoginStatus(user, 'active')">
+                        Unblock / Release login
                       </button>
-                      <button type="button" class="is-danger" (click)="remove(user)">Delete</button>
+                    </ng-container>
+                    <ng-container *ngIf="isLoginActive(user)">
+                      <button type="button" (click)="setLoginStatus(user, 'blocked')">Block login</button>
+                      <button type="button" (click)="setLoginStatus(user, 'deactivated')">
+                        Deactivate login
+                      </button>
+                    </ng-container>
+                    <ng-container *ngIf="isLoginDeactivated(user)">
+                      <button type="button" (click)="setLoginStatus(user, 'active')">Activate login</button>
+                    </ng-container>
+                    <button type="button" *ngIf="isSuperAdmin" (click)="resetLoginAttempts(user)">
+                      Reset login lock
+                    </button>
+
+                    <p class="menu__section">Banking</p>
+                    <ng-container *ngIf="isBankingActiveLike(user)">
+                      <button type="button" (click)="setBankingStatus(user, 'blocked')">Block banking</button>
+                      <button type="button" (click)="setBankingStatus(user, 'suspended')">
+                        Suspend banking
+                      </button>
+                      <button type="button" (click)="setBankingStatus(user, 'deactivated')">
+                        Deactivate banking
+                      </button>
+                    </ng-container>
+                    <ng-container *ngIf="isBankingBlocked(user)">
+                      <button type="button" (click)="setBankingStatus(user, 'active')">
+                        Unblock banking
+                      </button>
+                    </ng-container>
+                    <ng-container *ngIf="isBankingSuspended(user)">
+                      <button type="button" (click)="setBankingStatus(user, 'active')">
+                        Resume banking
+                      </button>
+                    </ng-container>
+                    <ng-container *ngIf="isBankingDeactivated(user)">
+                      <button type="button" (click)="setBankingStatus(user, 'active')">
+                        Activate banking
+                      </button>
+                    </ng-container>
+                    <ng-container *ngIf="isBankingKycPending(user)">
+                      <button type="button" (click)="setBankingStatus(user, 'active')">
+                        Activate banking
+                      </button>
                     </ng-container>
 
-                    <!-- active / approved: Block, Deactivate, Delete -->
-                    <ng-container *ngIf="isActiveLike(user)">
-                      <button type="button" (click)="setStatus(user, 'blocked')">Block</button>
-                      <button type="button" (click)="setStatus(user, 'deactivated')">Deactivate</button>
-                      <button type="button" *ngIf="isSuperAdmin" (click)="resetLoginAttempts(user)">
-                        Reset login lock
-                      </button>
-                      <button type="button" class="is-danger" (click)="remove(user)">Delete</button>
-                    </ng-container>
-
-                    <!-- deactivated: Activate + Delete -->
-                    <ng-container *ngIf="isDeactivated(user)">
-                      <button type="button" (click)="setStatus(user, 'active')">Activate</button>
-                      <button type="button" *ngIf="isSuperAdmin" (click)="resetLoginAttempts(user)">
-                        Reset login lock
-                      </button>
-                      <button type="button" class="is-danger" (click)="remove(user)">Delete</button>
-                    </ng-container>
-
-                    <!-- other non-deleted statuses -->
-                    <ng-container *ngIf="!isBlocked(user) && !isActiveLike(user) && !isDeactivated(user)">
-                      <button type="button" (click)="setStatus(user, 'active')">Activate</button>
-                      <button type="button" (click)="setStatus(user, 'blocked')">Block</button>
-                      <button type="button" (click)="setStatus(user, 'deactivated')">Deactivate</button>
-                      <button type="button" *ngIf="isSuperAdmin" (click)="resetLoginAttempts(user)">
-                        Reset login lock
-                      </button>
-                      <button type="button" class="is-danger" (click)="remove(user)">Delete</button>
-                    </ng-container>
+                    <p class="menu__section">Danger</p>
+                    <button type="button" class="is-danger" (click)="remove(user)">Delete</button>
                   </div>
                 </div>
               </div>
@@ -175,7 +222,7 @@
 
 <ng-template #listShimmer>
   <div class="list-shimmer">
-    <app-shimmer variant="data-table" [columns]="6" [rows]="6"></app-shimmer>
+    <app-shimmer variant="data-table" [columns]="7" [rows]="6"></app-shimmer>
     <div class="pager pager--shimmer" aria-hidden="true">
       <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
       <span class="pager-shimmer__bone pager-shimmer__bone--label"></span>
@@ -224,7 +271,30 @@
           <div><dt>Email</dt><dd>{{ user.email }}</dd></div>
           <div><dt>Username</dt><dd>{{ user.username || '—' }}</dd></div>
           <div><dt>Role</dt><dd>{{ roleLabel(user.role) }}</dd></div>
-          <div><dt>Status</dt><dd>{{ formatStatus(user.accountStatus || 'pending') }}</dd></div>
+          <div>
+            <dt>Login status</dt>
+            <dd>
+              <span
+                class="pill"
+                [ngClass]="statusPillClass('login', loginStatusOf(user))"
+                [attr.data-status]="loginStatusOf(user)"
+              >
+                {{ formatStatus(loginStatusOf(user)) }}
+              </span>
+            </dd>
+          </div>
+          <div>
+            <dt>Banking status</dt>
+            <dd>
+              <span
+                class="pill"
+                [ngClass]="statusPillClass('banking', bankingStatusOf(user))"
+                [attr.data-status]="bankingStatusOf(user)"
+              >
+                {{ formatStatus(bankingStatusOf(user)) }}
+              </span>
+            </dd>
+          </div>
           <div><dt>Balance</dt><dd>{{ user.balance | currencyFormat }}</dd></div>
           <div>
             <dt>Account</dt>
@@ -268,8 +338,14 @@
       </section>
 
       <p class="hint" *ngIf="(user.role || 'customer') === 'customer'">
-        Portal login and banking access use the same account status. Blocked customers can reach staff via
-        Contact administrator or email support on the sign-in screens.
+        Login status controls portal sign-in. Banking status controls ledger access (deposits, withdrawals,
+        transfers). They are independent — a customer can sign in while banking is blocked, suspended, or
+        deactivated.
+      </p>
+
+      <p class="hint" *ngIf="(user.role || 'customer') === 'customer' && bankingRestrictedWhileLoginActive(user)">
+        This customer can still sign in. They should use Contact administrator (or email support) to request
+        banking access restoration.
       </p>
 
       <p class="hint" *ngIf="(user.role || 'customer') === 'customer'">

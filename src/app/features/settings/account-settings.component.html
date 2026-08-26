@@ -166,6 +166,28 @@
           [value]="hasAccountNumber ? user?.accountNumber : null"
           pendingLabel="Pending"
         ></app-account-number>
+
+        <dl class="status-split" *ngIf="!isStaff">
+          <div>
+            <dt>Login status</dt>
+            <dd>{{ loginStatusLabel }}</dd>
+          </div>
+          <div>
+            <dt>Banking account status</dt>
+            <dd>{{ bankingStatusLabel }}</dd>
+          </div>
+        </dl>
+        <div class="status-split__cta" *ngIf="!isStaff && bankingRestricted">
+          <p>
+            Banking access is restricted, but you can still sign in. Contact an administrator to restore
+            deposits, withdrawals, and transfers.
+          </p>
+          <div class="status-split__actions">
+            <a class="btn btn--ghost" routerLink="/auth/contact-admin">Contact administrator</a>
+            <a class="btn btn--ghost" [href]="supportMailHref">Email support</a>
+          </div>
+        </div>
+
         <div class="banking-progress" *ngIf="application as app; else noApp">
           <p class="banking-progress__label">Opening progress</p>
           <ol class="banking-progress__steps">

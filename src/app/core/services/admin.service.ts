@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, firstValueFrom, map, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AccountStatus, User } from '../models/banking.models';
+import { AccountStatus, LoginStatus, User } from '../models/banking.models';
 
 export interface AdminRequestRow {
   id: string;
@@ -67,7 +67,13 @@ export class AdminService {
   });
   private readonly staffPendingSubject = new BehaviorSubject<User[]>([]);
   private readonly limitRequestsSubject = new BehaviorSubject<User[]>([]);
-  private lastCustomerOpts: { scope?: 'all' | 'customers'; role?: string; status?: string } = {};
+  private lastCustomerOpts: {
+    scope?: 'all' | 'customers';
+    role?: string;
+    status?: string;
+    loginStatus?: string;
+    bankingStatus?: string;
+  } = {};
 
   readonly users$ = this.usersSubject.asObservable();
   readonly requests$ = this.requestsSubject.asObservable();
@@ -92,7 +98,14 @@ export class AdminService {
   refreshCustomers(
     page = 1,
     limit = 5,
-    opts?: { scope?: 'all' | 'customers'; role?: string; status?: string }
+    opts?: {
+      scope?: 'all' | 'customers';
+      role?: string;
+      /** @deprecated prefer bankingStatus — maps to banking/ledger filter */
+      status?: string;
+      loginStatus?: string;
+      bankingStatus?: string;
+    }
   ): Observable<AdminCustomersPage> {
     if (opts !== undefined) {
       this.lastCustomerOpts = { ...opts };
@@ -105,8 +118,16 @@ export class AdminService {
     if (effective.role) {
       params = params.set('role', effective.role);
     }
-    if (effective.status && effective.status !== 'all') {
-      params = params.set('status', effective.status);
+    if (effective.loginStatus && effective.loginStatus !== 'all') {
+      params = params.set('loginStatus', effective.loginStatus);
+    }
+    const banking =
+      (effective.bankingStatus && effective.bankingStatus !== 'all'
+        ? effective.bankingStatus
+        : null) ||
+      (effective.status && effective.status !== 'all' ? effective.status : null);
+    if (banking) {
+      params = params.set('bankingStatus', banking).set('status', banking);
     }
     return this.http
       .get<AdminCustomersPage>(`${environment.apiUrl}/admin/customers`, { params })
@@ -151,11 +172,51 @@ export class AdminService {
     );
   }
 
-  async setStatus(userId: string, status: AccountStatus): Promise<User> {
+  async setLoginStatus(userId: string, status: LoginStatus): Promise<User> {
+    const res = await firstValueFrom(
+      this.http.patch<{ message: string; user: User }>(
+        `${environment.apiUrl}/admin/customers/${userId}/login-status`,
+        { status }
+      )
+    );
+    const { page, limit } = this.paginationSubject.value;
+    await firstValueFrom(this.refreshCustomers(page, limit));
+    return res.user;
+  }
+
+  async setBankingStatus(userId: string, status: AccountStatus): Promise<User> {
+    const res = await firstValueFrom(
+      this.http.patch<{ message: string; user: User }>(
+        `${environment.apiUrl}/admin/customers/${userId}/banking-status`,
+        { status }
+      )
+    );
+    const { page, limit } = this.paginationSubject.value;
+    await firstValueFrom(this.refreshCustomers(page, limit));
+    return res.user;
+  }
+
+  /**
+   * Compat helper — defaults to login-status for active|blocked|deactivated.
+   * Pass axis: 'banking' (or use setBankingStatus) for ledger/KYC updates.
+   */
+  async setStatus(
+    userId: string,
+    status: AccountStatus | LoginStatus,
+    opts?: { axis?: 'login' | 'banking' }
+  ): Promise<User> {
+    const axis = opts?.axis || 'login';
+    if (axis === 'banking') {
+      return this.setBankingStatus(userId, status as AccountStatus);
+    }
+    const loginAllowed: LoginStatus[] = ['active', 'blocked', 'deactivated'];
+    if ((loginAllowed as string[]).includes(status)) {
+      return this.setLoginStatus(userId, status as LoginStatus);
+    }
     const res = await firstValueFrom(
       this.http.patch<{ message: string; user: User }>(
         `${environment.apiUrl}/admin/customers/${userId}/status`,
-        { status }
+        { status, axis }
       )
     );
     const { page, limit } = this.paginationSubject.value;

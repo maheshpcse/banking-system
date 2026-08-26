@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, map } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AccountApplication,
   AccountStatus,
   ApplicationStep,
   ApplicationStepStatus,
-  BankCard,
   CardControls,
   LimitRequestProposal,
   User,
-  UserAddress
+  UserAddress,
+  effectiveBankingStatus
 } from '../models/banking.models';
 import { AuthService } from './auth.service';
 
@@ -30,8 +30,9 @@ function defaultSteps(status: AccountStatus): ApplicationStep[] {
     approved: { label: 'Account approved', detail: 'Account number & card issued.' },
     active: { label: 'Activated', detail: 'Banking & ATM card ready to use.' },
     rejected: { label: 'Rejected', detail: 'Application needs correction.' },
-    blocked: { label: 'Blocked', detail: 'Account restricted by admin.' },
-    deactivated: { label: 'Deactivated', detail: 'Account closed or suspended.' }
+    blocked: { label: 'Blocked', detail: 'Banking restricted by admin.' },
+    suspended: { label: 'Suspended', detail: 'Banking temporarily frozen by admin.' },
+    deactivated: { label: 'Deactivated', detail: 'Banking account closed or deactivated.' }
   };
 
   if (status === 'rejected') {
@@ -40,6 +41,37 @@ function defaultSteps(status: AccountStatus): ApplicationStep[] {
       { id: 'address_required', ...labels['address_required'], status: 'complete' },
       { id: 'under_review', ...labels['under_review'], status: 'complete' },
       { id: 'rejected', ...labels['rejected'], status: 'rejected' }
+    ];
+  }
+
+  // Treat suspended like blocked for progress labels (restricted banking).
+  if (status === 'blocked' || status === 'suspended') {
+    return [
+      { id: 'pending', ...labels['pending'], status: 'complete' },
+      { id: 'address_required', ...labels['address_required'], status: 'complete' },
+      { id: 'under_review', ...labels['under_review'], status: 'complete' },
+      { id: 'approved', ...labels['approved'], status: 'complete' },
+      {
+        id: status,
+        label: labels[status].label,
+        detail: labels[status].detail,
+        status: 'rejected'
+      }
+    ];
+  }
+
+  if (status === 'deactivated') {
+    return [
+      { id: 'pending', ...labels['pending'], status: 'complete' },
+      { id: 'address_required', ...labels['address_required'], status: 'complete' },
+      { id: 'under_review', ...labels['under_review'], status: 'complete' },
+      { id: 'approved', ...labels['approved'], status: 'complete' },
+      {
+        id: 'deactivated',
+        label: labels['deactivated'].label,
+        detail: labels['deactivated'].detail,
+        status: 'rejected'
+      }
     ];
   }
 
@@ -53,7 +85,8 @@ function defaultSteps(status: AccountStatus): ApplicationStep[] {
 }
 
 function ensureApplication(user: User): AccountApplication {
-  const status = user.accountStatus || (user.accountNumber ? 'active' : 'address_required');
+  const status =
+    effectiveBankingStatus(user) || (user.accountNumber ? 'active' : 'address_required');
   return (
     user.application || {
       status,
@@ -75,11 +108,21 @@ export class AccountLifecycleService {
     return !!user?.accountNumber && String(user.accountNumber).trim().length > 0;
   }
 
+  bankingStatus(user: User | null | undefined): AccountStatus | undefined {
+    return effectiveBankingStatus(user);
+  }
+
+  /** Banking ledger restricted while the user may still sign in. */
+  isBankingRestricted(user: User | null | undefined): boolean {
+    const status = effectiveBankingStatus(user);
+    return status === 'blocked' || status === 'suspended' || status === 'deactivated';
+  }
+
   canMoveMoney(user: User | null | undefined): boolean {
     if (!this.hasAccountNumber(user)) {
       return false;
     }
-    const status = user?.accountStatus;
+    const status = effectiveBankingStatus(user);
     if (!status) {
       return true;
     }
@@ -94,8 +137,18 @@ export class AccountLifecycleService {
     user: User | null | undefined,
     channel: 'online' | 'atm' | 'contactless' | 'international' = 'online'
   ): string | null {
-    if (!this.canMoveMoney(user)) {
+    if (!this.hasAccountNumber(user)) {
       return 'Account number is required before this action. Complete account opening first.';
+    }
+    const banking = effectiveBankingStatus(user);
+    if (banking && banking !== 'active' && banking !== 'approved') {
+      if (banking === 'blocked' || banking === 'suspended' || banking === 'deactivated') {
+        return (
+          `Your banking account is ${banking}. You can still sign in — use Contact administrator ` +
+          `or email support to restore banking / ledger access.`
+        );
+      }
+      return 'Account is not active for money movement.';
     }
     // Currency selection only applies to customers — staff (admin/manager) never move
     // personal money through these channels, so they can never be blocked on it.
@@ -202,6 +255,7 @@ export class AccountLifecycleService {
       ...user,
       accountNumber,
       accountStatus: 'active',
+      bankingAccountStatus: 'active',
       card: {
         holderName: user.card?.holderName || user.fullName,
         number: user.card?.number || cardNumber,

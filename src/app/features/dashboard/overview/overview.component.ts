@@ -47,6 +47,25 @@ export class OverviewComponent implements OnInit {
     return this.lifecycle.canMoveMoney(this.summary?.user);
   }
 
+  get bankingRestricted(): boolean {
+    return this.lifecycle.isBankingRestricted(this.summary?.user || this.auth.currentUser);
+  }
+
+  get moneyGateMessage(): string | null {
+    if (!this.bankingRestricted) {
+      return null;
+    }
+    return this.lifecycle.moneyBlockReason(this.summary?.user || this.auth.currentUser, 'online');
+  }
+
+  get supportEmail(): string {
+    return 'support@novabank.local';
+  }
+
+  get supportMailHref(): string {
+    return `mailto:${this.supportEmail}?subject=${encodeURIComponent('NovaBank banking access')}`;
+  }
+
   get application(): AccountApplication | null {
     return this.lifecycle.applicationFor(this.summary?.user || null);
   }

@@ -10,10 +10,12 @@ import {
   CardAccountType,
   CardBrand,
   User,
-  UserAvatar
+  UserAvatar,
+  effectiveBankingStatus
 } from '../../core/models/banking.models';
 import { SHIMMER_MS, withShimmerDelay } from '../../core/utils/shimmer';
 import { fieldError } from '../../core/utils/form-errors';
+import { formatStatusLabel } from '../../core/utils/status-label';
 
 type SettingsTab = 'identity' | 'presence' | 'banking' | 'cardinfo' | 'limits' | 'security' | 'experience';
 
@@ -380,6 +382,24 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     return this.lifecycle.hasAccountNumber(this.user);
   }
 
+  get loginStatusLabel(): string {
+    return formatStatusLabel(this.user?.loginStatus || 'active');
+  }
+
+  get bankingStatusLabel(): string {
+    return formatStatusLabel(
+      effectiveBankingStatus(this.user) || (this.hasAccountNumber ? 'active' : 'address_required')
+    );
+  }
+
+  get bankingRestricted(): boolean {
+    return this.lifecycle.isBankingRestricted(this.user);
+  }
+
+  get supportMailHref(): string {
+    return `mailto:support@novabank.local?subject=${encodeURIComponent('NovaBank banking access')}`;
+  }
+
   get hasCard(): boolean {
     return !!this.user?.card;
   }
@@ -582,11 +602,12 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
       this.bankingForm.markAllAsTouched();
       return;
     }
+    const banking = effectiveBankingStatus(this.user);
     const isFirstApplication =
       !this.hasAccountNumber &&
-      this.user?.accountStatus !== 'under_review' &&
-      this.user?.accountStatus !== 'active' &&
-      this.user?.accountStatus !== 'approved';
+      banking !== 'under_review' &&
+      banking !== 'active' &&
+      banking !== 'approved';
     this.savingApplication = true;
     const raw = this.bankingForm.getRawValue();
     withShimmerDelay(
@@ -959,11 +980,15 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
 
   private applyUser(user: User): void {
     // Normalize legacy users without lifecycle fields
+    const banking =
+      effectiveBankingStatus(user) || (user.accountNumber ? 'active' : 'address_required');
     const normalized: User = {
       ...user,
       accountNumber: user.accountNumber || null,
       role: user.role || 'customer',
-      accountStatus: user.accountStatus || (user.accountNumber ? 'active' : 'address_required')
+      loginStatus: user.loginStatus || 'active',
+      accountStatus: banking,
+      bankingAccountStatus: user.bankingAccountStatus || banking
     };
     this.user = normalized;
     this.imagePreview = normalized.avatar?.image || null;
