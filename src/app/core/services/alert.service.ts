@@ -190,8 +190,9 @@ export class AlertService {
   }
 
   /**
-   * Blocked / deactivated account modal — email support or open Contact administrator.
-   * Returns 'contact' | 'email' | 'close'.
+   * Blocked / deactivated account modal.
+   * Row 1: Close + Contact administrator (theme primary).
+   * Row 2: Email support (secondary).
    */
   async accountRestricted(options: {
     title: string;
@@ -203,36 +204,112 @@ export class AlertService {
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
-    const result = await Swal.fire({
-      icon: 'warning',
-      title: options.title,
-      html: `
-        <p class="nb-alert__text">${safeText}</p>
-        <p class="nb-alert__hint" style="margin:0.9rem 0 0;color:#5f7a8c;font-size:0.92rem;">
-          Administration email:
-          <a href="mailto:${email}" style="color:#0f766e;font-weight:650;text-decoration:none;">${email}</a>
-        </p>
-      `,
-      showDenyButton: true,
-      showCancelButton: true,
-      confirmButtonText: 'Email support',
-      denyButtonText: 'Contact administrator',
-      cancelButtonText: 'Close',
-      reverseButtons: true,
-      ...this.theme,
-      ...this.staticBackdrop,
-      customClass: this.alertClasses
+
+    const action = await new Promise<'contact' | 'email' | 'close'>((resolve) => {
+      let settled = false;
+      const finish = (value: 'contact' | 'email' | 'close') => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        resolve(value);
+      };
+
+      void Swal.fire({
+        icon: 'warning',
+        title: options.title,
+        html: `
+          <p class="nb-alert__text">${safeText}</p>
+          <p class="nb-alert__hint" style="margin:0.9rem 0 0;color:#5f7a8c;font-size:0.92rem;">
+            Administration email:
+            <a href="mailto:${email}" style="color:#0f766e;font-weight:650;text-decoration:none;">${email}</a>
+          </p>
+          <div class="nb-alert__rows">
+            <div class="nb-alert__row">
+              <button type="button" class="swal2-cancel nb-alert__cancel" data-ar="close">Close</button>
+              <button type="button" class="swal2-confirm nb-alert__confirm" data-ar="contact">Contact administrator</button>
+            </div>
+            <div class="nb-alert__row">
+              <button type="button" class="nb-alert__secondary" data-ar="email">Email support</button>
+            </div>
+          </div>
+        `,
+        showConfirmButton: false,
+        showDenyButton: false,
+        showCancelButton: false,
+        ...this.theme,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        customClass: {
+          ...this.alertClasses,
+          htmlContainer: 'nb-alert__text nb-alert__text--actions'
+        },
+        didOpen: (popup) => {
+          popup.setAttribute('data-backdrop', 'static');
+          popup.setAttribute('data-keyboard', 'false');
+          popup.setAttribute('tabindex', '-1');
+          popup.querySelectorAll<HTMLButtonElement>('[data-ar]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              const next = (btn.getAttribute('data-ar') || 'close') as 'contact' | 'email' | 'close';
+              Swal.close();
+              finish(next);
+            });
+          });
+        }
+      }).then(() => finish('close'));
     });
-    if (result.isConfirmed) {
-      if (typeof window !== 'undefined') {
-        window.location.href = `mailto:${email}?subject=${encodeURIComponent('NovaBank account access')}`;
-      }
-      return 'email';
+
+    if (action === 'email' && typeof window !== 'undefined') {
+      window.location.href = `mailto:${email}?subject=${encodeURIComponent('NovaBank account access')}`;
     }
-    if (result.isDenied) {
-      return 'contact';
-    }
-    return 'close';
+    return action;
+  }
+
+  /**
+   * Billing login rejected for customer role — modal with Login hint (no underline).
+   * Returns true when user chooses Login.
+   */
+  async billingStaffOnly(message: string): Promise<boolean> {
+    const safe = String(message || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    return new Promise<boolean>((resolve) => {
+      let settled = false;
+      const finish = (goLogin: boolean) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        resolve(goLogin);
+      };
+      void Swal.fire({
+        icon: 'error',
+        title: 'Billing access only',
+        html: `
+          <p class="nb-alert__text">${safe}</p>
+          <p class="nb-alert__hint" style="margin:1rem 0 0;color:#5f7a8c;font-size:0.92rem;">
+            Use NovaBank customer sign-in instead:
+            <button type="button" class="nb-alert__text-link" data-go-login>Login</button>
+          </p>
+        `,
+        showCancelButton: true,
+        showConfirmButton: false,
+        cancelButtonText: 'Close',
+        ...this.theme,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        customClass: this.alertClasses,
+        didOpen: (popup) => {
+          popup.setAttribute('data-backdrop', 'static');
+          popup.setAttribute('data-keyboard', 'false');
+          popup.querySelector('[data-go-login]')?.addEventListener('click', () => {
+            Swal.close();
+            finish(true);
+          });
+        }
+      }).then(() => finish(false));
+    });
   }
 
   confirm(options: {
@@ -314,6 +391,101 @@ export class AlertService {
       });
 
       return { ok: true, result };
+    } catch (error) {
+      const message =
+        typeof options.errorMessage === 'function'
+          ? options.errorMessage(error)
+          : options.errorMessage || this.readErrorMessage(error);
+
+      await Swal.fire({
+        icon: 'error',
+        title: ALERT_TITLES.error,
+        text: message,
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#c45b6c',
+        background: this.theme.background,
+        color: this.theme.color,
+        ...this.staticBackdrop,
+        customClass: {
+          ...this.alertClasses,
+          confirmButton: 'nb-alert__confirm nb-alert__confirm--danger'
+        }
+      });
+
+      return { ok: false, error };
+    }
+  }
+
+  /**
+   * Confirm with optional note → loading → success/error in the same modal flow.
+   */
+  async confirmActionWithNote<T>(options: {
+    text?: string;
+    confirmText?: string;
+    cancelText?: string;
+    loadingText?: string;
+    notePlaceholder?: string;
+    icon?: SweetAlertIcon;
+    action: (note: string) => Observable<T> | Promise<T>;
+    successMessage?: string | ((result: T) => string);
+    errorMessage?: string | ((err: unknown) => string);
+  }): Promise<{ ok: true; result: T; note: string } | { ok: false; cancelled?: boolean; error?: unknown }> {
+    const prompt = await Swal.fire({
+      icon: options.icon || 'question',
+      title: ALERT_TITLES.confirm,
+      text: options.text,
+      input: 'textarea',
+      inputPlaceholder: options.notePlaceholder || 'Optional note…',
+      showCancelButton: true,
+      confirmButtonText: options.confirmText || 'Confirm',
+      cancelButtonText: options.cancelText || 'Cancel',
+      reverseButtons: true,
+      ...this.theme,
+      ...this.staticBackdrop,
+      customClass: this.alertClasses
+    });
+
+    if (!prompt.isConfirmed) {
+      return { ok: false, cancelled: true };
+    }
+
+    const note = String(prompt.value || '').trim();
+
+    void Swal.fire({
+      title: ALERT_TITLES.confirm,
+      text: options.loadingText || 'Please wait…',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      ...this.theme,
+      customClass: this.alertClasses,
+      didOpen: (popup) => {
+        popup.setAttribute('data-backdrop', 'static');
+        popup.setAttribute('data-keyboard', 'false');
+        popup.setAttribute('tabindex', '-1');
+        Swal.showLoading();
+      }
+    });
+
+    try {
+      const pending = options.action(note);
+      const result = isObservable(pending) ? await firstValueFrom(pending) : await pending;
+      const message =
+        typeof options.successMessage === 'function'
+          ? options.successMessage(result)
+          : options.successMessage || 'Done.';
+
+      await Swal.fire({
+        icon: 'success',
+        title: ALERT_TITLES.success,
+        text: message,
+        confirmButtonText: 'Continue',
+        ...this.theme,
+        ...this.staticBackdrop,
+        customClass: this.alertClasses
+      });
+
+      return { ok: true, result, note };
     } catch (error) {
       const message =
         typeof options.errorMessage === 'function'

@@ -345,8 +345,7 @@ export class BillingPosComponent implements OnInit {
     this.busy = false;
     if (outcome.ok) {
       this.activeInvoice = outcome.result.bill;
-      this.cart = [];
-      this.clearCoupon();
+      // Keep customer, cart, amounts, and coupons until Reset or successful payment.
       await this.openGateway();
     }
   }

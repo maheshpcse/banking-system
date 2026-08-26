@@ -1,0 +1,31 @@
+<section class="nbill nbill--enter">
+  <div class="nbill__canvas" aria-hidden="true">
+    <div class="nbill__glow nbill__glow--gold"></div>
+    <div class="nbill__glow nbill__glow--teal"></div>
+    <div class="nbill__rail"></div>
+    <div class="nbill__horizon"></div>
+    <div class="nbill__mark-ring"></div>
+  </div>
+
+  <div class="nbill__frame">
+    <p class="nbill__brand nbill__reveal nbill__reveal--brand">NovaBill</p>
+    <h1 class="nbill__headline nbill__reveal nbill__reveal--headline">
+      Billing System for clear invoices and faster checkout.
+    </h1>
+    <p class="nbill__lede nbill__reveal nbill__reveal--lede">
+      Staff POS for products, customers, and payments — tied to the same NovaBank identity.
+    </p>
+
+    <div class="nbill__actions nbill__reveal nbill__reveal--actions">
+      <a class="nbill__cta nbill__cta--primary" routerLink="/auth/login" [queryParams]="{ next: 'billing' }">
+        Login
+      </a>
+      <a class="nbill__cta nbill__cta--secondary" routerLink="/auth/staff-signup">Signup</a>
+    </div>
+  </div>
+
+  <footer class="nbill__foot" aria-label="Site signature">
+    <span class="nbill__foot-sig">NovaBill · Billing System</span>
+    <span class="nbill__foot-copy">© {{ year }} NovaBank. All rights reserved.</span>
+  </footer>
+</section>

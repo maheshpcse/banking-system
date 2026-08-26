@@ -281,6 +281,11 @@ import { Component, Input } from '@angular/core';
             </div>
           </div>
         </div>
+        <div class="bps__pager">
+          <div class="bps__bone bps__bone--btn"></div>
+          <div class="bps__bone bps__bone--md"></div>
+          <div class="bps__bone bps__bone--btn"></div>
+        </div>
       </ng-container>
 
       <!-- Purchases: full page head + filters + list -->

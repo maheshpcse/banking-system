@@ -151,7 +151,8 @@
 }
 
 .auth-switch a:hover {
-  text-decoration: underline;
+  color: #ff9932;
+  text-decoration: none;
 }
 
 .auth-footnote {
@@ -170,8 +171,8 @@
 }
 
 .auth-footnote a:hover {
-  color: var(--accent-deep);
-  text-decoration: underline;
+  color: #ff9932;
+  text-decoration: none;
 }
 
 .form__hint {

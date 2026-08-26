@@ -209,6 +209,23 @@
   text-decoration: none;
 }
 
+.btn--home {
+  border: 0;
+  background: transparent;
+  color: var(--ca-accent);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding-left: 0.35rem;
+  padding-right: 0.35rem;
+}
+
+.btn--home:hover,
+.btn--home:focus-visible {
+  color: #ff9932;
+  text-decoration: none;
+  outline: none;
+}
+
 .thanks {
   display: flex;
   flex-direction: column;

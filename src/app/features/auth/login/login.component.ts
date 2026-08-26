@@ -78,10 +78,21 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.locked = false;
     const payload = this.form.getRawValue() as { identifier: string; password: string };
     this.auth.login(payload).subscribe({
-      next: () => {
+      next: async () => {
         this.notifications.refresh().subscribe();
         const role = this.auth.currentUser?.role || 'customer';
         const next = this.route.snapshot.queryParamMap.get('next');
+        if (next === 'billing' && role === 'customer' && !this.auth.currentUser?.isSuperAdmin) {
+          this.loading = false;
+          this.auth.logout();
+          const goLogin = await this.alerts.billingStaffOnly(
+            'Customer accounts cannot sign in to the Billing System. Managers and Admins only.'
+          );
+          if (goLogin) {
+            void this.router.navigateByUrl('/auth/login');
+          }
+          return;
+        }
         let dest =
           role === 'admin' ? '/admin' : role === 'manager' ? '/manager' : '/dashboard';
         let billingLaunch = false;

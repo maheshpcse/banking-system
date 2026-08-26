@@ -3,9 +3,11 @@ import { Router } from '@angular/router';
 import { AlertService } from '../../../core/services/alert.service';
 import { BillingService } from '../../../core/services/billing.service';
 import { BillingBill, BillingPayment, BillingPaymentStatus } from '../../../core/models/banking.models';
+import { ThemeSelectOption } from '../../../shared/theme-select/theme-select.component';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
 type StatusFilter = '' | BillingPaymentStatus;
+type SortOrder = 'desc' | 'asc';
 
 @Component({
   selector: 'app-billing-history',
@@ -19,6 +21,7 @@ export class BillingHistoryComponent implements OnInit {
   from = '';
   to = '';
   statusFilter: StatusFilter = '';
+  sortOrder: SortOrder = 'desc';
   page = 1;
   pages = 1;
   total = 0;
@@ -39,6 +42,11 @@ export class BillingHistoryComponent implements OnInit {
     { id: 'failed', label: 'Payment Failure' }
   ];
 
+  readonly sortOptions: ThemeSelectOption[] = [
+    { value: 'desc', label: 'Newest first' },
+    { value: 'asc', label: 'Oldest first' }
+  ];
+
   constructor(
     private readonly billing: BillingService,
     private readonly alerts: AlertService,
@@ -53,7 +61,7 @@ export class BillingHistoryComponent implements OnInit {
     this.page = page;
     if (mode === 'full') {
       this.pageLoading = true;
-    } else if (mode === 'filter') {
+    } else {
       this.filterLoading = true;
     }
     withShimmerDelay(
@@ -62,10 +70,12 @@ export class BillingHistoryComponent implements OnInit {
         from: this.from || undefined,
         to: this.to || undefined,
         paymentStatus: this.statusFilter || undefined,
+        sort: 'createdAt',
+        order: this.sortOrder,
         page: this.page,
         limit: this.limit
       }),
-      mode === 'full' || mode === 'filter' ? (mode === 'full' ? SHIMMER_MS : 280) : 0
+      mode === 'full' ? SHIMMER_MS : 280
     ).subscribe({
       next: (res) => {
         this.bills = res.items || [];
@@ -88,6 +98,11 @@ export class BillingHistoryComponent implements OnInit {
       return;
     }
     this.statusFilter = id;
+    this.load(1, 'filter');
+  }
+
+  onSortChange(order: string): void {
+    this.sortOrder = order === 'asc' ? 'asc' : 'desc';
     this.load(1, 'filter');
   }
 
@@ -174,6 +189,11 @@ export class BillingHistoryComponent implements OnInit {
     return status === 'draft' || status === 'pending' || status === 'failed' || status === 'error';
   }
 
+  canCancelBill(bill: BillingBill | string): boolean {
+    const status = typeof bill === 'string' ? bill : bill.paymentStatus;
+    return status === 'pending';
+  }
+
   /** Pending window expired → Payment Failure (no retry / delete). */
   isExpiredFailure(bill: BillingBill): boolean {
     if (bill.paymentStatus !== 'failed') {
@@ -184,16 +204,52 @@ export class BillingHistoryComponent implements OnInit {
       .includes('payment window expired');
   }
 
+  async cancelBill(bill: BillingBill, event?: Event): Promise<void> {
+    event?.stopPropagation();
+    if (!this.canCancelBill(bill)) {
+      return;
+    }
+    const outcome = await this.alerts.confirmActionWithNote({
+      text: `Cancel ${bill.billNumber}? Stock will be restored and the invoice marked as payment failure.`,
+      confirmText: 'Cancel invoice',
+      loadingText: 'Cancelling invoice…',
+      notePlaceholder: 'Optional note (why it was cancelled)…',
+      action: (note) => {
+        const statusReason = note
+          ? `Cancelled by staff before settlement. ${note}`
+          : 'Cancelled by staff before settlement.';
+        return withShimmerDelay(this.billing.cancelBill(bill.id, statusReason), SHIMMER_MS);
+      },
+      successMessage: (res) => res.message || 'Invoice cancelled',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Unable to cancel invoice.'
+    });
+    if (!outcome.ok) {
+      return;
+    }
+    if (this.detailBill?.id === bill.id) {
+      this.detailBill = outcome.result.bill;
+      this.detailPayments = [];
+    }
+    this.load(this.page, 'filter');
+  }
+
   async deleteBill(bill: BillingBill, event?: Event): Promise<void> {
     event?.stopPropagation();
     if (!this.canDeleteBill(bill)) {
       return;
     }
-    const outcome = await this.alerts.confirmAction({
+    const outcome = await this.alerts.confirmActionWithNote({
       text: `Delete ${bill.billNumber}? Stock will be restored and this invoice removed from history.`,
       confirmText: 'Delete invoice',
       loadingText: 'Deleting invoice…',
-      action: () => withShimmerDelay(this.billing.deleteBill(bill.id), SHIMMER_MS),
+      notePlaceholder: 'Optional note (why it was deleted)…',
+      action: (note) => {
+        const statusReason = note
+          ? `Deleted by staff before settlement. ${note}`
+          : 'Deleted by staff before settlement.';
+        return withShimmerDelay(this.billing.deleteBill(bill.id, statusReason), SHIMMER_MS);
+      },
       successMessage: (res) => res.message || 'Invoice deleted',
       errorMessage: (err) =>
         (err as { error?: { message?: string } })?.error?.message || 'Unable to delete invoice.'

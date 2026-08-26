@@ -523,6 +523,50 @@ html[data-nb-billing='1'] .nb-toast--warning {
   color: var(--text) !important;
 }
 
+.nb-alert__rows {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1.15rem;
+}
+
+.nb-alert__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
+.nb-alert__secondary {
+  border: 0;
+  cursor: pointer;
+  border-radius: 0.85rem !important;
+  font-weight: 650 !important;
+  padding: 0.7rem 1.2rem !important;
+  background: rgba(148, 163, 184, 0.35) !important;
+  color: var(--text) !important;
+  min-width: 11rem;
+}
+
+.nb-alert__secondary:hover {
+  background: rgba(148, 163, 184, 0.5) !important;
+}
+
+.nb-alert__text-link {
+  border: 0;
+  background: transparent;
+  color: #0f766e;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 0.15rem;
+  text-decoration: none;
+}
+
+.nb-alert__text-link:hover {
+  color: #ff9932;
+  text-decoration: none;
+}
+
 .swal2-icon.swal2-success {
   border-color: #5fc4b0 !important;
   color: #2f8f7f !important;

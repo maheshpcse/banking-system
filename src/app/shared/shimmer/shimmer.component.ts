@@ -35,6 +35,7 @@ export class ShimmerComponent {
     | 'manager-billing'
     | 'home'
     | 'auth'
+    | 'contact-admin'
     | 'drawer-profile' = 'dashboard';
 
   /** Settings tab or auth page layout when variant is settings-panel / auth */
@@ -52,6 +53,7 @@ export class ShimmerComponent {
     | 'reset'
     | 'staff-signup'
     | 'staff-status'
+    | 'contact-admin'
     | '' = '';
 
   /** Column count for data-table shimmer (Customers / Staff grids). */

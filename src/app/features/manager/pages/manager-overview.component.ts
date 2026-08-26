@@ -3,7 +3,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AdminAnalytics, AdminRequestRow, AdminService } from '../../../core/services/admin.service';
 import { BillingService } from '../../../core/services/billing.service';
-import { BillingDashboardStats } from '../../../core/models/banking.models';
+import { BillingDashboardStats, BillingSalesReport } from '../../../core/models/banking.models';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/shimmer';
@@ -82,6 +82,8 @@ export class ManagerOverviewComponent implements OnInit {
   billingLoading = true;
   billingFlowLoading = false;
   billingStats: BillingDashboardStats | null = null;
+  salesSummary: BillingSalesReport | null = null;
+  salesSummaryLoading = true;
   billingKpis: Array<{ label: string; display: string; pct: number; color: string }> = [];
   billingStatusBars: Array<{ id: BillingPulseFilter; label: string; count: number; color: string }> = [];
   billingView: ViewMode = 'chart';
@@ -139,23 +141,29 @@ export class ManagerOverviewComponent implements OnInit {
         customers: this.admin.refreshCustomers(1, 5),
         requests: this.admin.refreshRequests(),
         analytics: this.admin.getAnalytics(this.analyticsQuery()),
-        billing: this.billing.getStats().pipe(catchError(() => of(null)))
+        billing: this.billing.getStats().pipe(catchError(() => of(null))),
+        sales: this.billing
+          .getSalesReports({ cadence: 'weekly', range: 'last_month' })
+          .pipe(catchError(() => of(null)))
       }),
       SHIMMER_MS
     ).subscribe({
-      next: ({ customers, requests, analytics, billing }) => {
+      next: ({ customers, requests, analytics, billing, sales }) => {
         this.customers = customers.pagination.total;
         this.pending = requests.filter((r: AdminRequestRow) => r.status === 'under_review').length;
         this.unread = this.notifications.unreadCount;
         this.analytics = analytics;
         this.billingStats = billing;
+        this.salesSummary = sales;
         this.rebuildBillingPulse();
         this.billingLoading = false;
+        this.salesSummaryLoading = false;
         this.pageLoading = false;
       },
       error: async (err: { error?: { message?: string } }) => {
         this.pageLoading = false;
         this.billingLoading = false;
+        this.salesSummaryLoading = false;
         await this.alerts.error(err?.error?.message || 'Unable to load manager desk');
       }
     });

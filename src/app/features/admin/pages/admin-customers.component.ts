@@ -8,6 +8,7 @@ import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/
 import { formatStatusLabel } from '../../../core/utils/status-label';
 
 type RoleFilter = 'all' | 'customer' | 'manager' | 'admin';
+type StatusFilter = 'all' | 'active' | 'blocked' | 'deactivated' | 'deleted';
 type TxFilter = 'all' | 'deposit' | 'withdraw' | 'transfer_in' | 'transfer_out';
 type TxView = 'timeline' | 'chart' | 'table';
 
@@ -20,18 +21,26 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   users: User[] = [];
   pagination: AdminPagination = { page: 1, limit: 5, total: 0, pages: 1 };
   pageLoading = true;
-  /** Table-area shimmer when role filters / paging change after first paint */
+  /** Table-area shimmer when role/status filters / paging change after first paint */
   listLoading = false;
   menuOpenId: string | null = null;
   viewing: User | null = null;
   drawerOpen = false;
   drawerLoading = false;
   roleFilter: RoleFilter = 'customer';
+  statusFilter: StatusFilter = 'all';
   readonly roleFilters: { id: RoleFilter; label: string }[] = [
     { id: 'all', label: 'All Roles' },
     { id: 'customer', label: 'Customers' },
     { id: 'manager', label: 'Managers' },
     { id: 'admin', label: 'Admins' }
+  ];
+  readonly statusFilters: { id: StatusFilter; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'active', label: 'Active' },
+    { id: 'blocked', label: 'Blocked' },
+    { id: 'deactivated', label: 'Deactivated' },
+    { id: 'deleted', label: 'Deleted' }
   ];
 
   txModalOpen = false;
@@ -141,18 +150,29 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     this.loadPage(1, false);
   }
 
+  setStatusFilter(id: StatusFilter): void {
+    if (this.statusFilter === id) {
+      return;
+    }
+    this.statusFilter = id;
+    this.loadPage(1, false);
+  }
+
   loadPage(page: number, initial = false): void {
     if (initial) {
       this.pageLoading = true;
     } else {
       this.listLoading = true;
     }
-    const opts =
-      this.isSuperAdmin && this.roleFilter === 'all'
-        ? { scope: 'all' as const }
-        : this.isSuperAdmin
-          ? { role: this.roleFilter }
-          : undefined;
+    const opts: { scope?: 'all' | 'customers'; role?: string; status?: string } = {};
+    if (this.isSuperAdmin && this.roleFilter === 'all') {
+      opts.scope = 'all';
+    } else if (this.isSuperAdmin) {
+      opts.role = this.roleFilter;
+    }
+    if (this.statusFilter && this.statusFilter !== 'all') {
+      opts.status = this.statusFilter;
+    }
     withShimmerDelay(this.admin.refreshCustomers(page, 5, opts), SHIMMER_MS).subscribe({
       next: () => {
         this.pageLoading = false;
@@ -165,6 +185,27 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
         await this.alerts.error(err?.error?.message || 'Unable to load directory');
       }
     });
+  }
+
+  /** Hide the ⋮ menu for deleted customers (and non-customer roles). */
+  showActionMenu(user: User): boolean {
+    if ((user.role || 'customer') !== 'customer') {
+      return false;
+    }
+    return (user.accountStatus || '') !== 'deleted';
+  }
+
+  isBlocked(user: User): boolean {
+    return user.accountStatus === 'blocked';
+  }
+
+  isActiveLike(user: User): boolean {
+    const status = user.accountStatus || '';
+    return status === 'active' || status === 'approved';
+  }
+
+  isDeactivated(user: User): boolean {
+    return user.accountStatus === 'deactivated';
   }
 
   toggleMenu(event: Event, userId: string): void {

@@ -279,6 +279,53 @@
   </div>
 
   <app-animated-card
+    class="sales-targets-card"
+    accent="sand"
+    title="Sales targets"
+    subtitle="Last 30 days · paid invoices"
+    [tilt]="false"
+  >
+    <a
+      cardHeaderActions
+      routerLink="/manager/sales-targets"
+      class="btn btn--ghost btn--compact"
+      (click)="$event.stopPropagation()"
+    >
+      Full reports
+    </a>
+
+    <ng-container *ngIf="!salesSummaryLoading && salesSummary; else salesSummaryGate">
+      <div class="sales-targets-summary">
+        <div class="sales-targets-summary__kpi">
+          <span>Revenue</span>
+          <strong>{{ salesSummary.totals.revenue | currencyFormat }}</strong>
+        </div>
+        <div class="sales-targets-summary__kpi">
+          <span>Orders</span>
+          <strong>{{ salesSummary.totals.orderCount }}</strong>
+        </div>
+        <div class="sales-targets-summary__kpi">
+          <span>Units</span>
+          <strong>{{ salesSummary.totals.qty }}</strong>
+        </div>
+      </div>
+      <p class="hint" *ngIf="salesSummary.productSales.length">
+        Top product:
+        {{ salesSummary.productSales[0].name }}
+        ·
+        {{ salesSummary.productSales[0].revenue | currencyFormat }}
+      </p>
+      <p class="hint" *ngIf="!salesSummary.productSales.length">
+        No paid sales in the last month yet.
+      </p>
+    </ng-container>
+    <ng-template #salesSummaryGate>
+      <app-shimmer *ngIf="salesSummaryLoading" variant="manager-flow-chart"></app-shimmer>
+      <p class="hint" *ngIf="!salesSummaryLoading">Sales summary unavailable right now.</p>
+    </ng-template>
+  </app-animated-card>
+
+  <app-animated-card
     class="billing-pulse-card"
     accent="sand"
     title="Billing pulse"
@@ -421,6 +468,11 @@
       <h2>Reports</h2>
       <p>View and schedule deposit, withdraw, and transfer summaries before Billing goes live.</p>
       <a routerLink="/manager/reports" class="btn btn--ghost roadmap-card__btn">Reports workspace</a>
+    </article>
+    <article class="roadmap-card">
+      <h2>Sales targets</h2>
+      <p>Review paid product and customer sales by cadence, then export CSV for desk reviews.</p>
+      <a routerLink="/manager/sales-targets" class="btn btn--ghost roadmap-card__btn">Open sales targets</a>
     </article>
     <article class="roadmap-card">
       <h2>Billing</h2>

@@ -142,6 +142,11 @@ export class BillingPurchasesComponent implements OnInit {
     this.load(1, 'filter');
   }
 
+  /** Dropdown / date changes always reload — no empty-criteria toast. */
+  onCriteriaChange(): void {
+    this.load(1, 'filter');
+  }
+
   clearQuery(): void {
     this.query = '';
     this.load(1, 'filter');
