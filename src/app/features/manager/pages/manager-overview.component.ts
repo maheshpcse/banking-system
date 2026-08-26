@@ -170,7 +170,7 @@ export class ManagerOverviewComponent implements OnInit {
         analytics: this.admin.getAnalytics(this.analyticsQuery()),
         billing: this.billing.getStats().pipe(catchError(() => of(null))),
         sales: this.billing
-          .getSalesReports({ cadence: 'weekly', range: 'last_month' })
+          .getSalesReports({ cadence: this.salesChartCadence, range: this.salesChartRange })
           .pipe(catchError(() => of(null)))
       }),
       SHIMMER_MS
@@ -216,6 +216,18 @@ export class ManagerOverviewComponent implements OnInit {
     pct: number;
     color: string;
   }> {
+    const series = this.salesChart?.series || [];
+    if (series.length) {
+      const max = Math.max(1, ...series.map((r) => r.revenue));
+      const palette = ['#5fc4b0', '#d4a017', '#2f8f7f', '#f59e0b', '#0f766e', '#b45309'];
+      return series.map((row, i) => ({
+        name: row.label || row.key,
+        revenue: row.revenue,
+        qty: row.qty,
+        pct: Math.max(6, Math.round((row.revenue / max) * 100)),
+        color: palette[i % palette.length]
+      }));
+    }
     const rows = (this.salesChart?.productSales || []).slice(0, 8);
     const max = Math.max(1, ...rows.map((r) => r.revenue));
     const palette = ['#5fc4b0', '#d4a017', '#2f8f7f', '#f59e0b', '#0f766e', '#b45309'];

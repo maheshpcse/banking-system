@@ -27,6 +27,8 @@ export class ManagerSalesTargetsComponent implements OnInit {
   customerPageLoading = false;
   report: BillingSalesReport | null = null;
   view: ViewMode = 'table';
+  /** Tracks which body shimmer layout to show while filters refetch */
+  shimmerView: ViewMode = 'table';
 
   cadence: Cadence = 'weekly';
   range: RangePreset = 'last_month';
@@ -91,6 +93,27 @@ export class ManagerSalesTargetsComponent implements OnInit {
     return this.customerRows.slice(start, start + this.pageSize);
   }
 
+  get seriesBars(): Array<{ name: string; revenue: number; qty: number; pct: number; color: string }> {
+    const rows = this.report?.series || [];
+    return this.toBars(
+      rows.map((row) => ({
+        name: row.label || row.key,
+        qty: row.qty,
+        revenue: row.revenue,
+        orderCount: row.orderCount
+      }))
+    );
+  }
+
+  get seriesLinePath(): string {
+    return this.buildLinePath(this.seriesBars);
+  }
+
+  get seriesAreaPath(): string {
+    const line = this.seriesLinePath;
+    return line ? `${line} L100,40 L0,40 Z` : '';
+  }
+
   get productChartBars(): Array<{ name: string; revenue: number; qty: number; pct: number; color: string }> {
     return this.toBars(this.productRows.slice(0, 10));
   }
@@ -143,6 +166,7 @@ export class ManagerSalesTargetsComponent implements OnInit {
 
   toggleView(): void {
     this.view = this.view === 'chart' ? 'table' : 'chart';
+    this.shimmerView = this.view;
     this.reportLoading = true;
     shimmerPause(SHIMMER_MS).subscribe(() => {
       this.reportLoading = false;
@@ -388,7 +412,9 @@ export class ManagerSalesTargetsComponent implements OnInit {
   private loadReport(initial: boolean): void {
     if (initial) {
       this.pageLoading = true;
+      this.shimmerView = this.view;
     } else {
+      this.shimmerView = this.view;
       this.reportLoading = true;
     }
 

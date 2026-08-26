@@ -83,6 +83,41 @@
     </div>
 
     <div class="report-layout report-layout--stack" *ngIf="view === 'chart'">
+      <app-animated-card accent="sky" title="Revenue by period" subtitle="Cadence series · live paid invoices">
+        <div class="sales-tape" *ngIf="seriesBars.length; else noSeriesChart">
+          <div class="sales-tape__stage">
+            <div class="sales-tape__grid" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+            <div class="sales-tape__bars">
+              <div class="sales-tape__col" *ngFor="let bar of seriesBars">
+                <span class="sales-tape__value">{{ bar.revenue | currencyFormat }}</span>
+                <div class="sales-tape__track">
+                  <div
+                    class="sales-tape__fill"
+                    [style.height.%]="bar.pct"
+                    [style.background]="bar.color"
+                  ></div>
+                </div>
+                <span class="sales-tape__label" [title]="bar.name">{{ bar.name }}</span>
+              </div>
+            </div>
+            <svg class="sales-tape__line" viewBox="0 0 100 42" preserveAspectRatio="none" aria-hidden="true">
+              <path class="sales-tape__area" [attr.d]="seriesAreaPath"></path>
+              <path class="sales-tape__path" [attr.d]="seriesLinePath"></path>
+              <circle
+                *ngFor="let bar of seriesBars; let i = index"
+                class="sales-tape__point"
+                [attr.cx]="chartPointX(i, seriesBars.length)"
+                [attr.cy]="chartPointY(bar.revenue, seriesBars)"
+                r="1.35"
+              ></circle>
+            </svg>
+          </div>
+        </div>
+        <ng-template #noSeriesChart>
+          <app-empty-state kind="transactions" message="No paid sales periods in this cadence and range."></app-empty-state>
+        </ng-template>
+      </app-animated-card>
+
       <app-animated-card accent="sand" title="Product revenue" subtitle="Trading tape · top products">
         <div class="sales-tape" *ngIf="productChartBars.length; else noProductChart">
           <div class="sales-tape__stage">
@@ -228,11 +263,12 @@
   <ng-template #reportBodyShimmer>
     <app-shimmer variant="manager-sales-card"></app-shimmer>
     <div class="report-layout report-layout--stack" style="margin-top: 1rem">
-      <ng-container *ngIf="view === 'chart'">
+      <ng-container *ngIf="shimmerView === 'chart'">
+        <app-shimmer variant="manager-sales-chart"></app-shimmer>
         <app-shimmer variant="manager-sales-chart"></app-shimmer>
         <app-shimmer variant="manager-sales-chart"></app-shimmer>
       </ng-container>
-      <ng-container *ngIf="view === 'table'">
+      <ng-container *ngIf="shimmerView === 'table'">
         <app-shimmer variant="data-table" [columns]="4" [rows]="8"></app-shimmer>
         <app-shimmer variant="data-table" [columns]="4" [rows]="8"></app-shimmer>
       </ng-container>

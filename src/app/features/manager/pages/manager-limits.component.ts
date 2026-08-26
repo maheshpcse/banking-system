@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { User } from '../../../core/models/banking.models';
 import { AdminService } from '../../../core/services/admin.service';
 import { AlertService } from '../../../core/services/alert.service';
-import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/shimmer';
+
+type LimitTab = 'pending' | 'approved' | 'rejected';
 
 @Component({
   selector: 'app-manager-limits',
@@ -11,9 +13,17 @@ import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 })
 export class ManagerLimitsComponent implements OnInit {
   pageLoading = true;
+  listLoading = false;
   items: User[] = [];
+  status: LimitTab = 'pending';
   readonly pageSize = 5;
   page = 1;
+
+  readonly tabs: Array<{ id: LimitTab; label: string }> = [
+    { id: 'pending', label: 'Pending' },
+    { id: 'approved', label: 'Approved' },
+    { id: 'rejected', label: 'Rejected' }
+  ];
 
   constructor(private readonly admin: AdminService, private readonly alerts: AlertService) {}
 
@@ -27,29 +37,33 @@ export class ManagerLimitsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    withShimmerDelay(this.admin.listLimitRequests(), SHIMMER_MS).subscribe({
-      next: (items) => {
-        this.items = items;
-        this.page = 1;
-        this.pageLoading = false;
-      },
-      error: async (err) => {
-        this.pageLoading = false;
-        await this.alerts.error(err?.error?.message || 'Unable to load limit requests');
-      }
-    });
+    this.load(true);
+  }
+
+  setStatus(status: LimitTab): void {
+    if (this.status === status) {
+      return;
+    }
+    this.status = status;
+    this.load(false);
   }
 
   prev(): void {
-    if (this.page > 1) {
-      this.page -= 1;
+    if (this.page <= 1) {
+      return;
     }
+    this.flashPage(() => {
+      this.page -= 1;
+    });
   }
 
   next(): void {
-    if (this.page < this.pages) {
-      this.page += 1;
+    if (this.page >= this.pages) {
+      return;
     }
+    this.flashPage(() => {
+      this.page += 1;
+    });
   }
 
   async approve(user: User): Promise<void> {
@@ -62,10 +76,7 @@ export class ManagerLimitsComponent implements OnInit {
       errorMessage: (err) =>
         (err as { error?: { message?: string } })?.error?.message || 'Unable to approve limits'
     });
-    this.items = this.admin.listLimitRequestsSnapshot();
-    if (this.page > this.pages) {
-      this.page = this.pages;
-    }
+    this.load(false);
   }
 
   async reject(user: User): Promise<void> {
@@ -78,9 +89,39 @@ export class ManagerLimitsComponent implements OnInit {
       errorMessage: (err) =>
         (err as { error?: { message?: string } })?.error?.message || 'Unable to reject limits'
     });
-    this.items = this.admin.listLimitRequestsSnapshot();
-    if (this.page > this.pages) {
-      this.page = this.pages;
+    this.load(false);
+  }
+
+  requestStatus(user: User): string {
+    return String(user.pendingLimitRequest?.status || 'none');
+  }
+
+  private load(initial: boolean): void {
+    if (initial) {
+      this.pageLoading = true;
+    } else {
+      this.listLoading = true;
     }
+    withShimmerDelay(this.admin.listLimitRequests(this.status), SHIMMER_MS).subscribe({
+      next: (items) => {
+        this.items = items;
+        this.page = 1;
+        this.pageLoading = false;
+        this.listLoading = false;
+      },
+      error: async (err) => {
+        this.pageLoading = false;
+        this.listLoading = false;
+        await this.alerts.error(err?.error?.message || 'Unable to load limit requests');
+      }
+    });
+  }
+
+  private flashPage(mutate: () => void): void {
+    this.listLoading = true;
+    shimmerPause(SHIMMER_MS).subscribe(() => {
+      mutate();
+      this.listLoading = false;
+    });
   }
 }

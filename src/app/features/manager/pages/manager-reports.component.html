@@ -4,45 +4,55 @@
       <p class="eyebrow">NovaBank</p>
       <h1>Transaction reports</h1>
       <p class="lede">
-        Manager workspace for banking ledger summaries. Billing System will attach invoice and settlement
-        graphs here.
+        Choose a reporting cadence, save a schedule preview, and review the saved result on this page.
+        Live ledger tables and email/desk delivery attach here next.
       </p>
     </div>
   </header>
 
-  <div class="sales-toolbar reports-toolbar">
-    <label class="range-select">
-      <span>Cadence</span>
-      <app-theme-select
-        [(ngModel)]="cadence"
-        name="cadence"
-        [options]="cadenceOptions"
-        ariaLabel="Report cadence"
-        (valueChange)="onCadenceChange($event)"
-      ></app-theme-select>
-    </label>
-  </div>
-
-  <app-shimmer *ngIf="filterLoading" variant="manager-flow-table"></app-shimmer>
-
-  <div class="report-layout report-layout--stack" *ngIf="!filterLoading">
+  <div class="report-layout report-layout--stack">
     <app-animated-card accent="sky" title="Schedule" subtitle="Cadence preview">
       <form class="form" (ngSubmit)="schedule()">
+        <label>
+          <span>Report cadence</span>
+          <app-theme-select
+            [(ngModel)]="cadence"
+            name="cadence"
+            [options]="cadenceOptions"
+            ariaLabel="Report cadence"
+          ></app-theme-select>
+        </label>
         <p class="hint">
-          Schedules are stored for the Billing report engine handoff. Delivery channels (email / desk)
-          arrive with Billing System integration.
+          Workflow: pick a cadence → save preview → confirm the saved schedule below. Delivery channels
+          (email / manager desk digest) and ledger graphs will use this cadence once wired.
         </p>
-        <p class="hint">
-          Ledger tables and settlement graphs are not wired yet — this page is a schedule handoff
-          placeholder.
-        </p>
-        <button class="btn btn--primary" type="submit">
-          {{ scheduled ? 'Schedule saved (local preview)' : 'Save schedule preview' }}
+        <button class="btn btn--primary" type="submit" [disabled]="saving">
+          {{ saving ? 'Saving…' : saved ? 'Update schedule preview' : 'Save schedule preview' }}
         </button>
       </form>
     </app-animated-card>
 
-    <app-animated-card accent="mint" title="Coverage" subtitle="Banking → Billing">
+    <app-animated-card accent="mint" title="Saved schedule" subtitle="End result (this device)">
+      <ng-container *ngIf="saved; else noSchedule">
+        <ul class="bullet-list">
+          <li>
+            Cadence:
+            <strong>{{ savedCadenceLabel }}</strong>
+          </li>
+          <li>Saved at: {{ saved.savedAt | date: 'medium' }}</li>
+          <li>Status: preview stored locally until report delivery is connected</li>
+        </ul>
+        <button type="button" class="btn btn--ghost" (click)="clearSaved()">Clear saved preview</button>
+      </ng-container>
+      <ng-template #noSchedule>
+        <app-empty-state
+          kind="transactions"
+          message="No schedule preview yet. Save a cadence above to see the end result here."
+        ></app-empty-state>
+      </ng-template>
+    </app-animated-card>
+
+    <app-animated-card accent="sand" title="Coverage" subtitle="What this report will include">
       <ul class="bullet-list">
         <li>Deposits, withdrawals, and transfers by period</li>
         <li>Pending openings and blocked accounts</li>

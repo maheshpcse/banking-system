@@ -29,17 +29,10 @@
         <a class="app-foot__link" routerLink="/">NovaBank</a>
         <span aria-hidden="true"> · </span>
         <a class="app-foot__link" routerLink="/novabill">NovaBill</a>
-        <span aria-hidden="true"> · </span>
-        <a class="app-foot__link" routerLink="/auth/login" [queryParams]="{ next: 'billing' }">Billing System</a>
       </span>
       <span class="app-foot__copy">
         © {{ year }}
-        <a class="app-foot__link" routerLink="/">NovaBank</a>
-        <span aria-hidden="true"> · </span>
-        <a class="app-foot__link" routerLink="/novabill">NovaBill</a>
-        <span aria-hidden="true"> · </span>
-        <a class="app-foot__link" routerLink="/auth/login" [queryParams]="{ next: 'billing' }">Billing System</a>.
-        All rights reserved.
+        <a class="app-foot__link" routerLink="/">NovaBank</a>. All rights reserved.
       </span>
     </footer>
     <div class="app-foot app-foot--shimmer" *ngIf="!isBillingSurface && !isMarketingSurface && bootstrapping" aria-hidden="true">

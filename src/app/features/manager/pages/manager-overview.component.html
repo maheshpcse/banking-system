@@ -367,7 +367,7 @@
     class="sales-market-card"
     accent="mint"
     title="Sales tape"
-    subtitle="Product revenue · trading desk"
+        subtitle="Paid revenue · trading desk"
     [tilt]="false"
   >
     <a
@@ -409,7 +409,10 @@
     <ng-container *ngIf="!salesChartLoading && salesChart; else salesChartGate">
       <div class="sales-market" *ngIf="salesChartBars.length; else noSalesChart">
         <div class="sales-market__meta">
-          <span>{{ salesChartRangeLabel }} · {{ salesChart.totals.orderCount }} orders</span>
+          <span
+            >{{ salesChartCadence | titlecase }} · {{ salesChartRangeLabel }} ·
+            {{ salesChart.totals.orderCount }} orders</span
+          >
           <strong>{{ salesChart.totals.revenue | currencyFormat }}</strong>
         </div>
         <div class="sales-market__stage">
@@ -434,7 +437,7 @@
             viewBox="0 0 100 42"
             preserveAspectRatio="none"
             role="img"
-            aria-label="Product revenue trend"
+            aria-label="Paid revenue by cadence"
           >
             <path class="sales-market__area" [attr.d]="salesChartAreaPath"></path>
             <path class="sales-market__path" [attr.d]="salesChartLinePath"></path>
@@ -458,7 +461,7 @@
         </ul>
       </div>
       <ng-template #noSalesChart>
-        <app-empty-state kind="transactions" message="No paid product sales in this range."></app-empty-state>
+        <app-empty-state kind="transactions" message="No paid sales in this cadence and range."></app-empty-state>
       </ng-template>
     </ng-container>
     <ng-template #salesChartGate>
