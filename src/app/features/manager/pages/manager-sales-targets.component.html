@@ -1,0 +1,132 @@
+<section class="page" *ngIf="!pageLoading; else salesShimmer">
+  <header class="admin-hero">
+    <div>
+      <p class="eyebrow">NovaBill</p>
+      <h1>Sales targets</h1>
+      <p class="lede">
+        Aggregate paid invoice performance by product and customer across cadence and date ranges.
+      </p>
+    </div>
+    <button type="button" class="btn btn--primary" (click)="exportCsv()" [disabled]="!report">
+      Export CSV
+    </button>
+  </header>
+
+  <div class="sales-toolbar">
+    <label class="range-select">
+      <span>Cadence</span>
+      <app-theme-select
+        [(ngModel)]="cadence"
+        [options]="cadenceOptions"
+        name="salesCadence"
+        ariaLabel="Report cadence"
+        (valueChange)="onCadenceChange($event)"
+      ></app-theme-select>
+    </label>
+    <label class="range-select">
+      <span>Range</span>
+      <app-theme-select
+        [(ngModel)]="range"
+        [options]="rangeOptions"
+        name="salesRange"
+        ariaLabel="Date range"
+        (valueChange)="onRangeChange($event)"
+      ></app-theme-select>
+    </label>
+    <div class="custom-range custom-range--inline" *ngIf="range === 'custom'">
+      <label>
+        <span>From</span>
+        <input
+          type="date"
+          [(ngModel)]="customFrom"
+          (ngModelChange)="onCustomRangeChange()"
+          name="salesFrom"
+        />
+      </label>
+      <label>
+        <span>To</span>
+        <input
+          type="date"
+          [(ngModel)]="customTo"
+          (ngModelChange)="onCustomRangeChange()"
+          name="salesTo"
+        />
+      </label>
+    </div>
+  </div>
+
+  <div class="stat-grid sales-totals" *ngIf="!reportLoading">
+    <article class="stat">
+      <app-nb-icon name="shield"></app-nb-icon>
+      <div><span>Revenue</span><strong>{{ totals.revenue | currencyFormat }}</strong></div>
+    </article>
+    <article class="stat">
+      <app-nb-icon name="transfer"></app-nb-icon>
+      <div><span>Units sold</span><strong>{{ totals.qty }}</strong></div>
+    </article>
+    <article class="stat">
+      <app-nb-icon name="clock"></app-nb-icon>
+      <div><span>Paid orders</span><strong>{{ totals.orderCount }}</strong></div>
+    </article>
+  </div>
+
+  <app-shimmer *ngIf="reportLoading" variant="manager-reports"></app-shimmer>
+
+  <div class="report-layout" *ngIf="!reportLoading">
+    <app-animated-card accent="sand" title="Product sales" subtitle="Paid line items">
+      <div class="table-wrap" *ngIf="productRows.length; else noProducts">
+        <table class="data-table data-table--compact">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Revenue</th>
+              <th>Orders</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of productRows">
+              <td><strong>{{ row.name }}</strong></td>
+              <td>{{ row.qty }}</td>
+              <td>{{ row.revenue | currencyFormat }}</td>
+              <td>{{ row.orderCount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noProducts>
+        <app-empty-state kind="transactions" message="No paid product sales in this range."></app-empty-state>
+      </ng-template>
+    </app-animated-card>
+
+    <app-animated-card accent="mint" title="Customer purchases" subtitle="Paid invoices">
+      <div class="table-wrap" *ngIf="customerRows.length; else noCustomers">
+        <table class="data-table data-table--compact">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Qty</th>
+              <th>Revenue</th>
+              <th>Orders</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of customerRows">
+              <td><strong>{{ row.name }}</strong></td>
+              <td>{{ row.qty }}</td>
+              <td>{{ row.revenue | currencyFormat }}</td>
+              <td>{{ row.orderCount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noCustomers>
+        <app-empty-state kind="customers" message="No paid customer purchases in this range."></app-empty-state>
+      </ng-template>
+    </app-animated-card>
+  </div>
+</section>
+
+<ng-template #salesShimmer>
+  <app-shimmer variant="manager-reports"></app-shimmer>
+</ng-template>

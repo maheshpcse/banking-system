@@ -42,60 +42,78 @@
       </div>
       <input class="input" type="date" [(ngModel)]="from" />
       <input class="input" type="date" [(ngModel)]="to" />
+      <app-theme-select
+        controlClass="input input--select"
+        [(ngModel)]="sortOrder"
+        [options]="sortOptions"
+        ariaLabel="Sort order"
+        (valueChange)="onSortChange($event)"
+      ></app-theme-select>
       <button type="button" class="btn btn--ghost" (click)="applyFilters()">Filter</button>
     </div>
 
     <app-billing-panel-shimmer *ngIf="filterLoading" variant="history-data"></app-billing-panel-shimmer>
 
-    <div class="timeline" *ngIf="!filterLoading" [class.is-empty]="!bills.length">
-      <app-empty-state
-        *ngIf="!bills.length"
-        tone="billing"
-        kind="invoices"
-        [fill]="true"
-        message="No invoices match these filters."
-      ></app-empty-state>
-      <article class="card" *ngFor="let bill of bills" (click)="openDetail(bill)">
-        <div class="card__rail" aria-hidden="true"></div>
-        <div class="card__body">
-          <div class="card__top">
-            <strong>{{ bill.billNumber }}</strong>
-            <span [class]="statusClass(bill.paymentStatus)">{{ statusLabel(bill.paymentStatus) }}</span>
+    <ng-container *ngIf="!filterLoading">
+      <div class="timeline" [class.is-empty]="!bills.length">
+        <app-empty-state
+          *ngIf="!bills.length"
+          tone="billing"
+          kind="invoices"
+          [fill]="true"
+          message="No invoices match these filters."
+        ></app-empty-state>
+        <article class="card" *ngFor="let bill of bills" (click)="openDetail(bill)">
+          <div class="card__rail" aria-hidden="true"></div>
+          <div class="card__body">
+            <div class="card__top">
+              <strong>{{ bill.billNumber }}</strong>
+              <span [class]="statusClass(bill.paymentStatus)">{{ statusLabel(bill.paymentStatus) }}</span>
+            </div>
+            <p>{{ bill.customerName }}</p>
+            <div class="card__meta">
+              <span>
+                {{ bill.createdAt | date: 'medium' }}
+                <ng-container *ngIf="bill.paymentStatus === 'paid' && bill.paidAt">
+                  <br />Paid · {{ bill.paidAt | date: 'medium' }}
+                </ng-container>
+                <ng-container *ngIf="bill.paymentStatus === 'pending' && bill.paymentExpiresAt">
+                  <br />Expires · {{ bill.paymentExpiresAt | date: 'medium' }}
+                </ng-container>
+                <ng-container *ngIf="statusReason(bill) as reason">
+                  <br /><span class="card__reason">{{ reason }}</span>
+                </ng-container>
+              </span>
+              <em>{{ bill.grandTotal | currencyFormat }}</em>
+            </div>
+            <div class="card__actions" *ngIf="canCancelBill(bill) || canDeleteBill(bill)">
+              <button
+                type="button"
+                class="link-muted"
+                *ngIf="canCancelBill(bill)"
+                (click)="cancelBill(bill, $event)"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="link-danger"
+                *ngIf="canDeleteBill(bill)"
+                (click)="deleteBill(bill, $event)"
+              >
+                Delete
+              </button>
+            </div>
           </div>
-          <p>{{ bill.customerName }}</p>
-          <div class="card__meta">
-            <span>
-              {{ bill.createdAt | date: 'medium' }}
-              <ng-container *ngIf="bill.paymentStatus === 'paid' && bill.paidAt">
-                <br />Paid · {{ bill.paidAt | date: 'medium' }}
-              </ng-container>
-              <ng-container *ngIf="bill.paymentStatus === 'pending' && bill.paymentExpiresAt">
-                <br />Expires · {{ bill.paymentExpiresAt | date: 'medium' }}
-              </ng-container>
-              <ng-container *ngIf="statusReason(bill) as reason">
-                <br /><span class="card__reason">{{ reason }}</span>
-              </ng-container>
-            </span>
-            <em>{{ bill.grandTotal | currencyFormat }}</em>
-          </div>
-          <div class="card__actions" *ngIf="canDeleteBill(bill)">
-            <button
-              type="button"
-              class="link-danger"
-              (click)="deleteBill(bill, $event)"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </article>
-    </div>
+        </article>
+      </div>
 
-    <div class="pager" *ngIf="!filterLoading && pages > 1">
-      <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
-      <span>Page {{ page }} / {{ pages }} · {{ total }} total</span>
-      <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
-    </div>
+      <div class="pager" *ngIf="total > 0">
+        <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
+        <span>Page {{ page }} / {{ pages }} · {{ total }} total</span>
+        <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
+      </div>
+    </ng-container>
   </ng-container>
 
   <div
@@ -167,7 +185,22 @@
         </div>
       </div>
       <div class="drawer__foot">
-        <button type="button" class="btn btn--ghost" (click)="printInvoice(bill)">Print</button>
+        <button
+          type="button"
+          class="btn btn--ghost"
+          *ngIf="bill.paymentStatus !== 'pending'"
+          (click)="printInvoice(bill)"
+        >
+          Print
+        </button>
+        <button
+          type="button"
+          class="btn btn--ghost"
+          *ngIf="canCancelBill(bill)"
+          (click)="cancelBill(bill)"
+        >
+          Cancel
+        </button>
         <button
           type="button"
           class="btn btn--danger"

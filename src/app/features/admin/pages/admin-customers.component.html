@@ -18,6 +18,17 @@
     </button>
   </div>
 
+  <div class="filters" role="tablist" aria-label="Account status">
+    <button
+      type="button"
+      *ngFor="let kind of statusFilters"
+      [class.is-active]="statusFilter === kind.id"
+      (click)="setStatusFilter(kind.id)"
+    >
+      {{ kind.label }}
+    </button>
+  </div>
+
   <ng-container *ngIf="!listLoading; else listShimmer">
     <div class="table-wrap" [class.is-menu-open]="!!menuOpenId" *ngIf="users.length; else emptyCustomers">
       <table class="data-table">
@@ -74,7 +85,7 @@
                   <span>View</span>
                 </button>
 
-                <div class="menu" [class.is-open]="menuOpenId === user.id" *ngIf="(user.role || 'customer') === 'customer'">
+                <div class="menu" [class.is-open]="menuOpenId === user.id" *ngIf="showActionMenu(user)">
                   <button
                     type="button"
                     class="icon-btn icon-btn--more"
@@ -89,25 +100,44 @@
                     </svg>
                   </button>
                   <div class="menu__panel" *ngIf="menuOpenId === user.id">
-                    <button
-                      type="button"
-                      *ngIf="user.accountStatus !== 'active' && user.accountStatus !== 'approved'"
-                      (click)="setStatus(user, 'active')"
-                    >
-                      Activate
-                    </button>
-                    <button type="button" (click)="setStatus(user, 'blocked')">Block</button>
-                    <button
-                      type="button"
-                      *ngIf="user.accountStatus !== 'blocked'"
-                      (click)="setStatus(user, 'deactivated')"
-                    >
-                      Deactivate
-                    </button>
-                    <button type="button" *ngIf="isSuperAdmin" (click)="resetLoginAttempts(user)">
-                      Reset login lock
-                    </button>
-                    <button type="button" class="is-danger" (click)="remove(user)">Delete</button>
+                    <!-- blocked: Unblock + Delete -->
+                    <ng-container *ngIf="isBlocked(user)">
+                      <button type="button" (click)="setStatus(user, 'active')">Unblock / Release</button>
+                      <button type="button" *ngIf="isSuperAdmin" (click)="resetLoginAttempts(user)">
+                        Reset login lock
+                      </button>
+                      <button type="button" class="is-danger" (click)="remove(user)">Delete</button>
+                    </ng-container>
+
+                    <!-- active / approved: Block, Deactivate, Delete -->
+                    <ng-container *ngIf="isActiveLike(user)">
+                      <button type="button" (click)="setStatus(user, 'blocked')">Block</button>
+                      <button type="button" (click)="setStatus(user, 'deactivated')">Deactivate</button>
+                      <button type="button" *ngIf="isSuperAdmin" (click)="resetLoginAttempts(user)">
+                        Reset login lock
+                      </button>
+                      <button type="button" class="is-danger" (click)="remove(user)">Delete</button>
+                    </ng-container>
+
+                    <!-- deactivated: Activate + Delete -->
+                    <ng-container *ngIf="isDeactivated(user)">
+                      <button type="button" (click)="setStatus(user, 'active')">Activate</button>
+                      <button type="button" *ngIf="isSuperAdmin" (click)="resetLoginAttempts(user)">
+                        Reset login lock
+                      </button>
+                      <button type="button" class="is-danger" (click)="remove(user)">Delete</button>
+                    </ng-container>
+
+                    <!-- other non-deleted statuses -->
+                    <ng-container *ngIf="!isBlocked(user) && !isActiveLike(user) && !isDeactivated(user)">
+                      <button type="button" (click)="setStatus(user, 'active')">Activate</button>
+                      <button type="button" (click)="setStatus(user, 'blocked')">Block</button>
+                      <button type="button" (click)="setStatus(user, 'deactivated')">Deactivate</button>
+                      <button type="button" *ngIf="isSuperAdmin" (click)="resetLoginAttempts(user)">
+                        Reset login lock
+                      </button>
+                      <button type="button" class="is-danger" (click)="remove(user)">Delete</button>
+                    </ng-container>
                   </div>
                 </div>
               </div>
@@ -117,11 +147,11 @@
       </table>
     </div>
 
-    <div class="pager" *ngIf="pagination.pages > 1">
+    <div class="pager" *ngIf="pagination.total > 0">
       <button type="button" class="btn btn--ghost" (click)="prev()" [disabled]="pagination.page <= 1">
         Previous
       </button>
-      <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+      <span>Page {{ pagination.page }} of {{ pagination.pages }} · {{ pagination.total }} total</span>
       <button
         type="button"
         class="btn btn--ghost"
@@ -144,7 +174,14 @@
 </ng-template>
 
 <ng-template #listShimmer>
-  <app-shimmer variant="data-table" [columns]="6" [rows]="6"></app-shimmer>
+  <div class="list-shimmer">
+    <app-shimmer variant="data-table" [columns]="6" [rows]="6"></app-shimmer>
+    <div class="pager pager--shimmer" aria-hidden="true">
+      <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
+      <span class="pager-shimmer__bone pager-shimmer__bone--label"></span>
+      <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
+    </div>
+  </div>
 </ng-template>
 
 <div
@@ -229,6 +266,11 @@
           </div>
         </dl>
       </section>
+
+      <p class="hint" *ngIf="(user.role || 'customer') === 'customer'">
+        Portal login and banking access use the same account status. Blocked customers can reach staff via
+        Contact administrator or email support on the sign-in screens.
+      </p>
 
       <p class="hint" *ngIf="(user.role || 'customer') === 'customer'">
         Use the <app-nb-icon name="chart"></app-nb-icon> icon next to the account number in the table

@@ -67,6 +67,7 @@ export class AdminService {
   });
   private readonly staffPendingSubject = new BehaviorSubject<User[]>([]);
   private readonly limitRequestsSubject = new BehaviorSubject<User[]>([]);
+  private lastCustomerOpts: { scope?: 'all' | 'customers'; role?: string; status?: string } = {};
 
   readonly users$ = this.usersSubject.asObservable();
   readonly requests$ = this.requestsSubject.asObservable();
@@ -88,13 +89,24 @@ export class AdminService {
     return this.paginationSubject.value;
   }
 
-  refreshCustomers(page = 1, limit = 5, opts?: { scope?: 'all' | 'customers'; role?: string }): Observable<AdminCustomersPage> {
+  refreshCustomers(
+    page = 1,
+    limit = 5,
+    opts?: { scope?: 'all' | 'customers'; role?: string; status?: string }
+  ): Observable<AdminCustomersPage> {
+    if (opts !== undefined) {
+      this.lastCustomerOpts = { ...opts };
+    }
+    const effective = opts ?? this.lastCustomerOpts ?? {};
     let params = new HttpParams().set('page', String(page)).set('limit', String(limit));
-    if (opts?.scope === 'all') {
+    if (effective.scope === 'all') {
       params = params.set('scope', 'all');
     }
-    if (opts?.role) {
-      params = params.set('role', opts.role);
+    if (effective.role) {
+      params = params.set('role', effective.role);
+    }
+    if (effective.status && effective.status !== 'all') {
+      params = params.set('status', effective.status);
     }
     return this.http
       .get<AdminCustomersPage>(`${environment.apiUrl}/admin/customers`, { params })

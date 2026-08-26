@@ -430,6 +430,40 @@
   }
 }
 
+.sales-targets-card {
+  margin-top: 1rem;
+}
+
+.sales-targets-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.sales-targets-summary__kpi {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.85rem;
+  background: rgba(255, 200, 1, 0.12);
+  border: 1px solid rgba(255, 153, 50, 0.22);
+
+  span {
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+  }
+
+  strong {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 750;
+    color: var(--text);
+  }
+}
+
 @media (max-width: 860px) {
   .donut-layout,
   .bar-chart {
@@ -442,5 +476,9 @@
 
   .bar-chart__track {
     height: 5.5rem;
+  }
+
+  .sales-targets-summary {
+    grid-template-columns: 1fr;
   }
 }

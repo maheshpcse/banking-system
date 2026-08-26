@@ -27,21 +27,24 @@
         [(ngModel)]="customerId"
         [options]="customerOptions"
         ariaLabel="Customer filter"
+        (valueChange)="onCriteriaChange()"
       ></app-theme-select>
       <app-theme-select
         controlClass="input input--select"
         [(ngModel)]="productId"
         [options]="productOptions"
         ariaLabel="Product filter"
+        (valueChange)="onCriteriaChange()"
       ></app-theme-select>
       <app-theme-select
         controlClass="input input--select"
         [(ngModel)]="paymentMethod"
         [options]="methodOptions"
         ariaLabel="Payment method"
+        (valueChange)="onCriteriaChange()"
       ></app-theme-select>
-      <input class="input" type="date" [(ngModel)]="from" />
-      <input class="input" type="date" [(ngModel)]="to" />
+      <input class="input" type="date" [(ngModel)]="from" (ngModelChange)="onCriteriaChange()" />
+      <input class="input" type="date" [(ngModel)]="to" (ngModelChange)="onCriteriaChange()" />
       <button type="button" class="btn btn--ghost" (click)="applyFilters()">Filter</button>
     </div>
 
@@ -224,10 +227,6 @@
           </li>
         </ul>
       </section>
-
-      <div class="drawer__foot">
-        <button type="button" class="btn btn--ghost" (click)="closeDetail()">Close</button>
-      </div>
     </ng-container>
   </aside>
 </section>

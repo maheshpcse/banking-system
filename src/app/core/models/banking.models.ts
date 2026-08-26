@@ -409,6 +409,29 @@ export interface BillingDashboardStats {
   recentBills: BillingBill[];
 }
 
+export interface BillingSalesReportRow {
+  name: string;
+  qty: number;
+  revenue: number;
+  orderCount: number;
+  productId?: string | null;
+  customerId?: string | null;
+}
+
+export interface BillingSalesReport {
+  cadence: 'daily' | 'weekly' | 'biweekly' | 'monthly' | string;
+  range: string;
+  from: string;
+  to: string;
+  productSales: BillingSalesReportRow[];
+  customerPurchases: BillingSalesReportRow[];
+  totals: {
+    revenue: number;
+    qty: number;
+    orderCount: number;
+  };
+}
+
 export interface BillingGatewaySettings {
   id?: string;
   merchantName: string;

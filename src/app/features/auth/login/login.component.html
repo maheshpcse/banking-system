@@ -108,8 +108,12 @@
         New here?
         <a routerLink="/auth/register">Create an account</a>
       </p>
+      <p class="auth-switch" *ngIf="isBillingLogin">
+        New here?
+        <a routerLink="/auth/staff-signup">Create an account</a>
+      </p>
       <p class="auth-switch auth-switch--home">
-        <a routerLink="/">Back to home</a>
+        <a [routerLink]="isBillingLogin ? '/novabill' : '/'">Back to home</a>
       </p>
     </app-animated-card>
 
@@ -117,6 +121,10 @@
       Bank staff?
       <a routerLink="/auth/staff-signup">Request manager/admin access</a>
       ·
+      <a routerLink="/auth/staff-status">Check status</a>
+    </p>
+    <p class="auth-footnote" *ngIf="isBillingLogin">
+      Already applied?
       <a routerLink="/auth/staff-status">Check status</a>
     </p>
   </div>

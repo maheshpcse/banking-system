@@ -8,6 +8,7 @@ import { ManagerApprovalsComponent } from './pages/manager-approvals.component';
 import { ManagerReportsComponent } from './pages/manager-reports.component';
 import { ManagerBillingComponent } from './pages/manager-billing.component';
 import { ManagerLimitsComponent } from './pages/manager-limits.component';
+import { ManagerSalesTargetsComponent } from './pages/manager-sales-targets.component';
 
 const routes: Routes = [
   {
@@ -19,6 +20,7 @@ const routes: Routes = [
       { path: 'approvals', component: ManagerApprovalsComponent },
       { path: 'limits', component: ManagerLimitsComponent },
       { path: 'reports', component: ManagerReportsComponent },
+      { path: 'sales-targets', component: ManagerSalesTargetsComponent },
       { path: 'billing', component: ManagerBillingComponent }
     ]
   }
@@ -32,6 +34,7 @@ const routes: Routes = [
     ManagerApprovalsComponent,
     ManagerLimitsComponent,
     ManagerReportsComponent,
+    ManagerSalesTargetsComponent,
     ManagerBillingComponent
   ],
   imports: [SharedModule, RouterModule.forChild(routes)]

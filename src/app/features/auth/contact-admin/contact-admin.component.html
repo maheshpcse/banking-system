@@ -1,6 +1,6 @@
 <section
   class="contact-admin"
-  *ngIf="!pageLoading; else authShimmer"
+  *ngIf="!pageLoading; else contactShimmer"
   [class.contact-admin--thanks]="submitted"
 >
   <div class="contact-admin__glow" aria-hidden="true"></div>
@@ -49,6 +49,7 @@
             {{ loading ? 'Sending…' : 'Send request' }}
           </button>
           <a class="btn btn--ghost" routerLink="/auth/login">Back to sign in</a>
+          <button type="button" class="btn btn--home" (click)="goHome()">Back To Home</button>
         </div>
       </form>
     </ng-container>
@@ -86,6 +87,6 @@
   </div>
 </section>
 
-<ng-template #authShimmer>
-  <app-shimmer variant="form"></app-shimmer>
+<ng-template #contactShimmer>
+  <app-shimmer variant="contact-admin"></app-shimmer>
 </ng-template>

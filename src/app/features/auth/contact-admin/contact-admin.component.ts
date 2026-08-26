@@ -97,12 +97,17 @@ export class ContactAdminComponent implements OnInit, OnDestroy {
         if (err?.error?.supportEmail) {
           this.supportEmail = err.error.supportEmail;
         }
+        this.formError = msg;
         if (code === 'CONTACT_DUPLICATE') {
           await this.alerts.info(msg, 'Request already open');
-          this.formError = msg;
           return;
         }
-        this.formError = msg;
+        const status = err?.status;
+        if (status === 404 || status === 400) {
+          await this.alerts.info(msg, 'Unable to send request');
+          return;
+        }
+        await this.alerts.error(msg);
       }
     });
   }

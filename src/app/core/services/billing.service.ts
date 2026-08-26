@@ -13,7 +13,8 @@ import {
   BillingPayment,
   BillingPaymentMethod,
   BillingProduct,
-  BillingPurchase
+  BillingPurchase,
+  BillingSalesReport
 } from '../models/banking.models';
 
 @Injectable({ providedIn: 'root' })
@@ -24,6 +25,21 @@ export class BillingService {
 
   getStats(): Observable<BillingDashboardStats> {
     return this.http.get<BillingDashboardStats>(`${this.base}/dashboard/stats`);
+  }
+
+  getSalesReports(query: {
+    cadence?: string;
+    range?: string;
+    from?: string;
+    to?: string;
+  } = {}): Observable<BillingSalesReport> {
+    let params = new HttpParams();
+    Object.entries(query).forEach(([key, value]) => {
+      if (value != null && value !== '') {
+        params = params.set(key, String(value));
+      }
+    });
+    return this.http.get<BillingSalesReport>(`${this.base}/sales-reports`, { params });
   }
 
   listProducts(q = ''): Observable<{ items: BillingProduct[] }> {
@@ -79,6 +95,8 @@ export class BillingService {
     from?: string;
     to?: string;
     paymentStatus?: string;
+    sort?: string;
+    order?: 'asc' | 'desc';
     page?: number;
     limit?: number;
   } = {}): Observable<{ items: BillingBill[]; page: number; limit: number; total: number; pages: number }> {
@@ -108,8 +126,19 @@ export class BillingService {
     );
   }
 
-  deleteBill(id: string): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.base}/bills/${id}`);
+  cancelBill(
+    id: string,
+    statusReason: string
+  ): Observable<{ message: string; bill: BillingBill }> {
+    return this.http.patch<{ message: string; bill: BillingBill }>(`${this.base}/bills/${id}/cancel`, {
+      statusReason
+    });
+  }
+
+  deleteBill(id: string, statusReason?: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.base}/bills/${id}`, {
+      body: statusReason ? { statusReason } : { statusReason: 'Deleted by staff before settlement.' }
+    });
   }
 
   createBill(payload: {
