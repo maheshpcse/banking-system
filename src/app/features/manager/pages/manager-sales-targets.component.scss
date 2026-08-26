@@ -6,9 +6,7 @@
   margin: 0.35rem 0 1rem;
 }
 
-.sales-totals {
-  margin-bottom: 1rem;
-}
+.sales-totals { margin-bottom: 1rem; }
 
 .admin-hero {
   display: flex;
@@ -17,6 +15,15 @@
   justify-content: space-between;
   gap: 1rem;
 }
+
+.admin-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.flip-btn { white-space: nowrap; }
 
 .range-select {
   display: grid;
@@ -43,10 +50,7 @@
   align-items: flex-end;
 }
 
-.custom-range label {
-  display: grid;
-  gap: 0.3rem;
-}
+.custom-range label { display: grid; gap: 0.3rem; }
 
 .custom-range span {
   font-size: 0.72rem;
@@ -65,9 +69,117 @@
   color: var(--text);
 }
 
+.sales-tape { display: grid; gap: 0.65rem; }
+
+.sales-tape__stage {
+  position: relative;
+  min-height: 13rem;
+  padding: 0.85rem 0.7rem 0.45rem;
+  border-radius: 0.95rem;
+  background:
+    linear-gradient(180deg, rgba(15, 118, 110, 0.08), transparent 48%),
+    rgba(241, 245, 249, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.sales-tape__grid {
+  position: absolute;
+  inset: 0.85rem 0.7rem 2.8rem;
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
+  pointer-events: none;
+
+  span { border-top: 1px dashed rgba(148, 163, 184, 0.28); }
+}
+
+.sales-tape__bars {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(3.2rem, 1fr));
+  gap: 0.45rem;
+  align-items: end;
+  min-height: 10.5rem;
+}
+
+.sales-tape__col {
+  display: grid;
+  gap: 0.3rem;
+  justify-items: center;
+}
+
+.sales-tape__track {
+  width: 100%;
+  max-width: 1.85rem;
+  height: 8.5rem;
+  border-radius: 0.35rem 0.35rem 0.12rem 0.12rem;
+  background: rgba(148, 163, 184, 0.14);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.sales-tape__fill {
+  width: 100%;
+  min-height: 0.25rem;
+  border-radius: inherit;
+  transition: height 0.4s ease;
+}
+
+.sales-tape__value {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sales-tape__label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.sales-tape__line {
+  position: absolute;
+  left: 0.7rem;
+  right: 0.7rem;
+  top: 1.4rem;
+  height: 8.8rem;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.sales-tape__area { fill: rgba(95, 196, 176, 0.14); }
+
+.sales-tape__path {
+  fill: none;
+  stroke: #d4a017;
+  stroke-width: 0.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sales-tape__point {
+  fill: #5fc4b0;
+  stroke: #fff;
+  stroke-width: 0.35;
+}
+
 @media (max-width: 720px) {
   .sales-toolbar {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .admin-hero__actions { width: 100%; }
+
+  .sales-tape__bars {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

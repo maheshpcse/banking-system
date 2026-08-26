@@ -455,6 +455,22 @@
   letter-spacing: 0.04em;
   color: rgba(45, 70, 82, 0.62);
   font-weight: 600;
+  pointer-events: auto;
+}
+
+.home__foot-link {
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.home__foot-link:hover,
+.home__foot-link:focus-visible {
+  color: var(--accent-deep, #2f8f7f);
+  text-decoration: none;
+  outline: none;
 }
 
 .home__foot-sig {

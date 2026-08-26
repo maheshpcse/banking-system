@@ -34,7 +34,21 @@
   </div>
 
   <footer class="home__foot" aria-label="Site signature">
-    <span class="home__foot-sig">NovaBank · NovaBill</span>
-    <span class="home__foot-copy">© {{ year }} NovaBank. All rights reserved.</span>
+    <span class="home__foot-sig">
+      <a class="home__foot-link" routerLink="/">NovaBank</a>
+      <span aria-hidden="true"> · </span>
+      <a class="home__foot-link" routerLink="/novabill">NovaBill</a>
+      <span aria-hidden="true"> · </span>
+      <a class="home__foot-link" routerLink="/auth/login" [queryParams]="{ next: 'billing' }">Billing System</a>
+    </span>
+    <span class="home__foot-copy">
+      © {{ year }}
+      <a class="home__foot-link" routerLink="/">NovaBank</a>
+      <span aria-hidden="true"> · </span>
+      <a class="home__foot-link" routerLink="/novabill">NovaBill</a>
+      <span aria-hidden="true"> · </span>
+      <a class="home__foot-link" routerLink="/auth/login" [queryParams]="{ next: 'billing' }">Billing System</a>.
+      All rights reserved.
+    </span>
   </footer>
 </section>

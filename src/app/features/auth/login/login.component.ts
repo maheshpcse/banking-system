@@ -84,7 +84,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         const next = this.route.snapshot.queryParamMap.get('next');
         if (next === 'billing' && role === 'customer' && !this.auth.currentUser?.isSuperAdmin) {
           this.loading = false;
-          this.auth.logout();
+          this.auth.logout({ redirect: false });
           const goLogin = await this.alerts.billingStaffOnly(
             'Customer accounts cannot sign in to the Billing System. Managers and Admins only.'
           );

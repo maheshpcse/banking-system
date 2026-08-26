@@ -12,13 +12,25 @@ import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 export class ManagerLimitsComponent implements OnInit {
   pageLoading = true;
   items: User[] = [];
+  readonly pageSize = 5;
+  page = 1;
 
   constructor(private readonly admin: AdminService, private readonly alerts: AlertService) {}
+
+  get pages(): number {
+    return Math.max(1, Math.ceil(this.items.length / this.pageSize));
+  }
+
+  get paged(): User[] {
+    const start = (this.page - 1) * this.pageSize;
+    return this.items.slice(start, start + this.pageSize);
+  }
 
   ngOnInit(): void {
     withShimmerDelay(this.admin.listLimitRequests(), SHIMMER_MS).subscribe({
       next: (items) => {
         this.items = items;
+        this.page = 1;
         this.pageLoading = false;
       },
       error: async (err) => {
@@ -26,6 +38,18 @@ export class ManagerLimitsComponent implements OnInit {
         await this.alerts.error(err?.error?.message || 'Unable to load limit requests');
       }
     });
+  }
+
+  prev(): void {
+    if (this.page > 1) {
+      this.page -= 1;
+    }
+  }
+
+  next(): void {
+    if (this.page < this.pages) {
+      this.page += 1;
+    }
   }
 
   async approve(user: User): Promise<void> {
@@ -39,6 +63,9 @@ export class ManagerLimitsComponent implements OnInit {
         (err as { error?: { message?: string } })?.error?.message || 'Unable to approve limits'
     });
     this.items = this.admin.listLimitRequestsSnapshot();
+    if (this.page > this.pages) {
+      this.page = this.pages;
+    }
   }
 
   async reject(user: User): Promise<void> {
@@ -52,5 +79,8 @@ export class ManagerLimitsComponent implements OnInit {
         (err as { error?: { message?: string } })?.error?.message || 'Unable to reject limits'
     });
     this.items = this.admin.listLimitRequestsSnapshot();
+    if (this.page > this.pages) {
+      this.page = this.pages;
+    }
   }
 }

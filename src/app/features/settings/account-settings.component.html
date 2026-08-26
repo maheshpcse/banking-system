@@ -218,6 +218,10 @@
         subtitle="Card info"
       >
         <form class="form banking-form-wrap" [formGroup]="bankingForm" (ngSubmit)="submitBankingApplication()">
+          <p class="meta" *ngIf="bankingRestricted" style="margin:0 0 0.75rem">
+            Banking account is {{ bankingStatusLabel }}. Card details cannot be updated until the account is active again.
+          </p>
+          <fieldset class="banking-restricted-wrap" [disabled]="bankingRestricted">
           <div class="banking-layout">
             <aside class="banking-layout__card">
               <div class="card-stage">
@@ -435,9 +439,10 @@
             </div>
           </div>
 
-          <button class="btn btn--primary" type="submit" [disabled]="savingApplication">
+          <button class="btn btn--primary" type="submit" [disabled]="savingApplication || bankingRestricted">
             {{ savingApplication ? 'Submitting…' : (hasAccountNumber ? 'Update card & address' : 'Submit for verification') }}
           </button>
+          </fieldset>
         </form>
       </app-animated-card>
 
@@ -449,6 +454,10 @@
         subtitle="Live protections"
       >
         <form class="form form--prefs card-controls" [formGroup]="cardControlsForm" (ngSubmit)="saveCardControls()">
+          <p class="meta" *ngIf="bankingRestricted" style="margin:0 0 0.75rem">
+            Banking account is {{ bankingStatusLabel }}. Card controls cannot be changed until the account is active again.
+          </p>
+          <fieldset class="banking-restricted-wrap" [disabled]="bankingRestricted">
           <label class="toggle toggle--danger">
             <input type="checkbox" formControlName="frozen" />
             <span>Freeze card — pause all money movement immediately</span>
@@ -476,9 +485,10 @@
           <p class="form__hint" *ngIf="cardControlsForm.value.frozen">
             Your card is frozen — deposits, withdrawals, and transfers are paused until you unfreeze it.
           </p>
-          <button class="btn btn--primary" type="submit" [disabled]="savingCardControls">
+          <button class="btn btn--primary" type="submit" [disabled]="savingCardControls || bankingRestricted">
             {{ savingCardControls ? 'Saving…' : 'Save card controls' }}
           </button>
+          </fieldset>
         </form>
       </app-animated-card>
 
