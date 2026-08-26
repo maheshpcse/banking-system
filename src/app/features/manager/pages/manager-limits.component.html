@@ -9,38 +9,78 @@
     </div>
   </header>
 
-  <div class="request-list" *ngIf="items.length; else empty">
-    <article class="request-card" *ngFor="let user of paged">
-      <div class="request-card__copy">
-        <strong>{{ user.fullName }}</strong>
-        <p>{{ user.email }} · {{ user.pendingLimitRequest?.requestedAt | date: 'medium' }}</p>
-        <p class="muted">
-          Deposit {{ user.pendingLimitRequest?.proposed?.depositDaily | currencyFormat }} · Withdraw
-          {{ user.pendingLimitRequest?.proposed?.withdrawDaily | currencyFormat }} · Transfer
-          {{ user.pendingLimitRequest?.proposed?.transferDaily | currencyFormat }} ·
-          {{ user.pendingLimitRequest?.proposed?.transferCountDaily }} transfers/day
-        </p>
-        <span class="pill" data-status="under_review">pending</span>
-      </div>
-      <div class="request-card__actions">
-        <button type="button" class="btn btn--ghost btn--compact" (click)="reject(user)">Reject</button>
-        <button type="button" class="btn btn--primary btn--compact" (click)="approve(user)">Approve</button>
-      </div>
-    </article>
+  <div class="filters limit-tabs">
+    <button
+      type="button"
+      *ngFor="let tab of tabs"
+      [class.is-active]="status === tab.id"
+      (click)="setStatus(tab.id)"
+    >
+      {{ tab.label }}
+    </button>
   </div>
 
-  <div class="pager" *ngIf="items.length">
-    <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
-    <span>Page {{ page }} / {{ pages }} · {{ items.length }} total</span>
-    <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
-  </div>
+  <ng-container *ngIf="!listLoading; else listShimmer">
+    <div class="request-list" *ngIf="items.length; else empty">
+      <article class="request-card" *ngFor="let user of paged">
+        <div class="request-card__copy">
+          <strong>{{ user.fullName }}</strong>
+          <p>
+            {{ user.email }} ·
+            {{
+              (user.pendingLimitRequest?.decidedAt || user.pendingLimitRequest?.requestedAt) | date: 'medium'
+            }}
+          </p>
+          <p class="muted">
+            Deposit {{ user.pendingLimitRequest?.proposed?.depositDaily | currencyFormat }} · Withdraw
+            {{ user.pendingLimitRequest?.proposed?.withdrawDaily | currencyFormat }} · Transfer
+            {{ user.pendingLimitRequest?.proposed?.transferDaily | currencyFormat }} ·
+            {{ user.pendingLimitRequest?.proposed?.transferCountDaily }} transfers/day
+          </p>
+          <span class="pill" [attr.data-status]="requestStatus(user) === 'pending' ? 'under_review' : requestStatus(user)">
+            {{ requestStatus(user) }}
+          </span>
+          <p class="muted" *ngIf="user.pendingLimitRequest?.reviewNote">
+            Note: {{ user.pendingLimitRequest?.reviewNote }}
+          </p>
+        </div>
+        <div class="request-card__actions" *ngIf="status === 'pending'">
+          <button type="button" class="btn btn--ghost btn--compact" (click)="reject(user)">Reject</button>
+          <button type="button" class="btn btn--primary btn--compact" (click)="approve(user)">Approve</button>
+        </div>
+      </article>
+    </div>
+
+    <div class="pager" *ngIf="items.length">
+      <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
+      <span>Page {{ page }} / {{ pages }} · {{ items.length }} total</span>
+      <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
+    </div>
+  </ng-container>
 
   <ng-template #empty>
-    <app-empty-state kind="requests"
-    message="No pending daily-limit requests."></app-empty-state>
+    <app-empty-state
+      kind="requests"
+      [message]="
+        status === 'pending'
+          ? 'No pending daily-limit requests.'
+          : status === 'approved'
+            ? 'No approved limit requests yet.'
+            : 'No rejected limit requests yet.'
+      "
+    ></app-empty-state>
   </ng-template>
 </section>
 
 <ng-template #shimmer>
   <app-shimmer variant="admin-requests"></app-shimmer>
+</ng-template>
+
+<ng-template #listShimmer>
+  <app-shimmer variant="admin-requests-list"></app-shimmer>
+  <div class="pager pager--shimmer" aria-hidden="true">
+    <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
+    <span class="pager-shimmer__bone pager-shimmer__bone--label"></span>
+    <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
+  </div>
 </ng-template>

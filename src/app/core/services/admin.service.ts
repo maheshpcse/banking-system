@@ -348,11 +348,17 @@ export class AdminService {
     return this.limitRequestsSubject.value;
   }
 
-  listLimitRequests(): Observable<User[]> {
-    return this.http.get<{ items: User[] }>(`${environment.apiUrl}/admin/limit-requests`).pipe(
-      map((res) => res.items || []),
-      tap((items) => this.limitRequestsSubject.next(items))
-    );
+  listLimitRequests(status: 'pending' | 'approved' | 'rejected' | 'all' = 'pending'): Observable<User[]> {
+    let params = new HttpParams();
+    if (status) {
+      params = params.set('status', status);
+    }
+    return this.http
+      .get<{ items: User[] }>(`${environment.apiUrl}/admin/limit-requests`, { params })
+      .pipe(
+        map((res) => res.items || []),
+        tap((items) => this.limitRequestsSubject.next(items))
+      );
   }
 
   async approveLimitRequest(userId: string, reviewNote?: string): Promise<User | null> {

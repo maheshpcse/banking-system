@@ -15,6 +15,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   kindFilter: '' | NotificationKind = '';
   pageLoading = true;
   listLoading = false;
+  readonly pageSize = 8;
+  page = 1;
   private sub?: Subscription;
 
   readonly kinds: Array<{ id: '' | NotificationKind; label: string }> = [
@@ -37,8 +39,22 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     return this.items.filter((item) => item.kind === this.kindFilter);
   }
 
+  get pages(): number {
+    return Math.max(1, Math.ceil(this.filtered.length / this.pageSize));
+  }
+
+  get paged(): AppNotification[] {
+    const start = (this.page - 1) * this.pageSize;
+    return this.filtered.slice(start, start + this.pageSize);
+  }
+
   ngOnInit(): void {
-    this.sub = this.notifications.notifications$.subscribe((items) => (this.items = items));
+    this.sub = this.notifications.notifications$.subscribe((items) => {
+      this.items = items;
+      if (this.page > this.pages) {
+        this.page = this.pages;
+      }
+    });
     withShimmerDelay(this.notifications.refresh(), SHIMMER_MS).subscribe(() => {
       this.pageLoading = false;
     });
@@ -53,9 +69,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       return;
     }
     this.kindFilter = kind;
-    this.listLoading = true;
-    shimmerPause(SHIMMER_MS).subscribe(() => {
-      this.listLoading = false;
+    this.flashList(() => {
+      this.page = 1;
     });
   }
 
@@ -64,9 +79,24 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       return;
     }
     this.view = view;
-    this.listLoading = true;
-    shimmerPause(SHIMMER_MS).subscribe(() => {
-      this.listLoading = false;
+    this.flashList();
+  }
+
+  prev(): void {
+    if (this.page <= 1) {
+      return;
+    }
+    this.flashList(() => {
+      this.page -= 1;
+    });
+  }
+
+  next(): void {
+    if (this.page >= this.pages) {
+      return;
+    }
+    this.flashList(() => {
+      this.page += 1;
     });
   }
 
@@ -76,5 +106,13 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   markAll(): void {
     this.notifications.markAllRead();
+  }
+
+  private flashList(mutate?: () => void): void {
+    this.listLoading = true;
+    shimmerPause(SHIMMER_MS).subscribe(() => {
+      mutate?.();
+      this.listLoading = false;
+    });
   }
 }

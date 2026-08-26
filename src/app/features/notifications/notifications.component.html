@@ -38,7 +38,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of filtered" (click)="markRead(item)" [class.is-unread]="!item.read">
+            <tr *ngFor="let item of paged" (click)="markRead(item)" [class.is-unread]="!item.read">
               <td>{{ item.createdAt | date: 'short' }}</td>
               <td>{{ item.kind }}</td>
               <td>{{ item.title }}</td>
@@ -52,7 +52,7 @@
       <div [class]="view === 'grid' ? 'notif-grid' : 'notif-list'" *ngIf="view !== 'table'">
         <article
           class="notif-card"
-          *ngFor="let item of filtered"
+          *ngFor="let item of paged"
           [class.is-unread]="!item.read"
           (click)="markRead(item)"
         >
@@ -65,6 +65,12 @@
             <time>{{ item.createdAt | date: 'medium' }}</time>
           </div>
         </article>
+      </div>
+
+      <div class="pager" *ngIf="filtered.length">
+        <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
+        <span>Page {{ page }} / {{ pages }} · {{ filtered.length }} total</span>
+        <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
       </div>
     </ng-container>
   </ng-container>
@@ -82,5 +88,10 @@
 <ng-template #listShimmer>
   <app-shimmer *ngIf="view === 'list'" variant="notifications-list"></app-shimmer>
   <app-shimmer *ngIf="view === 'grid'" variant="notifications-grid"></app-shimmer>
-  <app-shimmer *ngIf="view === 'table'" variant="data-table" [columns]="5" [rows]="4"></app-shimmer>
+  <app-shimmer *ngIf="view === 'table'" variant="data-table" [columns]="5" [rows]="8"></app-shimmer>
+  <div class="pager pager--shimmer" aria-hidden="true">
+    <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
+    <span class="pager-shimmer__bone pager-shimmer__bone--label"></span>
+    <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
+  </div>
 </ng-template>

@@ -434,11 +434,20 @@ export interface BillingSalesReportRow {
   customerId?: string | null;
 }
 
+export interface BillingSalesSeriesPoint {
+  key: string;
+  label: string;
+  revenue: number;
+  qty: number;
+  orderCount: number;
+}
+
 export interface BillingSalesReport {
   cadence: 'daily' | 'weekly' | 'biweekly' | 'monthly' | string;
   range: string;
   from: string;
   to: string;
+  series?: BillingSalesSeriesPoint[];
   productSales: BillingSalesReportRow[];
   customerPurchases: BillingSalesReportRow[];
   totals: {
