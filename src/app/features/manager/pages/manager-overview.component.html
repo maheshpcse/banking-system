@@ -232,7 +232,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let row of dailyGridRows">
+                  <tr *ngFor="let row of pagedDailyGridRows">
                     <td><strong>{{ row.label }}</strong></td>
                     <td>{{ row.deposit | currencyFormat }}</td>
                     <td>{{ row.withdraw | currencyFormat }}</td>
@@ -242,6 +242,25 @@
                   </tr>
                 </tbody>
               </table>
+              <div class="pager" *ngIf="dailyGridRows.length">
+                <button
+                  type="button"
+                  class="btn btn--ghost"
+                  [disabled]="flowTablePage <= 1"
+                  (click)="prevFlowTable()"
+                >
+                  Previous
+                </button>
+                <span>Page {{ flowTablePage }} / {{ flowDailyPages }} · {{ dailyGridRows.length }} total</span>
+                <button
+                  type="button"
+                  class="btn btn--ghost"
+                  [disabled]="flowTablePage >= flowDailyPages"
+                  (click)="nextFlowTable()"
+                >
+                  Next
+                </button>
+              </div>
             </div>
 
             <ng-template #dailySingleBlock>
@@ -256,7 +275,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let row of dailyLedgerRows">
+                    <tr *ngFor="let row of pagedDailyLedgerRows">
                       <td><strong>{{ row.label }}</strong></td>
                       <td>
                         <span class="pill" [attr.data-status]="row.key">{{ row.typeLabel }}</span>
@@ -266,6 +285,25 @@
                     </tr>
                   </tbody>
                 </table>
+                <div class="pager" *ngIf="dailyLedgerRows.length">
+                  <button
+                    type="button"
+                    class="btn btn--ghost"
+                    [disabled]="flowTablePage <= 1"
+                    (click)="prevFlowTable()"
+                  >
+                    Previous
+                  </button>
+                  <span>Page {{ flowTablePage }} / {{ flowDailyPages }} · {{ dailyLedgerRows.length }} total</span>
+                  <button
+                    type="button"
+                    class="btn btn--ghost"
+                    [disabled]="flowTablePage >= flowDailyPages"
+                    (click)="nextFlowTable()"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
               <ng-template #noDaily>
                 <app-empty-state kind="transactions"
@@ -320,8 +358,111 @@
       </p>
     </ng-container>
     <ng-template #salesSummaryGate>
-      <app-shimmer *ngIf="salesSummaryLoading" variant="manager-flow-chart"></app-shimmer>
+      <app-shimmer *ngIf="salesSummaryLoading" variant="manager-sales-card"></app-shimmer>
       <p class="hint" *ngIf="!salesSummaryLoading">Sales summary unavailable right now.</p>
+    </ng-template>
+  </app-animated-card>
+
+  <app-animated-card
+    class="sales-market-card"
+    accent="mint"
+    title="Sales tape"
+    subtitle="Product revenue · trading desk"
+    [tilt]="false"
+  >
+    <a
+      cardHeaderActions
+      routerLink="/manager/sales-targets"
+      class="btn btn--ghost btn--compact"
+      (click)="$event.stopPropagation()"
+    >
+      Open targets
+    </a>
+
+    <div class="flow-toolbar" (click)="$event.stopPropagation()">
+      <div class="range-cluster">
+        <label class="range-select">
+          <span>Cadence</span>
+          <app-theme-select
+            [(ngModel)]="salesChartCadence"
+            [options]="salesChartCadenceOptions"
+            name="salesChartCadence"
+            ariaLabel="Sales chart cadence"
+            (valueChange)="onSalesChartCadenceChange($event)"
+          ></app-theme-select>
+        </label>
+        <label class="range-select">
+          <span>Range</span>
+          <app-theme-select
+            [(ngModel)]="salesChartRange"
+            [options]="salesChartRangeOptions"
+            name="salesChartRange"
+            ariaLabel="Sales chart range"
+            (valueChange)="onSalesChartRangeChange($event)"
+          ></app-theme-select>
+        </label>
+      </div>
+    </div>
+
+    <app-shimmer *ngIf="salesChartLoading" variant="manager-sales-chart"></app-shimmer>
+
+    <ng-container *ngIf="!salesChartLoading && salesChart; else salesChartGate">
+      <div class="sales-market" *ngIf="salesChartBars.length; else noSalesChart">
+        <div class="sales-market__meta">
+          <span>{{ salesChartRangeLabel }} · {{ salesChart.totals.orderCount }} orders</span>
+          <strong>{{ salesChart.totals.revenue | currencyFormat }}</strong>
+        </div>
+        <div class="sales-market__stage">
+          <div class="sales-market__grid" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <div class="sales-market__bars">
+            <div class="sales-market__col" *ngFor="let bar of salesChartBars">
+              <span class="sales-market__value">{{ bar.revenue | currencyFormat }}</span>
+              <div class="sales-market__track">
+                <div
+                  class="sales-market__fill"
+                  [style.height.%]="bar.pct"
+                  [style.background]="bar.color"
+                ></div>
+              </div>
+              <span class="sales-market__label" [title]="bar.name">{{ bar.name }}</span>
+            </div>
+          </div>
+          <svg
+            class="sales-market__line"
+            viewBox="0 0 100 42"
+            preserveAspectRatio="none"
+            role="img"
+            aria-label="Product revenue trend"
+          >
+            <path class="sales-market__area" [attr.d]="salesChartAreaPath"></path>
+            <path class="sales-market__path" [attr.d]="salesChartLinePath"></path>
+            <circle
+              *ngFor="let bar of salesChartBars; let i = index"
+              class="sales-market__point"
+              [attr.cx]="salesChartPointX(i)"
+              [attr.cy]="salesChartPointY(bar.revenue)"
+              r="1.35"
+            >
+              <title>{{ bar.name }}: {{ bar.revenue | currencyFormat }}</title>
+            </circle>
+          </svg>
+        </div>
+        <ul class="sales-market__legend">
+          <li *ngFor="let bar of salesChartBars | slice:0:4">
+            <i [style.background]="bar.color"></i>
+            {{ bar.name }}
+            <em>{{ bar.qty }} u</em>
+          </li>
+        </ul>
+      </div>
+      <ng-template #noSalesChart>
+        <app-empty-state kind="transactions" message="No paid product sales in this range."></app-empty-state>
+      </ng-template>
+    </ng-container>
+    <ng-template #salesChartGate>
+      <p class="hint" *ngIf="!salesChartLoading">Sales chart unavailable right now.</p>
     </ng-template>
   </app-animated-card>
 
@@ -431,7 +572,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let bill of billingRecentRows">
+                <tr *ngFor="let bill of pagedBillingRecentRows">
                   <td><strong>{{ bill.billNumber }}</strong></td>
                   <td>{{ bill.customerName }}</td>
                   <td>{{ bill.paymentStatus }}</td>
@@ -439,6 +580,27 @@
                 </tr>
               </tbody>
             </table>
+            <div class="pager" *ngIf="billingRecentRows.length">
+              <button
+                type="button"
+                class="btn btn--ghost"
+                [disabled]="billingTablePage <= 1"
+                (click)="prevBillingTable()"
+              >
+                Previous
+              </button>
+              <span>
+                Page {{ billingTablePage }} / {{ billingRecentPages }} · {{ billingRecentRows.length }} total
+              </span>
+              <button
+                type="button"
+                class="btn btn--ghost"
+                [disabled]="billingTablePage >= billingRecentPages"
+                (click)="nextBillingTable()"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
         <ng-template #noBillingRows>

@@ -290,12 +290,13 @@ export class AlertService {
           <p class="nb-alert__text">${safe}</p>
           <p class="nb-alert__hint" style="margin:1rem 0 0;color:#5f7a8c;font-size:0.92rem;">
             Use NovaBank customer sign-in instead:
-            <button type="button" class="nb-alert__text-link" data-go-login>Login</button>
+            <button type="button" class="nb-alert__text-link" data-go-login tabindex="-1">Login</button>
           </p>
         `,
         showCancelButton: true,
         showConfirmButton: false,
         cancelButtonText: 'Close',
+        focusCancel: true,
         ...this.theme,
         allowOutsideClick: false,
         allowEscapeKey: false,
@@ -303,6 +304,8 @@ export class AlertService {
         didOpen: (popup) => {
           popup.setAttribute('data-backdrop', 'static');
           popup.setAttribute('data-keyboard', 'false');
+          const cancel = popup.querySelector('.swal2-cancel') as HTMLButtonElement | null;
+          cancel?.focus();
           popup.querySelector('[data-go-login]')?.addEventListener('click', () => {
             Swal.close();
             finish(true);

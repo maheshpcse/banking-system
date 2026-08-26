@@ -10,7 +10,7 @@
   </header>
 
   <div class="request-list" *ngIf="items.length; else empty">
-    <article class="request-card" *ngFor="let user of items">
+    <article class="request-card" *ngFor="let user of paged">
       <div class="request-card__copy">
         <strong>{{ user.fullName }}</strong>
         <p>{{ user.email }} · {{ user.pendingLimitRequest?.requestedAt | date: 'medium' }}</p>
@@ -27,6 +27,12 @@
         <button type="button" class="btn btn--primary btn--compact" (click)="approve(user)">Approve</button>
       </div>
     </article>
+  </div>
+
+  <div class="pager" *ngIf="items.length">
+    <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
+    <span>Page {{ page }} / {{ pages }} · {{ items.length }} total</span>
+    <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
   </div>
 
   <ng-template #empty>

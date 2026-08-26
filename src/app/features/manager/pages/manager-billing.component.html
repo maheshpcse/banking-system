@@ -8,6 +8,9 @@
         the store POS from the navbar.
       </p>
     </div>
+    <button type="button" class="btn btn--ghost" (click)="refresh()" [disabled]="filterLoading">
+      Refresh
+    </button>
   </header>
 
   <p class="hint launch-hint" *ngIf="!canLaunchBillingApp">
@@ -15,7 +18,7 @@
     Manager / Admin in the Billing System app.
   </p>
 
-  <div class="stat-grid monitor-stats">
+  <div class="stat-grid monitor-stats" *ngIf="!filterLoading">
     <article class="stat">
       <app-nb-icon name="wallet"></app-nb-icon>
       <div>
@@ -46,7 +49,9 @@
     </article>
   </div>
 
-  <div class="report-layout monitor-panels">
+  <app-shimmer *ngIf="filterLoading" variant="manager-billing-table"></app-shimmer>
+
+  <div class="report-layout report-layout--stack monitor-panels" *ngIf="!filterLoading">
     <app-animated-card accent="mint" title="Recent invoices" subtitle="Billing System feed">
       <table class="mini-table" *ngIf="recentBills.length; else noBills">
         <thead>
@@ -58,7 +63,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let bill of recentBills">
+          <tr *ngFor="let bill of pagedBills">
             <td>{{ bill.billNumber }}</td>
             <td>{{ bill.customerName }}</td>
             <td>${{ bill.grandTotal | number: '1.2-2' }}</td>
@@ -66,6 +71,20 @@
           </tr>
         </tbody>
       </table>
+      <div class="pager" *ngIf="recentBills.length">
+        <button type="button" class="btn btn--ghost" [disabled]="billPage <= 1" (click)="prevBills()">
+          Previous
+        </button>
+        <span>Page {{ billPage }} / {{ billPages }} · {{ recentBills.length }} total</span>
+        <button
+          type="button"
+          class="btn btn--ghost"
+          [disabled]="billPage >= billPages"
+          (click)="nextBills()"
+        >
+          Next
+        </button>
+      </div>
       <ng-template #noBills>
         <app-empty-state kind="invoices"
           message="No invoices yet from the Billing System."></app-empty-state>
@@ -73,7 +92,7 @@
     </app-animated-card>
 
     <app-animated-card accent="sky" title="Dispute queue" subtitle="Accept · reject · escalate">
-      <article class="dispute-card" *ngFor="let c of complaints">
+      <article class="dispute-card" *ngFor="let c of pagedComplaints">
         <header>
           <strong>{{ c.subject }}</strong>
           <span>{{ c.status }}</span>
@@ -87,6 +106,25 @@
           <button type="button" class="btn btn--primary" (click)="resolveComplaint(c, 'resolved')">Resolve</button>
         </div>
       </article>
+      <div class="pager" *ngIf="complaints.length">
+        <button
+          type="button"
+          class="btn btn--ghost"
+          [disabled]="complaintPage <= 1"
+          (click)="prevComplaints()"
+        >
+          Previous
+        </button>
+        <span>Page {{ complaintPage }} / {{ complaintPages }} · {{ complaints.length }} total</span>
+        <button
+          type="button"
+          class="btn btn--ghost"
+          [disabled]="complaintPage >= complaintPages"
+          (click)="nextComplaints()"
+        >
+          Next
+        </button>
+      </div>
       <app-empty-state *ngIf="!complaints.length" kind="requests"
         message="No open disputes."></app-empty-state>
     </app-animated-card>

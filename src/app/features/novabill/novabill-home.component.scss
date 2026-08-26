@@ -248,6 +248,22 @@
   letter-spacing: 0.04em;
   color: rgba(22, 50, 58, 0.58);
   font-weight: 600;
+  pointer-events: auto;
+}
+
+.nbill__foot-link {
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.nbill__foot-link:hover,
+.nbill__foot-link:focus-visible {
+  color: var(--accent-deep, #2f8f7f);
+  text-decoration: none;
+  outline: none;
 }
 
 .nbill__foot-copy {

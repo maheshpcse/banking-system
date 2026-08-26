@@ -20,7 +20,7 @@
 
   <ng-container *ngIf="!listLoading; else listShimmer">
     <div class="request-list" *ngIf="filtered.length; else empty">
-      <article class="request-card" *ngFor="let row of filtered">
+      <article class="request-card" *ngFor="let row of paged">
         <div class="request-card__copy">
           <strong>{{ row.fullName }}</strong>
           <p>{{ row.email }} · {{ row.submittedAt | date: 'medium' }}</p>
@@ -32,6 +32,12 @@
           <button type="button" class="btn btn--primary btn--compact" (click)="approve(row)">Approve</button>
         </div>
       </article>
+    </div>
+
+    <div class="pager" *ngIf="filtered.length">
+      <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
+      <span>Page {{ page }} / {{ pages }} · {{ filtered.length }} total</span>
+      <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
     </div>
   </ng-container>
 </section>
@@ -46,5 +52,12 @@
 </ng-template>
 
 <ng-template #listShimmer>
-  <app-shimmer variant="admin-requests-list"></app-shimmer>
+  <div class="list-shimmer">
+    <app-shimmer variant="admin-requests-list"></app-shimmer>
+    <div class="pager pager--shimmer" aria-hidden="true">
+      <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
+      <span class="pager-shimmer__bone pager-shimmer__bone--label"></span>
+      <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
+    </div>
+  </div>
 </ng-template>

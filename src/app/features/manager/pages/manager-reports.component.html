@@ -10,21 +10,31 @@
     </div>
   </header>
 
-  <div class="report-layout">
-    <app-animated-card accent="sky" title="Schedule" subtitle="Cadence">
+  <div class="sales-toolbar reports-toolbar">
+    <label class="range-select">
+      <span>Cadence</span>
+      <app-theme-select
+        [(ngModel)]="cadence"
+        name="cadence"
+        [options]="cadenceOptions"
+        ariaLabel="Report cadence"
+        (valueChange)="onCadenceChange($event)"
+      ></app-theme-select>
+    </label>
+  </div>
+
+  <app-shimmer *ngIf="filterLoading" variant="manager-flow-table"></app-shimmer>
+
+  <div class="report-layout report-layout--stack" *ngIf="!filterLoading">
+    <app-animated-card accent="sky" title="Schedule" subtitle="Cadence preview">
       <form class="form" (ngSubmit)="schedule()">
-        <label>
-          <span>Report cadence</span>
-          <app-theme-select
-            [(ngModel)]="cadence"
-            name="cadence"
-            [options]="cadenceOptions"
-            ariaLabel="Report cadence"
-          ></app-theme-select>
-        </label>
         <p class="hint">
           Schedules are stored for the Billing report engine handoff. Delivery channels (email / desk)
           arrive with Billing System integration.
+        </p>
+        <p class="hint">
+          Ledger tables and settlement graphs are not wired yet — this page is a schedule handoff
+          placeholder.
         </p>
         <button class="btn btn--primary" type="submit">
           {{ scheduled ? 'Schedule saved (local preview)' : 'Save schedule preview' }}

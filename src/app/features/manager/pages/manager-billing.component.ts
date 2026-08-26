@@ -18,10 +18,15 @@ import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 })
 export class ManagerBillingComponent implements OnInit {
   pageLoading = true;
-  busy = false;
+  filterLoading = false;
   stats: BillingDashboardStats | null = null;
   recentBills: BillingBill[] = [];
   complaints: BillingComplaint[] = [];
+
+  readonly billPageSize = 8;
+  readonly complaintPageSize = 5;
+  billPage = 1;
+  complaintPage = 1;
 
   constructor(
     private readonly billing: BillingService,
@@ -32,6 +37,24 @@ export class ManagerBillingComponent implements OnInit {
   get canLaunchBillingApp(): boolean {
     const user = this.auth.currentUser;
     return !!user && !user.isSuperAdmin && (user.role === 'manager' || user.role === 'admin');
+  }
+
+  get billPages(): number {
+    return Math.max(1, Math.ceil(this.recentBills.length / this.billPageSize));
+  }
+
+  get complaintPages(): number {
+    return Math.max(1, Math.ceil(this.complaints.length / this.complaintPageSize));
+  }
+
+  get pagedBills(): BillingBill[] {
+    const start = (this.billPage - 1) * this.billPageSize;
+    return this.recentBills.slice(start, start + this.billPageSize);
+  }
+
+  get pagedComplaints(): BillingComplaint[] {
+    const start = (this.complaintPage - 1) * this.complaintPageSize;
+    return this.complaints.slice(start, start + this.complaintPageSize);
   }
 
   ngOnInit(): void {
@@ -48,17 +71,43 @@ export class ManagerBillingComponent implements OnInit {
   }
 
   refresh(): void {
-    this.busy = true;
-    this.loadMonitor().subscribe({
+    this.filterLoading = true;
+    withShimmerDelay(this.loadMonitor(), SHIMMER_MS).subscribe({
       next: (bundle) => {
         this.apply(bundle);
-        this.busy = false;
+        this.billPage = 1;
+        this.complaintPage = 1;
+        this.filterLoading = false;
       },
       error: async () => {
-        this.busy = false;
+        this.filterLoading = false;
         await this.alerts.error('Refresh failed.');
       }
     });
+  }
+
+  prevBills(): void {
+    if (this.billPage > 1) {
+      this.billPage -= 1;
+    }
+  }
+
+  nextBills(): void {
+    if (this.billPage < this.billPages) {
+      this.billPage += 1;
+    }
+  }
+
+  prevComplaints(): void {
+    if (this.complaintPage > 1) {
+      this.complaintPage -= 1;
+    }
+  }
+
+  nextComplaints(): void {
+    if (this.complaintPage < this.complaintPages) {
+      this.complaintPage += 1;
+    }
   }
 
   resolveComplaint(

@@ -598,6 +598,13 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   }
 
   submitBankingApplication(): void {
+    if (this.bankingRestricted) {
+      const status = effectiveBankingStatus(this.user) || 'restricted';
+      void this.alerts.error(
+        `Your banking account is ${String(status).replace(/_/g, ' ')}. Card details cannot be updated until staff restore banking access.`
+      );
+      return;
+    }
     if (this.bankingForm.invalid || this.savingApplication) {
       this.bankingForm.markAllAsTouched();
       return;
@@ -652,6 +659,13 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   }
 
   saveCardControls(): void {
+    if (this.bankingRestricted) {
+      const status = effectiveBankingStatus(this.user) || 'restricted';
+      void this.alerts.error(
+        `Your banking account is ${String(status).replace(/_/g, ' ')}. Card controls cannot be updated until staff restore banking access.`
+      );
+      return;
+    }
     if (this.savingCardControls || !this.hasCard) {
       return;
     }

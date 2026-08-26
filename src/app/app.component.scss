@@ -70,6 +70,22 @@
   letter-spacing: 0.04em;
   color: rgba(95, 120, 140, 0.72);
   font-weight: 550;
+  pointer-events: auto;
+}
+
+.app-foot__link {
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.app-foot__link:hover,
+.app-foot__link:focus-visible {
+  color: var(--accent-deep, #2f8f7f);
+  text-decoration: none;
+  outline: none;
 }
 
 .app-foot__sig {

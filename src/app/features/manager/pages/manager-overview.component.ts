@@ -84,10 +84,37 @@ export class ManagerOverviewComponent implements OnInit {
   billingStats: BillingDashboardStats | null = null;
   salesSummary: BillingSalesReport | null = null;
   salesSummaryLoading = true;
+  salesChart: BillingSalesReport | null = null;
+  salesChartLoading = true;
+  salesChartCadence: 'daily' | 'weekly' | 'biweekly' | 'monthly' = 'weekly';
+  salesChartRange:
+    | 'last_week'
+    | 'last_month'
+    | 'last_3_months'
+    | 'last_6_months' = 'last_month';
+
+  readonly salesChartCadenceOptions: Array<{ value: string; label: string }> = [
+    { value: 'daily', label: 'Daily' },
+    { value: 'weekly', label: 'Weekly' },
+    { value: 'biweekly', label: 'Bi-weekly' },
+    { value: 'monthly', label: 'Monthly' }
+  ];
+
+  readonly salesChartRangeOptions: Array<{ value: string; label: string }> = [
+    { value: 'last_week', label: 'Last week' },
+    { value: 'last_month', label: 'Last month' },
+    { value: 'last_3_months', label: 'Last 3 months' },
+    { value: 'last_6_months', label: 'Last 6 months' }
+  ];
+
   billingKpis: Array<{ label: string; display: string; pct: number; color: string }> = [];
   billingStatusBars: Array<{ id: BillingPulseFilter; label: string; count: number; color: string }> = [];
   billingView: ViewMode = 'chart';
   billingFilter: BillingPulseFilter = 'all';
+  readonly flowTablePageSize = 8;
+  readonly billingTablePageSize = 5;
+  flowTablePage = 1;
+  billingTablePage = 1;
   customers = 0;
   pending = 0;
   unread = 0;
@@ -155,16 +182,111 @@ export class ManagerOverviewComponent implements OnInit {
         this.analytics = analytics;
         this.billingStats = billing;
         this.salesSummary = sales;
+        this.salesChart = sales;
         this.rebuildBillingPulse();
         this.billingLoading = false;
         this.salesSummaryLoading = false;
+        this.salesChartLoading = false;
         this.pageLoading = false;
       },
       error: async (err: { error?: { message?: string } }) => {
         this.pageLoading = false;
         this.billingLoading = false;
         this.salesSummaryLoading = false;
+        this.salesChartLoading = false;
         await this.alerts.error(err?.error?.message || 'Unable to load manager desk');
+      }
+    });
+  }
+
+  onSalesChartCadenceChange(value: string): void {
+    this.salesChartCadence = (value || 'weekly') as typeof this.salesChartCadence;
+    this.reloadSalesChart();
+  }
+
+  onSalesChartRangeChange(value: string): void {
+    this.salesChartRange = (value || 'last_month') as typeof this.salesChartRange;
+    this.reloadSalesChart();
+  }
+
+  get salesChartBars(): Array<{
+    name: string;
+    revenue: number;
+    qty: number;
+    pct: number;
+    color: string;
+  }> {
+    const rows = (this.salesChart?.productSales || []).slice(0, 8);
+    const max = Math.max(1, ...rows.map((r) => r.revenue));
+    const palette = ['#5fc4b0', '#d4a017', '#2f8f7f', '#f59e0b', '#0f766e', '#b45309'];
+    return rows.map((row, i) => ({
+      name: row.name,
+      revenue: row.revenue,
+      qty: row.qty,
+      pct: Math.max(6, Math.round((row.revenue / max) * 100)),
+      color: palette[i % palette.length]
+    }));
+  }
+
+  get salesChartLinePath(): string {
+    const bars = this.salesChartBars;
+    if (!bars.length) {
+      return '';
+    }
+    const max = Math.max(1, ...bars.map((b) => b.revenue));
+    const stepX = 100 / Math.max(1, bars.length - 1);
+    return bars
+      .map((b, i) => {
+        const x = i * stepX;
+        const y = 38 - (b.revenue / max) * 32;
+        return `${i === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`;
+      })
+      .join(' ');
+  }
+
+  get salesChartAreaPath(): string {
+    const line = this.salesChartLinePath;
+    if (!line) {
+      return '';
+    }
+    return `${line} L100,40 L0,40 Z`;
+  }
+
+  salesChartPointX(index: number): number {
+    const n = this.salesChartBars.length;
+    return (index * 100) / Math.max(1, n - 1);
+  }
+
+  salesChartPointY(revenue: number): number {
+    const max = Math.max(1, ...this.salesChartBars.map((b) => b.revenue));
+    return 38 - (revenue / max) * 32;
+  }
+
+  get salesChartRangeLabel(): string {
+    return (
+      this.salesChartRangeOptions.find((r) => r.value === this.salesChartRange)?.label ||
+      'Last month'
+    );
+  }
+
+  private reloadSalesChart(): void {
+    this.salesChartLoading = true;
+    withShimmerDelay(
+      this.billing
+        .getSalesReports({
+          cadence: this.salesChartCadence,
+          range: this.salesChartRange
+        })
+        .pipe(catchError(() => of(null))),
+      SHIMMER_MS
+    ).subscribe({
+      next: (report) => {
+        this.salesChart = report;
+        this.salesChartLoading = false;
+      },
+      error: async (err: { error?: { message?: string } }) => {
+        this.salesChartLoading = false;
+        await this.alerts.error(err?.error?.message || 'Unable to reload sales chart');
       }
     });
   }
@@ -214,12 +336,34 @@ export class ManagerOverviewComponent implements OnInit {
     return items.filter((b) => b.paymentStatus === this.billingFilter);
   }
 
+  get billingRecentPages(): number {
+    return Math.max(1, Math.ceil(this.billingRecentRows.length / this.billingTablePageSize));
+  }
+
+  get pagedBillingRecentRows(): BillingDashboardStats['recentBills'] {
+    const start = (this.billingTablePage - 1) * this.billingTablePageSize;
+    return this.billingRecentRows.slice(start, start + this.billingTablePageSize);
+  }
+
   setBillingFilter(filter: BillingPulseFilter): void {
     if (this.billingFilter === filter) {
       return;
     }
     this.billingFilter = filter;
+    this.billingTablePage = 1;
     this.flashBillingFlow();
+  }
+
+  prevBillingTable(): void {
+    if (this.billingTablePage > 1) {
+      this.billingTablePage -= 1;
+    }
+  }
+
+  nextBillingTable(): void {
+    if (this.billingTablePage < this.billingRecentPages) {
+      this.billingTablePage += 1;
+    }
   }
 
   toggleBillingView(): void {
@@ -248,6 +392,7 @@ export class ManagerOverviewComponent implements OnInit {
       return;
     }
     this.filter = filter;
+    this.flowTablePage = 1;
     this.reloadAnalytics();
   }
 
@@ -265,11 +410,41 @@ export class ManagerOverviewComponent implements OnInit {
       this.customEnd = this.isoDay(end);
       this.customStart = this.isoDay(start);
     }
+    this.flowTablePage = 1;
     this.reloadAnalytics();
   }
 
   onCustomRangeChange(): void {
+    this.flowTablePage = 1;
     this.reloadAnalytics();
+  }
+
+  get flowDailyPages(): number {
+    const total =
+      this.filter === 'all' ? this.dailyGridRows.length : this.dailyLedgerRows.length;
+    return Math.max(1, Math.ceil(total / this.flowTablePageSize));
+  }
+
+  get pagedDailyGridRows(): DailyGridRow[] {
+    const start = (this.flowTablePage - 1) * this.flowTablePageSize;
+    return this.dailyGridRows.slice(start, start + this.flowTablePageSize);
+  }
+
+  get pagedDailyLedgerRows(): DailyLedgerRow[] {
+    const start = (this.flowTablePage - 1) * this.flowTablePageSize;
+    return this.dailyLedgerRows.slice(start, start + this.flowTablePageSize);
+  }
+
+  prevFlowTable(): void {
+    if (this.flowTablePage > 1) {
+      this.flowTablePage -= 1;
+    }
+  }
+
+  nextFlowTable(): void {
+    if (this.flowTablePage < this.flowDailyPages) {
+      this.flowTablePage += 1;
+    }
   }
 
   private flashFlow(): void {

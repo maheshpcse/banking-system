@@ -7,9 +7,20 @@
         Aggregate paid invoice performance by product and customer across cadence and date ranges.
       </p>
     </div>
-    <button type="button" class="btn btn--primary" (click)="exportCsv()" [disabled]="!report">
-      Export CSV
-    </button>
+    <div class="admin-hero__actions">
+      <button
+        type="button"
+        class="btn btn--ghost flip-btn"
+        (click)="toggleView()"
+        [disabled]="reportLoading"
+      >
+        <app-nb-icon name="transfer"></app-nb-icon>
+        {{ view === 'chart' ? 'Table view' : 'Chart view' }}
+      </button>
+      <button type="button" class="btn btn--primary" (click)="exportCsv()" [disabled]="!report || reportLoading">
+        Export CSV
+      </button>
+    </div>
   </header>
 
   <div class="sales-toolbar">
@@ -55,78 +66,180 @@
     </div>
   </div>
 
-  <div class="stat-grid sales-totals" *ngIf="!reportLoading">
-    <article class="stat">
-      <app-nb-icon name="shield"></app-nb-icon>
-      <div><span>Revenue</span><strong>{{ totals.revenue | currencyFormat }}</strong></div>
-    </article>
-    <article class="stat">
-      <app-nb-icon name="transfer"></app-nb-icon>
-      <div><span>Units sold</span><strong>{{ totals.qty }}</strong></div>
-    </article>
-    <article class="stat">
-      <app-nb-icon name="clock"></app-nb-icon>
-      <div><span>Paid orders</span><strong>{{ totals.orderCount }}</strong></div>
-    </article>
-  </div>
+  <ng-container *ngIf="!reportLoading; else reportBodyShimmer">
+    <div class="stat-grid sales-totals">
+      <article class="stat">
+        <app-nb-icon name="shield"></app-nb-icon>
+        <div><span>Revenue</span><strong>{{ totals.revenue | currencyFormat }}</strong></div>
+      </article>
+      <article class="stat">
+        <app-nb-icon name="transfer"></app-nb-icon>
+        <div><span>Units sold</span><strong>{{ totals.qty }}</strong></div>
+      </article>
+      <article class="stat">
+        <app-nb-icon name="clock"></app-nb-icon>
+        <div><span>Paid orders</span><strong>{{ totals.orderCount }}</strong></div>
+      </article>
+    </div>
 
-  <app-shimmer *ngIf="reportLoading" variant="manager-reports"></app-shimmer>
+    <div class="report-layout report-layout--stack" *ngIf="view === 'chart'">
+      <app-animated-card accent="sand" title="Product revenue" subtitle="Trading tape · top products">
+        <div class="sales-tape" *ngIf="productChartBars.length; else noProductChart">
+          <div class="sales-tape__stage">
+            <div class="sales-tape__grid" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+            <div class="sales-tape__bars">
+              <div class="sales-tape__col" *ngFor="let bar of productChartBars">
+                <span class="sales-tape__value">{{ bar.revenue | currencyFormat }}</span>
+                <div class="sales-tape__track">
+                  <div
+                    class="sales-tape__fill"
+                    [style.height.%]="bar.pct"
+                    [style.background]="bar.color"
+                  ></div>
+                </div>
+                <span class="sales-tape__label" [title]="bar.name">{{ bar.name }}</span>
+              </div>
+            </div>
+            <svg class="sales-tape__line" viewBox="0 0 100 42" preserveAspectRatio="none" aria-hidden="true">
+              <path class="sales-tape__area" [attr.d]="productAreaPath"></path>
+              <path class="sales-tape__path" [attr.d]="productLinePath"></path>
+              <circle
+                *ngFor="let bar of productChartBars; let i = index"
+                class="sales-tape__point"
+                [attr.cx]="chartPointX(i, productChartBars.length)"
+                [attr.cy]="chartPointY(bar.revenue, productChartBars)"
+                r="1.35"
+              ></circle>
+            </svg>
+          </div>
+        </div>
+        <ng-template #noProductChart>
+          <app-empty-state kind="transactions" message="No paid product sales in this range."></app-empty-state>
+        </ng-template>
+      </app-animated-card>
 
-  <div class="report-layout" *ngIf="!reportLoading">
-    <app-animated-card accent="sand" title="Product sales" subtitle="Paid line items">
-      <div class="table-wrap" *ngIf="productRows.length; else noProducts">
-        <table class="data-table data-table--compact">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Qty</th>
-              <th>Revenue</th>
-              <th>Orders</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let row of productRows">
-              <td><strong>{{ row.name }}</strong></td>
-              <td>{{ row.qty }}</td>
-              <td>{{ row.revenue | currencyFormat }}</td>
-              <td>{{ row.orderCount }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <ng-template #noProducts>
-        <app-empty-state kind="transactions" message="No paid product sales in this range."></app-empty-state>
-      </ng-template>
-    </app-animated-card>
+      <app-animated-card accent="mint" title="Customer spend" subtitle="Trading tape · top customers">
+        <div class="sales-tape" *ngIf="customerChartBars.length; else noCustomerChart">
+          <div class="sales-tape__stage">
+            <div class="sales-tape__grid" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+            <div class="sales-tape__bars">
+              <div class="sales-tape__col" *ngFor="let bar of customerChartBars">
+                <span class="sales-tape__value">{{ bar.revenue | currencyFormat }}</span>
+                <div class="sales-tape__track">
+                  <div
+                    class="sales-tape__fill"
+                    [style.height.%]="bar.pct"
+                    [style.background]="bar.color"
+                  ></div>
+                </div>
+                <span class="sales-tape__label" [title]="bar.name">{{ bar.name }}</span>
+              </div>
+            </div>
+            <svg class="sales-tape__line" viewBox="0 0 100 42" preserveAspectRatio="none" aria-hidden="true">
+              <path class="sales-tape__area" [attr.d]="customerAreaPath"></path>
+              <path class="sales-tape__path" [attr.d]="customerLinePath"></path>
+              <circle
+                *ngFor="let bar of customerChartBars; let i = index"
+                class="sales-tape__point"
+                [attr.cx]="chartPointX(i, customerChartBars.length)"
+                [attr.cy]="chartPointY(bar.revenue, customerChartBars)"
+                r="1.35"
+              ></circle>
+            </svg>
+          </div>
+        </div>
+        <ng-template #noCustomerChart>
+          <app-empty-state kind="customers" message="No paid customer purchases in this range."></app-empty-state>
+        </ng-template>
+      </app-animated-card>
+    </div>
 
-    <app-animated-card accent="mint" title="Customer purchases" subtitle="Paid invoices">
-      <div class="table-wrap" *ngIf="customerRows.length; else noCustomers">
-        <table class="data-table data-table--compact">
-          <thead>
-            <tr>
-              <th>Customer</th>
-              <th>Qty</th>
-              <th>Revenue</th>
-              <th>Orders</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let row of customerRows">
-              <td><strong>{{ row.name }}</strong></td>
-              <td>{{ row.qty }}</td>
-              <td>{{ row.revenue | currencyFormat }}</td>
-              <td>{{ row.orderCount }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <ng-template #noCustomers>
-        <app-empty-state kind="customers" message="No paid customer purchases in this range."></app-empty-state>
-      </ng-template>
-    </app-animated-card>
-  </div>
+    <div class="report-layout report-layout--stack" *ngIf="view === 'table'">
+      <app-animated-card accent="sand" title="Product sales" subtitle="Paid line items">
+        <app-shimmer *ngIf="productPageLoading" variant="data-table" [columns]="4" [rows]="8"></app-shimmer>
+        <ng-container *ngIf="!productPageLoading">
+          <div class="table-wrap" *ngIf="productRows.length; else noProducts">
+            <table class="data-table data-table--compact">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Qty</th>
+                  <th>Revenue</th>
+                  <th>Orders</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of pagedProductRows">
+                  <td><strong>{{ row.name }}</strong></td>
+                  <td>{{ row.qty }}</td>
+                  <td>{{ row.revenue | currencyFormat }}</td>
+                  <td>{{ row.orderCount }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pager" *ngIf="productRows.length">
+            <button type="button" class="btn btn--ghost" [disabled]="productPage <= 1" (click)="prevProductPage()">Previous</button>
+            <span>Page {{ productPage }} / {{ productPages }} · {{ productRows.length }} total</span>
+            <button type="button" class="btn btn--ghost" [disabled]="productPage >= productPages" (click)="nextProductPage()">Next</button>
+          </div>
+          <ng-template #noProducts>
+            <app-empty-state kind="transactions" message="No paid product sales in this range."></app-empty-state>
+          </ng-template>
+        </ng-container>
+      </app-animated-card>
+
+      <app-animated-card accent="mint" title="Customer purchases" subtitle="Paid invoices">
+        <app-shimmer *ngIf="customerPageLoading" variant="data-table" [columns]="4" [rows]="8"></app-shimmer>
+        <ng-container *ngIf="!customerPageLoading">
+          <div class="table-wrap" *ngIf="customerRows.length; else noCustomers">
+            <table class="data-table data-table--compact">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Qty</th>
+                  <th>Revenue</th>
+                  <th>Orders</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of pagedCustomerRows">
+                  <td><strong>{{ row.name }}</strong></td>
+                  <td>{{ row.qty }}</td>
+                  <td>{{ row.revenue | currencyFormat }}</td>
+                  <td>{{ row.orderCount }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pager" *ngIf="customerRows.length">
+            <button type="button" class="btn btn--ghost" [disabled]="customerPage <= 1" (click)="prevCustomerPage()">Previous</button>
+            <span>Page {{ customerPage }} / {{ customerPages }} · {{ customerRows.length }} total</span>
+            <button type="button" class="btn btn--ghost" [disabled]="customerPage >= customerPages" (click)="nextCustomerPage()">Next</button>
+          </div>
+          <ng-template #noCustomers>
+            <app-empty-state kind="customers" message="No paid customer purchases in this range."></app-empty-state>
+          </ng-template>
+        </ng-container>
+      </app-animated-card>
+    </div>
+  </ng-container>
+
+  <ng-template #reportBodyShimmer>
+    <app-shimmer variant="manager-sales-card"></app-shimmer>
+    <div class="report-layout report-layout--stack" style="margin-top: 1rem">
+      <ng-container *ngIf="view === 'chart'">
+        <app-shimmer variant="manager-sales-chart"></app-shimmer>
+        <app-shimmer variant="manager-sales-chart"></app-shimmer>
+      </ng-container>
+      <ng-container *ngIf="view === 'table'">
+        <app-shimmer variant="data-table" [columns]="4" [rows]="8"></app-shimmer>
+        <app-shimmer variant="data-table" [columns]="4" [rows]="8"></app-shimmer>
+      </ng-container>
+    </div>
+  </ng-template>
 </section>
 
 <ng-template #salesShimmer>
-  <app-shimmer variant="manager-reports"></app-shimmer>
+  <app-shimmer variant="manager-sales-targets"></app-shimmer>
 </ng-template>

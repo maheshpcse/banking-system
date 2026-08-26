@@ -132,11 +132,14 @@ export class AuthService {
     this.userSubject.next(user);
   }
 
-  logout(): void {
+  logout(options?: { redirect?: boolean }): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     this.userSubject.next(null);
     this.shellBoot.complete();
+    if (options?.redirect === false) {
+      return;
+    }
     void this.router.navigateByUrl('/');
   }
 

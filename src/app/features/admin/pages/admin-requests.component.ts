@@ -17,6 +17,8 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
   pageLoading = true;
   listLoading = false;
   statusFilter: RequestFilter = 'all';
+  readonly pageSize = 5;
+  page = 1;
   readonly filters: { id: RequestFilter; label: string }[] = [
     { id: 'all', label: 'All' },
     { id: 'under_review', label: 'Under Review' },
@@ -40,8 +42,22 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
     return this.requests.filter((r) => r.status === this.statusFilter);
   }
 
+  get pages(): number {
+    return Math.max(1, Math.ceil(this.filtered.length / this.pageSize));
+  }
+
+  get paged(): AdminRequestRow[] {
+    const start = (this.page - 1) * this.pageSize;
+    return this.filtered.slice(start, start + this.pageSize);
+  }
+
   ngOnInit(): void {
-    this.sub = this.admin.requests$.subscribe((rows) => (this.requests = rows));
+    this.sub = this.admin.requests$.subscribe((rows) => {
+      this.requests = rows;
+      if (this.page > this.pages) {
+        this.page = this.pages;
+      }
+    });
     withShimmerDelay(this.admin.refreshRequests(), SHIMMER_MS).subscribe({
       next: () => {
         this.pageLoading = false;
@@ -62,10 +78,23 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
       return;
     }
     this.statusFilter = id;
+    this.page = 1;
     this.listLoading = true;
     shimmerPause(SHIMMER_MS).subscribe(() => {
       this.listLoading = false;
     });
+  }
+
+  prev(): void {
+    if (this.page > 1) {
+      this.page -= 1;
+    }
+  }
+
+  next(): void {
+    if (this.page < this.pages) {
+      this.page += 1;
+    }
   }
 
   async approve(row: AdminRequestRow): Promise<void> {
