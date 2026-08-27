@@ -4,15 +4,20 @@
       <p class="eyebrow">NovaBank</p>
       <h1>Transaction reports</h1>
       <p class="lede">
-        Choose a reporting cadence, save a schedule preview, and review the saved result on this page.
-        Live ledger tables and email/desk delivery attach here next.
+        Choose data sources, columns, filters, and a run time. Saved schedules stay until you clear
+        them or they auto-expire (with an alert).
       </p>
     </div>
   </header>
 
   <div class="report-layout">
-    <app-animated-card accent="sky" title="Schedule" subtitle="Cadence preview">
-      <form class="form" (ngSubmit)="schedule()">
+    <app-animated-card accent="sky" title="Schedule" subtitle="Build &amp; save">
+      <form class="form reports-form" (ngSubmit)="schedule()">
+        <label>
+          <span>Schedule name</span>
+          <input type="text" [(ngModel)]="scheduleName" name="scheduleName" maxlength="80" placeholder="Weekly desk digest" />
+        </label>
+
         <label>
           <span>Report cadence</span>
           <app-theme-select
@@ -22,45 +27,204 @@
             ariaLabel="Report cadence"
           ></app-theme-select>
         </label>
+
+        <label>
+          <span>Data scope</span>
+          <app-theme-select
+            [(ngModel)]="scope"
+            name="scope"
+            [options]="scopeOptions"
+            ariaLabel="Data scope"
+          ></app-theme-select>
+        </label>
+
+        <div class="reports-block">
+          <p class="section-label">Data to schedule</p>
+          <div class="reports-chips">
+            <button
+              type="button"
+              class="reports-chip"
+              *ngFor="let d of datasetOptions"
+              [class.is-on]="isDatasetSelected(d.id)"
+              (click)="toggleDataset(d.id)"
+              [attr.title]="d.hint"
+            >
+              {{ d.label }}
+            </button>
+          </div>
+        </div>
+
+        <div class="reports-block" *ngIf="scope === 'custom'">
+          <p class="section-label">Columns</p>
+          <label class="reports-check">
+            <input
+              type="checkbox"
+              [ngModel]="autoFromFilters"
+              (ngModelChange)="onAutoFromFiltersChange($event)"
+              name="autoFromFilters"
+            />
+            <span>Auto-select columns from chosen data + current filters</span>
+          </label>
+          <div class="reports-chips">
+            <button
+              type="button"
+              class="reports-chip"
+              *ngFor="let c of columnOptions"
+              [class.is-on]="isColumnSelected(c.id)"
+              (click)="toggleColumn(c.id)"
+            >
+              {{ c.label }}
+            </button>
+          </div>
+        </div>
+
+        <div class="reports-block">
+          <p class="section-label">Filters (applied to schedule)</p>
+          <div class="form-row form-row--2">
+            <label>
+              <span>Status</span>
+              <app-theme-select
+                [(ngModel)]="filters.status"
+                name="filterStatus"
+                [options]="statusOptions"
+                ariaLabel="Status filter"
+              ></app-theme-select>
+            </label>
+            <label>
+              <span>Account type</span>
+              <app-theme-select
+                [(ngModel)]="filters.accountType"
+                name="filterAccountType"
+                [options]="accountTypeOptions"
+                ariaLabel="Account type filter"
+              ></app-theme-select>
+            </label>
+          </div>
+          <div class="form-row form-row--2">
+            <label>
+              <span>Min amount</span>
+              <input type="number" min="0" step="0.01" [(ngModel)]="filters.minAmount" name="minAmount" />
+            </label>
+            <label>
+              <span>Max amount</span>
+              <input type="number" min="0" step="0.01" [(ngModel)]="filters.maxAmount" name="maxAmount" />
+            </label>
+          </div>
+          <label>
+            <span>Keyword</span>
+            <input type="text" [(ngModel)]="filters.keyword" name="keyword" placeholder="Account, note, reference…" />
+          </label>
+        </div>
+
+        <div class="form-row form-row--2">
+          <label>
+            <span>Run at</span>
+            <input type="datetime-local" [(ngModel)]="runAt" name="runAt" required />
+          </label>
+          <label>
+            <span>Auto-expire at (optional)</span>
+            <input type="datetime-local" [(ngModel)]="expiresAt" name="expiresAt" />
+          </label>
+        </div>
+
         <p class="hint">
-          Workflow: pick a cadence → save preview → confirm the saved schedule below. Delivery channels
-          (email / manager desk digest) and ledger graphs will use this cadence once wired.
+          Selected: {{ selectedDatasetLabels || 'none' }}. Schedules persist on this device until
+          manual clear/delete or auto-expiry.
         </p>
-        <button class="btn btn--primary" type="submit" [disabled]="saving">
-          {{ saving ? 'Saving…' : saved ? 'Update schedule preview' : 'Save schedule preview' }}
-        </button>
+
+        <div class="reports-actions">
+          <button class="btn btn--ghost" type="button" (click)="buildReview()" [disabled]="reviewing">
+            {{ reviewing ? 'Building…' : 'Review grid' }}
+          </button>
+          <button class="btn btn--primary" type="submit" [disabled]="saving">
+            {{ saving ? 'Saving…' : 'Save schedule' }}
+          </button>
+        </div>
       </form>
     </app-animated-card>
 
-    <app-animated-card accent="sand" title="Coverage" subtitle="What this report will include">
+    <app-animated-card accent="sand" title="Coverage" subtitle="What this report can include">
       <ul class="bullet-list">
-        <li>Deposits, withdrawals, and transfers by period</li>
-        <li>Pending openings and blocked accounts</li>
-        <li>Complaint volume once Billing queues go live</li>
-        <li>Shared settlement references with Billing invoices</li>
+        <li *ngFor="let d of datasetOptions">
+          <strong>{{ d.label }}</strong> — {{ d.hint }}
+        </li>
       </ul>
     </app-animated-card>
   </div>
 
+  <div class="report-layout report-layout--stack report-layout--result" *ngIf="showReview">
+    <app-animated-card accent="rose" title="Review before schedule" subtitle="Preview grid">
+      <div class="table-wrap" *ngIf="reviewRows.length; else noReview">
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Column</th>
+              <th>Filters</th>
+              <th>Sample</th>
+              <th>Include</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of reviewRows">
+              <td>{{ row.dataset }}</td>
+              <td>{{ row.column }}</td>
+              <td>{{ row.filter }}</td>
+              <td>{{ row.sample }}</td>
+              <td>{{ row.included ? 'Yes' : 'No' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noReview>
+        <app-empty-state kind="transactions" message="Build a review grid from the schedule form."></app-empty-state>
+      </ng-template>
+    </app-animated-card>
+  </div>
+
   <div class="report-layout report-layout--stack report-layout--result">
-    <app-animated-card accent="mint" title="Saved schedule" subtitle="End result (this device)">
-      <ng-container *ngIf="saved; else noSchedule">
-        <ul class="bullet-list">
-          <li>
-            Cadence:
-            <strong>{{ savedCadenceLabel }}</strong>
-          </li>
-          <li>Saved at: {{ saved.savedAt | date: 'medium' }}</li>
-          <li>Status: preview stored locally until report delivery is connected</li>
-        </ul>
-        <button type="button" class="btn btn--ghost report-clear-btn" (click)="clearSaved()">
-          Clear saved preview
+    <app-animated-card accent="mint" title="Saved schedules" subtitle="{{ activeScheduleCount }} active on this device">
+      <ng-container *ngIf="schedules.length; else noSchedule">
+        <div class="table-wrap">
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Cadence</th>
+                <th>Scope</th>
+                <th>Run at</th>
+                <th>Expires</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of schedules">
+                <td>
+                  <strong>{{ s.name }}</strong>
+                  <div class="hint">{{ s.datasets.length }} sources · {{ s.columns.length }} columns</div>
+                  <div class="hint">{{ filterSummary(s.filters) }}</div>
+                </td>
+                <td>{{ cadenceOptions.find(o => o.value === s.cadence)?.label || s.cadence }}</td>
+                <td>{{ s.scope === 'all' ? 'All data' : 'Custom' }}</td>
+                <td>{{ s.runAt | date: 'medium' }}</td>
+                <td>{{ s.expiresAt ? (s.expiresAt | date: 'medium') : 'Never' }}</td>
+                <td>
+                  <button type="button" class="btn btn--ghost btn--compact" (click)="deleteSchedule(s.id)">
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button type="button" class="btn btn--ghost report-clear-btn" (click)="clearAllSchedules()">
+          Clear all schedules
         </button>
       </ng-container>
       <ng-template #noSchedule>
         <app-empty-state
           kind="transactions"
-          message="No schedule preview yet. Save a cadence above to see the end result here."
+          message="No schedules yet. Configure data, columns, and run time above, then save."
         ></app-empty-state>
       </ng-template>
     </app-animated-card>

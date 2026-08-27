@@ -509,7 +509,14 @@
 }
 
 .limit-meters__link:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  color: var(--accent, #5fc4b0);
+}
+
+.limit-meters__link.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  cursor: not-allowed;
 }
 
 @media (max-width: 860px) {

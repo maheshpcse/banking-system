@@ -88,7 +88,7 @@
 <ng-template #listShimmer>
   <app-shimmer *ngIf="view === 'list'" variant="notifications-list"></app-shimmer>
   <app-shimmer *ngIf="view === 'grid'" variant="notifications-grid"></app-shimmer>
-  <app-shimmer *ngIf="view === 'table'" variant="data-table" [columns]="5" [rows]="8"></app-shimmer>
+  <app-shimmer *ngIf="view === 'table'" variant="notifications-table" [columns]="5" [rows]="4"></app-shimmer>
   <div class="pager pager--shimmer" aria-hidden="true">
     <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
     <span class="pager-shimmer__bone pager-shimmer__bone--label"></span>

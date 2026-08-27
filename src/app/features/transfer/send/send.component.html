@@ -23,26 +23,28 @@
       <form *ngIf="canTransfer" class="form" [formGroup]="form" (ngSubmit)="submit()">
         <label class="autocomplete" #recipientField>
           <span>Recipient account</span>
-          <input
-            type="text"
-            formControlName="toAccountNumber"
-            placeholder="Start typing MBxxxxxxxxxxxx"
-            autocomplete="off"
-            (input)="onRecipientInput()"
-            (focus)="showSuggestions = suggestions.length > 0"
-            (keydown)="onRecipientKeydown($event)"
-          />
-          <div class="autocomplete__panel" *ngIf="showSuggestions && suggestions.length">
-            <button
-              type="button"
-              class="autocomplete__option"
-              *ngFor="let item of suggestions; let i = index"
-              [class.is-active]="i === highlightIndex"
-              (click)="selectSuggestion(item)"
-            >
-              <strong>{{ item.accountNumber }}</strong>
-              <span>{{ item.displayName }}</span>
-            </button>
+          <div class="autocomplete__field">
+            <input
+              type="text"
+              formControlName="toAccountNumber"
+              placeholder="Start typing MBxxxxxxxxxxxx"
+              autocomplete="off"
+              (input)="onRecipientInput()"
+              (focus)="onRecipientFocus()"
+              (keydown)="onRecipientKeydown($event)"
+            />
+            <div class="autocomplete__panel" *ngIf="showSuggestions && suggestions.length" role="listbox">
+              <button
+                type="button"
+                class="autocomplete__option"
+                *ngFor="let item of suggestions; let i = index"
+                [class.is-active]="i === highlightIndex"
+                (mousedown)="$event.preventDefault(); selectSuggestion(item)"
+              >
+                <strong>{{ item.accountNumber }}</strong>
+                <span>{{ item.displayName }}</span>
+              </button>
+            </div>
           </div>
           <p class="form__field-error" *ngIf="fieldError(form.controls.toAccountNumber, 'Recipient account') as msg">
             {{ msg }}
@@ -85,7 +87,13 @@
             <span [style.width.%]="limitPct(usage.transfer.count, usage.transfer.countLimit)"></span>
           </div>
         </div>
-        <a class="limit-meters__link" routerLink="/settings" [queryParams]="{ tab: 'limits' }">Request higher limits</a>
+        <a
+          class="limit-meters__link"
+          *ngIf="canTransfer"
+          routerLink="/settings"
+          [queryParams]="{ tab: 'limits' }"
+        >Request higher limits</a>
+        <span class="limit-meters__link is-disabled" *ngIf="!canTransfer">Request higher limits</span>
       </div>
 
       <div class="tips__panel">

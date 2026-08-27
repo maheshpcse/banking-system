@@ -97,7 +97,13 @@
             <span [style.width.%]="limitPct(usage.transfer.used, usage.transfer.limit)"></span>
           </div>
         </div>
-        <a class="limit-meters__link" routerLink="/settings" [queryParams]="{ tab: 'limits' }">Request limit changes</a>
+        <a
+          class="limit-meters__link"
+          *ngIf="canMoveMoney"
+          routerLink="/settings"
+          [queryParams]="{ tab: 'limits' }"
+        >Request limit changes</a>
+        <span class="limit-meters__link is-disabled" *ngIf="!canMoveMoney">Request limit changes</span>
       </div>
     </app-animated-card>
 

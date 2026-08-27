@@ -49,7 +49,7 @@
           <button class="btn btn--primary" type="submit" [disabled]="loading || form.invalid">
             {{ loading ? 'Sending…' : 'Send request' }}
           </button>
-          <a class="btn btn--ghost" routerLink="/auth/login">Back to sign in</a>
+          <a class="btn btn--ghost" routerLink="/auth/login" *ngIf="!isAuthenticated">Back to sign in</a>
           <button type="button" class="btn btn--home" (click)="goHome()">Back To Home</button>
         </div>
       </form>
