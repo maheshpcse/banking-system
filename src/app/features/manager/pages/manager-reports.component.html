@@ -53,7 +53,9 @@
           <li>Saved at: {{ saved.savedAt | date: 'medium' }}</li>
           <li>Status: preview stored locally until report delivery is connected</li>
         </ul>
-        <button type="button" class="btn btn--ghost" (click)="clearSaved()">Clear saved preview</button>
+        <button type="button" class="btn btn--ghost report-clear-btn" (click)="clearSaved()">
+          Clear saved preview
+        </button>
       </ng-container>
       <ng-template #noSchedule>
         <app-empty-state
