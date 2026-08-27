@@ -288,6 +288,8 @@ export interface BillingProduct {
   stock: number;
   gstPercentage: number;
   active: boolean;
+  category?: string;
+  images?: string[];
   ratingCount?: number;
   ratingAvg?: number;
   createdAt?: string;

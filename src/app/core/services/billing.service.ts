@@ -42,9 +42,16 @@ export class BillingService {
     return this.http.get<BillingSalesReport>(`${this.base}/sales-reports`, { params });
   }
 
-  listProducts(q = ''): Observable<{ items: BillingProduct[] }> {
+  listProducts(
+    q = '',
+    extras: { category?: string; inStock?: boolean; active?: boolean; sort?: string } = {}
+  ): Observable<{ items: BillingProduct[] }> {
     let params = new HttpParams();
     if (q) params = params.set('q', q);
+    if (extras.category) params = params.set('category', extras.category);
+    if (extras.inStock) params = params.set('inStock', '1');
+    if (extras.active) params = params.set('active', '1');
+    if (extras.sort) params = params.set('sort', extras.sort);
     return this.http.get<{ items: BillingProduct[] }>(`${this.base}/products`, { params });
   }
 
