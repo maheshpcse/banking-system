@@ -1,4 +1,7 @@
 :host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
   --shop-ink: #0b1f33;
   --shop-mist: #eef6fb;
   --shop-arctic: #2f6fed;
@@ -10,8 +13,6 @@
   --font-display: 'Sora', 'Segoe UI', sans-serif;
   --font-body: 'Manrope', 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-  display: block;
-  min-height: 100vh;
   color: var(--shop-ink);
   font-family: var(--font-body);
   background:
@@ -22,12 +23,24 @@
 }
 
 .shop {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
-  padding: 0.55rem clamp(0.65rem, 1.6vw, 1.15rem) 1rem;
+  padding: 0.55rem clamp(0.65rem, 1.6vw, 1.15rem) 0.65rem;
   box-sizing: border-box;
+}
+
+.shop-top {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  background: linear-gradient(180deg, rgba(247, 251, 253, 0.98), rgba(244, 250, 252, 0.92));
+  border-bottom: 1px solid var(--shop-line);
+  padding-bottom: 0.35rem;
 }
 
 .shop--boot {
@@ -35,8 +48,7 @@
 }
 
 .shop-chrome {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 40;
   display: flex;
   align-items: center;
@@ -263,8 +275,7 @@
 }
 
 .shop-sticky {
-  position: sticky;
-  top: 3.35rem;
+  position: relative;
   z-index: 35;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -487,7 +498,10 @@
 .shop-stage {
   flex: 1;
   min-height: 0;
-  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  padding-bottom: 0.75rem;
 }
 
 .shop-stage.is-loading {
@@ -1386,4 +1400,227 @@
 
 .shop-filter-block {
   grid-column: 1 / 2;
+}
+
+
+.shop-search__field {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.shop-search__field input {
+  width: 100%;
+  padding-right: 2.2rem;
+}
+
+.shop-search__clear {
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.55rem;
+  height: 1.55rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(11, 31, 51, 0.08);
+  color: rgba(11, 31, 51, 0.65);
+  font-size: 1rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+}
+
+.shop-search__clear:hover {
+  background: rgba(47, 111, 237, 0.14);
+  color: var(--shop-arctic-deep);
+}
+
+.shop-theme-select {
+  display: block;
+  min-width: 9.5rem;
+}
+
+:host ::ng-deep .shop-theme-select .theme-select__control,
+:host ::ng-deep .shop-theme-select__control {
+  min-height: 2.15rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--shop-line);
+  background: #fff;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--shop-ink);
+  padding: 0.3rem 2rem 0.3rem 0.65rem;
+}
+
+:host ::ng-deep .shop-theme-select .theme-select__option {
+  cursor: pointer;
+}
+
+:host ::ng-deep .shop-theme-select .theme-select__menu {
+  border-radius: 0.75rem;
+  border: 1px solid var(--shop-line);
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(8, 20, 34, 0.12);
+}
+
+.shop-checkout-pane {
+  animation: shop-fade-in 220ms ease;
+}
+
+.shop-checkout-pane.is-leaving {
+  animation: shop-fade-out 180ms ease forwards;
+}
+
+.shop-pay {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: min(60vh, 28rem);
+  padding-top: 0.35rem;
+}
+
+.shop-pay--center {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.shop-pay__head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.shop-pay__head h2 {
+  margin: 0.1rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.shop-pay__head p {
+  margin: 0.2rem 0 0;
+  font-size: 0.86rem;
+  color: rgba(11, 31, 51, 0.58);
+}
+
+.shop-pay__methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.shop-pay__method {
+  min-height: 2.35rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--shop-line);
+  background: rgba(255, 255, 255, 0.75);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 720;
+  cursor: pointer;
+  color: var(--shop-ink);
+}
+
+.shop-pay__method.is-on,
+.shop-pay__method:hover {
+  border-color: rgba(47, 111, 237, 0.4);
+  background: rgba(219, 234, 254, 0.7);
+  color: var(--shop-arctic-deep);
+}
+
+.shop-pay__fields {
+  display: grid;
+  gap: 0.45rem;
+  max-width: 28rem;
+}
+
+.shop-pay__fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.66rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(11, 31, 51, 0.5);
+}
+
+.shop-pay__fields input {
+  min-height: 2.2rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--shop-line);
+  background: #fff;
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--shop-ink);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.shop-pay__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+}
+
+.shop-pay__hint {
+  margin: 0;
+  font-size: 0.88rem;
+  color: rgba(11, 31, 51, 0.6);
+}
+
+.shop-pay__meter {
+  position: relative;
+  width: 5rem;
+  height: 5rem;
+  display: grid;
+  place-items: center;
+}
+
+.shop-pay__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: conic-gradient(from 210deg, rgba(47, 111, 237, 0.2), #2f6fed, rgba(15, 118, 110, 0.35), rgba(47, 111, 237, 0.2));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 7px));
+  animation: shop-spin 1s linear infinite;
+}
+
+.shop-pay__meter strong {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+}
+
+.shop-pay--center h2 {
+  margin: 0;
+  font-family: var(--font-display);
+}
+
+.shop-pay--center p {
+  margin: 0;
+  color: rgba(11, 31, 51, 0.58);
+}
+
+.shop-modal__close:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@keyframes shop-spin {
+  to { transform: rotate(360deg); }
 }

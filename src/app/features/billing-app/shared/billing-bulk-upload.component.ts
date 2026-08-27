@@ -35,10 +35,12 @@ export class BillingBulkUploadComponent implements OnChanges {
   readonly pageSize = 8;
   uploading = false;
   bootShimmer = false;
+  previewShimmer = false;
   resultMessage = '';
   resultCreated = 0;
   resultErrors: Array<{ index: number; message: string }> = [];
   private leaveTimer: ReturnType<typeof setTimeout> | null = null;
+  private previewTimer: ReturnType<typeof setTimeout> | null = null;
   private idSeq = 0;
 
   constructor(
@@ -96,6 +98,7 @@ export class BillingBulkUploadComponent implements OnChanges {
     this.leaving = true;
     this.leaveTimer = setTimeout(() => {
       this.leaving = false;
+      this.reset();
       this.closed.emit();
     }, 200);
   }
@@ -124,14 +127,22 @@ export class BillingBulkUploadComponent implements OnChanges {
       void this.alerts.error('Paste or upload at least one data row.');
       return;
     }
-    this.rows = parsed.map((raw) => ({
-      id: `row-${++this.idSeq}`,
-      selected: true,
-      raw,
-      localError: this.localValidate(raw)
-    }));
-    this.page = 1;
+    this.previewShimmer = true;
     this.step = 'preview';
+    this.page = 1;
+    if (this.previewTimer) {
+      clearTimeout(this.previewTimer);
+    }
+    this.previewTimer = setTimeout(() => {
+      this.rows = parsed.map((raw) => ({
+        id: `row-${++this.idSeq}`,
+        selected: true,
+        raw,
+        localError: this.localValidate(raw)
+      }));
+      this.previewShimmer = false;
+      this.previewTimer = null;
+    }, 420);
   }
 
   togglePage(select: boolean): void {
@@ -194,16 +205,19 @@ export class BillingBulkUploadComponent implements OnChanges {
         await this.alerts.error(this.resultMessage);
       }
     } catch (err) {
-      this.step = 'preview';
-      await this.alerts.error(
-        (err as { error?: { message?: string } })?.error?.message || 'Bulk upload failed.'
-      );
+      this.resultCreated = 0;
+      this.resultErrors = [];
+      this.resultMessage =
+        (err as { error?: { message?: string } })?.error?.message || 'Bulk upload failed.';
+      this.step = 'result';
+      await this.alerts.error(this.resultMessage);
     } finally {
       this.uploading = false;
     }
   }
 
   finish(): void {
+    this.reset();
     this.closed.emit();
   }
 
@@ -219,9 +233,14 @@ export class BillingBulkUploadComponent implements OnChanges {
     this.rows = [];
     this.page = 1;
     this.uploading = false;
+    this.previewShimmer = false;
     this.resultMessage = '';
     this.resultCreated = 0;
     this.resultErrors = [];
+    if (this.previewTimer) {
+      clearTimeout(this.previewTimer);
+      this.previewTimer = null;
+    }
   }
 
   private localValidate(raw: Record<string, string | number>): string | undefined {

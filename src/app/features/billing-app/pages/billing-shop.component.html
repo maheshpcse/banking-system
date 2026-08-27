@@ -1,111 +1,144 @@
 <section class="shop" *ngIf="!pageLoading; else shopBoot">
-  <header class="shop-chrome">
-    <div class="shop-chrome__brand">
-      <span class="shop-chrome__mark" aria-hidden="true"></span>
-      <div>
-        <p class="shop-chrome__eyebrow">NovaBank × NovaBill</p>
-        <strong>Shop Floor</strong>
+  <div class="shop-top">
+    <header class="shop-chrome">
+      <div class="shop-chrome__brand">
+        <span class="shop-chrome__mark" aria-hidden="true"></span>
+        <div>
+          <p class="shop-chrome__eyebrow">NovaBank × NovaBill</p>
+          <strong>Shop Floor</strong>
+        </div>
       </div>
-    </div>
-    <div class="shop-chrome__actions">
-      <button type="button" class="shop-cart-pill" (click)="openCheckout()" [disabled]="!cartCount">
-        <span>Bag</span>
-        <em>{{ cartCount }}</em>
-        <strong>{{ cartGrandTotal | currencyFormat }}</strong>
-      </button>
-      <span class="shop-avatar" [ngClass]="'shop-avatar--' + avatarStyle" [attr.aria-label]="operatorName">
-        <img *ngIf="avatarSrc as src" [src]="src" alt="" />
-        <ng-container *ngIf="!avatarSrc">{{ avatarInitials }}</ng-container>
-      </span>
-      <button type="button" class="shop-ghost" (click)="goBillingDesk()">Billing desk</button>
-      <button type="button" class="shop-ghost" (click)="goBankingPos()">Classic POS</button>
-      <button type="button" class="shop-ghost" (click)="signOut()">Sign out</button>
-    </div>
-  </header>
-
-  <div class="shop-sticky">
-    <div class="shop-search shop-search--product">
-      <span>Find products</span>
-      <div class="shop-search__row">
-        <input
-          type="search"
-          [ngModel]="productQuery"
-          (ngModelChange)="productQuery = $event"
-          (keyup.enter)="runProductSearch()"
-          placeholder="Search name, SKU, or category"
-          autocomplete="off"
-        />
-        <button type="button" class="shop-solid shop-solid--search" (click)="runProductSearch()">Search</button>
-      </div>
-    </div>
-
-    <div class="shop-filter-block">
-      <span class="shop-filter-block__label">Stock</span>
-      <div class="shop-filters">
-        <button
-          type="button"
-          *ngFor="let opt of stockOptions"
-          [class.is-on]="stockFilter === opt.id"
-          (click)="setStockFilter(opt.id)"
-        >
-          {{ opt.label }}
+      <div class="shop-chrome__actions">
+        <button type="button" class="shop-cart-pill" (click)="openCheckout()" [disabled]="!cartCount">
+          <span>Bag</span>
+          <em>{{ cartCount }}</em>
+          <strong>{{ cartGrandTotal | currencyFormat }}</strong>
         </button>
+        <span class="shop-avatar" [ngClass]="'shop-avatar--' + avatarStyle" [attr.aria-label]="operatorName">
+          <img *ngIf="avatarSrc as src" [src]="src" alt="" />
+          <ng-container *ngIf="!avatarSrc">{{ avatarInitials }}</ng-container>
+        </span>
+        <button type="button" class="shop-ghost" (click)="goBillingDesk()">Billing desk</button>
+        <button type="button" class="shop-ghost" (click)="goBankingPos()">Classic POS</button>
+        <button type="button" class="shop-ghost" (click)="signOut()">Sign out</button>
       </div>
+    </header>
+
+    <div class="shop-sticky">
+      <div class="shop-search shop-search--product">
+        <span>Find products</span>
+        <div class="shop-search__row">
+          <div class="shop-search__field">
+            <input
+              type="search"
+              [ngModel]="productQuery"
+              (ngModelChange)="onProductQuery($event)"
+              (keyup.enter)="runProductSearch()"
+              placeholder="Search name, SKU, or category"
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              class="shop-search__clear"
+              *ngIf="productQuery"
+              (click)="clearProductQuery()"
+              aria-label="Clear product search"
+            >
+              ×
+            </button>
+          </div>
+          <button type="button" class="shop-solid shop-solid--search" (click)="runProductSearch()">Search</button>
+        </div>
+      </div>
+
+      <div class="shop-filter-block">
+        <span class="shop-filter-block__label">Stock</span>
+        <div class="shop-filters">
+          <button
+            type="button"
+            *ngFor="let opt of stockOptions"
+            [class.is-on]="stockFilter === opt.id"
+            (click)="setStockFilter(opt.id)"
+          >
+            {{ opt.label }}
+          </button>
+        </div>
+      </div>
+
+      <label class="shop-sort">
+        <span>Category</span>
+        <app-theme-select
+          class="shop-theme-select"
+          controlClass="shop-theme-select__control"
+          [ngModel]="categoryFilter"
+          [options]="categoryOptions"
+          ariaLabel="Category filter"
+          (ngModelChange)="setCategory($event)"
+        ></app-theme-select>
+      </label>
+
+      <label class="shop-sort">
+        <span>Sort</span>
+        <app-theme-select
+          class="shop-theme-select"
+          controlClass="shop-theme-select__control"
+          [ngModel]="sortKey"
+          [options]="sortSelectOptions"
+          ariaLabel="Sort products"
+          (ngModelChange)="setSort($event)"
+        ></app-theme-select>
+      </label>
     </div>
 
-    <label class="shop-sort">
-      <span>Category</span>
-      <select class="shop-native-select" [ngModel]="categoryFilter" (ngModelChange)="setCategory($event)">
-        <option value="">All categories</option>
-        <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-      </select>
-    </label>
-
-    <label class="shop-sort">
-      <span>Sort</span>
-      <select class="shop-native-select" [ngModel]="sortKey" (ngModelChange)="setSort($event)">
-        <option *ngFor="let opt of sortOptions" [value]="opt.id">{{ opt.label }}</option>
-      </select>
-    </label>
-  </div>
-
-  <div class="shop-customer">
-    <div class="shop-search shop-search--customer">
-      <span>Customer</span>
-      <div class="shop-search__row">
-        <input
-          type="search"
-          [ngModel]="customerQuery"
-          (ngModelChange)="customerQuery = $event"
-          (keyup.enter)="runCustomerSearch()"
-          placeholder="Search name, email, phone, or account"
-          autocomplete="off"
-        />
-        <button type="button" class="shop-solid shop-solid--search" (click)="runCustomerSearch()">Search</button>
+    <div class="shop-customer">
+      <div class="shop-search shop-search--customer">
+        <span>Customer</span>
+        <div class="shop-search__row">
+          <div class="shop-search__field">
+            <input
+              type="search"
+              [ngModel]="customerQuery"
+              (ngModelChange)="onCustomerQuery($event)"
+              (keyup.enter)="runCustomerSearch()"
+              placeholder="Search name, email, phone, or account"
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              class="shop-search__clear"
+              *ngIf="customerQuery"
+              (click)="clearCustomerQuery()"
+              aria-label="Clear customer search"
+            >
+              ×
+            </button>
+          </div>
+          <button type="button" class="shop-solid shop-solid--search" (click)="runCustomerSearch()">Search</button>
+        </div>
       </div>
-    </div>
-    <button type="button" class="shop-ghost" *ngIf="!selectedCustomer" (click)="openAddCustomer()">Add customer</button>
-    <button type="button" class="shop-ghost" *ngIf="selectedCustomer" (click)="clearCustomer()">Clear</button>
+      <button type="button" class="shop-ghost" *ngIf="!selectedCustomer" (click)="openAddCustomer()">Add customer</button>
+      <button type="button" class="shop-ghost" *ngIf="selectedCustomer" (click)="clearCustomer()">Clear</button>
 
-    <div class="shop-customer__hits" *ngIf="!selectedCustomer && customerSearched && !customerBusy">
-      <button type="button" *ngFor="let c of customers" (click)="selectCustomer(c)">
-        <strong>{{ c.name }}</strong>
-        <span>{{ c.email || c.phone || 'No contact' }}</span>
-      </button>
-      <div class="shop-customer__empty" *ngIf="!customers.length">
-        <p>No customer found{{ customerQuery.trim() ? ' for “' + customerQuery + '”' : '' }}.</p>
-        <button type="button" class="shop-solid" (click)="openAddCustomer()">Add them</button>
+      <div class="shop-customer__hits" *ngIf="!selectedCustomer && customerSearched && !customerBusy">
+        <button type="button" *ngFor="let c of customers" (click)="selectCustomer(c)">
+          <strong>{{ c.name }}</strong>
+          <span>{{ c.email || c.phone || 'No contact' }}</span>
+        </button>
+        <div class="shop-customer__empty" *ngIf="!customers.length">
+          <p>No customer found{{ customerQuery.trim() ? ' for “' + customerQuery + '”' : '' }}.</p>
+          <button type="button" class="shop-solid" (click)="openAddCustomer()">Add them</button>
+        </div>
       </div>
-    </div>
 
-    <div class="shop-customer__detail" *ngIf="selectedCustomer as c">
-      <div class="shop-customer__detail-grid">
-        <div><span>Name</span><strong>{{ c.name }}</strong></div>
-        <div><span>Email</span><strong>{{ c.email || '—' }}</strong></div>
-        <div><span>Phone</span><strong>{{ c.phone || '—' }}</strong></div>
-        <div><span>Reward points</span><strong>{{ c.rewardPoints ?? 0 }}</strong></div>
-        <div><span>Banking account</span><strong>{{ c.bankingAccountNumber || '—' }}</strong></div>
-        <div><span>Address</span><strong>{{ c.address || '—' }}</strong></div>
+      <div class="shop-customer__detail" *ngIf="selectedCustomer as c">
+        <div class="shop-customer__detail-grid">
+          <div><span>Name</span><strong>{{ c.name }}</strong></div>
+          <div><span>Email</span><strong>{{ c.email || '—' }}</strong></div>
+          <div><span>Phone</span><strong>{{ c.phone || '—' }}</strong></div>
+          <div><span>Reward points</span><strong>{{ c.rewardPoints ?? 0 }}</strong></div>
+          <div><span>Banking account</span><strong>{{ c.bankingAccountNumber || '—' }}</strong></div>
+          <div><span>Address</span><strong>{{ c.address || '—' }}</strong></div>
+        </div>
       </div>
     </div>
   </div>
@@ -292,95 +325,134 @@
   (click)="closeCheckout()"
 >
   <div class="shop-modal__panel shop-modal__panel--wide" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
-    <button type="button" class="shop-modal__close" (click)="closeCheckout()" aria-label="Close">×</button>
+    <button
+      type="button"
+      class="shop-modal__close"
+      (click)="closeCheckout()"
+      aria-label="Close"
+      [disabled]="checkoutBusy || checkoutStep === 'processing'"
+    >
+      ×
+    </button>
 
-    <div class="shop-checkout" *ngIf="checkoutStep === 'cart'">
-      <aside class="shop-checkout__cart">
-        <header>
-          <h2>Cart</h2>
-          <button type="button" class="shop-ghost" (click)="clearCart()" [disabled]="!cart.length">Clear all</button>
-        </header>
-        <div class="shop-checkout__lines" *ngIf="cart.length; else emptyCart">
-          <article *ngFor="let line of cart">
-            <img *ngIf="line.image" [src]="line.image" alt="" />
-            <div>
-              <strong>{{ line.name }}</strong>
-              <p>{{ line.unitPrice | currencyFormat }} · GST {{ line.gstPercentage }}%</p>
-              <div class="shop-qty">
-                <button type="button" (click)="changeQty(line, -1)">−</button>
-                <span>{{ line.quantity }}</span>
-                <button type="button" (click)="changeQty(line, 1)">+</button>
+    <div class="shop-checkout-pane" [class.is-leaving]="checkoutPaneLeaving">
+      <div class="shop-checkout" *ngIf="checkoutStep === 'cart'">
+        <aside class="shop-checkout__cart">
+          <header>
+            <h2>Cart</h2>
+            <button type="button" class="shop-ghost" (click)="clearCart()" [disabled]="!cart.length">Clear all</button>
+          </header>
+          <div class="shop-checkout__lines" *ngIf="cart.length; else emptyCart">
+            <article *ngFor="let line of cart">
+              <img *ngIf="line.image" [src]="line.image" alt="" />
+              <div>
+                <strong>{{ line.name }}</strong>
+                <p>{{ line.unitPrice | currencyFormat }} · GST {{ line.gstPercentage }}%</p>
+                <div class="shop-qty">
+                  <button type="button" (click)="changeQty(line, -1)">−</button>
+                  <span>{{ line.quantity }}</span>
+                  <button type="button" (click)="changeQty(line, 1)">+</button>
+                </div>
               </div>
-            </div>
-            <button type="button" class="shop-clear-mini" (click)="removeLine(line)">Clear</button>
-          </article>
-        </div>
-        <ng-template #emptyCart>
-          <div class="shop-empty shop-empty--compact">
-            <p>Cart is empty.</p>
+              <button type="button" class="shop-clear-mini" (click)="removeLine(line)">Clear</button>
+            </article>
           </div>
-        </ng-template>
-      </aside>
+          <ng-template #emptyCart>
+            <div class="shop-empty shop-empty--compact">
+              <p>Cart is empty.</p>
+            </div>
+          </ng-template>
+        </aside>
 
-      <section class="shop-checkout__summary">
-        <h2>Amounts</h2>
-        <dl>
-          <div><dt>Subtotal</dt><dd>{{ cartSubtotal | currencyFormat }}</dd></div>
-          <div><dt>Tax</dt><dd>{{ cartTax | currencyFormat }}</dd></div>
-          <div class="is-total"><dt>Total</dt><dd>{{ cartGrandTotal | currencyFormat }}</dd></div>
-        </dl>
-        <p class="shop-checkout__customer" *ngIf="selectedCustomer; else needCustomer">
-          Charging <strong>{{ selectedCustomer.name }}</strong>
-        </p>
-        <ng-template #needCustomer>
-          <p class="shop-checkout__customer is-warn">Select a customer above the product grid first.</p>
-        </ng-template>
-        <button
-          type="button"
-          class="shop-solid"
-          [disabled]="checkoutBusy || !cart.length || !selectedCustomer"
-          (click)="beginPayment()"
-        >
-          {{ checkoutBusy ? 'Preparing…' : 'Next · Payment' }}
-        </button>
-        <button type="button" class="shop-ghost" (click)="closeCheckout()">Cancel</button>
-      </section>
-    </div>
-
-    <div class="shop-checkout shop-checkout--pay" *ngIf="checkoutStep === 'pay'">
-      <div class="shop-checkout__summary shop-checkout__summary--full">
-        <h2>Processing payment</h2>
-        <p *ngIf="activeInvoice">Invoice {{ activeInvoice.billNumber }} · {{ activeInvoice.grandTotal | currencyFormat }}</p>
-        <app-billing-payment-gateway
-          [open]="gatewayOpen"
-          [bill]="activeInvoice"
-          [settings]="settings"
-          [methods]="enabledMethods"
-          (closed)="onGatewayClosed()"
-          (completed)="onGatewayCompleted($event)"
-        ></app-billing-payment-gateway>
+        <section class="shop-checkout__summary">
+          <h2>Amounts</h2>
+          <dl>
+            <div><dt>Subtotal</dt><dd>{{ cartSubtotal | currencyFormat }}</dd></div>
+            <div><dt>Tax</dt><dd>{{ cartTax | currencyFormat }}</dd></div>
+            <div class="is-total"><dt>Total</dt><dd>{{ cartGrandTotal | currencyFormat }}</dd></div>
+          </dl>
+          <p class="shop-checkout__customer" *ngIf="selectedCustomer; else needCustomer">
+            Charging <strong>{{ selectedCustomer.name }}</strong>
+          </p>
+          <ng-template #needCustomer>
+            <p class="shop-checkout__customer is-warn">Select a customer above the product grid first.</p>
+          </ng-template>
+          <button
+            type="button"
+            class="shop-solid"
+            [disabled]="checkoutBusy || !cart.length || !selectedCustomer"
+            (click)="beginPayment()"
+          >
+            {{ checkoutBusy ? 'Preparing…' : 'Next · Payment' }}
+          </button>
+          <button type="button" class="shop-ghost" (click)="closeCheckout()">Cancel</button>
+        </section>
       </div>
-    </div>
 
-    <div class="shop-checkout shop-checkout--invoice" *ngIf="checkoutStep === 'invoice' && activeInvoice as bill">
-      <section class="shop-invoice">
-        <p class="shop-chrome__eyebrow">Paid invoice</p>
-        <h2>{{ bill.billNumber }}</h2>
-        <p>{{ bill.customerName }} · {{ bill.grandTotal | currencyFormat }}</p>
-        <ul>
-          <li *ngFor="let item of bill.items">
-            <span>{{ item.name }} × {{ item.quantity }}</span>
-            <strong>{{ item.lineTotal | currencyFormat }}</strong>
-          </li>
-        </ul>
-        <dl>
-          <div><dt>Subtotal</dt><dd>{{ bill.subtotal | currencyFormat }}</dd></div>
-          <div><dt>Tax</dt><dd>{{ bill.tax | currencyFormat }}</dd></div>
-          <div class="is-total"><dt>Paid</dt><dd>{{ bill.grandTotal | currencyFormat }}</dd></div>
-        </dl>
-        <p *ngIf="lastPayment">Ref {{ lastPayment.transactionRef }} · {{ lastPayment.paymentMethod | uppercase }}</p>
-        <button type="button" class="shop-solid" (click)="closeCheckout()">Done</button>
-      </section>
+      <div class="shop-pay" *ngIf="checkoutStep === 'pay'">
+        <header class="shop-pay__head">
+          <button type="button" class="shop-ghost" (click)="backToCart()">← Back to cart</button>
+          <div>
+            <p class="shop-chrome__eyebrow">Payment</p>
+            <h2>Choose method</h2>
+            <p *ngIf="activeInvoice">
+              Invoice {{ activeInvoice.billNumber }} · {{ activeInvoice.grandTotal | currencyFormat }}
+            </p>
+          </div>
+        </header>
+        <div class="shop-pay__methods">
+          <button
+            type="button"
+            *ngFor="let m of enabledMethods"
+            class="shop-pay__method"
+            [class.is-on]="payMethod === m"
+            (click)="selectPayMethod(m)"
+          >
+            {{ methodLabel(m) }}
+          </button>
+        </div>
+        <div class="shop-pay__fields" *ngIf="payMethod === 'card'">
+          <label><span>Name on card</span><input type="text" [(ngModel)]="cardName" /></label>
+          <label><span>Card number</span><input type="text" [(ngModel)]="cardNumber" inputmode="numeric" /></label>
+          <div class="shop-pay__row">
+            <label><span>Expiry</span><input type="text" [(ngModel)]="cardExpiry" placeholder="MM/YY" /></label>
+            <label><span>CVV</span><input type="password" [(ngModel)]="cardCvv" maxlength="4" /></label>
+          </div>
+          <label *ngIf="otpSent"><span>OTP</span><input type="text" [(ngModel)]="otp" maxlength="6" /></label>
+        </div>
+        <div class="shop-pay__fields" *ngIf="payMethod === 'upi'">
+          <label><span>UPI VPA</span><input type="text" [(ngModel)]="upiVpa" placeholder="name@bank" /></label>
+        </div>
+        <div class="shop-pay__fields" *ngIf="payMethod === 'qr'">
+          <p class="shop-pay__hint">Scan the merchant QR in the next step to complete payment.</p>
+        </div>
+        <div class="shop-pay__fields" *ngIf="payMethod === 'cash'">
+          <p class="shop-pay__hint">Cash will be marked collected for this invoice.</p>
+        </div>
+        <div class="shop-modal__actions">
+          <button type="button" class="shop-solid" [disabled]="checkoutBusy" (click)="continuePay()">
+            {{ payMethod === 'card' && !otpSent ? 'Send OTP' : 'Pay now' }}
+          </button>
+          <button type="button" class="shop-ghost" (click)="backToCart()">Back to cart</button>
+        </div>
+      </div>
+
+      <div class="shop-pay shop-pay--center" *ngIf="checkoutStep === 'processing'">
+        <div class="shop-pay__meter">
+          <div class="shop-pay__ring"></div>
+          <strong>{{ payProgress }}%</strong>
+        </div>
+        <h2>Processing payment</h2>
+        <p>Confirming {{ methodLabel(payMethod) }} for {{ activeInvoice?.billNumber || 'invoice' }}…</p>
+      </div>
+
+      <div class="shop-pay shop-pay--center" *ngIf="checkoutStep === 'result'">
+        <p class="shop-chrome__eyebrow">{{ payResultOk ? 'Success' : 'Failed' }}</p>
+        <h2>{{ payResultMessage }}</h2>
+        <p *ngIf="activeInvoice">{{ activeInvoice.billNumber }} · {{ activeInvoice.grandTotal | currencyFormat }}</p>
+        <p *ngIf="lastPayment?.transactionRef">Ref {{ lastPayment?.transactionRef }}</p>
+        <button type="button" class="shop-solid" (click)="finishCheckoutResult()">Done</button>
+      </div>
     </div>
   </div>
 </div>

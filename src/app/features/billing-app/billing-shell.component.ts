@@ -111,7 +111,7 @@ export class BillingShellComponent implements OnInit, OnDestroy {
   }
 
   signOut(): void {
-    this.auth.logout();
+    this.auth.logout({ home: '/novabill' });
   }
 
   private injectBootstrapCss(): void {

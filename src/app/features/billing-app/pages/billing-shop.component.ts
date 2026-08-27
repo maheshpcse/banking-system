@@ -15,6 +15,7 @@ import {
   BillingProduct
 } from '../../../core/models/banking.models';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
+import { ThemeSelectOption } from '../../../shared/theme-select/theme-select.component';
 
 interface CartLine {
   productId: string;
@@ -28,7 +29,7 @@ interface CartLine {
 
 type StockFilter = 'all' | 'in_stock' | 'low';
 type SortKey = 'name' | 'price_asc' | 'price_desc' | 'stock' | 'rating' | 'newest';
-type CheckoutStep = 'cart' | 'pay' | 'invoice';
+type CheckoutStep = 'cart' | 'pay' | 'processing' | 'result';
 
 @Component({
   selector: 'app-billing-shop',
@@ -69,9 +70,22 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   checkoutOpen = false;
   checkoutLeaving = false;
   checkoutStep: CheckoutStep = 'cart';
-  gatewayOpen = false;
+  checkoutPaneLeaving = false;
   activeInvoice: BillingBill | null = null;
   lastPayment: BillingPayment | null = null;
+  payResultOk: boolean | null = null;
+  payResultMessage = '';
+  payProgress = 0;
+  payMethod: BillingPaymentMethod = 'upi';
+  cardName = '';
+  cardNumber = '';
+  cardExpiry = '';
+  cardCvv = '';
+  upiVpa = '';
+  otp = '';
+  otpSent = false;
+  private payProgressTimer: ReturnType<typeof setInterval> | null = null;
+  private checkoutPaneTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly stockOptions: Array<{ id: StockFilter; label: string }> = [
     { id: 'all', label: 'Any stock' },
@@ -134,13 +148,19 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     if (this.leaveTimer) {
       clearTimeout(this.leaveTimer);
     }
+    if (this.checkoutPaneTimer) {
+      clearTimeout(this.checkoutPaneTimer);
+    }
+    if (this.payProgressTimer) {
+      clearInterval(this.payProgressTimer);
+    }
     delete document.documentElement.dataset['nbBilling'];
     document.body.classList.remove('billing-mode');
   }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.gatewayOpen) {
+    if (this.checkoutBusy || this.checkoutStep === 'processing') {
       return;
     }
     if (this.showAddCustomer) {
@@ -206,6 +226,17 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     return (['cash', 'card', 'upi', 'qr'] as BillingPaymentMethod[]).filter((k) => !!m[k]);
   }
 
+  get categoryOptions(): ThemeSelectOption[] {
+    return [
+      { value: '', label: 'All categories' },
+      ...this.categories.map((cat) => ({ value: cat, label: cat }))
+    ];
+  }
+
+  get sortSelectOptions(): ThemeSelectOption[] {
+    return this.sortOptions.map((opt) => ({ value: opt.id, label: opt.label }));
+  }
+
   get filteredProducts(): BillingProduct[] {
     let rows = this.products.filter((p) => p.active !== false);
     if (this.stockFilter === 'in_stock') {
@@ -246,8 +277,32 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     });
   }
 
-  runProductSearch(): void {
+  onProductQuery(value: string): void {
+    this.productQuery = value;
+    this.productSearch$.next(value.trim());
+  }
+
+  clearProductQuery(): void {
+    this.productQuery = '';
+    this.productSearch$.next('');
     this.reloadCatalog(false);
+  }
+
+  runProductSearch(): void {
+    this.productSearch$.next(this.productQuery.trim());
+    this.reloadCatalog(false);
+  }
+
+  onCustomerQuery(value: string): void {
+    this.customerQuery = value;
+    this.customerSearch$.next(value.trim());
+  }
+
+  clearCustomerQuery(): void {
+    this.customerQuery = '';
+    this.customerSearched = false;
+    this.customers = [];
+    this.customerSearch$.next('');
   }
 
   runCustomerSearch(): void {
@@ -514,20 +569,44 @@ export class BillingShopComponent implements OnInit, OnDestroy {
       return;
     }
     this.checkoutStep = 'cart';
+    this.checkoutPaneLeaving = false;
     this.checkoutLeaving = false;
+    this.payResultOk = null;
+    this.payResultMessage = '';
+    this.resetPayForm();
     this.checkoutOpen = true;
   }
 
   closeCheckout(): void {
-    if (!this.checkoutOpen || this.checkoutLeaving || this.gatewayOpen) {
+    if (!this.checkoutOpen || this.checkoutLeaving || this.checkoutBusy || this.checkoutStep === 'processing') {
       return;
     }
+    const shouldReset = this.checkoutStep === 'result';
     this.checkoutLeaving = true;
     this.leaveTimer = setTimeout(() => {
       this.checkoutOpen = false;
       this.checkoutLeaving = false;
-      this.gatewayOpen = false;
+      if (shouldReset) {
+        this.resetShopSession(false);
+      }
     }, 240);
+  }
+
+  async goCheckoutStep(step: CheckoutStep): Promise<void> {
+    if (this.checkoutStep === step || this.checkoutPaneLeaving) {
+      return;
+    }
+    this.checkoutPaneLeaving = true;
+    await new Promise((r) => setTimeout(r, 180));
+    this.checkoutStep = step;
+    this.checkoutPaneLeaving = false;
+  }
+
+  backToCart(): void {
+    if (this.checkoutBusy || this.checkoutStep === 'processing') {
+      return;
+    }
+    void this.goCheckoutStep('cart');
   }
 
   async beginPayment(): Promise<void> {
@@ -557,8 +636,8 @@ export class BillingShopComponent implements OnInit, OnDestroy {
       );
       const pending = await firstValueFrom(this.billing.awaitBillPayment(created.bill.id));
       this.activeInvoice = pending.bill;
-      this.checkoutStep = 'pay';
-      this.gatewayOpen = true;
+      this.resetPayForm();
+      await this.goCheckoutStep('pay');
     } catch (err) {
       await this.alerts.error(
         (err as { error?: { message?: string } })?.error?.message || 'Unable to create invoice.'
@@ -568,22 +647,168 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     }
   }
 
-  onGatewayClosed(): void {
-    this.gatewayOpen = false;
+  selectPayMethod(method: BillingPaymentMethod): void {
+    this.payMethod = method;
+    this.otpSent = false;
+    this.otp = '';
   }
 
-  onGatewayCompleted(event: { bill: BillingBill; payment: BillingPayment; ok: boolean }): void {
-    this.gatewayOpen = false;
-    this.activeInvoice = event.bill;
-    this.lastPayment = event.payment;
-    if (event.ok) {
-      this.checkoutStep = 'invoice';
-      this.cart = [];
+  methodLabel(method: BillingPaymentMethod): string {
+    if (method === 'card') return this.settings?.cardLabel || 'Card';
+    if (method === 'upi') return this.settings?.upiVpa ? `UPI · ${this.settings.upiVpa}` : 'UPI';
+    if (method === 'qr') return 'QR Scan';
+    return 'Cash';
+  }
+
+  async continuePay(): Promise<void> {
+    if (this.payMethod === 'cash' || this.payMethod === 'qr') {
+      await this.runEmbeddedPayment();
+      return;
+    }
+    if (this.payMethod === 'upi') {
+      const vpa = String(this.upiVpa || this.settings?.upiVpa || '').trim();
+      if (!vpa.includes('@')) {
+        await this.alerts.toastWarning('UPI ID required', 'Enter a VPA like name@bank.');
+        return;
+      }
+      this.upiVpa = vpa;
+      await this.runEmbeddedPayment();
+      return;
+    }
+    // card
+    if (!this.cardReady()) {
+      await this.alerts.toastWarning('Card details incomplete', 'Fill name, number, expiry, and CVV.');
+      return;
+    }
+    if (!this.otpSent) {
+      this.otpSent = true;
+      this.otp = '';
+      await this.alerts.toastSuccess('OTP sent', 'Demo OTP is 123456');
+      return;
+    }
+    if (String(this.otp).trim() !== '123456') {
+      await this.alerts.toastWarning('Invalid OTP', 'Use demo OTP 123456.');
+      return;
+    }
+    await this.runEmbeddedPayment();
+  }
+
+  async finishCheckoutResult(): Promise<void> {
+    this.checkoutLeaving = true;
+    await new Promise((r) => setTimeout(r, 200));
+    this.checkoutOpen = false;
+    this.checkoutLeaving = false;
+    this.resetShopSession(true);
+  }
+
+  private cardReady(): boolean {
+    const digits = String(this.cardNumber || '').replace(/\D/g, '');
+    return (
+      String(this.cardName || '').trim().length >= 2 &&
+      digits.length >= 12 &&
+      /^\d{2}\/\d{2}$/.test(String(this.cardExpiry || '').trim()) &&
+      String(this.cardCvv || '').trim().length >= 3
+    );
+  }
+
+  private async runEmbeddedPayment(): Promise<void> {
+    if (!this.activeInvoice || this.checkoutBusy) {
+      return;
+    }
+    this.checkoutBusy = true;
+    this.payProgress = 8;
+    this.payResultOk = null;
+    await this.goCheckoutStep('processing');
+    this.startPayProgress();
+    const waitMs = this.payMethod === 'cash' ? 900 : this.payMethod === 'qr' ? 1600 : 1200;
+    await new Promise((r) => setTimeout(r, waitMs));
+    try {
+      const res = await firstValueFrom(
+        this.billing.payBill({
+          billId: this.activeInvoice.id,
+          paymentMethod: this.payMethod,
+          provider: 'novapay',
+          sessionId: `shop-${Date.now()}`,
+          channel: 'modal',
+          cardLast4:
+            this.payMethod === 'card'
+              ? String(this.cardNumber || '').replace(/\D/g, '').slice(-4)
+              : undefined,
+          upiVpa: this.payMethod === 'upi' ? String(this.upiVpa || '').trim() : undefined
+        })
+      );
+      this.payProgress = 100;
+      this.stopPayProgress();
+      this.lastPayment = res.payment;
+      this.activeInvoice = res.bill;
+      this.payResultOk = res.payment.status === 'success';
+      this.payResultMessage = res.message || (this.payResultOk ? 'Payment successful' : 'Payment failed');
+      await this.goCheckoutStep('result');
+      if (this.payResultOk) {
+        void this.alerts.toastSuccessCorner('Paid', `Invoice ${res.bill.billNumber}`);
+      } else {
+        void this.alerts.error(this.payResultMessage);
+      }
+    } catch (err) {
+      this.payProgress = 100;
+      this.stopPayProgress();
+      this.payResultOk = false;
+      this.payResultMessage =
+        (err as { error?: { message?: string } })?.error?.message || 'Payment could not be completed.';
+      await this.goCheckoutStep('result');
+      void this.alerts.error(this.payResultMessage);
+    } finally {
+      this.checkoutBusy = false;
+    }
+  }
+
+  private startPayProgress(): void {
+    this.stopPayProgress();
+    this.payProgressTimer = setInterval(() => {
+      if (this.payProgress < 90) {
+        this.payProgress = Math.min(90, this.payProgress + 7);
+      }
+    }, 120);
+  }
+
+  private stopPayProgress(): void {
+    if (this.payProgressTimer) {
+      clearInterval(this.payProgressTimer);
+      this.payProgressTimer = null;
+    }
+  }
+
+  private resetPayForm(): void {
+    const methods = this.enabledMethods;
+    this.payMethod = methods[0] || 'upi';
+    this.cardName = '';
+    this.cardNumber = '';
+    this.cardExpiry = '';
+    this.cardCvv = '';
+    this.upiVpa = this.settings?.upiVpa || '';
+    this.otp = '';
+    this.otpSent = false;
+    this.payProgress = 0;
+  }
+
+  private resetShopSession(reload: boolean): void {
+    this.cart = [];
+    this.selectedCustomer = null;
+    this.customerQuery = '';
+    this.customerSearched = false;
+    this.customers = [];
+    this.productQuery = '';
+    this.stockFilter = 'all';
+    this.categoryFilter = '';
+    this.sortKey = 'name';
+    this.activeInvoice = null;
+    this.lastPayment = null;
+    this.checkoutStep = 'cart';
+    this.payResultOk = null;
+    this.payResultMessage = '';
+    this.resetPayForm();
+    if (reload) {
       this.reloadCatalog(false);
-      void this.alerts.toastSuccessCorner('Paid', `Invoice ${event.bill.billNumber}`);
-    } else {
-      this.checkoutStep = 'cart';
-      void this.alerts.error(event.payment?.transactionRef ? 'Payment did not complete.' : 'Payment failed.');
     }
   }
 
@@ -596,7 +821,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   }
 
   signOut(): void {
-    this.auth.logout();
+    this.auth.logout({ home: '/novabill' });
   }
 
   private applyProducts(items: BillingProduct[]): void {
