@@ -162,6 +162,10 @@ export class ManagerReportsComponent implements OnInit, OnDestroy {
     return this.cadenceOptions.find((o) => o.value === this.cadence)?.label || this.cadence;
   }
 
+  cadenceLabelFor(cadence: Cadence | string): string {
+    return this.cadenceOptions.find((o) => o.value === cadence)?.label || String(cadence);
+  }
+
   get activeScheduleCount(): number {
     return this.schedules.length;
   }

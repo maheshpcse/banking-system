@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   BillingBill,
+  BillingCategory,
   BillingComplaint,
   BillingComplaintStatus,
   BillingCoupon,
@@ -68,6 +69,11 @@ export class BillingService {
 
   archiveProduct(id: string): Observable<{ message: string; product: BillingProduct }> {
     return this.http.delete<{ message: string; product: BillingProduct }>(`${this.base}/products/${id}`);
+  }
+
+  /** Permanently remove a product from the catalog. */
+  purgeProduct(id: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/products/${id}/purge`, {});
   }
 
   bulkCreateProducts(
@@ -253,6 +259,42 @@ export class BillingService {
       `${this.base}/coupons/${id}/deactivate`,
       {}
     );
+  }
+
+  listCategories(includeInactive = false): Observable<{ items: BillingCategory[] }> {
+    let params = new HttpParams();
+    if (includeInactive) params = params.set('includeInactive', '1');
+    return this.http.get<{ items: BillingCategory[] }>(`${this.base}/categories`, { params });
+  }
+
+  createCategory(
+    payload: Partial<BillingCategory>
+  ): Observable<{ message: string; category: BillingCategory }> {
+    return this.http.post<{ message: string; category: BillingCategory }>(
+      `${this.base}/categories`,
+      payload
+    );
+  }
+
+  updateCategory(
+    id: string,
+    payload: Partial<BillingCategory>
+  ): Observable<{ message: string; category: BillingCategory }> {
+    return this.http.put<{ message: string; category: BillingCategory }>(
+      `${this.base}/categories/${id}`,
+      payload
+    );
+  }
+
+  deactivateCategory(id: string): Observable<{ message: string; category: BillingCategory }> {
+    return this.http.post<{ message: string; category: BillingCategory }>(
+      `${this.base}/categories/${id}/deactivate`,
+      {}
+    );
+  }
+
+  deleteCategory(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.base}/categories/${id}`);
   }
 
   rateBill(

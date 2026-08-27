@@ -1,6 +1,6 @@
 <div class="bulk" *ngIf="open" [class.is-leaving]="leaving" (click)="close()">
   <div class="bulk__panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
-    <button type="button" class="bulk__close" (click)="close()" aria-label="Close" [disabled]="uploading">×</button>
+    <button type="button" class="bulk__close" (click)="close()" aria-label="Close" [disabled]="uploading"><span aria-hidden="true">×</span></button>
 
     <header class="bulk__head">
       <p class="bulk__eyebrow">NovaBill catalog</p>

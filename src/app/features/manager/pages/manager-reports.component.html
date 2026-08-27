@@ -204,7 +204,7 @@
                   <div class="hint">{{ s.datasets.length }} sources · {{ s.columns.length }} columns</div>
                   <div class="hint">{{ filterSummary(s.filters) }}</div>
                 </td>
-                <td>{{ cadenceOptions.find(o => o.value === s.cadence)?.label || s.cadence }}</td>
+                <td>{{ cadenceLabelFor(s.cadence) }}</td>
                 <td>{{ s.scope === 'all' ? 'All data' : 'Custom' }}</td>
                 <td>{{ s.runAt | date: 'medium' }}</td>
                 <td>{{ s.expiresAt ? (s.expiresAt | date: 'medium') : 'Never' }}</td>

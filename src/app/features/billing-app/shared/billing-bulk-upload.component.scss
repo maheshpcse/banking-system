@@ -54,6 +54,12 @@
   cursor: pointer;
 }
 
+.bulk__close > span {
+  display: block;
+  line-height: 1;
+  transform: translateY(-0.08em);
+}
+
 .bulk__close:hover:not(:disabled) {
   background: rgba(47, 111, 237, 0.12);
   color: #1d4ed8;
@@ -133,6 +139,13 @@
   font-weight: 720;
   cursor: pointer;
   color: #0b1f33;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.bulk__file:hover {
+  border-color: rgba(47, 111, 237, 0.4);
+  background: rgba(219, 234, 254, 0.75);
+  color: #1d4ed8;
 }
 
 .bulk__file input {
@@ -242,6 +255,7 @@
   justify-content: center;
   padding: 0;
   cursor: pointer;
+  transform: translateY(-0.06em);
 }
 
 .bulk__icon-x:hover {

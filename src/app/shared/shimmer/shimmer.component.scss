@@ -12,6 +12,7 @@
 .shimmer--tx-table,
 .shimmer--notifications-list,
 .shimmer--notifications-grid,
+.shimmer--notifications-table,
 .shimmer--admin-requests-list,
 .shimmer--manager-flow-chart,
 .shimmer--manager-flow-table,
@@ -797,32 +798,10 @@
   height: 0.7rem;
 }
 
-.shimmer__grid--reports {
-  grid-template-columns: 1.05fr 0.95fr;
-  align-items: stretch;
-}
-
-.shimmer-card--report-form {
-  min-height: 22rem;
-  align-content: start;
-}
-
-.shimmer-card--report-list {
-  min-height: 22rem;
-  align-content: start;
-}
-
-.shimmer-card--report-saved {
-  margin-top: 1rem;
-  min-height: 14rem;
-  align-content: start;
-}
-
-@media (max-width: 900px) {
-  .shimmer__grid--reports {
-    grid-template-columns: 1fr;
-  }
-}
+.shimmer__grid--reports{grid-template-columns:1.05fr .95fr;align-items:stretch}
+.shimmer-card--report-form,.shimmer-card--report-list{min-height:22rem;align-content:start}
+.shimmer-card--report-saved{margin-top:1rem;min-height:14rem;align-content:start}
+@media (max-width:900px){.shimmer__grid--reports{grid-template-columns:1fr}}
 
 .shimmer-theme-grid {
   display: grid;
@@ -1100,74 +1079,17 @@ html[data-nb-mode='dark'] .shimmer__auth-page {
   border-radius: 0.7rem;
 }
 
-.shimmer__grid--manager-analytics {
-  grid-template-columns: 1fr;
-}
-
-.shimmer-card--analytics {
-  min-height: 16rem;
-}
-
-.shimmer__stack--desk {
-  display: grid;
-  gap: 1rem;
-  margin: 0 0 1rem;
-}
-
-.shimmer-card--desk-panel {
-  min-height: auto;
-  align-content: start;
-  display: grid;
-  gap: 0.65rem;
-}
-
-.shimmer-desk-donut {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 1rem;
-  align-items: center;
-  min-height: 9rem;
-}
-
-.shimmer-desk-donut__ring {
-  width: 7.5rem;
-  height: 7.5rem;
-  border-radius: 999px;
-  border: 0.65rem solid rgba(148, 163, 184, 0.22);
-  border-top-color: rgba(95, 196, 176, 0.45);
-  border-right-color: rgba(56, 189, 248, 0.4);
-  animation: shimmer-wave 1.35s ease-in-out infinite;
-}
-
-.shimmer-desk-donut__legend {
-  display: grid;
-  gap: 0.45rem;
-}
-
-.shimmer__stack--billing {
-  display: grid;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.shimmer-card--billing-panel {
-  min-height: 12rem;
-  align-content: start;
-  display: grid;
-  gap: 0.65rem;
-}
-
-.shimmer__grid--roadmap {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-bottom: 0;
-}
-
-.shimmer-card--roadmap {
-  min-height: 8rem;
-  align-content: start;
-  display: grid;
-  gap: 0.55rem;
-}
+.shimmer__grid--manager-analytics{grid-template-columns:1fr}
+.shimmer-card--analytics{min-height:16rem}
+.shimmer__stack--desk{display:grid;gap:1rem;margin:0 0 1rem}
+.shimmer-card--desk-panel{min-height:auto;align-content:start;display:grid;gap:.65rem}
+.shimmer-desk-donut{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center;min-height:9rem}
+.shimmer-desk-donut__ring{width:7.5rem;height:7.5rem;border-radius:999px;border:.65rem solid rgba(148,163,184,.22);border-top-color:rgba(95,196,176,.45);border-right-color:rgba(56,189,248,.4);animation:shimmer-wave 1.35s ease-in-out infinite}
+.shimmer-desk-donut__legend{display:grid;gap:.45rem}
+.shimmer__stack--billing{display:grid;gap:1rem;margin-top:1rem}
+.shimmer-card--billing-panel{min-height:12rem;align-content:start;display:grid;gap:.65rem}
+.shimmer__grid--roadmap{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:0}
+.shimmer-card--roadmap{min-height:8rem;align-content:start;display:grid;gap:.55rem}
 
 .shimmer-flow {
   display: grid;
@@ -1591,68 +1513,9 @@ html[data-nb-mode='dark'] .shimmer__auth-page {
   animation: shimmer-wave 1.35s ease-in-out infinite;
 }
 
-.shimmer-sales-chart__ticker {
-  position: absolute;
-  inset: 12% 6% auto;
-  display: flex;
-  justify-content: space-between;
-  pointer-events: none;
-}
-
-.shimmer-sales-chart__tick {
-  width: 18%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(95, 196, 176, 0.45), transparent);
-}
-
-.shimmer-sales-chart__axis {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.shimmer-sales-chart__axis .shimmer-line--xs {
-  width: 16%;
-}
-
-.shimmer-sales-targets__toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: flex-end;
-  margin-bottom: 1rem;
-}
-
-.shimmer-sales-targets__toolbar .shimmer-block--sm {
-  width: min(12rem, 42%);
-  height: 2.55rem;
-}
-
-.shimmer-sales-targets__stats {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-bottom: 0.85rem;
-}
-
-.shimmer-sales-targets__body {
-  display: grid;
-  gap: 0.85rem;
-}
-
-.shimmer-card--sales-stack {
-  margin-bottom: 0;
-  min-height: auto;
-  align-content: start;
-  display: grid;
-  gap: 0.55rem;
-}
-
-@media (max-width: 720px) {
-  .shimmer-sales-card__kpis,
-  .shimmer-sales-targets__stats {
-    grid-template-columns: 1fr;
-  }
-
-  .shimmer-sales-chart__bars {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
+.shimmer-sales-targets__toolbar{display:flex;flex-wrap:wrap;gap:.75rem;align-items:flex-end;margin-bottom:1rem}
+.shimmer-sales-targets__toolbar .shimmer-block--sm{width:min(12rem,42%);height:2.55rem}
+.shimmer-sales-targets__stats{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:.85rem}
+.shimmer-sales-targets__body{display:grid;gap:.85rem}
+.shimmer-card--sales-stack{margin-bottom:0;min-height:auto;align-content:start;display:grid;gap:.55rem}
+@media (max-width:720px){.shimmer-sales-card__kpis,.shimmer-sales-targets__stats{grid-template-columns:1fr}.shimmer-sales-chart__bars{grid-template-columns:repeat(4,minmax(0,1fr))}}

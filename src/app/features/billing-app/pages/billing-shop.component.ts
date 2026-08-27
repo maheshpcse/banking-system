@@ -8,6 +8,8 @@ import { PortalLaunchService } from '../../../core/services/portal-launch.servic
 import { ShellBootService } from '../../../core/services/shell-boot.service';
 import {
   BillingBill,
+  BillingCategory,
+  BillingCoupon,
   BillingCustomer,
   BillingGatewaySettings,
   BillingPayment,
@@ -29,7 +31,7 @@ interface CartLine {
 
 type StockFilter = 'all' | 'in_stock' | 'low';
 type SortKey = 'name' | 'price_asc' | 'price_desc' | 'stock' | 'rating' | 'newest';
-type CheckoutStep = 'cart' | 'pay' | 'processing' | 'result';
+type CheckoutStep = 'cart' | 'processing' | 'result';
 
 @Component({
   selector: 'app-billing-shop',
@@ -51,6 +53,14 @@ export class BillingShopComponent implements OnInit, OnDestroy {
 
   products: BillingProduct[] = [];
   categories: string[] = [];
+  categoryRecords: BillingCategory[] = [];
+  coupons: BillingCoupon[] = [];
+  selectedCouponCode = '';
+  couponCodeInput = '';
+  appliedCoupon: BillingCoupon | null = null;
+  manualDiscount: number | null = null;
+  couponBusy = false;
+  private appliedDiscountAmount = 0;
   slideIndex: Record<string, number> = {};
 
   customers: BillingCustomer[] = [];
@@ -208,14 +218,29 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     return this.round(this.cart.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0));
   }
 
+  get cartDiscount(): number {
+    if (this.appliedCoupon) {
+      return this.round(Math.min(this.cartSubtotal, Math.max(0, Number(this.appliedDiscountAmount || 0))));
+    }
+    return this.round(Math.min(this.cartSubtotal, Math.max(0, Number(this.manualDiscount || 0))));
+  }
+
   get cartTax(): number {
+    const taxable = Math.max(0, this.cartSubtotal - this.cartDiscount);
+    if (!this.cartSubtotal) {
+      return 0;
+    }
+    const ratio = taxable / this.cartSubtotal;
     return this.round(
-      this.cart.reduce((sum, line) => sum + (line.unitPrice * line.quantity * line.gstPercentage) / 100, 0)
+      this.cart.reduce(
+        (sum, line) => sum + (line.unitPrice * line.quantity * line.gstPercentage * ratio) / 100,
+        0
+      )
     );
   }
 
   get cartGrandTotal(): number {
-    return this.round(this.cartSubtotal + this.cartTax);
+    return this.round(Math.max(0, this.cartSubtotal - this.cartDiscount + this.cartTax));
   }
 
   get enabledMethods(): BillingPaymentMethod[] {
@@ -227,10 +252,23 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   }
 
   get categoryOptions(): ThemeSelectOption[] {
-    return [
-      { value: '', label: 'All categories' },
-      ...this.categories.map((cat) => ({ value: cat, label: cat }))
-    ];
+    const extras = ['Grocery', 'Beverages', 'Electronics', 'Home', 'Personal Care', 'Snacks'];
+    const fromApi = this.categoryRecords
+      .filter((c) => c.active !== false)
+      .map((c) => c.name);
+    const merged = Array.from(new Set([...fromApi, ...this.categories, ...extras])).sort((a, b) =>
+      a.localeCompare(b)
+    );
+    return [{ value: '', label: 'All categories' }, ...merged.map((cat) => ({ value: cat, label: cat }))];
+  }
+
+  get couponSelectOptions(): ThemeSelectOption[] {
+    return this.coupons
+      .filter((c) => c.active)
+      .map((c) => ({
+        value: c.code,
+        label: `${c.code} · ${c.title || c.usageNote || c.discountType}`
+      }));
   }
 
   get sortSelectOptions(): ThemeSelectOption[] {
@@ -238,7 +276,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   }
 
   get filteredProducts(): BillingProduct[] {
-    let rows = this.products.filter((p) => p.active !== false);
+    let rows = this.products.filter((p) => p.active !== false && !this.isExpired(p));
     if (this.stockFilter === 'in_stock') {
       rows = rows.filter((p) => p.stock > 0);
     } else if (this.stockFilter === 'low') {
@@ -260,14 +298,20 @@ export class BillingShopComponent implements OnInit, OnDestroy {
           .listProducts('', { active: true, sort: this.sortKey })
           .pipe(catchError(() => of({ items: [] as BillingProduct[] }))),
         settings: this.billing.getSettings().pipe(catchError(() => of(null))),
-        customers: this.billing.listCustomers('').pipe(catchError(() => of({ items: [] as BillingCustomer[] })))
+        customers: this.billing.listCustomers('').pipe(catchError(() => of({ items: [] as BillingCustomer[] }))),
+        categories: this.billing
+          .listCategories()
+          .pipe(catchError(() => of({ items: [] as BillingCategory[] }))),
+        coupons: this.billing.listCoupons().pipe(catchError(() => of({ items: [] as BillingCoupon[] })))
       }),
       SHIMMER_MS
     ).subscribe({
-      next: ({ products, settings, customers }) => {
+      next: ({ products, settings, customers, categories, coupons }) => {
         this.applyProducts(products.items || []);
         this.settings = settings?.settings ?? null;
         this.customers = customers.items || [];
+        this.categoryRecords = categories.items || [];
+        this.coupons = coupons.items || [];
         this.pageLoading = false;
       },
       error: async () => {
@@ -561,6 +605,62 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     this.activeInvoice = null;
     this.lastPayment = null;
     this.checkoutStep = 'cart';
+    this.clearDiscount();
+  }
+
+  onManualDiscountChange(): void {
+    this.appliedCoupon = null;
+    this.appliedDiscountAmount = 0;
+    this.selectedCouponCode = '';
+    this.couponCodeInput = '';
+  }
+
+  clearDiscount(): void {
+    this.appliedCoupon = null;
+    this.appliedDiscountAmount = 0;
+    this.selectedCouponCode = '';
+    this.couponCodeInput = '';
+    this.manualDiscount = null;
+  }
+
+  async applyCoupon(): Promise<void> {
+    const code = String(this.selectedCouponCode || this.couponCodeInput || '')
+      .trim()
+      .toUpperCase();
+    if (!code) {
+      await this.alerts.toastWarning('Coupon required', 'Select or enter a coupon code.');
+      return;
+    }
+    if (!this.cart.length) {
+      await this.alerts.toastWarning('Cart empty', 'Add products before applying a coupon.');
+      return;
+    }
+    this.couponBusy = true;
+    try {
+      const res = await firstValueFrom(
+        withShimmerDelay(
+          this.billing.validateCoupon({
+            code,
+            subtotal: this.cartSubtotal,
+            paymentMethod: this.payMethod
+          }),
+          SHIMMER_MS
+        )
+      );
+      this.appliedCoupon = res.coupon;
+      this.appliedDiscountAmount = Number(res.discount) || 0;
+      this.selectedCouponCode = res.coupon.code;
+      this.couponCodeInput = res.coupon.code;
+      this.manualDiscount = null;
+      await this.alerts.toastSuccess('Coupon applied', res.coupon.usageNote || res.message);
+    } catch (err) {
+      await this.alerts.toastWarning(
+        'Coupon failed',
+        (err as { error?: { message?: string } })?.error?.message || 'Invalid coupon.'
+      );
+    } finally {
+      this.couponBusy = false;
+    }
   }
 
   openCheckout(): void {
@@ -610,41 +710,8 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   }
 
   async beginPayment(): Promise<void> {
-    if (!this.selectedCustomer) {
-      await this.alerts.error('Select or add a customer before checkout.');
-      return;
-    }
-    if (!this.cart.length) {
-      await this.alerts.error('Cart is empty.');
-      return;
-    }
-    this.checkoutBusy = true;
-    try {
-      const created = await firstValueFrom(
-        withShimmerDelay(
-          this.billing.createBill({
-            customerId: this.selectedCustomer.id,
-            items: this.cart.map((line) => ({
-              productId: line.productId,
-              quantity: line.quantity
-            })),
-            discount: 0,
-            notes: 'NovaBill Shop checkout'
-          }),
-          SHIMMER_MS
-        )
-      );
-      const pending = await firstValueFrom(this.billing.awaitBillPayment(created.bill.id));
-      this.activeInvoice = pending.bill;
-      this.resetPayForm();
-      await this.goCheckoutStep('pay');
-    } catch (err) {
-      await this.alerts.error(
-        (err as { error?: { message?: string } })?.error?.message || 'Unable to create invoice.'
-      );
-    } finally {
-      this.checkoutBusy = false;
-    }
+    // Kept for compatibility — payment now runs inline via continuePay().
+    await this.continuePay();
   }
 
   selectPayMethod(method: BillingPaymentMethod): void {
@@ -661,8 +728,12 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   }
 
   async continuePay(): Promise<void> {
-    if (this.payMethod === 'cash' || this.payMethod === 'qr') {
-      await this.runEmbeddedPayment();
+    if (!this.selectedCustomer) {
+      await this.alerts.error('Select or add a customer before checkout.');
+      return;
+    }
+    if (!this.cart.length) {
+      await this.alerts.error('Cart is empty.');
       return;
     }
     if (this.payMethod === 'upi') {
@@ -672,23 +743,22 @@ export class BillingShopComponent implements OnInit, OnDestroy {
         return;
       }
       this.upiVpa = vpa;
-      await this.runEmbeddedPayment();
-      return;
     }
-    // card
-    if (!this.cardReady()) {
-      await this.alerts.toastWarning('Card details incomplete', 'Fill name, number, expiry, and CVV.');
-      return;
-    }
-    if (!this.otpSent) {
-      this.otpSent = true;
-      this.otp = '';
-      await this.alerts.toastSuccess('OTP sent', 'Demo OTP is 123456');
-      return;
-    }
-    if (String(this.otp).trim() !== '123456') {
-      await this.alerts.toastWarning('Invalid OTP', 'Use demo OTP 123456.');
-      return;
+    if (this.payMethod === 'card') {
+      if (!this.cardReady()) {
+        await this.alerts.toastWarning('Card details incomplete', 'Fill name, number, expiry, and CVV.');
+        return;
+      }
+      if (!this.otpSent) {
+        this.otpSent = true;
+        this.otp = '';
+        await this.alerts.toastSuccess('OTP sent', 'Demo OTP is 123456');
+        return;
+      }
+      if (String(this.otp).trim() !== '123456') {
+        await this.alerts.toastWarning('Invalid OTP', 'Use demo OTP 123456.');
+        return;
+      }
     }
     await this.runEmbeddedPayment();
   }
@@ -712,7 +782,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   }
 
   private async runEmbeddedPayment(): Promise<void> {
-    if (!this.activeInvoice || this.checkoutBusy) {
+    if (this.checkoutBusy) {
       return;
     }
     this.checkoutBusy = true;
@@ -720,9 +790,25 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     this.payResultOk = null;
     await this.goCheckoutStep('processing');
     this.startPayProgress();
-    const waitMs = this.payMethod === 'cash' ? 900 : this.payMethod === 'qr' ? 1600 : 1200;
-    await new Promise((r) => setTimeout(r, waitMs));
     try {
+      if (!this.activeInvoice) {
+        const created = await firstValueFrom(
+          this.billing.createBill({
+            customerId: this.selectedCustomer!.id,
+            items: this.cart.map((line) => ({
+              productId: line.productId,
+              quantity: line.quantity
+            })),
+            discount: this.appliedCoupon ? undefined : this.cartDiscount || 0,
+            couponCode: this.appliedCoupon?.code,
+            notes: 'NovaBill Shop checkout'
+          })
+        );
+        const pending = await firstValueFrom(this.billing.awaitBillPayment(created.bill.id));
+        this.activeInvoice = pending.bill;
+      }
+      const waitMs = this.payMethod === 'cash' ? 900 : this.payMethod === 'qr' ? 1600 : 1200;
+      await new Promise((r) => setTimeout(r, waitMs));
       const res = await firstValueFrom(
         this.billing.payBill({
           billId: this.activeInvoice.id,
@@ -806,6 +892,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     this.checkoutStep = 'cart';
     this.payResultOk = null;
     this.payResultMessage = '';
+    this.clearDiscount();
     this.resetPayForm();
     if (reload) {
       this.reloadCatalog(false);
@@ -825,15 +912,23 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   }
 
   private applyProducts(items: BillingProduct[]): void {
-    this.products = items;
+    this.products = (items || []).filter((p) => !this.isExpired(p));
     const cats = new Set<string>();
-    items.forEach((p) => {
+    this.products.forEach((p) => {
       const c = String(p.category || '').trim();
       if (c) {
         cats.add(c);
       }
     });
     this.categories = Array.from(cats).sort((a, b) => a.localeCompare(b));
+  }
+
+  private isExpired(product: BillingProduct): boolean {
+    if (!product.expiresAt) {
+      return false;
+    }
+    const at = new Date(product.expiresAt).getTime();
+    return !Number.isNaN(at) && at <= Date.now();
   }
 
   private generatedSlides(product: BillingProduct): string[] {

@@ -49,13 +49,19 @@ export class BillingBulkUploadComponent implements OnChanges {
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['open'] && this.open) {
+    if (!changes['open']) {
+      return;
+    }
+    if (this.open) {
       this.reset();
       this.bootShimmer = true;
       setTimeout(() => {
         this.bootShimmer = false;
       }, 320);
+      return;
     }
+    // Fully reset when parent closes the modal (open → false).
+    this.reset();
   }
 
   get title(): string {

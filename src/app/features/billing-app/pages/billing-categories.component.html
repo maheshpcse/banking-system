@@ -1,0 +1,146 @@
+<section class="bs-page fade-up">
+  <app-billing-panel-shimmer *ngIf="listLoading" variant="catalog"></app-billing-panel-shimmer>
+
+  <ng-container *ngIf="!listLoading">
+    <header class="bs-page__head">
+      <div>
+        <p class="eyebrow">Catalog</p>
+        <h2>Categories</h2>
+        <p class="lede">
+          Organize products for shop filters and catalog forms. {{ activeCount }} active ·
+          {{ categories.length }} total.
+        </p>
+      </div>
+    </header>
+
+    <div class="layout">
+      <form class="glass form" [formGroup]="form" (ngSubmit)="save()">
+        <h3>{{ editingId ? 'Edit category' : 'Add category' }}</h3>
+        <label>
+          Name
+          <input class="input" formControlName="name" placeholder="e.g. Grocery" />
+        </label>
+        <label>
+          Slug
+          <input class="input" formControlName="slug" placeholder="auto from name if blank" />
+        </label>
+        <label>
+          Description
+          <input class="input" formControlName="description" placeholder="Optional note" />
+        </label>
+        <div class="grid2">
+          <label>
+            Sort order
+            <input class="input" type="number" formControlName="sortOrder" />
+          </label>
+          <label class="check">
+            <input type="checkbox" formControlName="active" />
+            <span>Active</span>
+          </label>
+        </div>
+        <div class="form__actions">
+          <button type="button" class="btn btn--ghost" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
+          <button type="submit" class="btn btn--primary" [disabled]="busy">
+            {{ busy ? 'Saving…' : editingId ? 'Update' : 'Create' }}
+          </button>
+        </div>
+      </form>
+
+      <div class="main-panel glass">
+        <div class="main-panel__body" [class.is-empty]="!categories.length">
+          <app-empty-state
+            *ngIf="!categories.length"
+            tone="billing"
+            kind="products"
+            [fill]="true"
+            message="No categories yet. Create one to power shop filters."
+          ></app-empty-state>
+
+          <ul class="list" *ngIf="categories.length">
+            <li *ngFor="let c of categories">
+              <button type="button" class="row" (click)="openDetail(c)">
+                <span class="thumb" [class.thumb--off]="c.active === false" aria-hidden="true">
+                  {{ (c.name || '?').slice(0, 1).toUpperCase() }}
+                </span>
+                <div class="row__body">
+                  <strong>{{ c.name }}</strong>
+                  <span>{{ c.slug }} · sort {{ c.sortOrder ?? 0 }}</span>
+                  <span class="row__status">{{ c.active === false ? 'Inactive' : 'Active' }}</span>
+                </div>
+              </button>
+              <div class="row__actions">
+                <button type="button" class="link" (click)="edit(c)">Edit</button>
+                <button
+                  type="button"
+                  class="link"
+                  *ngIf="c.active !== false"
+                  [disabled]="busy"
+                  (click)="deactivate(c)"
+                >
+                  Deactivate
+                </button>
+                <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Delete</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <div class="detail-backdrop" *ngIf="detail" [class.is-leaving]="detailLeaving"></div>
+  <div
+    class="detail-modal"
+    *ngIf="detail as c"
+    [class.is-leaving]="detailLeaving"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="detail-modal__head">
+      <div>
+        <p class="eyebrow">Category detail</p>
+        <h3>{{ c.name }}</h3>
+      </div>
+      <button type="button" class="icon-close" (click)="closeDetail()" aria-label="Close">×</button>
+    </div>
+    <dl class="detail-modal__meta">
+      <div>
+        <dt>Slug</dt>
+        <dd>{{ c.slug }}</dd>
+      </div>
+      <div>
+        <dt>Status</dt>
+        <dd>{{ c.active === false ? 'Inactive' : 'Active' }}</dd>
+      </div>
+      <div>
+        <dt>Sort</dt>
+        <dd>{{ c.sortOrder ?? 0 }}</dd>
+      </div>
+      <div>
+        <dt>Description</dt>
+        <dd>{{ c.description || '—' }}</dd>
+      </div>
+      <div *ngIf="c.createdAt">
+        <dt>Created</dt>
+        <dd>{{ c.createdAt | date: 'medium' }}</dd>
+      </div>
+      <div *ngIf="c.updatedAt">
+        <dt>Updated</dt>
+        <dd>{{ c.updatedAt | date: 'medium' }}</dd>
+      </div>
+    </dl>
+    <div class="detail-modal__actions">
+      <button type="button" class="btn btn--ghost" (click)="edit(c)">Edit</button>
+      <button
+        type="button"
+        class="btn btn--ghost"
+        *ngIf="c.active !== false"
+        [disabled]="busy"
+        (click)="deactivate(c)"
+      >
+        Deactivate
+      </button>
+      <button type="button" class="btn btn--danger" [disabled]="busy" (click)="remove(c)">Delete</button>
+    </div>
+  </div>
+</section>

@@ -4,6 +4,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { BillingShellComponent } from './billing-shell.component';
 import { BillingDashboardComponent } from './pages/billing-dashboard.component';
 import { BillingProductsComponent } from './pages/billing-products.component';
+import { BillingCategoriesComponent } from './pages/billing-categories.component';
 import { BillingCustomersComponent } from './pages/billing-customers.component';
 import { BillingPosComponent } from './pages/billing-pos.component';
 import { BillingHistoryComponent } from './pages/billing-history.component';
@@ -24,6 +25,7 @@ const routes: Routes = [
     children: [
       { path: '', component: BillingDashboardComponent },
       { path: 'products', component: BillingProductsComponent },
+      { path: 'categories', component: BillingCategoriesComponent },
       { path: 'customers', component: BillingCustomersComponent },
       { path: 'pos', component: BillingPosComponent },
       { path: 'history', component: BillingHistoryComponent },
@@ -39,6 +41,7 @@ const routes: Routes = [
     BillingShellComponent,
     BillingDashboardComponent,
     BillingProductsComponent,
+    BillingCategoriesComponent,
     BillingCustomersComponent,
     BillingPosComponent,
     BillingHistoryComponent,
