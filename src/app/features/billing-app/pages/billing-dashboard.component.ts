@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertService } from '../../../core/services/alert.service';
 import { BillingService } from '../../../core/services/billing.service';
+import { PortalLaunchService } from '../../../core/services/portal-launch.service';
 import { BillingBill, BillingDashboardStats } from '../../../core/models/banking.models';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
@@ -19,7 +20,8 @@ export class BillingDashboardComponent implements OnInit {
   constructor(
     private readonly billing: BillingService,
     private readonly alerts: AlertService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly portalLaunch: PortalLaunchService
   ) {}
 
   ngOnInit(): void {
@@ -60,6 +62,10 @@ export class BillingDashboardComponent implements OnInit {
 
   goPos(): void {
     void this.router.navigateByUrl('/billing/pos');
+  }
+
+  goShop(): void {
+    this.portalLaunch.launch('shop', '/billing/shop');
   }
 
   statusClass(status: string): string {

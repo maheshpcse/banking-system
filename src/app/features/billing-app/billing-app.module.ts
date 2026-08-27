@@ -12,6 +12,7 @@ import { BillingSettingsComponent } from './pages/billing-settings.component';
 import { BillingSceneComponent } from './shared/billing-scene.component';
 import { BillingPanelShimmerComponent } from './shared/billing-panel-shimmer.component';
 import { BillingPaymentGatewayComponent } from './shared/billing-payment-gateway.component';
+import { BillingBulkUploadComponent } from './shared/billing-bulk-upload.component';
 import { BillingNotFoundRedirectComponent } from './pages/billing-not-found-redirect.component';
 import { BillingShopComponent } from './pages/billing-shop.component';
 
@@ -47,6 +48,7 @@ const routes: Routes = [
     BillingSceneComponent,
     BillingPanelShimmerComponent,
     BillingPaymentGatewayComponent,
+    BillingBulkUploadComponent,
     BillingNotFoundRedirectComponent
   ],
   imports: [SharedModule, RouterModule.forChild(routes)]

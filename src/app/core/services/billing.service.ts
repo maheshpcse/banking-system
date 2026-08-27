@@ -70,6 +70,24 @@ export class BillingService {
     return this.http.delete<{ message: string; product: BillingProduct }>(`${this.base}/products/${id}`);
   }
 
+  bulkCreateProducts(
+    items: Array<Record<string, string | number>>
+  ): Observable<{
+    message: string;
+    created: BillingProduct[];
+    errors: Array<{ index: number; message: string }>;
+    createdCount: number;
+    errorCount: number;
+  }> {
+    return this.http.post<{
+      message: string;
+      created: BillingProduct[];
+      errors: Array<{ index: number; message: string }>;
+      createdCount: number;
+      errorCount: number;
+    }>(`${this.base}/products/bulk`, { items });
+  }
+
   listCustomers(q = ''): Observable<{ items: BillingCustomer[] }> {
     let params = new HttpParams();
     if (q) params = params.set('q', q);
@@ -94,6 +112,24 @@ export class BillingService {
 
   deleteCustomer(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.base}/customers/${id}`);
+  }
+
+  bulkCreateCustomers(
+    items: Array<Record<string, string | number>>
+  ): Observable<{
+    message: string;
+    created: BillingCustomer[];
+    errors: Array<{ index: number; message: string }>;
+    createdCount: number;
+    errorCount: number;
+  }> {
+    return this.http.post<{
+      message: string;
+      created: BillingCustomer[];
+      errors: Array<{ index: number; message: string }>;
+      createdCount: number;
+      errorCount: number;
+    }>(`${this.base}/customers/bulk`, { items });
   }
 
   listBills(query: {

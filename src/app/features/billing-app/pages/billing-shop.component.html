@@ -17,92 +17,111 @@
         <img *ngIf="avatarSrc as src" [src]="src" alt="" />
         <ng-container *ngIf="!avatarSrc">{{ avatarInitials }}</ng-container>
       </span>
-      <button type="button" class="shop-linkish" (click)="goBankingPos()">Classic POS</button>
+      <button type="button" class="shop-ghost" (click)="goBillingDesk()">Billing desk</button>
+      <button type="button" class="shop-ghost" (click)="goBankingPos()">Classic POS</button>
       <button type="button" class="shop-ghost" (click)="signOut()">Sign out</button>
     </div>
   </header>
 
   <div class="shop-sticky">
-    <label class="shop-search shop-search--product">
+    <div class="shop-search shop-search--product">
       <span>Find products</span>
-      <input
-        type="search"
-        [ngModel]="productQuery"
-        (ngModelChange)="onProductQuery($event)"
-        placeholder="Search name, SKU, or category"
-        autocomplete="off"
-      />
-    </label>
-    <div class="shop-filters">
-      <button
-        type="button"
-        *ngFor="let opt of stockOptions"
-        [class.is-on]="stockFilter === opt.id"
-        (click)="setStockFilter(opt.id)"
-      >
-        {{ opt.label }}
-      </button>
-      <button type="button" [class.is-on]="!categoryFilter" (click)="setCategory('')">All categories</button>
-      <button
-        type="button"
-        *ngFor="let cat of categories"
-        [class.is-on]="categoryFilter === cat"
-        (click)="setCategory(cat)"
-      >
-        {{ cat }}
-      </button>
+      <div class="shop-search__row">
+        <input
+          type="search"
+          [ngModel]="productQuery"
+          (ngModelChange)="productQuery = $event"
+          (keyup.enter)="runProductSearch()"
+          placeholder="Search name, SKU, or category"
+          autocomplete="off"
+        />
+        <button type="button" class="shop-solid shop-solid--search" (click)="runProductSearch()">Search</button>
+      </div>
     </div>
+
+    <div class="shop-filter-block">
+      <span class="shop-filter-block__label">Stock</span>
+      <div class="shop-filters">
+        <button
+          type="button"
+          *ngFor="let opt of stockOptions"
+          [class.is-on]="stockFilter === opt.id"
+          (click)="setStockFilter(opt.id)"
+        >
+          {{ opt.label }}
+        </button>
+      </div>
+    </div>
+
+    <label class="shop-sort">
+      <span>Category</span>
+      <select class="shop-native-select" [ngModel]="categoryFilter" (ngModelChange)="setCategory($event)">
+        <option value="">All categories</option>
+        <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+      </select>
+    </label>
+
     <label class="shop-sort">
       <span>Sort</span>
-      <select [ngModel]="sortKey" (ngModelChange)="setSort($event)">
+      <select class="shop-native-select" [ngModel]="sortKey" (ngModelChange)="setSort($event)">
         <option *ngFor="let opt of sortOptions" [value]="opt.id">{{ opt.label }}</option>
       </select>
     </label>
   </div>
 
   <div class="shop-customer">
-    <label class="shop-search shop-search--customer">
+    <div class="shop-search shop-search--customer">
       <span>Customer</span>
-      <input
-        type="search"
-        [ngModel]="customerQuery"
-        (ngModelChange)="onCustomerQuery($event)"
-        placeholder="Search name, email, phone, or account"
-        autocomplete="off"
-      />
-    </label>
-    <button type="button" class="shop-ghost" *ngIf="!selectedCustomer" (click)="openAddCustomer()">
-      Add customer
-    </button>
+      <div class="shop-search__row">
+        <input
+          type="search"
+          [ngModel]="customerQuery"
+          (ngModelChange)="customerQuery = $event"
+          (keyup.enter)="runCustomerSearch()"
+          placeholder="Search name, email, phone, or account"
+          autocomplete="off"
+        />
+        <button type="button" class="shop-solid shop-solid--search" (click)="runCustomerSearch()">Search</button>
+      </div>
+    </div>
+    <button type="button" class="shop-ghost" *ngIf="!selectedCustomer" (click)="openAddCustomer()">Add customer</button>
     <button type="button" class="shop-ghost" *ngIf="selectedCustomer" (click)="clearCustomer()">Clear</button>
 
-    <div class="shop-customer__hits" *ngIf="!selectedCustomer && customerQuery.trim() && !customerBusy">
+    <div class="shop-customer__hits" *ngIf="!selectedCustomer && customerSearched && !customerBusy">
       <button type="button" *ngFor="let c of customers" (click)="selectCustomer(c)">
         <strong>{{ c.name }}</strong>
         <span>{{ c.email || c.phone || 'No contact' }}</span>
       </button>
       <div class="shop-customer__empty" *ngIf="!customers.length">
-        <p>No customer found for “{{ customerQuery }}”.</p>
+        <p>No customer found{{ customerQuery.trim() ? ' for “' + customerQuery + '”' : '' }}.</p>
         <button type="button" class="shop-solid" (click)="openAddCustomer()">Add them</button>
       </div>
     </div>
 
-    <div class="shop-customer__card" *ngIf="selectedCustomer as c">
-      <div>
-        <strong>{{ c.name }}</strong>
-        <p>
-          {{ c.email || '—' }} · {{ c.phone || '—' }}
-          <ng-container *ngIf="c.bankingAccountNumber"> · {{ c.bankingAccountNumber }}</ng-container>
-        </p>
+    <div class="shop-customer__detail" *ngIf="selectedCustomer as c">
+      <div class="shop-customer__detail-grid">
+        <div><span>Name</span><strong>{{ c.name }}</strong></div>
+        <div><span>Email</span><strong>{{ c.email || '—' }}</strong></div>
+        <div><span>Phone</span><strong>{{ c.phone || '—' }}</strong></div>
+        <div><span>Reward points</span><strong>{{ c.rewardPoints ?? 0 }}</strong></div>
+        <div><span>Banking account</span><strong>{{ c.bankingAccountNumber || '—' }}</strong></div>
+        <div><span>Address</span><strong>{{ c.address || '—' }}</strong></div>
       </div>
-      <span *ngIf="c.rewardPoints != null">{{ c.rewardPoints }} pts</span>
     </div>
   </div>
 
-  <div class="shop-stage" [class.is-loading]="catalogLoading">
-    <div class="shop-grid" *ngIf="filteredProducts.length; else noProducts">
+  <div class="shop-stage">
+    <div class="shop-grid-shimmer" *ngIf="catalogLoading" aria-hidden="true">
+      <div class="shop-boot-bone" *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8]"></div>
+    </div>
+
+    <div class="shop-grid" *ngIf="!catalogLoading && filteredProducts.length; else catalogEmpty">
       <article class="shop-tile" *ngFor="let product of filteredProducts" (click)="openProduct(product)">
         <div class="shop-tile__media">
+          <span class="shop-cart-badge" *ngIf="qtyInCart(product.id) as qty">
+            <i aria-hidden="true"></i>
+            <em>{{ qty }}</em>
+          </span>
           <img
             class="shop-tile__slide"
             *ngFor="let src of productSlides(product); let i = index"
@@ -110,10 +129,20 @@
             [alt]="product.name"
             [class.is-active]="slideFor(product) === i"
           />
-          <button type="button" class="shop-tile__nav shop-tile__nav--prev" (click)="prevSlide(product, $event)" aria-label="Previous image">
+          <button
+            type="button"
+            class="shop-tile__nav shop-tile__nav--prev"
+            (click)="prevSlide(product, $event)"
+            aria-label="Previous image"
+          >
             ‹
           </button>
-          <button type="button" class="shop-tile__nav shop-tile__nav--next" (click)="nextSlide(product, $event)" aria-label="Next image">
+          <button
+            type="button"
+            class="shop-tile__nav shop-tile__nav--next"
+            (click)="nextSlide(product, $event)"
+            aria-label="Next image"
+          >
             ›
           </button>
           <div class="shop-tile__dots" aria-hidden="true">
@@ -125,24 +154,36 @@
           <h2>{{ product.name }}</h2>
           <div class="shop-tile__row">
             <strong>{{ product.price | currencyFormat }}</strong>
-            <span [class.is-out]="product.stock <= 0">{{ product.stock > 0 ? product.stock + ' in stock' : 'Out of stock' }}</span>
+            <span [class.is-out]="product.stock <= 0">{{
+              product.stock > 0 ? product.stock + ' in stock' : 'Out of stock'
+            }}</span>
           </div>
-          <button
-            type="button"
-            class="shop-solid shop-solid--slim"
-            [disabled]="product.stock <= 0"
-            (click)="addToCart(product, $event)"
-          >
-            Add
-          </button>
+          <div class="shop-tile__actions">
+            <button
+              type="button"
+              class="shop-solid shop-solid--slim"
+              [disabled]="product.stock <= 0"
+              (click)="addToCart(product, $event)"
+            >
+              Add
+            </button>
+            <button
+              type="button"
+              class="shop-clear-mini"
+              *ngIf="qtyInCart(product.id)"
+              (click)="clearProductFromCart(product, $event)"
+            >
+              Clear
+            </button>
+          </div>
         </div>
       </article>
     </div>
   </div>
 </section>
 
-<ng-template #noProducts>
-  <div class="shop-empty">
+<ng-template #catalogEmpty>
+  <div class="shop-empty" *ngIf="!catalogLoading">
     <svg viewBox="0 0 180 140" width="160" height="120" aria-hidden="true">
       <rect x="18" y="78" width="144" height="16" rx="6" fill="rgba(95,196,176,0.28)" />
       <rect x="48" y="28" width="84" height="62" rx="12" fill="rgba(255,200,1,0.22)" stroke="rgba(255,153,50,0.45)" />
@@ -159,8 +200,9 @@
   <div class="shop shop--boot">
     <div class="shop-boot-bone shop-boot-bone--chrome"></div>
     <div class="shop-boot-bone shop-boot-bone--search"></div>
+    <div class="shop-boot-bone shop-boot-bone--customer"></div>
     <div class="shop-boot-grid">
-      <div class="shop-boot-bone" *ngFor="let i of [1, 2, 3, 4, 5, 6]"></div>
+      <div class="shop-boot-bone" *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8]"></div>
     </div>
   </div>
 </ng-template>
@@ -175,27 +217,66 @@
   <div class="shop-modal__panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
     <button type="button" class="shop-modal__close" (click)="closeProductModal()" aria-label="Close">×</button>
     <div class="shop-modal__media">
+      <span class="shop-cart-badge shop-cart-badge--lg" *ngIf="qtyInCart(product.id) as qty">
+        <i aria-hidden="true"></i>
+        <em>{{ qty }}</em>
+      </span>
       <img
         class="shop-tile__slide"
-        *ngFor="let src of productSlides(product); let i = index"
+        *ngFor="let src of productSlides(product); let i = index; trackBy: trackSlide"
         [src]="src"
         [alt]="product.name"
         [class.is-active]="activeSlide === i"
       />
-      <button type="button" class="shop-tile__nav shop-tile__nav--prev" (click)="modalPrev()">‹</button>
-      <button type="button" class="shop-tile__nav shop-tile__nav--next" (click)="modalNext()">›</button>
+      <button
+        type="button"
+        class="shop-tile__nav shop-tile__nav--prev"
+        (click)="modalPrev($event)"
+        aria-label="Previous image"
+      >
+        ‹
+      </button>
+      <button
+        type="button"
+        class="shop-tile__nav shop-tile__nav--next"
+        (click)="modalNext($event)"
+        aria-label="Next image"
+      >
+        ›
+      </button>
+      <div class="shop-tile__dots" aria-hidden="true">
+        <i *ngFor="let s of productSlides(product); let i = index" [class.is-on]="activeSlide === i"></i>
+      </div>
     </div>
     <div class="shop-modal__copy">
-      <p class="shop-tile__cat">{{ product.category || 'General' }} · SKU {{ product.sku || '—' }}</p>
+      <p class="shop-tile__cat">{{ product.category || 'General' }}</p>
       <h2>{{ product.name }}</h2>
-      <p class="shop-modal__lede">
-        {{ product.price | currencyFormat }} · GST {{ product.gstPercentage }}%
-        · {{ product.stock > 0 ? product.stock + ' available' : 'Out of stock' }}
-        <ng-container *ngIf="product.ratingCount"> · ★ {{ product.ratingAvg }} ({{ product.ratingCount }})</ng-container>
-      </p>
+      <dl class="shop-product-facts">
+        <div><dt>SKU</dt><dd>{{ product.sku || '—' }}</dd></div>
+        <div><dt>Price</dt><dd>{{ product.price | currencyFormat }}</dd></div>
+        <div><dt>GST</dt><dd>{{ product.gstPercentage }}%</dd></div>
+        <div>
+          <dt>Stock</dt>
+          <dd [class.is-out]="product.stock <= 0">
+            {{ product.stock > 0 ? product.stock + ' available' : 'Out of stock' }}
+          </dd>
+        </div>
+        <div><dt>Rating</dt><dd>{{ product.ratingCount ? (product.ratingAvg + ' ★ (' + product.ratingCount + ')') : 'No ratings yet' }}</dd></div>
+        <div><dt>Status</dt><dd>{{ product.active === false ? 'Archived' : 'Active' }}</dd></div>
+        <div *ngIf="product.createdAt"><dt>Added</dt><dd>{{ product.createdAt | date: 'mediumDate' }}</dd></div>
+        <div *ngIf="qtyInCart(product.id) as qty"><dt>In cart</dt><dd>{{ qty }}</dd></div>
+      </dl>
       <div class="shop-modal__actions">
         <button type="button" class="shop-solid" [disabled]="product.stock <= 0" (click)="addToCart(product)">
           Add to cart
+        </button>
+        <button
+          type="button"
+          class="shop-clear-mini"
+          *ngIf="qtyInCart(product.id)"
+          (click)="clearProductFromCart(product)"
+        >
+          Clear from cart
         </button>
         <button type="button" class="shop-ghost" (click)="closeProductModal()">Keep browsing</button>
       </div>
@@ -217,7 +298,7 @@
       <aside class="shop-checkout__cart">
         <header>
           <h2>Cart</h2>
-          <button type="button" class="shop-linkish" (click)="clearCart()" [disabled]="!cart.length">Clear all</button>
+          <button type="button" class="shop-ghost" (click)="clearCart()" [disabled]="!cart.length">Clear all</button>
         </header>
         <div class="shop-checkout__lines" *ngIf="cart.length; else emptyCart">
           <article *ngFor="let line of cart">
@@ -231,7 +312,7 @@
                 <button type="button" (click)="changeQty(line, 1)">+</button>
               </div>
             </div>
-            <button type="button" class="shop-linkish" (click)="removeLine(line)">Remove</button>
+            <button type="button" class="shop-clear-mini" (click)="removeLine(line)">Clear</button>
           </article>
         </div>
         <ng-template #emptyCart>
@@ -304,9 +385,15 @@
   </div>
 </div>
 
-<!-- Add customer sheet -->
-<div class="shop-modal shop-modal--sheet" *ngIf="showAddCustomer" (click)="showAddCustomer = false">
-  <div class="shop-modal__panel shop-modal__panel--sheet" (click)="$event.stopPropagation()">
+<!-- Add customer modal -->
+<div
+  class="shop-modal shop-modal--sheet"
+  *ngIf="showAddCustomer"
+  [class.is-leaving]="addCustomerLeaving"
+  (click)="closeAddCustomer()"
+>
+  <div class="shop-modal__panel shop-modal__panel--sheet" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <button type="button" class="shop-modal__close" (click)="closeAddCustomer()" aria-label="Close">×</button>
     <h2>Add customer</h2>
     <label>
       <span>Name</span>
@@ -328,7 +415,7 @@
       <button type="button" class="shop-solid" [disabled]="customerBusy" (click)="saveNewCustomer()">
         {{ customerBusy ? 'Saving…' : 'Save customer' }}
       </button>
-      <button type="button" class="shop-ghost" (click)="showAddCustomer = false">Cancel</button>
+      <button type="button" class="shop-ghost" (click)="closeAddCustomer()">Cancel</button>
     </div>
   </div>
 </div>

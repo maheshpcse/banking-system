@@ -40,6 +40,7 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
   private detailTimer: ReturnType<typeof setTimeout> | null = null;
   matchedPanelHeight: number | null = null;
   lockedPanelHeight: number | null = null;
+  bulkOpen = false;
 
   sort: CustomerSort = 'name-asc';
   bankingFilter: BankingFilter = 'all';
@@ -385,6 +386,19 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
     if (this.showForm) {
       this.bindFormHeightObserver();
     }
+  }
+
+  openBulkUpload(): void {
+    this.bulkOpen = true;
+  }
+
+  closeBulkUpload(): void {
+    this.bulkOpen = false;
+  }
+
+  onBulkCompleted(): void {
+    this.bulkOpen = false;
+    this.softReload();
   }
 
   async save(): Promise<void> {
