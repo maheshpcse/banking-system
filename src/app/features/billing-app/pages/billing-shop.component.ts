@@ -1,10 +1,10 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { firstValueFrom, forkJoin, of, Subject } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { BillingService } from '../../../core/services/billing.service';
+import { PortalLaunchService } from '../../../core/services/portal-launch.service';
 import { ShellBootService } from '../../../core/services/shell-boot.service';
 import {
   BillingBill,
@@ -39,6 +39,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   pageLoading = true;
   catalogLoading = false;
   customerBusy = false;
+  customerSearched = false;
   checkoutBusy = false;
 
   productQuery = '';
@@ -54,6 +55,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   customers: BillingCustomer[] = [];
   selectedCustomer: BillingCustomer | null = null;
   showAddCustomer = false;
+  addCustomerLeaving = false;
   newCustomer = { name: '', email: '', phone: '', address: '' };
 
   cart: CartLine[] = [];
@@ -72,7 +74,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   lastPayment: BillingPayment | null = null;
 
   readonly stockOptions: Array<{ id: StockFilter; label: string }> = [
-    { id: 'all', label: 'All' },
+    { id: 'all', label: 'Any stock' },
     { id: 'in_stock', label: 'In stock' },
     { id: 'low', label: 'Low stock' }
   ];
@@ -96,11 +98,13 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     private readonly auth: AuthService,
     private readonly alerts: AlertService,
     private readonly shellBoot: ShellBootService,
-    private readonly router: Router
+    private readonly portalLaunch: PortalLaunchService
   ) {}
 
   ngOnInit(): void {
     this.shellBoot.complete();
+    document.documentElement.dataset['nbBilling'] = '1';
+    document.body.classList.add('billing-mode');
     this.productSearch$
       .pipe(debounceTime(220), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => this.reloadCatalog(false));
@@ -110,6 +114,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
         distinctUntilChanged(),
         switchMap((q) => {
           this.customerBusy = true;
+          this.customerSearched = true;
           return withShimmerDelay(this.billing.listCustomers(q), Math.min(SHIMMER_MS, 420)).pipe(
             catchError(() => of({ items: [] as BillingCustomer[] }))
           );
@@ -119,12 +124,6 @@ export class BillingShopComponent implements OnInit, OnDestroy {
       .subscribe((res) => {
         this.customers = res.items || [];
         this.customerBusy = false;
-        if (this.selectedCustomer) {
-          const still = this.customers.find((c) => c.id === this.selectedCustomer?.id);
-          if (!still && this.customerQuery.trim()) {
-            /* keep selection until cleared */
-          }
-        }
       });
     this.boot();
   }
@@ -135,11 +134,17 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     if (this.leaveTimer) {
       clearTimeout(this.leaveTimer);
     }
+    delete document.documentElement.dataset['nbBilling'];
+    document.body.classList.remove('billing-mode');
   }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.gatewayOpen) {
+      return;
+    }
+    if (this.showAddCustomer) {
+      this.closeAddCustomer();
       return;
     }
     if (this.checkoutOpen) {
@@ -241,14 +246,12 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     });
   }
 
-  onProductQuery(value: string): void {
-    this.productQuery = value;
-    this.productSearch$.next(value.trim());
+  runProductSearch(): void {
+    this.reloadCatalog(false);
   }
 
-  onCustomerQuery(value: string): void {
-    this.customerQuery = value;
-    this.customerSearch$.next(value.trim());
+  runCustomerSearch(): void {
+    this.customerSearch$.next(this.customerQuery.trim());
   }
 
   setStockFilter(id: StockFilter): void {
@@ -307,6 +310,10 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     return this.generatedSlides(product);
   }
 
+  trackSlide(_index: number, src: string): string {
+    return src;
+  }
+
   slideFor(product: BillingProduct): number {
     const slides = this.productSlides(product);
     const idx = this.slideIndex[product.id] || 0;
@@ -317,14 +324,14 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     event?.stopPropagation();
     const n = this.productSlides(product).length;
     const cur = this.slideFor(product);
-    this.slideIndex[product.id] = (cur - 1 + n) % n;
+    this.slideIndex = { ...this.slideIndex, [product.id]: (cur - 1 + n) % n };
   }
 
   nextSlide(product: BillingProduct, event?: Event): void {
     event?.stopPropagation();
     const n = this.productSlides(product).length;
     const cur = this.slideFor(product);
-    this.slideIndex[product.id] = (cur + 1) % n;
+    this.slideIndex = { ...this.slideIndex, [product.id]: (cur + 1) % n };
   }
 
   openProduct(product: BillingProduct): void {
@@ -346,44 +353,60 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     }, 240);
   }
 
-  modalPrev(): void {
+  modalPrev(event?: Event): void {
+    event?.stopPropagation();
     if (!this.activeProduct) {
       return;
     }
     const n = this.productSlides(this.activeProduct).length;
     this.activeSlide = (this.activeSlide - 1 + n) % n;
-    this.slideIndex[this.activeProduct.id] = this.activeSlide;
+    this.slideIndex = { ...this.slideIndex, [this.activeProduct.id]: this.activeSlide };
   }
 
-  modalNext(): void {
+  modalNext(event?: Event): void {
+    event?.stopPropagation();
     if (!this.activeProduct) {
       return;
     }
     const n = this.productSlides(this.activeProduct).length;
     this.activeSlide = (this.activeSlide + 1) % n;
-    this.slideIndex[this.activeProduct.id] = this.activeSlide;
+    this.slideIndex = { ...this.slideIndex, [this.activeProduct.id]: this.activeSlide };
   }
 
   selectCustomer(customer: BillingCustomer): void {
     this.selectedCustomer = customer;
     this.customerQuery = customer.name;
     this.customers = [customer];
+    this.customerSearched = false;
   }
 
   clearCustomer(): void {
     this.selectedCustomer = null;
     this.customerQuery = '';
+    this.customerSearched = false;
     this.customerSearch$.next('');
   }
 
   openAddCustomer(): void {
     this.showAddCustomer = true;
+    this.addCustomerLeaving = false;
     this.newCustomer = {
       name: this.customerQuery.trim(),
       email: '',
       phone: '',
       address: ''
     };
+  }
+
+  closeAddCustomer(): void {
+    if (!this.showAddCustomer || this.addCustomerLeaving) {
+      return;
+    }
+    this.addCustomerLeaving = true;
+    this.leaveTimer = setTimeout(() => {
+      this.showAddCustomer = false;
+      this.addCustomerLeaving = false;
+    }, 200);
   }
 
   async saveNewCustomer(): Promise<void> {
@@ -408,7 +431,9 @@ export class BillingShopComponent implements OnInit, OnDestroy {
       this.selectedCustomer = res.customer;
       this.customerQuery = res.customer.name;
       this.customers = [res.customer];
+      this.customerSearched = false;
       this.showAddCustomer = false;
+      this.addCustomerLeaving = false;
       await this.alerts.toastSuccessCorner('Customer added', res.customer.name);
     } catch (err) {
       await this.alerts.error(
@@ -417,6 +442,10 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     } finally {
       this.customerBusy = false;
     }
+  }
+
+  qtyInCart(productId: string): number {
+    return this.cart.find((line) => line.productId === productId)?.quantity || 0;
   }
 
   addToCart(product: BillingProduct, event?: Event): void {
@@ -432,6 +461,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
         return;
       }
       existing.quantity += 1;
+      this.cart = [...this.cart];
     } else {
       this.cart = [
         ...this.cart,
@@ -448,6 +478,11 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     }
   }
 
+  clearProductFromCart(product: BillingProduct, event?: Event): void {
+    event?.stopPropagation();
+    this.cart = this.cart.filter((line) => line.productId !== product.id);
+  }
+
   changeQty(line: CartLine, delta: number): void {
     const next = line.quantity + delta;
     if (next <= 0) {
@@ -459,6 +494,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
       return;
     }
     line.quantity = next;
+    this.cart = [...this.cart];
   }
 
   removeLine(line: CartLine): void {
@@ -552,7 +588,11 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   }
 
   goBankingPos(): void {
-    void this.router.navigateByUrl('/billing/pos');
+    this.portalLaunch.launch('billing-desk', '/billing/pos');
+  }
+
+  goBillingDesk(): void {
+    this.portalLaunch.launch('billing-desk', '/billing');
   }
 
   signOut(): void {
@@ -600,6 +640,9 @@ export class BillingShopComponent implements OnInit, OnDestroy {
         <rect x='70' y='430' width='280' height='18' rx='9' fill='rgba(255,255,255,0.35)'/>
         <rect x='70' y='470' width='190' height='14' rx='7' fill='rgba(255,255,255,0.22)'/>
         <text x='70' y='120' fill='rgba(255,255,255,0.92)' font-family='Sora,Manrope,sans-serif' font-size='42' font-weight='700'>${label}</text>
+        <text x='70' y='170' fill='rgba(255,255,255,0.7)' font-family='IBM Plex Mono,monospace' font-size='28'>Slide ${
+          i + 1
+        }</text>
       </svg>`;
       return `data:image/svg+xml;charset=utf-8,${svg.replace(/\n/g, '').replace(/#/g, '%23')}`;
     });

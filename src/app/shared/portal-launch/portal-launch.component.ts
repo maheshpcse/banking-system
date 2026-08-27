@@ -30,6 +30,17 @@ export class PortalLaunchComponent implements OnInit, OnDestroy {
   }
 
   get label(): string {
-    return 'Launching…';
+    switch (this.target) {
+      case 'shop':
+        return 'Opening Shop Floor…';
+      case 'billing-desk':
+        return 'Opening Billing Desk…';
+      case 'billing':
+        return 'Opening NovaBill…';
+      case 'banking':
+        return 'Opening NovaBank…';
+      default:
+        return 'Launching…';
+    }
   }
 }

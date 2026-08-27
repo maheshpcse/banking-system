@@ -143,6 +143,10 @@
   border-radius: 0.15rem;
   background: linear-gradient(90deg, var(--forsythia), var(--saffron));
 }
+.bs-rail__icon[data-icon='shop']::before {
+  clip-path: polygon(12% 28%, 88% 28%, 78% 88%, 22% 88%);
+  background: linear-gradient(135deg, #2f6fed, #0f766e);
+}
 .bs-rail__icon[data-icon='history']::before {
   border-radius: 999px;
   background: conic-gradient(from 40deg, var(--saffron), var(--mint), var(--forsythia));

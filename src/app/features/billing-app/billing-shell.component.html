@@ -15,6 +15,7 @@
         [routerLink]="item.path"
         routerLinkActive="is-active"
         [routerLinkActiveOptions]="{ exact: item.path === '/billing' }"
+        (click)="onDockClick($event, item)"
       >
         <span class="bs-rail__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
         <span class="bs-rail__label">{{ item.label }}</span>

@@ -1,0 +1,171 @@
+<div class="bulk" *ngIf="open" [class.is-leaving]="leaving" (click)="close()">
+  <div class="bulk__panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <button type="button" class="bulk__close" (click)="close()" aria-label="Close" [disabled]="uploading">×</button>
+
+    <header class="bulk__head">
+      <p class="bulk__eyebrow">NovaBill catalog</p>
+      <h2>{{ title }}</h2>
+      <p class="bulk__lede">{{ hint }}</p>
+    </header>
+
+    <div class="bulk__shimmer" *ngIf="bootShimmer" aria-hidden="true">
+      <div class="bulk__bone bulk__bone--wide"></div>
+      <div class="bulk__bone"></div>
+      <div class="bulk__bone"></div>
+      <div class="bulk__bone bulk__bone--table"></div>
+    </div>
+
+    <ng-container *ngIf="!bootShimmer">
+      <section class="bulk__step" *ngIf="step === 'import'">
+        <div class="bulk__actions-row">
+          <label class="bulk__file">
+            <input type="file" accept=".csv,text/csv,text/plain" (change)="onFileSelected($event)" />
+            Choose CSV
+          </label>
+          <button type="button" class="bulk-btn bulk-btn--ghost" (click)="useSample()">Use sample</button>
+        </div>
+        <label class="bulk__paste">
+          <span>Paste rows</span>
+          <textarea
+            rows="10"
+            [(ngModel)]="pasteText"
+            [placeholder]="sample"
+          ></textarea>
+        </label>
+        <div class="bulk__footer">
+          <button type="button" class="bulk-btn bulk-btn--ghost" (click)="close()">Cancel</button>
+          <button type="button" class="bulk-btn bulk-btn--primary" (click)="buildPreview()">Review rows</button>
+        </div>
+      </section>
+
+      <section class="bulk__step" *ngIf="step === 'preview'">
+        <div class="bulk__toolbar">
+          <p>{{ rows.length }} rows · {{ selectedCount }} selected</p>
+          <div class="bulk__toolbar-actions">
+            <button type="button" class="bulk-btn bulk-btn--ghost" (click)="togglePage(true)">Select page</button>
+            <button type="button" class="bulk-btn bulk-btn--ghost" (click)="togglePage(false)">Clear page</button>
+            <button
+              type="button"
+              class="bulk-btn bulk-btn--danger"
+              [disabled]="!selectedCount"
+              (click)="removeSelected()"
+            >
+              Delete selected
+            </button>
+          </div>
+        </div>
+
+        <div class="bulk__table-wrap">
+          <table class="bulk__table" *ngIf="kind === 'products'; else customerTable">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" [checked]="allPageSelected" (change)="togglePage(!allPageSelected)" />
+                </th>
+                <th>Name</th>
+                <th>SKU</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>GST</th>
+                <th>Category</th>
+                <th>Check</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of pagedRows" [class.is-warn]="!!row.localError">
+                <td><input type="checkbox" [checked]="row.selected" (change)="toggleRow(row)" /></td>
+                <td>{{ displayValue(row, 'name') }}</td>
+                <td>{{ displayValue(row, 'sku') }}</td>
+                <td>{{ displayValue(row, 'price') }}</td>
+                <td>{{ displayValue(row, 'stock') }}</td>
+                <td>{{ displayValue(row, 'gstPercentage') }}</td>
+                <td>{{ displayValue(row, 'category') }}</td>
+                <td>{{ row.localError || 'Ready' }}</td>
+                <td>
+                  <button type="button" class="bulk__icon-x" (click)="removeRow(row)" aria-label="Remove row">×</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #customerTable>
+            <table class="bulk__table">
+              <thead>
+                <tr>
+                  <th>
+                    <input type="checkbox" [checked]="allPageSelected" (change)="togglePage(!allPageSelected)" />
+                  </th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Address</th>
+                  <th>Account</th>
+                  <th>Check</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of pagedRows" [class.is-warn]="!!row.localError">
+                  <td><input type="checkbox" [checked]="row.selected" (change)="toggleRow(row)" /></td>
+                  <td>{{ displayValue(row, 'name') }}</td>
+                  <td>{{ displayValue(row, 'email') }}</td>
+                  <td>{{ displayValue(row, 'phone') }}</td>
+                  <td>{{ displayValue(row, 'address') }}</td>
+                  <td>{{ displayValue(row, 'bankingAccountNumber') }}</td>
+                  <td>{{ row.localError || 'Ready' }}</td>
+                  <td>
+                    <button type="button" class="bulk__icon-x" (click)="removeRow(row)" aria-label="Remove row">×</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </ng-template>
+        </div>
+
+        <div class="bulk__pager" *ngIf="totalPages > 1">
+          <button type="button" class="bulk-btn bulk-btn--ghost" [disabled]="page <= 1" (click)="goPage(-1)">Prev</button>
+          <span>Page {{ page }} / {{ totalPages }}</span>
+          <button
+            type="button"
+            class="bulk-btn bulk-btn--ghost"
+            [disabled]="page >= totalPages"
+            (click)="goPage(1)"
+          >
+            Next
+          </button>
+        </div>
+
+        <div class="bulk__footer">
+          <button type="button" class="bulk-btn bulk-btn--ghost" (click)="backToImport()">Back</button>
+          <button
+            type="button"
+            class="bulk-btn bulk-btn--primary"
+            [disabled]="!selectedCount"
+            (click)="uploadSelected()"
+          >
+            Upload selected
+          </button>
+        </div>
+      </section>
+
+      <section class="bulk__step bulk__step--center" *ngIf="step === 'uploading'">
+        <div class="bulk__progress" aria-hidden="true">
+          <div class="bulk__bone bulk__bone--ring"></div>
+        </div>
+        <h3>Uploading…</h3>
+        <p>Validating against the catalog and writing accepted rows.</p>
+      </section>
+
+      <section class="bulk__step" *ngIf="step === 'result'">
+        <h3>{{ resultMessage }}</h3>
+        <p>{{ resultCreated }} created · {{ resultErrors.length }} rejected</p>
+        <ul class="bulk__errors" *ngIf="resultErrors.length">
+          <li *ngFor="let err of resultErrors">Row {{ err.index + 1 }}: {{ err.message }}</li>
+        </ul>
+        <div class="bulk__footer">
+          <button type="button" class="bulk-btn bulk-btn--primary" (click)="finish()">Done</button>
+        </div>
+      </section>
+    </ng-container>
+  </div>
+</div>

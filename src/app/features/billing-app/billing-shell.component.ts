@@ -18,11 +18,17 @@ export class BillingShellComponent implements OnInit, OnDestroy {
   private bootstrapLink: HTMLLinkElement | null = null;
   readonly year = new Date().getFullYear();
 
-  readonly dockItems: Array<{ path: string; label: string; icon: string }> = [
+  readonly dockItems: Array<{
+    path: string;
+    label: string;
+    icon: string;
+    handoff?: 'shop';
+  }> = [
     { path: '/billing', label: 'Dashboard', icon: 'dashboard' },
     { path: '/billing/products', label: 'Products', icon: 'products' },
     { path: '/billing/customers', label: 'Customers', icon: 'customers' },
     { path: '/billing/pos', label: 'POS', icon: 'pos' },
+    { path: '/billing/shop', label: 'Shop', icon: 'shop', handoff: 'shop' },
     { path: '/billing/history', label: 'History', icon: 'history' },
     { path: '/billing/purchases', label: 'Purchases', icon: 'purchases' },
     { path: '/billing/settings', label: 'Settings', icon: 'settings' }
@@ -90,6 +96,18 @@ export class BillingShellComponent implements OnInit, OnDestroy {
 
   returnToBanking(): void {
     this.portalLaunch.launch('banking', this.bankingReturnUrl);
+  }
+
+  openShopFloor(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.portalLaunch.launch('shop', '/billing/shop');
+  }
+
+  onDockClick(event: Event, item: { path: string; handoff?: 'shop' }): void {
+    if (item.handoff === 'shop') {
+      this.openShopFloor(event);
+    }
   }
 
   signOut(): void {

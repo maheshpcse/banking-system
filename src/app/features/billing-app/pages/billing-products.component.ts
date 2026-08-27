@@ -41,6 +41,7 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
   matchedPanelHeight: number | null = null;
   /** Locked to first form-measured height so Hide form keeps the same data-panel height. */
   lockedPanelHeight: number | null = null;
+  bulkOpen = false;
 
   sort: ProductSort = 'name-asc';
   stockFilter: StockFilter = 'all';
@@ -387,6 +388,19 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
     if (this.showForm) {
       this.bindFormHeightObserver();
     }
+  }
+
+  openBulkUpload(): void {
+    this.bulkOpen = true;
+  }
+
+  closeBulkUpload(): void {
+    this.bulkOpen = false;
+  }
+
+  onBulkCompleted(): void {
+    this.bulkOpen = false;
+    this.softReload();
   }
 
   async save(): Promise<void> {

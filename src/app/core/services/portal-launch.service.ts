@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 
-export type PortalLaunchTarget = 'billing' | 'banking';
+export type PortalLaunchTarget = 'billing' | 'banking' | 'shop' | 'billing-desk';
 
 @Injectable({ providedIn: 'root' })
 export class PortalLaunchService {
