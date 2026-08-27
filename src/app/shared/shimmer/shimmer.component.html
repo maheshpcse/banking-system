@@ -420,6 +420,20 @@
         <div class="shimmer-line shimmer-line--title"></div>
         <div class="shimmer-line shimmer-line--lede"></div>
       </div>
+      <div class="shimmer-filter-rows" aria-hidden="true">
+        <div class="shimmer-filter-row">
+          <div class="shimmer-line shimmer-line--xs shimmer-filter-row__label"></div>
+          <div class="shimmer-chips">
+            <div class="shimmer-chip" *ngFor="let i of [1, 2, 3, 4, 5]"></div>
+          </div>
+        </div>
+        <div class="shimmer-filter-row">
+          <div class="shimmer-line shimmer-line--xs shimmer-filter-row__label"></div>
+          <div class="shimmer-chips">
+            <div class="shimmer-chip" *ngFor="let i of [1, 2, 3, 4, 5, 6]"></div>
+          </div>
+        </div>
+      </div>
       <div class="shimmer-data-table" aria-hidden="true">
         <div class="shimmer-data-table__head" style="grid-template-columns: repeat(6, minmax(0, 1fr))">
           <div class="shimmer-data-table__cell" *ngFor="let c of [0, 1, 2, 3, 4, 5]">

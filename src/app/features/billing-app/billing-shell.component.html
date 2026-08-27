@@ -1,11 +1,20 @@
-<div class="bs-shell">
-  <aside class="bs-rail" aria-label="Billing navigation">
+<div class="bs-shell" [class.is-rail-collapsed]="railCollapsed">
+  <aside class="bs-rail" aria-label="Billing navigation" [attr.aria-expanded]="!railCollapsed">
     <div class="bs-rail__brand">
       <span class="bs-rail__mark" aria-hidden="true"></span>
-      <div>
+      <div class="bs-rail__brand-copy">
         <p class="bs-rail__eyebrow">NovaBill</p>
         <strong>Billing System</strong>
       </div>
+      <button
+        type="button"
+        class="bs-rail__toggle"
+        (click)="toggleRail()"
+        [attr.aria-label]="railCollapsed ? 'Expand side menu' : 'Collapse side menu'"
+        [attr.title]="railCollapsed ? 'Expand' : 'Collapse'"
+      >
+        <span class="bs-rail__toggle-icon" aria-hidden="true"></span>
+      </button>
     </div>
 
     <nav class="bs-rail__nav">
@@ -15,6 +24,7 @@
         [routerLink]="item.path"
         routerLinkActive="is-active"
         [routerLinkActiveOptions]="{ exact: item.path === '/billing' }"
+        [attr.title]="item.label"
       >
         <span class="bs-rail__icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
         <span class="bs-rail__label">{{ item.label }}</span>
