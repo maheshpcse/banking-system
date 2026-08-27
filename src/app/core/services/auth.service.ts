@@ -132,7 +132,7 @@ export class AuthService {
     this.userSubject.next(user);
   }
 
-  logout(options?: { redirect?: boolean }): void {
+  logout(options?: { redirect?: boolean; home?: string }): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     this.userSubject.next(null);
@@ -140,7 +140,7 @@ export class AuthService {
     if (options?.redirect === false) {
       return;
     }
-    void this.router.navigateByUrl('/');
+    void this.router.navigateByUrl(options?.home || '/');
   }
 
   /** True when the user has chosen a transaction currency (required before money actions). */

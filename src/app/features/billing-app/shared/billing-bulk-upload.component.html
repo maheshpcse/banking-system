@@ -39,6 +39,13 @@
       </section>
 
       <section class="bulk__step" *ngIf="step === 'preview'">
+        <div class="bulk__shimmer" *ngIf="previewShimmer" aria-hidden="true">
+          <div class="bulk__bone bulk__bone--wide"></div>
+          <div class="bulk__bone bulk__bone--table"></div>
+          <div class="bulk__bone"></div>
+        </div>
+
+        <ng-container *ngIf="!previewShimmer">
         <div class="bulk__toolbar">
           <p>{{ rows.length }} rows · {{ selectedCount }} selected</p>
           <div class="bulk__toolbar-actions">
@@ -146,6 +153,7 @@
             Upload selected
           </button>
         </div>
+        </ng-container>
       </section>
 
       <section class="bulk__step bulk__step--center" *ngIf="step === 'uploading'">

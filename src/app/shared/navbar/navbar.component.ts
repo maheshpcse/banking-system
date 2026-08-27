@@ -140,7 +140,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.closeMenu();
-    this.auth.logout();
+    this.auth.logout({ home: '/' });
   }
 
   private forceLightMode(): void {
