@@ -1304,6 +1304,29 @@ html[data-nb-mode='dark'] .shimmer__auth-page {
   margin-bottom: 1rem;
 }
 
+.shimmer-filter-rows {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.shimmer-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.85rem;
+}
+
+.shimmer-filter-row__label {
+  width: 4.25rem;
+  flex: 0 0 auto;
+}
+
+.shimmer-filter-row .shimmer-chips {
+  margin-bottom: 0;
+  flex: 1 1 auto;
+}
+
 .shimmer-chip {
   width: 5.5rem;
   height: 2.1rem;

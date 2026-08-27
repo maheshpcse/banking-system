@@ -7,7 +7,7 @@
     </div>
   </header>
 
-  <div class="filters" *ngIf="isSuperAdmin">
+  <div class="filters" *ngIf="isSuperAdmin && !listLoading">
     <button
       type="button"
       *ngFor="let kind of roleFilters"
@@ -17,34 +17,54 @@
       {{ kind.label }}
     </button>
   </div>
-
-  <div class="filter-row">
-    <span class="filter-row__label">Login</span>
-    <div class="filters filters--inline" role="tablist" aria-label="Login status">
-      <button
-        type="button"
-        *ngFor="let kind of loginStatusFilters"
-        [class.is-active]="loginStatusFilter === kind.id"
-        (click)="setLoginStatusFilter(kind.id)"
-      >
-        {{ kind.label }}
-      </button>
-    </div>
+  <div class="filters filters--shimmer" *ngIf="isSuperAdmin && listLoading" aria-hidden="true">
+    <span class="filter-shimmer-chip" *ngFor="let i of [1, 2, 3, 4]"></span>
   </div>
 
-  <div class="filter-row">
-    <span class="filter-row__label">Banking</span>
-    <div class="filters filters--inline" role="tablist" aria-label="Banking status">
-      <button
-        type="button"
-        *ngFor="let kind of bankingStatusFilters"
-        [class.is-active]="bankingStatusFilter === kind.id"
-        (click)="setBankingStatusFilter(kind.id)"
-      >
-        {{ kind.label }}
-      </button>
+  <ng-container *ngIf="!listLoading; else statusFiltersShimmer">
+    <div class="filter-row">
+      <span class="filter-row__label">Login</span>
+      <div class="filters filters--inline" role="tablist" aria-label="Login status">
+        <button
+          type="button"
+          *ngFor="let kind of loginStatusFilters"
+          [class.is-active]="loginStatusFilter === kind.id"
+          (click)="setLoginStatusFilter(kind.id)"
+        >
+          {{ kind.label }}
+        </button>
+      </div>
     </div>
-  </div>
+
+    <div class="filter-row">
+      <span class="filter-row__label">Banking</span>
+      <div class="filters filters--inline" role="tablist" aria-label="Banking status">
+        <button
+          type="button"
+          *ngFor="let kind of bankingStatusFilters"
+          [class.is-active]="bankingStatusFilter === kind.id"
+          (click)="setBankingStatusFilter(kind.id)"
+        >
+          {{ kind.label }}
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #statusFiltersShimmer>
+    <div class="filter-row filter-row--shimmer" aria-hidden="true">
+      <span class="filter-row__label-bone"></span>
+      <div class="filters filters--inline filters--shimmer">
+        <span class="filter-shimmer-chip" *ngFor="let i of [1, 2, 3, 4, 5]"></span>
+      </div>
+    </div>
+    <div class="filter-row filter-row--shimmer" aria-hidden="true">
+      <span class="filter-row__label-bone"></span>
+      <div class="filters filters--inline filters--shimmer">
+        <span class="filter-shimmer-chip" *ngFor="let i of [1, 2, 3, 4, 5, 6, 7]"></span>
+      </div>
+    </div>
+  </ng-template>
 
   <ng-container *ngIf="!listLoading; else listShimmer">
     <div class="table-wrap" [class.is-menu-open]="!!menuOpenId" *ngIf="users.length; else emptyCustomers">

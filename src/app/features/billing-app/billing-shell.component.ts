@@ -17,6 +17,8 @@ const THREE_JS_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three
 export class BillingShellComponent implements OnInit, OnDestroy {
   private bootstrapLink: HTMLLinkElement | null = null;
   readonly year = new Date().getFullYear();
+  private readonly railStorageKey = 'nb.billing.railCollapsed';
+  railCollapsed = false;
 
   readonly dockItems: Array<{ path: string; label: string; icon: string }> = [
     { path: '/billing', label: 'Dashboard', icon: 'dashboard' },
@@ -36,11 +38,29 @@ export class BillingShellComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.railCollapsed = this.readRailCollapsed();
     this.injectBootstrapCss();
     this.ensureThreeJs();
     document.documentElement.dataset['nbBilling'] = '1';
     document.body.classList.add('billing-mode');
     this.shellBoot.complete();
+  }
+
+  toggleRail(): void {
+    this.railCollapsed = !this.railCollapsed;
+    try {
+      localStorage.setItem(this.railStorageKey, this.railCollapsed ? '1' : '0');
+    } catch {
+      /* ignore quota / private mode */
+    }
+  }
+
+  private readRailCollapsed(): boolean {
+    try {
+      return localStorage.getItem(this.railStorageKey) === '1';
+    } catch {
+      return false;
+    }
   }
 
   ngOnDestroy(): void {
