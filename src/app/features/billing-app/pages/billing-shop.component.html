@@ -37,15 +37,6 @@
               placeholder="Search name, SKU, or category"
               autocomplete="off"
             />
-            <button
-              type="button"
-              class="shop-search__clear"
-              *ngIf="productQuery"
-              (click)="clearProductQuery()"
-              aria-label="Clear product search"
-            >
-              ×
-            </button>
           </div>
           <button type="button" class="shop-solid shop-solid--search" (click)="runProductSearch()">Search</button>
         </div>
@@ -103,15 +94,6 @@
               placeholder="Search name, email, phone, or account"
               autocomplete="off"
             />
-            <button
-              type="button"
-              class="shop-search__clear"
-              *ngIf="customerQuery"
-              (click)="clearCustomerQuery()"
-              aria-label="Clear customer search"
-            >
-              ×
-            </button>
           </div>
           <button type="button" class="shop-solid shop-solid--search" (click)="runCustomerSearch()">Search</button>
         </div>
@@ -368,76 +350,107 @@
           <h2>Amounts</h2>
           <dl>
             <div><dt>Subtotal</dt><dd>{{ cartSubtotal | currencyFormat }}</dd></div>
+            <div *ngIf="cartDiscount > 0"><dt>Discount</dt><dd>−{{ cartDiscount | currencyFormat }}</dd></div>
             <div><dt>Tax</dt><dd>{{ cartTax | currencyFormat }}</dd></div>
             <div class="is-total"><dt>Total</dt><dd>{{ cartGrandTotal | currencyFormat }}</dd></div>
           </dl>
+
+          <div class="shop-checkout__coupon">
+            <label>
+              <span>Coupon code</span>
+              <app-theme-select
+                [(ngModel)]="selectedCouponCode"
+                [options]="couponSelectOptions"
+                placeholder="Select saved coupon…"
+                ariaLabel="Coupon codes"
+                [clearable]="true"
+              ></app-theme-select>
+            </label>
+            <label>
+              <span>Or enter code</span>
+              <input type="text" [(ngModel)]="couponCodeInput" placeholder="SAVE10" />
+            </label>
+            <label>
+              <span>Manual discount</span>
+              <input type="number" min="0" step="0.01" [(ngModel)]="manualDiscount" (ngModelChange)="onManualDiscountChange()" />
+            </label>
+            <div class="shop-checkout__coupon-actions">
+              <button type="button" class="shop-ghost" [disabled]="couponBusy" (click)="applyCoupon()">
+                {{ couponBusy ? 'Applying…' : 'Apply coupon' }}
+              </button>
+              <button type="button" class="shop-ghost" *ngIf="appliedCoupon || manualDiscount" (click)="clearDiscount()">
+                Clear discount
+              </button>
+            </div>
+            <p class="shop-checkout__coupon-note" *ngIf="appliedCoupon as c">
+              Applied {{ c.code }} · {{ c.title || c.usageNote || 'Discount ready' }}
+            </p>
+          </div>
+
           <p class="shop-checkout__customer" *ngIf="selectedCustomer; else needCustomer">
             Charging <strong>{{ selectedCustomer.name }}</strong>
           </p>
           <ng-template #needCustomer>
             <p class="shop-checkout__customer is-warn">Select a customer above the product grid first.</p>
           </ng-template>
-          <button
-            type="button"
-            class="shop-solid"
-            [disabled]="checkoutBusy || !cart.length || !selectedCustomer"
-            (click)="beginPayment()"
-          >
-            {{ checkoutBusy ? 'Preparing…' : 'Next · Payment' }}
-          </button>
-          <button type="button" class="shop-ghost" (click)="closeCheckout()">Cancel</button>
+
+          <div class="shop-checkout__pay">
+            <p class="shop-checkout__pay-label">Payment</p>
+            <div class="shop-pay__methods">
+              <button
+                type="button"
+                *ngFor="let m of enabledMethods"
+                class="shop-pay__method"
+                [class.is-on]="payMethod === m"
+                (click)="selectPayMethod(m)"
+              >
+                {{ methodLabel(m) }}
+              </button>
+            </div>
+            <div class="shop-pay__fields" *ngIf="payMethod === 'card'">
+              <label><span>Name on card</span><input type="text" [(ngModel)]="cardName" /></label>
+              <label><span>Card number</span><input type="text" [(ngModel)]="cardNumber" inputmode="numeric" /></label>
+              <div class="shop-pay__row">
+                <label><span>Expiry</span><input type="text" [(ngModel)]="cardExpiry" placeholder="MM/YY" /></label>
+                <label><span>CVV</span><input type="password" [(ngModel)]="cardCvv" maxlength="4" /></label>
+              </div>
+              <label *ngIf="otpSent"><span>OTP</span><input type="text" [(ngModel)]="otp" maxlength="6" /></label>
+            </div>
+            <div class="shop-pay__fields" *ngIf="payMethod === 'upi'">
+              <label><span>UPI VPA</span><input type="text" [(ngModel)]="upiVpa" placeholder="name@bank" /></label>
+            </div>
+            <div class="shop-pay__fields" *ngIf="payMethod === 'qr'">
+              <p class="shop-pay__hint">Scan the merchant QR in the next step to complete payment.</p>
+            </div>
+            <div class="shop-pay__fields" *ngIf="payMethod === 'cash'">
+              <p class="shop-pay__hint">Cash will be marked collected for this invoice.</p>
+            </div>
+          </div>
+
+          <div class="shop-checkout__actions">
+            <button
+              type="button"
+              class="shop-solid"
+              [disabled]="checkoutBusy || !cart.length || !selectedCustomer"
+              (click)="continuePay()"
+            >
+              {{
+                checkoutBusy
+                  ? 'Processing…'
+                  : payMethod === 'card' && !otpSent
+                    ? 'Send OTP'
+                    : 'Pay now'
+              }}
+            </button>
+            <button type="button" class="shop-ghost" (click)="clearCart()" [disabled]="!cart.length || checkoutBusy">
+              Reset cart
+            </button>
+            <button type="button" class="shop-ghost" (click)="closeCheckout()">Cancel</button>
+          </div>
         </section>
       </div>
 
-      <div class="shop-pay" *ngIf="checkoutStep === 'pay'">
-        <header class="shop-pay__head">
-          <button type="button" class="shop-ghost" (click)="backToCart()">← Back to cart</button>
-          <div>
-            <p class="shop-chrome__eyebrow">Payment</p>
-            <h2>Choose method</h2>
-            <p *ngIf="activeInvoice">
-              Invoice {{ activeInvoice.billNumber }} · {{ activeInvoice.grandTotal | currencyFormat }}
-            </p>
-          </div>
-        </header>
-        <div class="shop-pay__methods">
-          <button
-            type="button"
-            *ngFor="let m of enabledMethods"
-            class="shop-pay__method"
-            [class.is-on]="payMethod === m"
-            (click)="selectPayMethod(m)"
-          >
-            {{ methodLabel(m) }}
-          </button>
-        </div>
-        <div class="shop-pay__fields" *ngIf="payMethod === 'card'">
-          <label><span>Name on card</span><input type="text" [(ngModel)]="cardName" /></label>
-          <label><span>Card number</span><input type="text" [(ngModel)]="cardNumber" inputmode="numeric" /></label>
-          <div class="shop-pay__row">
-            <label><span>Expiry</span><input type="text" [(ngModel)]="cardExpiry" placeholder="MM/YY" /></label>
-            <label><span>CVV</span><input type="password" [(ngModel)]="cardCvv" maxlength="4" /></label>
-          </div>
-          <label *ngIf="otpSent"><span>OTP</span><input type="text" [(ngModel)]="otp" maxlength="6" /></label>
-        </div>
-        <div class="shop-pay__fields" *ngIf="payMethod === 'upi'">
-          <label><span>UPI VPA</span><input type="text" [(ngModel)]="upiVpa" placeholder="name@bank" /></label>
-        </div>
-        <div class="shop-pay__fields" *ngIf="payMethod === 'qr'">
-          <p class="shop-pay__hint">Scan the merchant QR in the next step to complete payment.</p>
-        </div>
-        <div class="shop-pay__fields" *ngIf="payMethod === 'cash'">
-          <p class="shop-pay__hint">Cash will be marked collected for this invoice.</p>
-        </div>
-        <div class="shop-modal__actions">
-          <button type="button" class="shop-solid" [disabled]="checkoutBusy" (click)="continuePay()">
-            {{ payMethod === 'card' && !otpSent ? 'Send OTP' : 'Pay now' }}
-          </button>
-          <button type="button" class="shop-ghost" (click)="backToCart()">Back to cart</button>
-        </div>
-      </div>
-
-      <div class="shop-pay shop-pay--center" *ngIf="checkoutStep === 'processing'">
+      <div class="shop-pay" *ngIf="checkoutStep === 'processing'">
         <div class="shop-pay__meter">
           <div class="shop-pay__ring"></div>
           <strong>{{ payProgress }}%</strong>
@@ -446,7 +459,7 @@
         <p>Confirming {{ methodLabel(payMethod) }} for {{ activeInvoice?.billNumber || 'invoice' }}…</p>
       </div>
 
-      <div class="shop-pay shop-pay--center" *ngIf="checkoutStep === 'result'">
+      <div class="shop-pay" *ngIf="checkoutStep === 'result'">
         <p class="shop-chrome__eyebrow">{{ payResultOk ? 'Success' : 'Failed' }}</p>
         <h2>{{ payResultMessage }}</h2>
         <p *ngIf="activeInvoice">{{ activeInvoice.billNumber }} · {{ activeInvoice.grandTotal | currencyFormat }}</p>

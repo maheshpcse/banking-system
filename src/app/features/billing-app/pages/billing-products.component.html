@@ -97,6 +97,19 @@
           GST %
           <input class="input" type="number" formControlName="gstPercentage" />
         </label>
+        <label>
+          Category
+          <app-theme-select
+            controlClass="input input--select"
+            formControlName="category"
+            [options]="categoryOptions"
+            ariaLabel="Product category"
+          ></app-theme-select>
+        </label>
+        <label>
+          Expires at
+          <input class="input" type="datetime-local" formControlName="expiresAt" />
+        </label>
         <div class="form__actions">
           <button type="button" class="btn btn--ghost" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
           <button type="submit" class="btn btn--primary" [disabled]="busy">
@@ -156,6 +169,7 @@
                 <div class="row__actions">
                   <button type="button" class="link" (click)="edit(p)">Edit</button>
                   <button type="button" class="link-danger" [disabled]="busy" (click)="archive(p)">Archive</button>
+                  <button type="button" class="link-danger" [disabled]="busy" (click)="purge(p)">Delete</button>
                 </div>
               </li>
             </ul>
@@ -218,6 +232,7 @@
                     <td class="table__actions">
                       <button type="button" class="link" (click)="edit(p)">Edit</button>
                       <button type="button" class="link-danger" [disabled]="busy" (click)="archive(p)">Archive</button>
+                      <button type="button" class="link-danger" [disabled]="busy" (click)="purge(p)">Delete</button>
                     </td>
                   </tr>
                 </tbody>
@@ -309,7 +324,20 @@
         <dt>Status</dt>
         <dd>{{ p.active === false ? 'Archived' : 'Active' }}</dd>
       </div>
+      <div>
+        <dt>Category</dt>
+        <dd>{{ p.category || '—' }}</dd>
+      </div>
+      <div>
+        <dt>Expiry</dt>
+        <dd>{{ expiryLabel(p) }}</dd>
+      </div>
     </dl>
+    <div class="detail-modal__actions">
+      <button type="button" class="btn btn--ghost" (click)="edit(p)">Edit</button>
+      <button type="button" class="btn btn--ghost" [disabled]="busy" (click)="archive(p)">Archive</button>
+      <button type="button" class="link-danger" [disabled]="busy" (click)="purge(p)">Delete forever</button>
+    </div>
   </div>
 </section>
 

@@ -33,6 +33,10 @@ export class ContactAdminComponent implements OnInit, OnDestroy {
     return `mailto:${this.supportEmail}?subject=${encodeURIComponent('NovaBank account access')}`;
   }
 
+  get isAuthenticated(): boolean {
+    return this.auth.isAuthenticated();
+  }
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly auth: AuthService,

@@ -39,21 +39,31 @@
 
 .autocomplete {
   position: relative;
+  overflow: visible;
+}
+
+.autocomplete__field {
+  position: relative;
+  overflow: visible;
 }
 
 .autocomplete__panel {
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(100% - 0.15rem);
-  z-index: 40;
+  top: calc(100% + 0.35rem);
+  z-index: 120;
   display: grid;
-  gap: 0.2rem;
-  padding: 0.35rem;
-  border-radius: 0.9rem;
+  gap: 0.15rem;
+  max-height: 14rem;
+  overflow: auto;
+  padding: 0.4rem;
+  border-radius: 0.95rem;
   background: rgba(255, 255, 255, 0.98);
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  box-shadow: 0 16px 36px rgba(90, 120, 150, 0.16);
+  border: 1px solid rgba(95, 196, 176, 0.45);
+  box-shadow:
+    0 0 0 4px rgba(95, 196, 176, 0.12),
+    0 18px 40px rgba(90, 120, 150, 0.18);
 }
 
 .autocomplete__option {
@@ -127,10 +137,18 @@
 .limit-meters__link {
   font-size: 0.88rem;
   color: var(--accent, #2a8f7c);
+  text-decoration: none;
 }
 
 .limit-meters__link:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  color: var(--accent-deep, #1f6b5c);
+}
+
+.limit-meters__link.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  cursor: not-allowed;
 }
 
 .tips__panel {

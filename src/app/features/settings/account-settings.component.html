@@ -438,11 +438,15 @@
               </div>
             </div>
           </div>
+          </fieldset>
 
-          <button class="btn btn--primary" type="submit" [disabled]="savingApplication || bankingRestricted">
+          <button
+            class="btn btn--primary banking-form-wrap__submit"
+            type="submit"
+            [disabled]="savingApplication || bankingRestricted"
+          >
             {{ savingApplication ? 'Submitting…' : (hasAccountNumber ? 'Update card & address' : 'Submit for verification') }}
           </button>
-          </fieldset>
         </form>
       </app-animated-card>
 
@@ -485,10 +489,14 @@
           <p class="form__hint" *ngIf="cardControlsForm.value.frozen">
             Your card is frozen — deposits, withdrawals, and transfers are paused until you unfreeze it.
           </p>
-          <button class="btn btn--primary" type="submit" [disabled]="savingCardControls || bankingRestricted">
+          </fieldset>
+          <button
+            class="btn btn--primary banking-form-wrap__submit"
+            type="submit"
+            [disabled]="savingCardControls || bankingRestricted"
+          >
             {{ savingCardControls ? 'Saving…' : 'Save card controls' }}
           </button>
-          </fieldset>
         </form>
       </app-animated-card>
 
@@ -558,35 +566,52 @@
           Your last limit request was approved{{ pendingLimitRequest?.reviewNote ? ': ' + pendingLimitRequest?.reviewNote : '.' }}
         </p>
 
+        <p class="meta" *ngIf="bankingRestricted" style="margin:0 0 0.75rem">
+          Banking account is {{ bankingStatusLabel }}. Limit changes cannot be requested until the account is active again.
+        </p>
         <form
           class="form limits-form"
           [formGroup]="limitsForm"
           (ngSubmit)="submitLimitsRequest()"
-          [class.is-disabled]="hasPendingLimitRequest"
+          [class.is-disabled]="hasPendingLimitRequest || bankingRestricted"
         >
-          <p class="section-label">Request new limits</p>
-          <div class="form-row form-row--2">
-            <label>
-              <span>Deposit / day</span>
-              <input type="number" min="1" step="1" formControlName="depositDaily" />
-            </label>
-            <label>
-              <span>Withdraw / day</span>
-              <input type="number" min="1" step="1" formControlName="withdrawDaily" />
-            </label>
-          </div>
-          <div class="form-row form-row--2">
-            <label>
-              <span>Transfer / day</span>
-              <input type="number" min="1" step="1" formControlName="transferDaily" />
-            </label>
-            <label>
-              <span>Transfers count / day</span>
-              <input type="number" min="1" step="1" formControlName="transferCountDaily" />
-            </label>
-          </div>
-          <button class="btn btn--primary" type="submit" [disabled]="savingLimits || hasPendingLimitRequest">
-            {{ hasPendingLimitRequest ? 'Request pending review' : (savingLimits ? 'Submitting…' : 'Request new limits') }}
+          <fieldset class="banking-restricted-wrap" [disabled]="bankingRestricted || hasPendingLimitRequest">
+            <p class="section-label">Request new limits</p>
+            <div class="form-row form-row--2">
+              <label>
+                <span>Deposit / day</span>
+                <input type="number" min="1" step="1" formControlName="depositDaily" />
+              </label>
+              <label>
+                <span>Withdraw / day</span>
+                <input type="number" min="1" step="1" formControlName="withdrawDaily" />
+              </label>
+            </div>
+            <div class="form-row form-row--2">
+              <label>
+                <span>Transfer / day</span>
+                <input type="number" min="1" step="1" formControlName="transferDaily" />
+              </label>
+              <label>
+                <span>Transfers count / day</span>
+                <input type="number" min="1" step="1" formControlName="transferCountDaily" />
+              </label>
+            </div>
+          </fieldset>
+          <button
+            class="btn btn--primary banking-form-wrap__submit"
+            type="submit"
+            [disabled]="savingLimits || hasPendingLimitRequest || bankingRestricted"
+          >
+            {{
+              bankingRestricted
+                ? 'Limits locked'
+                : hasPendingLimitRequest
+                  ? 'Request pending review'
+                  : savingLimits
+                    ? 'Submitting…'
+                    : 'Request new limits'
+            }}
           </button>
         </form>
       </app-animated-card>

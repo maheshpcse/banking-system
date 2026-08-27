@@ -721,6 +721,13 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
   }
 
   submitLimitsRequest(): void {
+    if (this.bankingRestricted) {
+      const status = effectiveBankingStatus(this.user) || 'restricted';
+      void this.alerts.error(
+        `Your banking account is ${String(status).replace(/_/g, ' ')}. Limit changes cannot be requested until staff restore banking access.`
+      );
+      return;
+    }
     if (this.limitsForm.invalid || this.savingLimits || this.hasPendingLimitRequest) {
       this.limitsForm.markAllAsTouched();
       return;

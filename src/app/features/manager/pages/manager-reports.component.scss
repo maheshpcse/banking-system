@@ -1,0 +1,68 @@
+.reports-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.reports-block {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.reports-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.reports-chip {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reports-chip.is-on {
+  border-color: rgba(47, 143, 125, 0.55);
+  background: rgba(95, 196, 176, 0.18);
+  color: var(--accent-deep, #2f8f7d);
+}
+
+.reports-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+
+.reports-check input {
+  margin-top: 0.2rem;
+}
+
+.reports-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.25rem;
+}
+
+.report-clear-btn {
+  margin-top: 0.85rem;
+}
+
+.section-label {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.table-wrap {
+  overflow: auto;
+}

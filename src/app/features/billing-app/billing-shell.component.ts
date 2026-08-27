@@ -26,6 +26,7 @@ export class BillingShellComponent implements OnInit, OnDestroy {
   }> = [
     { path: '/billing', label: 'Dashboard', icon: 'dashboard' },
     { path: '/billing/products', label: 'Products', icon: 'products' },
+    { path: '/billing/categories', label: 'Categories', icon: 'categories' },
     { path: '/billing/customers', label: 'Customers', icon: 'customers' },
     { path: '/billing/pos', label: 'POS', icon: 'pos' },
     { path: '/billing/shop', label: 'Shop', icon: 'shop', handoff: 'shop' },

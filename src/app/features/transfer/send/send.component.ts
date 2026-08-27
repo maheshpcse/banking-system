@@ -23,7 +23,7 @@ export class SendComponent implements OnInit, OnDestroy {
   dailyUsage: AccountSummary['dailyUsage'] | null = null;
   private recipientSub?: Subscription;
 
-  @ViewChild('recipientField') recipientField?: ElementRef<HTMLInputElement>;
+  @ViewChild('recipientField') recipientField?: ElementRef<HTMLElement>;
 
   form = this.fb.group({
     toAccountNumber: ['', [Validators.required, Validators.minLength(6)]],
@@ -118,11 +118,11 @@ export class SendComponent implements OnInit, OnDestroy {
     if (this.recipientField?.nativeElement.contains(target)) {
       return;
     }
-    const panel = document.querySelector('.autocomplete__panel');
-    if (panel?.contains(target)) {
-      return;
-    }
     this.showSuggestions = false;
+  }
+
+  onRecipientFocus(): void {
+    this.showSuggestions = this.suggestions.length > 0;
   }
 
   onRecipientInput(): void {

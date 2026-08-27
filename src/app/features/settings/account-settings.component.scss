@@ -1027,8 +1027,18 @@
   margin: 0;
   padding: 0;
   min-inline-size: 0;
+  width: 100%;
+  display: block;
 }
 
 .banking-restricted-wrap:disabled {
   opacity: 0.72;
+}
+
+.banking-form-wrap__submit {
+  display: inline-flex;
+  width: auto;
+  min-width: min(100%, 16rem);
+  white-space: nowrap;
+  margin-top: 1rem;
 }

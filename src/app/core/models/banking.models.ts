@@ -290,9 +290,22 @@ export interface BillingProduct {
   active: boolean;
   category?: string;
   images?: string[];
+  expiresAt?: string | null;
+  expiredAt?: string | null;
   ratingCount?: number;
   ratingAvg?: number;
   createdAt?: string;
+}
+
+export interface BillingCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  active: boolean;
+  sortOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface BillingCustomer {

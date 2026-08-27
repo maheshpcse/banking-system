@@ -1,10 +1,10 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { forkJoin, of, Subject } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { AlertService } from '../../../core/services/alert.service';
 import { BillingService } from '../../../core/services/billing.service';
-import { BillingProduct } from '../../../core/models/banking.models';
+import { BillingCategory, BillingProduct } from '../../../core/models/banking.models';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 import { ThemeSelectOption } from '../../../shared/theme-select/theme-select.component';
 
@@ -32,6 +32,7 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
   busy = false;
   query = '';
   products: BillingProduct[] = [];
+  categories: BillingCategory[] = [];
   editingId: string | null = null;
   showForm = true;
   panelAnimating = false;
@@ -69,8 +70,35 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
     sku: [''],
     price: [0, [Validators.required, Validators.min(0)]],
     stock: [0, [Validators.required, Validators.min(0)]],
-    gstPercentage: [18, [Validators.required, Validators.min(0), Validators.max(100)]]
+    gstPercentage: [18, [Validators.required, Validators.min(0), Validators.max(100)]],
+    category: [''],
+    expiresAt: ['']
   });
+
+  get categoryOptions(): ThemeSelectOption[] {
+    const extras = [
+      { value: 'Grocery', label: 'Grocery' },
+      { value: 'Beverages', label: 'Beverages' },
+      { value: 'Electronics', label: 'Electronics' },
+      { value: 'Home', label: 'Home' },
+      { value: 'Personal Care', label: 'Personal Care' },
+      { value: 'Snacks', label: 'Snacks' }
+    ];
+    const fromApi = this.categories
+      .filter((c) => c.active !== false)
+      .map((c) => ({ value: c.name, label: c.name }));
+    const seen = new Set<string>();
+    const merged: ThemeSelectOption[] = [{ value: '', label: 'No category' }];
+    [...fromApi, ...extras].forEach((opt) => {
+      const key = opt.value.toLowerCase();
+      if (!opt.value || seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      merged.push(opt);
+    });
+    return merged;
+  }
 
   private readonly search$ = new Subject<string>();
   private readonly destroy$ = new Subject<void>();
@@ -277,9 +305,16 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
 
   load(): void {
     this.listLoading = true;
-    withShimmerDelay(this.billing.listProducts(this.query.trim()), SHIMMER_MS).subscribe({
-      next: (res) => {
-        this.products = res.items || [];
+    withShimmerDelay(
+      forkJoin({
+        products: this.billing.listProducts(this.query.trim()),
+        categories: this.billing.listCategories().pipe(catchError(() => of({ items: [] as BillingCategory[] })))
+      }),
+      SHIMMER_MS
+    ).subscribe({
+      next: (bundle) => {
+        this.products = bundle.products.items || [];
+        this.categories = bundle.categories.items || [];
         if (this.page > this.totalPages) {
           this.page = this.totalPages;
         }
@@ -363,7 +398,9 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
       sku: product.sku,
       price: product.price,
       stock: product.stock,
-      gstPercentage: product.gstPercentage
+      gstPercentage: product.gstPercentage,
+      category: product.category || '',
+      expiresAt: this.toDatetimeLocal(product.expiresAt)
     });
     if (!this.showForm) {
       this.panelAnimating = true;
@@ -384,7 +421,15 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
 
   cancelEdit(): void {
     this.editingId = null;
-    this.form.reset({ name: '', sku: '', price: 0, stock: 0, gstPercentage: 18 });
+    this.form.reset({
+      name: '',
+      sku: '',
+      price: 0,
+      stock: 0,
+      gstPercentage: 18,
+      category: '',
+      expiresAt: ''
+    });
     if (this.showForm) {
       this.bindFormHeightObserver();
     }
@@ -414,7 +459,9 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
       sku: String(raw.sku || ''),
       price: Number(raw.price || 0),
       stock: Number(raw.stock || 0),
-      gstPercentage: Number(raw.gstPercentage || 0)
+      gstPercentage: Number(raw.gstPercentage || 0),
+      category: String(raw.category || '').trim(),
+      expiresAt: String(raw.expiresAt || '').trim() || null
     };
     const editingId = this.editingId;
     const label = editingId ? 'Update' : 'Create';
@@ -462,6 +509,57 @@ export class BillingProductsComponent implements OnInit, AfterViewInit, OnDestro
       }
       this.softReload();
     }
+  }
+
+  async purge(product: BillingProduct): Promise<void> {
+    this.busy = true;
+    const outcome = await this.alerts.confirmAction({
+      text: `Permanently delete “${product.name}”? This cannot be undone.`,
+      confirmText: 'Delete forever',
+      loadingText: 'Deleting…',
+      action: () => this.billing.purgeProduct(product.id),
+      successMessage: (res) => res.message || 'Deleted',
+      errorMessage: (err) =>
+        (err as { error?: { message?: string } })?.error?.message || 'Delete failed.'
+    });
+    this.busy = false;
+    if (outcome.ok) {
+      if (this.detail?.id === product.id) {
+        this.closeDetail();
+      }
+      if (this.editingId === product.id) {
+        this.cancelEdit();
+      }
+      this.softReload();
+    }
+  }
+
+  expiryLabel(product: BillingProduct): string {
+    if (!product.expiresAt) {
+      return 'No expiry';
+    }
+    const at = new Date(product.expiresAt);
+    if (Number.isNaN(at.getTime())) {
+      return 'No expiry';
+    }
+    if (at.getTime() <= Date.now()) {
+      return `Expired ${at.toLocaleString()}`;
+    }
+    return `Expires ${at.toLocaleString()}`;
+  }
+
+  private toDatetimeLocal(iso: string | null | undefined): string {
+    if (!iso) {
+      return '';
+    }
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) {
+      return '';
+    }
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(
+      d.getMinutes()
+    )}`;
   }
 
   stockTone(stock: number): string {
