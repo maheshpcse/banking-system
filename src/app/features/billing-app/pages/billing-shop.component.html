@@ -1,0 +1,334 @@
+<section class="shop" *ngIf="!pageLoading; else shopBoot">
+  <header class="shop-chrome">
+    <div class="shop-chrome__brand">
+      <span class="shop-chrome__mark" aria-hidden="true"></span>
+      <div>
+        <p class="shop-chrome__eyebrow">NovaBank × NovaBill</p>
+        <strong>Shop Floor</strong>
+      </div>
+    </div>
+    <div class="shop-chrome__actions">
+      <button type="button" class="shop-cart-pill" (click)="openCheckout()" [disabled]="!cartCount">
+        <span>Bag</span>
+        <em>{{ cartCount }}</em>
+        <strong>{{ cartGrandTotal | currencyFormat }}</strong>
+      </button>
+      <span class="shop-avatar" [ngClass]="'shop-avatar--' + avatarStyle" [attr.aria-label]="operatorName">
+        <img *ngIf="avatarSrc as src" [src]="src" alt="" />
+        <ng-container *ngIf="!avatarSrc">{{ avatarInitials }}</ng-container>
+      </span>
+      <button type="button" class="shop-linkish" (click)="goBankingPos()">Classic POS</button>
+      <button type="button" class="shop-ghost" (click)="signOut()">Sign out</button>
+    </div>
+  </header>
+
+  <div class="shop-sticky">
+    <label class="shop-search shop-search--product">
+      <span>Find products</span>
+      <input
+        type="search"
+        [ngModel]="productQuery"
+        (ngModelChange)="onProductQuery($event)"
+        placeholder="Search name, SKU, or category"
+        autocomplete="off"
+      />
+    </label>
+    <div class="shop-filters">
+      <button
+        type="button"
+        *ngFor="let opt of stockOptions"
+        [class.is-on]="stockFilter === opt.id"
+        (click)="setStockFilter(opt.id)"
+      >
+        {{ opt.label }}
+      </button>
+      <button type="button" [class.is-on]="!categoryFilter" (click)="setCategory('')">All categories</button>
+      <button
+        type="button"
+        *ngFor="let cat of categories"
+        [class.is-on]="categoryFilter === cat"
+        (click)="setCategory(cat)"
+      >
+        {{ cat }}
+      </button>
+    </div>
+    <label class="shop-sort">
+      <span>Sort</span>
+      <select [ngModel]="sortKey" (ngModelChange)="setSort($event)">
+        <option *ngFor="let opt of sortOptions" [value]="opt.id">{{ opt.label }}</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="shop-customer">
+    <label class="shop-search shop-search--customer">
+      <span>Customer</span>
+      <input
+        type="search"
+        [ngModel]="customerQuery"
+        (ngModelChange)="onCustomerQuery($event)"
+        placeholder="Search name, email, phone, or account"
+        autocomplete="off"
+      />
+    </label>
+    <button type="button" class="shop-ghost" *ngIf="!selectedCustomer" (click)="openAddCustomer()">
+      Add customer
+    </button>
+    <button type="button" class="shop-ghost" *ngIf="selectedCustomer" (click)="clearCustomer()">Clear</button>
+
+    <div class="shop-customer__hits" *ngIf="!selectedCustomer && customerQuery.trim() && !customerBusy">
+      <button type="button" *ngFor="let c of customers" (click)="selectCustomer(c)">
+        <strong>{{ c.name }}</strong>
+        <span>{{ c.email || c.phone || 'No contact' }}</span>
+      </button>
+      <div class="shop-customer__empty" *ngIf="!customers.length">
+        <p>No customer found for “{{ customerQuery }}”.</p>
+        <button type="button" class="shop-solid" (click)="openAddCustomer()">Add them</button>
+      </div>
+    </div>
+
+    <div class="shop-customer__card" *ngIf="selectedCustomer as c">
+      <div>
+        <strong>{{ c.name }}</strong>
+        <p>
+          {{ c.email || '—' }} · {{ c.phone || '—' }}
+          <ng-container *ngIf="c.bankingAccountNumber"> · {{ c.bankingAccountNumber }}</ng-container>
+        </p>
+      </div>
+      <span *ngIf="c.rewardPoints != null">{{ c.rewardPoints }} pts</span>
+    </div>
+  </div>
+
+  <div class="shop-stage" [class.is-loading]="catalogLoading">
+    <div class="shop-grid" *ngIf="filteredProducts.length; else noProducts">
+      <article class="shop-tile" *ngFor="let product of filteredProducts" (click)="openProduct(product)">
+        <div class="shop-tile__media">
+          <img
+            class="shop-tile__slide"
+            *ngFor="let src of productSlides(product); let i = index"
+            [src]="src"
+            [alt]="product.name"
+            [class.is-active]="slideFor(product) === i"
+          />
+          <button type="button" class="shop-tile__nav shop-tile__nav--prev" (click)="prevSlide(product, $event)" aria-label="Previous image">
+            ‹
+          </button>
+          <button type="button" class="shop-tile__nav shop-tile__nav--next" (click)="nextSlide(product, $event)" aria-label="Next image">
+            ›
+          </button>
+          <div class="shop-tile__dots" aria-hidden="true">
+            <i *ngFor="let s of productSlides(product); let i = index" [class.is-on]="slideFor(product) === i"></i>
+          </div>
+        </div>
+        <div class="shop-tile__meta">
+          <p class="shop-tile__cat">{{ product.category || 'General' }}</p>
+          <h2>{{ product.name }}</h2>
+          <div class="shop-tile__row">
+            <strong>{{ product.price | currencyFormat }}</strong>
+            <span [class.is-out]="product.stock <= 0">{{ product.stock > 0 ? product.stock + ' in stock' : 'Out of stock' }}</span>
+          </div>
+          <button
+            type="button"
+            class="shop-solid shop-solid--slim"
+            [disabled]="product.stock <= 0"
+            (click)="addToCart(product, $event)"
+          >
+            Add
+          </button>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<ng-template #noProducts>
+  <div class="shop-empty">
+    <svg viewBox="0 0 180 140" width="160" height="120" aria-hidden="true">
+      <rect x="18" y="78" width="144" height="16" rx="6" fill="rgba(95,196,176,0.28)" />
+      <rect x="48" y="28" width="84" height="62" rx="12" fill="rgba(255,200,1,0.22)" stroke="rgba(255,153,50,0.45)" />
+      <path d="M58 28h32l8 10h34v-4a8 8 0 0 0-8-6H58z" fill="rgba(95,196,176,0.5)" />
+      <circle cx="90" cy="58" r="12" fill="rgba(15,118,110,0.28)" />
+      <path d="M84 58h12M90 52v12" stroke="#0f766e" stroke-width="3" stroke-linecap="round" />
+    </svg>
+    <h2>No products here</h2>
+    <p>No products match this search and filters.</p>
+  </div>
+</ng-template>
+
+<ng-template #shopBoot>
+  <div class="shop shop--boot">
+    <div class="shop-boot-bone shop-boot-bone--chrome"></div>
+    <div class="shop-boot-bone shop-boot-bone--search"></div>
+    <div class="shop-boot-grid">
+      <div class="shop-boot-bone" *ngFor="let i of [1, 2, 3, 4, 5, 6]"></div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Product XL modal -->
+<div
+  class="shop-modal"
+  *ngIf="productModalOpen && activeProduct as product"
+  [class.is-leaving]="productModalLeaving"
+  (click)="closeProductModal()"
+>
+  <div class="shop-modal__panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <button type="button" class="shop-modal__close" (click)="closeProductModal()" aria-label="Close">×</button>
+    <div class="shop-modal__media">
+      <img
+        class="shop-tile__slide"
+        *ngFor="let src of productSlides(product); let i = index"
+        [src]="src"
+        [alt]="product.name"
+        [class.is-active]="activeSlide === i"
+      />
+      <button type="button" class="shop-tile__nav shop-tile__nav--prev" (click)="modalPrev()">‹</button>
+      <button type="button" class="shop-tile__nav shop-tile__nav--next" (click)="modalNext()">›</button>
+    </div>
+    <div class="shop-modal__copy">
+      <p class="shop-tile__cat">{{ product.category || 'General' }} · SKU {{ product.sku || '—' }}</p>
+      <h2>{{ product.name }}</h2>
+      <p class="shop-modal__lede">
+        {{ product.price | currencyFormat }} · GST {{ product.gstPercentage }}%
+        · {{ product.stock > 0 ? product.stock + ' available' : 'Out of stock' }}
+        <ng-container *ngIf="product.ratingCount"> · ★ {{ product.ratingAvg }} ({{ product.ratingCount }})</ng-container>
+      </p>
+      <div class="shop-modal__actions">
+        <button type="button" class="shop-solid" [disabled]="product.stock <= 0" (click)="addToCart(product)">
+          Add to cart
+        </button>
+        <button type="button" class="shop-ghost" (click)="closeProductModal()">Keep browsing</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Checkout XL modal -->
+<div
+  class="shop-modal shop-modal--checkout"
+  *ngIf="checkoutOpen"
+  [class.is-leaving]="checkoutLeaving"
+  (click)="closeCheckout()"
+>
+  <div class="shop-modal__panel shop-modal__panel--wide" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <button type="button" class="shop-modal__close" (click)="closeCheckout()" aria-label="Close">×</button>
+
+    <div class="shop-checkout" *ngIf="checkoutStep === 'cart'">
+      <aside class="shop-checkout__cart">
+        <header>
+          <h2>Cart</h2>
+          <button type="button" class="shop-linkish" (click)="clearCart()" [disabled]="!cart.length">Clear all</button>
+        </header>
+        <div class="shop-checkout__lines" *ngIf="cart.length; else emptyCart">
+          <article *ngFor="let line of cart">
+            <img *ngIf="line.image" [src]="line.image" alt="" />
+            <div>
+              <strong>{{ line.name }}</strong>
+              <p>{{ line.unitPrice | currencyFormat }} · GST {{ line.gstPercentage }}%</p>
+              <div class="shop-qty">
+                <button type="button" (click)="changeQty(line, -1)">−</button>
+                <span>{{ line.quantity }}</span>
+                <button type="button" (click)="changeQty(line, 1)">+</button>
+              </div>
+            </div>
+            <button type="button" class="shop-linkish" (click)="removeLine(line)">Remove</button>
+          </article>
+        </div>
+        <ng-template #emptyCart>
+          <div class="shop-empty shop-empty--compact">
+            <p>Cart is empty.</p>
+          </div>
+        </ng-template>
+      </aside>
+
+      <section class="shop-checkout__summary">
+        <h2>Amounts</h2>
+        <dl>
+          <div><dt>Subtotal</dt><dd>{{ cartSubtotal | currencyFormat }}</dd></div>
+          <div><dt>Tax</dt><dd>{{ cartTax | currencyFormat }}</dd></div>
+          <div class="is-total"><dt>Total</dt><dd>{{ cartGrandTotal | currencyFormat }}</dd></div>
+        </dl>
+        <p class="shop-checkout__customer" *ngIf="selectedCustomer; else needCustomer">
+          Charging <strong>{{ selectedCustomer.name }}</strong>
+        </p>
+        <ng-template #needCustomer>
+          <p class="shop-checkout__customer is-warn">Select a customer above the product grid first.</p>
+        </ng-template>
+        <button
+          type="button"
+          class="shop-solid"
+          [disabled]="checkoutBusy || !cart.length || !selectedCustomer"
+          (click)="beginPayment()"
+        >
+          {{ checkoutBusy ? 'Preparing…' : 'Next · Payment' }}
+        </button>
+        <button type="button" class="shop-ghost" (click)="closeCheckout()">Cancel</button>
+      </section>
+    </div>
+
+    <div class="shop-checkout shop-checkout--pay" *ngIf="checkoutStep === 'pay'">
+      <div class="shop-checkout__summary shop-checkout__summary--full">
+        <h2>Processing payment</h2>
+        <p *ngIf="activeInvoice">Invoice {{ activeInvoice.billNumber }} · {{ activeInvoice.grandTotal | currencyFormat }}</p>
+        <app-billing-payment-gateway
+          [open]="gatewayOpen"
+          [bill]="activeInvoice"
+          [settings]="settings"
+          [methods]="enabledMethods"
+          (closed)="onGatewayClosed()"
+          (completed)="onGatewayCompleted($event)"
+        ></app-billing-payment-gateway>
+      </div>
+    </div>
+
+    <div class="shop-checkout shop-checkout--invoice" *ngIf="checkoutStep === 'invoice' && activeInvoice as bill">
+      <section class="shop-invoice">
+        <p class="shop-chrome__eyebrow">Paid invoice</p>
+        <h2>{{ bill.billNumber }}</h2>
+        <p>{{ bill.customerName }} · {{ bill.grandTotal | currencyFormat }}</p>
+        <ul>
+          <li *ngFor="let item of bill.items">
+            <span>{{ item.name }} × {{ item.quantity }}</span>
+            <strong>{{ item.lineTotal | currencyFormat }}</strong>
+          </li>
+        </ul>
+        <dl>
+          <div><dt>Subtotal</dt><dd>{{ bill.subtotal | currencyFormat }}</dd></div>
+          <div><dt>Tax</dt><dd>{{ bill.tax | currencyFormat }}</dd></div>
+          <div class="is-total"><dt>Paid</dt><dd>{{ bill.grandTotal | currencyFormat }}</dd></div>
+        </dl>
+        <p *ngIf="lastPayment">Ref {{ lastPayment.transactionRef }} · {{ lastPayment.paymentMethod | uppercase }}</p>
+        <button type="button" class="shop-solid" (click)="closeCheckout()">Done</button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Add customer sheet -->
+<div class="shop-modal shop-modal--sheet" *ngIf="showAddCustomer" (click)="showAddCustomer = false">
+  <div class="shop-modal__panel shop-modal__panel--sheet" (click)="$event.stopPropagation()">
+    <h2>Add customer</h2>
+    <label>
+      <span>Name</span>
+      <input type="text" [(ngModel)]="newCustomer.name" />
+    </label>
+    <label>
+      <span>Email</span>
+      <input type="email" [(ngModel)]="newCustomer.email" />
+    </label>
+    <label>
+      <span>Phone</span>
+      <input type="tel" [(ngModel)]="newCustomer.phone" />
+    </label>
+    <label>
+      <span>Address</span>
+      <input type="text" [(ngModel)]="newCustomer.address" />
+    </label>
+    <div class="shop-modal__actions">
+      <button type="button" class="shop-solid" [disabled]="customerBusy" (click)="saveNewCustomer()">
+        {{ customerBusy ? 'Saving…' : 'Save customer' }}
+      </button>
+      <button type="button" class="shop-ghost" (click)="showAddCustomer = false">Cancel</button>
+    </div>
+  </div>
+</div>

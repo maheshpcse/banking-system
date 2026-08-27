@@ -13,8 +13,10 @@ import { BillingSceneComponent } from './shared/billing-scene.component';
 import { BillingPanelShimmerComponent } from './shared/billing-panel-shimmer.component';
 import { BillingPaymentGatewayComponent } from './shared/billing-payment-gateway.component';
 import { BillingNotFoundRedirectComponent } from './pages/billing-not-found-redirect.component';
+import { BillingShopComponent } from './pages/billing-shop.component';
 
 const routes: Routes = [
+  { path: 'shop', component: BillingShopComponent },
   {
     path: '',
     component: BillingShellComponent,
@@ -41,6 +43,7 @@ const routes: Routes = [
     BillingHistoryComponent,
     BillingPurchasesComponent,
     BillingSettingsComponent,
+    BillingShopComponent,
     BillingSceneComponent,
     BillingPanelShimmerComponent,
     BillingPaymentGatewayComponent,
