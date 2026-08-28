@@ -56,73 +56,12 @@
         <button type="button" [class.is-active]="view === 'table'" (click)="setView('table')">Table</button>
       </div>
 
-      <button type="button" class="btn btn--ghost toolbar__add" (click)="toggleForm()">
-        {{ showForm ? 'Hide form' : 'Add product' }}
-      </button>
+      <button type="button" class="btn btn--ghost toolbar__add" (click)="openForm()">Add product</button>
       <button type="button" class="btn btn--primary" (click)="openBulkUpload()">Bulk upload</button>
     </div>
 
-    <div
-      class="layout"
-      [class.is-expanded]="!showForm"
-      [class.is-animating]="panelAnimating"
-    >
-      <form
-        #addForm
-        class="glass form"
-        [class.is-hidden]="!showForm"
-        [formGroup]="form"
-        (ngSubmit)="save()"
-      >
-        <h3>{{ editingId ? 'Edit product' : 'Add product' }}</h3>
-        <label>
-          Name
-          <input class="input" formControlName="name" />
-        </label>
-        <label>
-          SKU
-          <input class="input" formControlName="sku" />
-        </label>
-        <div class="grid2">
-          <label>
-            Price
-            <input class="input" type="number" formControlName="price" />
-          </label>
-          <label>
-            Stock
-            <input class="input" type="number" formControlName="stock" />
-          </label>
-        </div>
-        <label>
-          GST %
-          <input class="input" type="number" formControlName="gstPercentage" />
-        </label>
-        <label>
-          Category
-          <app-theme-select
-            controlClass="input input--select"
-            formControlName="category"
-            [options]="categoryOptions"
-            ariaLabel="Product category"
-          ></app-theme-select>
-        </label>
-        <label>
-          Expires at
-          <input class="input" type="datetime-local" formControlName="expiresAt" />
-        </label>
-        <div class="form__actions">
-          <button type="button" class="btn btn--ghost" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
-          <button type="submit" class="btn btn--primary" [disabled]="busy">
-            {{ busy ? 'Saving…' : editingId ? 'Update' : 'Create' }}
-          </button>
-        </div>
-      </form>
-
-      <div
-        class="main-panel glass"
-        [style.minHeight.px]="dataPanelHeight"
-        [style.height.px]="dataPanelHeight"
-      >
+    <div class="layout is-expanded">
+      <div class="main-panel glass">
         <div class="main-panel__body" [class.is-empty]="!filterLoading && !filtered.length">
           <app-billing-panel-shimmer
             *ngIf="filterLoading"
@@ -262,6 +201,66 @@
       </div>
     </div>
   </ng-container>
+
+  <div
+    class="form-modal"
+    *ngIf="formOpen"
+    [class.is-leaving]="formLeaving"
+    (click)="closeForm()"
+  >
+    <div class="form-modal__panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <button type="button" class="form-modal__close" (click)="closeForm()" aria-label="Close" [disabled]="busy">
+        <span aria-hidden="true">×</span>
+      </button>
+      <form class="form" [formGroup]="form" (ngSubmit)="save()">
+        <header class="form-modal__head">
+          <p class="form-modal__eyebrow">NovaBill catalog</p>
+          <h3>{{ editingId ? 'Edit product' : 'Add product' }}</h3>
+        </header>
+        <label>
+          Name
+          <input class="input" formControlName="name" />
+        </label>
+        <label>
+          SKU
+          <input class="input" formControlName="sku" />
+        </label>
+        <div class="grid2">
+          <label>
+            Price
+            <input class="input" type="number" formControlName="price" />
+          </label>
+          <label>
+            Stock
+            <input class="input" type="number" formControlName="stock" />
+          </label>
+        </div>
+        <label>
+          GST %
+          <input class="input" type="number" formControlName="gstPercentage" />
+        </label>
+        <label>
+          Category
+          <app-theme-select
+            controlClass="input input--select"
+            formControlName="category"
+            [options]="categoryOptions"
+            ariaLabel="Product category"
+          ></app-theme-select>
+        </label>
+        <label>
+          Expires at
+          <input class="input" type="datetime-local" formControlName="expiresAt" />
+        </label>
+        <div class="form__actions">
+          <button type="button" class="btn btn--ghost" (click)="closeForm()">Cancel</button>
+          <button type="submit" class="btn btn--primary" [disabled]="busy">
+            {{ busy ? 'Saving…' : editingId ? 'Update' : 'Create' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <div
     class="detail-backdrop"

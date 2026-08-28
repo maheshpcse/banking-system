@@ -88,6 +88,8 @@ export class ManagerReportsComponent implements OnInit, OnDestroy {
   schedules: SavedReportSchedule[] = [];
   reviewRows: ReviewRow[] = [];
   showReview = false;
+  reviewPage = 1;
+  readonly reviewPageSize = 8;
 
   readonly cadenceOptions = [
     { value: 'daily', label: 'Daily' },
@@ -170,6 +172,15 @@ export class ManagerReportsComponent implements OnInit, OnDestroy {
     return this.schedules.length;
   }
 
+  get reviewPages(): number {
+    return Math.max(1, Math.ceil(this.reviewRows.length / this.reviewPageSize));
+  }
+
+  get pagedReviewRows(): ReviewRow[] {
+    const start = (this.reviewPage - 1) * this.reviewPageSize;
+    return this.reviewRows.slice(start, start + this.reviewPageSize);
+  }
+
   get selectedDatasetLabels(): string {
     return this.datasetOptions
       .filter((d) => this.selectedDatasets.has(d.id))
@@ -219,16 +230,38 @@ export class ManagerReportsComponent implements OnInit, OnDestroy {
 
   buildReview(): void {
     this.reviewing = true;
+    this.showReview = true;
+    this.reviewPage = 1;
     withShimmerDelay(of(this.composeReviewRows()), SHIMMER_MS).subscribe({
       next: (rows) => {
         this.reviewRows = rows;
-        this.showReview = true;
         this.reviewing = false;
       },
       error: () => {
         this.reviewing = false;
       }
     });
+  }
+
+  clearReview(): void {
+    this.showReview = false;
+    this.reviewRows = [];
+    this.reviewPage = 1;
+    this.reviewing = false;
+  }
+
+  prevReviewPage(): void {
+    if (this.reviewPage <= 1) {
+      return;
+    }
+    this.reviewPage -= 1;
+  }
+
+  nextReviewPage(): void {
+    if (this.reviewPage >= this.reviewPages) {
+      return;
+    }
+    this.reviewPage += 1;
   }
 
   async schedule(): Promise<void> {
@@ -296,6 +329,7 @@ export class ManagerReportsComponent implements OnInit, OnDestroy {
           this.persist();
           this.saving = false;
           this.showReview = true;
+          this.reviewPage = 1;
           this.reviewRows = this.composeReviewRows(next);
           await this.alerts.success(
             `Saved “${next.name}”. It stays until you clear it or it auto-expires.`
@@ -402,7 +436,7 @@ export class ManagerReportsComponent implements OnInit, OnDestroy {
         });
       }
     }
-    return rows.slice(0, 24);
+    return rows.slice(0, 48);
   }
 
   private sampleValue(dataset: string, column: string): string {

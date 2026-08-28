@@ -90,7 +90,9 @@
                 <td>{{ displayValue(row, 'category') }}</td>
                 <td>{{ row.localError || 'Ready' }}</td>
                 <td>
-                  <button type="button" class="bulk__icon-x" (click)="removeRow(row)" aria-label="Remove row">×</button>
+                  <button type="button" class="bulk__icon-x" (click)="removeRow(row)" aria-label="Remove row">
+                    <span aria-hidden="true">×</span>
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -121,7 +123,9 @@
                   <td>{{ displayValue(row, 'bankingAccountNumber') }}</td>
                   <td>{{ row.localError || 'Ready' }}</td>
                   <td>
-                    <button type="button" class="bulk__icon-x" (click)="removeRow(row)" aria-label="Remove row">×</button>
+                    <button type="button" class="bulk__icon-x" (click)="removeRow(row)" aria-label="Remove row">
+                      <span aria-hidden="true">×</span>
+                    </button>
                   </td>
                 </tr>
               </tbody>

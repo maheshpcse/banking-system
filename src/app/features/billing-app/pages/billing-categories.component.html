@@ -13,9 +13,193 @@
       </div>
     </header>
 
-    <div class="layout">
-      <form class="glass form" [formGroup]="form" (ngSubmit)="save()">
-        <h3>{{ editingId ? 'Edit category' : 'Add category' }}</h3>
+    <div class="toolbar">
+      <div class="search">
+        <input
+          type="text"
+          class="input"
+          placeholder="Search name or slug"
+          [ngModel]="query"
+          (ngModelChange)="onQueryChange($event)"
+          (keyup.enter)="search()"
+        />
+        <button
+          type="button"
+          class="search__clear"
+          *ngIf="query"
+          (click)="clearQuery()"
+          aria-label="Clear search"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <button type="button" class="btn btn--ghost" (click)="search()">Search</button>
+
+      <app-theme-select
+        class="theme-select--compact theme-select--sort"
+        controlClass="input input--select"
+        [(ngModel)]="sort"
+        [options]="sortOptions"
+        ariaLabel="Sort categories"
+        (valueChange)="onFilterChange()"
+      ></app-theme-select>
+
+      <app-theme-select
+        class="theme-select--compact theme-select--sort"
+        controlClass="input input--select"
+        [(ngModel)]="statusFilter"
+        [options]="statusOptions"
+        ariaLabel="Filter status"
+        (valueChange)="onFilterChange()"
+      ></app-theme-select>
+
+      <div class="seg" role="group" aria-label="View mode">
+        <button type="button" [class.is-active]="view === 'list'" (click)="setView('list')">List</button>
+        <button type="button" [class.is-active]="view === 'grid'" (click)="setView('grid')">Grid</button>
+        <button type="button" [class.is-active]="view === 'table'" (click)="setView('table')">Table</button>
+      </div>
+
+      <button type="button" class="btn btn--primary toolbar__add" (click)="openForm()">Add category</button>
+    </div>
+
+    <div class="layout is-expanded">
+      <div class="main-panel glass">
+        <div class="main-panel__body" [class.is-empty]="!filterLoading && !filtered.length">
+          <app-billing-panel-shimmer
+            *ngIf="filterLoading"
+            [variant]="dataShimmerVariant"
+          ></app-billing-panel-shimmer>
+
+          <ng-container *ngIf="!filterLoading">
+            <app-empty-state
+              *ngIf="!filtered.length"
+              tone="billing"
+              kind="products"
+              [fill]="true"
+              message="No categories match this search or filter."
+            ></app-empty-state>
+
+            <ul class="list" *ngIf="filtered.length && view === 'list'">
+              <li *ngFor="let c of paged">
+                <button type="button" class="row" (click)="openDetail(c)">
+                  <span class="thumb" [class.thumb--off]="c.active === false" aria-hidden="true">
+                    {{ (c.name || '?').slice(0, 1).toUpperCase() }}
+                  </span>
+                  <div class="row__body">
+                    <strong>{{ c.name }}</strong>
+                    <span>{{ c.slug }} · sort {{ c.sortOrder ?? 0 }}</span>
+                    <span class="row__status" [class.is-inactive]="c.active === false">
+                      {{ c.active === false ? 'Inactive' : 'Active' }}
+                    </span>
+                  </div>
+                </button>
+                <div class="row__actions">
+                  <button type="button" class="link link--edit" (click)="edit(c)">Edit</button>
+                  <button
+                    type="button"
+                    class="link link--warn"
+                    *ngIf="c.active !== false"
+                    [disabled]="busy"
+                    (click)="deactivate(c)"
+                  >
+                    Deactivate
+                  </button>
+                  <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Delete</button>
+                </div>
+              </li>
+            </ul>
+
+            <div class="grid-view" *ngIf="filtered.length && view === 'grid'">
+              <button type="button" class="card-tile" *ngFor="let c of paged" (click)="openDetail(c)">
+                <span class="thumb" [class.thumb--off]="c.active === false" aria-hidden="true">
+                  {{ (c.name || '?').slice(0, 1).toUpperCase() }}
+                </span>
+                <strong>{{ c.name }}</strong>
+                <span>{{ c.slug }}</span>
+                <small>{{ c.active === false ? 'Inactive' : 'Active' }} · sort {{ c.sortOrder ?? 0 }}</small>
+              </button>
+            </div>
+
+            <div class="table-wrap" *ngIf="filtered.length && view === 'table'">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Slug</th>
+                    <th>Sort</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let c of paged">
+                    <td>
+                      <button type="button" class="name-btn" (click)="openDetail(c)">
+                        <span class="thumb thumb--sm" [class.thumb--off]="c.active === false" aria-hidden="true">
+                          {{ (c.name || '?').slice(0, 1).toUpperCase() }}
+                        </span>
+                        {{ c.name }}
+                      </button>
+                    </td>
+                    <td>{{ c.slug }}</td>
+                    <td>{{ c.sortOrder ?? 0 }}</td>
+                    <td>
+                      <span class="status" [class.is-inactive]="c.active === false">
+                        {{ c.active === false ? 'Inactive' : 'Active' }}
+                      </span>
+                    </td>
+                    <td class="table__actions">
+                      <button type="button" class="link link--edit" (click)="edit(c)">Edit</button>
+                      <button
+                        type="button"
+                        class="link link--warn"
+                        *ngIf="c.active !== false"
+                        [disabled]="busy"
+                        (click)="deactivate(c)"
+                      >
+                        Deactivate
+                      </button>
+                      <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Delete</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </ng-container>
+        </div>
+
+        <div class="pager" *ngIf="filtered.length || filterLoading">
+          <ng-container *ngIf="!filterLoading">
+            <span>{{ filtered.length }} categories · page {{ page }} / {{ totalPages }}</span>
+            <div class="pager__btns">
+              <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="goPage(-1)">Prev</button>
+              <button type="button" class="btn btn--ghost" [disabled]="page >= totalPages" (click)="goPage(1)">
+                Next
+              </button>
+            </div>
+          </ng-container>
+          <div class="pager-shimmer" *ngIf="filterLoading" aria-hidden="true">
+            <span class="pager-shimmer__bone pager-shimmer__bone--label"></span>
+            <div class="pager-shimmer__btns">
+              <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
+              <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <div class="form-modal" *ngIf="formOpen" [class.is-leaving]="formLeaving" (click)="closeForm()">
+    <div class="form-modal__panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <button type="button" class="form-modal__close" (click)="closeForm()" aria-label="Close" [disabled]="busy">
+        <span aria-hidden="true">×</span>
+      </button>
+      <form class="form" [formGroup]="form" (ngSubmit)="save()">
+        <header class="form-modal__head">
+          <p class="form-modal__eyebrow">NovaBill catalog</p>
+          <h3>{{ editingId ? 'Edit category' : 'Add category' }}</h3>
+        </header>
         <label>
           Name
           <input class="input" formControlName="name" placeholder="e.g. Grocery" />
@@ -39,54 +223,14 @@
           </label>
         </div>
         <div class="form__actions">
-          <button type="button" class="btn btn--ghost" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
+          <button type="button" class="btn btn--ghost" (click)="closeForm()">Cancel</button>
           <button type="submit" class="btn btn--primary" [disabled]="busy">
             {{ busy ? 'Saving…' : editingId ? 'Update' : 'Create' }}
           </button>
         </div>
       </form>
-
-      <div class="main-panel glass">
-        <div class="main-panel__body" [class.is-empty]="!categories.length">
-          <app-empty-state
-            *ngIf="!categories.length"
-            tone="billing"
-            kind="products"
-            [fill]="true"
-            message="No categories yet. Create one to power shop filters."
-          ></app-empty-state>
-
-          <ul class="list" *ngIf="categories.length">
-            <li *ngFor="let c of categories">
-              <button type="button" class="row" (click)="openDetail(c)">
-                <span class="thumb" [class.thumb--off]="c.active === false" aria-hidden="true">
-                  {{ (c.name || '?').slice(0, 1).toUpperCase() }}
-                </span>
-                <div class="row__body">
-                  <strong>{{ c.name }}</strong>
-                  <span>{{ c.slug }} · sort {{ c.sortOrder ?? 0 }}</span>
-                  <span class="row__status">{{ c.active === false ? 'Inactive' : 'Active' }}</span>
-                </div>
-              </button>
-              <div class="row__actions">
-                <button type="button" class="link" (click)="edit(c)">Edit</button>
-                <button
-                  type="button"
-                  class="link"
-                  *ngIf="c.active !== false"
-                  [disabled]="busy"
-                  (click)="deactivate(c)"
-                >
-                  Deactivate
-                </button>
-                <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Delete</button>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
     </div>
-  </ng-container>
+  </div>
 
   <div class="detail-backdrop" *ngIf="detail" [class.is-leaving]="detailLeaving"></div>
   <div
@@ -110,7 +254,7 @@
       </div>
       <div>
         <dt>Status</dt>
-        <dd>{{ c.active === false ? 'Inactive' : 'Active' }}</dd>
+        <dd [class.is-inactive]="c.active === false">{{ c.active === false ? 'Inactive' : 'Active' }}</dd>
       </div>
       <div>
         <dt>Sort</dt>
@@ -133,7 +277,7 @@
       <button type="button" class="btn btn--ghost" (click)="edit(c)">Edit</button>
       <button
         type="button"
-        class="btn btn--ghost"
+        class="btn btn--warn"
         *ngIf="c.active !== false"
         [disabled]="busy"
         (click)="deactivate(c)"

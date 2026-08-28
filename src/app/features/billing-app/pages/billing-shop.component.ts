@@ -116,6 +116,10 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   private readonly productSearch$ = new Subject<string>();
   private readonly customerSearch$ = new Subject<string>();
   private leaveTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly cardAutoTimers = new Map<string, ReturnType<typeof setInterval>>();
+  private modalAutoTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly autoSlideMs = 1800;
+  private cartScrollLocked = false;
 
   constructor(
     private readonly billing: BillingService,
@@ -164,6 +168,9 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     if (this.payProgressTimer) {
       clearInterval(this.payProgressTimer);
     }
+    this.stopAllCardAutoSlides();
+    this.stopModalAutoSlide();
+    this.unlockCartScroll();
     delete document.documentElement.dataset['nbBilling'];
     document.body.classList.remove('billing-mode');
   }
@@ -429,11 +436,53 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   nextSlide(product: BillingProduct, event?: Event): void {
     event?.stopPropagation();
     const n = this.productSlides(product).length;
+    if (n <= 1) {
+      return;
+    }
     const cur = this.slideFor(product);
     this.slideIndex = { ...this.slideIndex, [product.id]: (cur + 1) % n };
   }
 
+  startCardAutoSlide(product: BillingProduct): void {
+    const slides = this.productSlides(product);
+    if (slides.length <= 1) {
+      return;
+    }
+    this.stopCardAutoSlide(product.id);
+    const timer = setInterval(() => this.nextSlide(product), this.autoSlideMs);
+    this.cardAutoTimers.set(product.id, timer);
+  }
+
+  stopCardAutoSlide(productId: string): void {
+    const timer = this.cardAutoTimers.get(productId);
+    if (timer) {
+      clearInterval(timer);
+      this.cardAutoTimers.delete(productId);
+    }
+  }
+
+  startModalAutoSlide(): void {
+    if (!this.activeProduct || this.productSlides(this.activeProduct).length <= 1) {
+      return;
+    }
+    this.stopModalAutoSlide();
+    this.modalAutoTimer = setInterval(() => this.modalNext(), this.autoSlideMs);
+  }
+
+  stopModalAutoSlide(): void {
+    if (this.modalAutoTimer) {
+      clearInterval(this.modalAutoTimer);
+      this.modalAutoTimer = null;
+    }
+  }
+
+  private stopAllCardAutoSlides(): void {
+    this.cardAutoTimers.forEach((timer) => clearInterval(timer));
+    this.cardAutoTimers.clear();
+  }
+
   openProduct(product: BillingProduct): void {
+    this.stopCardAutoSlide(product.id);
     this.activeProduct = product;
     this.activeSlide = this.slideFor(product);
     this.productModalLeaving = false;
@@ -444,6 +493,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     if (!this.productModalOpen || this.productModalLeaving) {
       return;
     }
+    this.stopModalAutoSlide();
     this.productModalLeaving = true;
     this.leaveTimer = setTimeout(() => {
       this.productModalOpen = false;
@@ -615,6 +665,20 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     this.couponCodeInput = '';
   }
 
+  onCouponSelect(code: string): void {
+    this.selectedCouponCode = String(code || '');
+    if (this.selectedCouponCode) {
+      this.couponCodeInput = '';
+    }
+  }
+
+  onCouponInput(value: string): void {
+    this.couponCodeInput = String(value || '');
+    if (this.couponCodeInput.trim()) {
+      this.selectedCouponCode = '';
+    }
+  }
+
   clearDiscount(): void {
     this.appliedCoupon = null;
     this.appliedDiscountAmount = 0;
@@ -624,9 +688,9 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   }
 
   async applyCoupon(): Promise<void> {
-    const code = String(this.selectedCouponCode || this.couponCodeInput || '')
-      .trim()
-      .toUpperCase();
+    const fromSelect = String(this.selectedCouponCode || '').trim();
+    const fromManual = String(this.couponCodeInput || '').trim();
+    const code = (fromSelect || fromManual).toUpperCase();
     if (!code) {
       await this.alerts.toastWarning('Coupon required', 'Select or enter a coupon code.');
       return;
@@ -635,6 +699,17 @@ export class BillingShopComponent implements OnInit, OnDestroy {
       await this.alerts.toastWarning('Cart empty', 'Add products before applying a coupon.');
       return;
     }
+
+    const saved = this.coupons.find((c) => String(c.code || '').toUpperCase() === code);
+    const minSubtotal = Number(saved?.minSubtotal || 0);
+    if (saved && minSubtotal > 0 && this.cartSubtotal < minSubtotal) {
+      await this.alerts.toastWarning(
+        'Minimum not met',
+        `This coupon requires a bill subtotal of at least ${minSubtotal.toFixed(2)}.`
+      );
+      return;
+    }
+
     this.couponBusy = true;
     try {
       const res = await firstValueFrom(
@@ -649,8 +724,13 @@ export class BillingShopComponent implements OnInit, OnDestroy {
       );
       this.appliedCoupon = res.coupon;
       this.appliedDiscountAmount = Number(res.discount) || 0;
-      this.selectedCouponCode = res.coupon.code;
-      this.couponCodeInput = res.coupon.code;
+      if (fromSelect) {
+        this.selectedCouponCode = res.coupon.code;
+        this.couponCodeInput = '';
+      } else {
+        this.couponCodeInput = res.coupon.code;
+        this.selectedCouponCode = '';
+      }
       this.manualDiscount = null;
       await this.alerts.toastSuccess('Coupon applied', res.coupon.usageNote || res.message);
     } catch (err) {
@@ -675,6 +755,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     this.payResultMessage = '';
     this.resetPayForm();
     this.checkoutOpen = true;
+    this.lockCartScroll();
   }
 
   closeCheckout(): void {
@@ -686,10 +767,33 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     this.leaveTimer = setTimeout(() => {
       this.checkoutOpen = false;
       this.checkoutLeaving = false;
+      this.unlockCartScroll();
       if (shouldReset) {
         this.resetShopSession(false);
       }
     }, 240);
+  }
+
+  private lockCartScroll(): void {
+    if (this.cartScrollLocked) {
+      return;
+    }
+    this.cartScrollLocked = true;
+    document.documentElement.classList.add('shop-cart-scroll-lock');
+    document.body.classList.add('shop-cart-scroll-lock');
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+  }
+
+  private unlockCartScroll(): void {
+    if (!this.cartScrollLocked) {
+      return;
+    }
+    this.cartScrollLocked = false;
+    document.documentElement.classList.remove('shop-cart-scroll-lock');
+    document.body.classList.remove('shop-cart-scroll-lock');
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
   }
 
   async goCheckoutStep(step: CheckoutStep): Promise<void> {
@@ -768,6 +872,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     await new Promise((r) => setTimeout(r, 200));
     this.checkoutOpen = false;
     this.checkoutLeaving = false;
+    this.unlockCartScroll();
     this.resetShopSession(true);
   }
 
