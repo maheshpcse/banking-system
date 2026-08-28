@@ -818,10 +818,16 @@
     </ng-container>
 
     <ng-container *ngSwitchCase="'manager-sales-targets'">
-      <div class="shimmer__hero shimmer__hero--admin">
-        <div class="shimmer-line shimmer-line--brand"></div>
-        <div class="shimmer-line shimmer-line--title"></div>
-        <div class="shimmer-line shimmer-line--lede"></div>
+      <div class="shimmer__hero shimmer__hero--admin shimmer__hero--dashboard">
+        <div class="shimmer__hero-copy">
+          <div class="shimmer-line shimmer-line--brand"></div>
+          <div class="shimmer-line shimmer-line--title"></div>
+          <div class="shimmer-line shimmer-line--lede"></div>
+        </div>
+        <div class="shimmer-tools" aria-hidden="true">
+          <div class="shimmer-line shimmer-line--btn shimmer-chip--tool"></div>
+          <div class="shimmer-line shimmer-line--btn shimmer-chip--tool"></div>
+        </div>
       </div>
       <div class="shimmer-sales-targets__toolbar">
         <div class="shimmer-block shimmer-block--sm" *ngFor="let i of [1, 2]"></div>
@@ -888,15 +894,19 @@
       <div class="shimmer-reports-stack">
         <div class="shimmer-card shimmer-card--report-form">
           <div class="shimmer-line shimmer-line--xs"></div>
-          <div class="shimmer-block shimmer-block--sm"></div>
-          <div class="shimmer-block shimmer-block--sm"></div>
-          <div class="shimmer-chips">
-            <span class="shimmer-chip" *ngFor="let i of [1, 2, 3, 4, 5]"></span>
+          <div class="shimmer-reports-form-row" style="display:grid;gap:.7rem;grid-template-columns:repeat(3,minmax(0,1fr))">
+            <div class="shimmer-block shimmer-block--sm"></div>
+            <div class="shimmer-block shimmer-block--sm"></div>
+            <div class="shimmer-block shimmer-block--sm"></div>
           </div>
-          <div class="shimmer-chips">
-            <span class="shimmer-chip" *ngFor="let i of [1, 2, 3]"></span>
+          <div class="shimmer-reports-form-cols" style="display:grid;gap:.7rem;grid-template-columns:repeat(2,minmax(0,1fr))">
+            <div class="shimmer-chips">
+              <span class="shimmer-chip" *ngFor="let i of [1, 2, 3, 4, 5]"></span>
+            </div>
+            <div class="shimmer-chips">
+              <span class="shimmer-chip" *ngFor="let i of [1, 2, 3]"></span>
+            </div>
           </div>
-          <div class="shimmer-block shimmer-block--sm"></div>
           <div class="shimmer-block shimmer-block--sm"></div>
           <div class="shimmer-line shimmer-line--btn shimmer-line--btn-inline"></div>
           <div class="shimmer-line shimmer-line--btn shimmer-line--btn-inline"></div>
@@ -1144,7 +1154,7 @@
       <div class="shimmer-drawer-profile" aria-hidden="true">
         <div class="shimmer-drawer-profile__section">
           <div class="shimmer-line shimmer-line--xs shimmer-line--drawer-label"></div>
-          <div class="shimmer-drawer-profile__meta shimmer-drawer-profile__meta--grid">
+          <div class="shimmer-drawer-profile__meta">
             <div *ngFor="let i of [1, 2, 3, 4, 5, 6]">
               <div class="shimmer-line shimmer-line--xs"></div>
               <div class="shimmer-line shimmer-line--sm"></div>
@@ -1159,8 +1169,7 @@
         </div>
         <div class="shimmer-drawer-profile__section">
           <div class="shimmer-line shimmer-line--xs shimmer-line--drawer-label"></div>
-          <div class="shimmer-block" style="width: min(100%, 14rem); height: 5.5rem"></div>
-          <div class="shimmer-drawer-profile__meta shimmer-drawer-profile__meta--grid">
+          <div class="shimmer-drawer-profile__meta">
             <div *ngFor="let i of [1, 2, 3, 4, 5]">
               <div class="shimmer-line shimmer-line--xs"></div>
               <div class="shimmer-line shimmer-line--sm"></div>

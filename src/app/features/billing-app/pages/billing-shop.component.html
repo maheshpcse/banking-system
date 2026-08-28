@@ -153,10 +153,12 @@
         class="shop-tile"
         *ngFor="let product of filteredProducts"
         (click)="openProduct(product)"
-        (mouseenter)="startCardAutoSlide(product)"
-        (mouseleave)="stopCardAutoSlide(product.id)"
       >
-        <div class="shop-tile__media">
+        <div
+          class="shop-tile__media"
+          (mouseenter)="startCardAutoSlide(product)"
+          (mouseleave)="stopCardAutoSlide(product.id)"
+        >
           <span class="shop-cart-badge" *ngIf="qtyInCart(product.id) as qty">
             <i aria-hidden="true"></i>
             <em>{{ qty }}</em>
@@ -238,8 +240,18 @@
 
 <ng-template #shopBoot>
   <div class="shop shop--boot">
-    <div class="shop-boot-bone shop-boot-bone--chrome"></div>
+    <div class="shop-boot-chrome">
+      <div class="shop-boot-bone shop-boot-bone--brand"></div>
+      <div class="shop-boot-chrome__acts">
+        <div class="shop-boot-bone shop-boot-bone--act" *ngFor="let i of [1, 2, 3, 4]"></div>
+      </div>
+    </div>
     <div class="shop-boot-bone shop-boot-bone--search"></div>
+    <div class="shop-boot-filters">
+      <div class="shop-boot-bone shop-boot-bone--stock"></div>
+      <div class="shop-boot-bone shop-boot-bone--sort"></div>
+      <div class="shop-boot-bone shop-boot-bone--sort"></div>
+    </div>
     <div class="shop-boot-bone shop-boot-bone--customer"></div>
     <div class="shop-boot-grid">
       <div class="shop-boot-bone" *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8]"></div>

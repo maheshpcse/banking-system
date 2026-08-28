@@ -13,44 +13,86 @@
   <div class="report-layout report-layout--stack">
     <app-animated-card accent="sky" title="Schedule" subtitle="Build &amp; save">
       <form class="form reports-form" (ngSubmit)="schedule()">
-        <label>
-          <span>Schedule name</span>
-          <input type="text" [(ngModel)]="scheduleName" name="scheduleName" maxlength="80" placeholder="Weekly desk digest" />
-        </label>
+        <div class="form-row form-row--3">
+          <label>
+            <span>Schedule name</span>
+            <input type="text" [(ngModel)]="scheduleName" name="scheduleName" maxlength="80" placeholder="Weekly desk digest" />
+          </label>
 
-        <label>
-          <span>Report cadence</span>
-          <app-theme-select
-            [(ngModel)]="cadence"
-            name="cadence"
-            [options]="cadenceOptions"
-            ariaLabel="Report cadence"
-          ></app-theme-select>
-        </label>
+          <label>
+            <span>Report cadence</span>
+            <app-theme-select
+              [(ngModel)]="cadence"
+              name="cadence"
+              [options]="cadenceOptions"
+              ariaLabel="Report cadence"
+            ></app-theme-select>
+          </label>
 
-        <label>
-          <span>Data scope</span>
-          <app-theme-select
-            [(ngModel)]="scope"
-            name="scope"
-            [options]="scopeOptions"
-            ariaLabel="Data scope"
-          ></app-theme-select>
-        </label>
+          <label>
+            <span>Data scope</span>
+            <app-theme-select
+              [(ngModel)]="scope"
+              name="scope"
+              [options]="scopeOptions"
+              ariaLabel="Data scope"
+            ></app-theme-select>
+          </label>
+        </div>
 
-        <div class="reports-block">
-          <p class="section-label">Data to schedule</p>
-          <div class="reports-chips">
-            <button
-              type="button"
-              class="reports-chip"
-              *ngFor="let d of datasetOptions"
-              [class.is-on]="isDatasetSelected(d.id)"
-              (click)="toggleDataset(d.id)"
-              [attr.title]="d.hint"
-            >
-              {{ d.label }}
-            </button>
+        <div class="reports-form__cols">
+          <div class="reports-block">
+            <p class="section-label">Data to schedule</p>
+            <div class="reports-chips">
+              <button
+                type="button"
+                class="reports-chip"
+                *ngFor="let d of datasetOptions"
+                [class.is-on]="isDatasetSelected(d.id)"
+                (click)="toggleDataset(d.id)"
+                [attr.title]="d.hint"
+              >
+                {{ d.label }}
+              </button>
+            </div>
+          </div>
+
+          <div class="reports-block">
+            <p class="section-label">Filters (applied to schedule)</p>
+            <div class="form-row form-row--2">
+              <label>
+                <span>Status</span>
+                <app-theme-select
+                  [(ngModel)]="filters.status"
+                  name="filterStatus"
+                  [options]="statusOptions"
+                  ariaLabel="Status filter"
+                ></app-theme-select>
+              </label>
+              <label>
+                <span>Account type</span>
+                <app-theme-select
+                  [(ngModel)]="filters.accountType"
+                  name="filterAccountType"
+                  [options]="accountTypeOptions"
+                  ariaLabel="Account type filter"
+                ></app-theme-select>
+              </label>
+            </div>
+            <div class="form-row form-row--2">
+              <label>
+                <span>Min amount</span>
+                <input type="number" min="0" step="0.01" [(ngModel)]="filters.minAmount" name="minAmount" />
+              </label>
+              <label>
+                <span>Max amount</span>
+                <input type="number" min="0" step="0.01" [(ngModel)]="filters.maxAmount" name="maxAmount" />
+              </label>
+            </div>
+            <label>
+              <span>Keyword</span>
+              <input type="text" [(ngModel)]="filters.keyword" name="keyword" placeholder="Account, note, reference…" />
+            </label>
           </div>
         </div>
 
@@ -76,44 +118,6 @@
               {{ c.label }}
             </button>
           </div>
-        </div>
-
-        <div class="reports-block">
-          <p class="section-label">Filters (applied to schedule)</p>
-          <div class="form-row form-row--2">
-            <label>
-              <span>Status</span>
-              <app-theme-select
-                [(ngModel)]="filters.status"
-                name="filterStatus"
-                [options]="statusOptions"
-                ariaLabel="Status filter"
-              ></app-theme-select>
-            </label>
-            <label>
-              <span>Account type</span>
-              <app-theme-select
-                [(ngModel)]="filters.accountType"
-                name="filterAccountType"
-                [options]="accountTypeOptions"
-                ariaLabel="Account type filter"
-              ></app-theme-select>
-            </label>
-          </div>
-          <div class="form-row form-row--2">
-            <label>
-              <span>Min amount</span>
-              <input type="number" min="0" step="0.01" [(ngModel)]="filters.minAmount" name="minAmount" />
-            </label>
-            <label>
-              <span>Max amount</span>
-              <input type="number" min="0" step="0.01" [(ngModel)]="filters.maxAmount" name="maxAmount" />
-            </label>
-          </div>
-          <label>
-            <span>Keyword</span>
-            <input type="text" [(ngModel)]="filters.keyword" name="keyword" placeholder="Account, note, reference…" />
-          </label>
         </div>
 
         <div class="form-row form-row--2">

@@ -227,6 +227,7 @@ export class BillingService {
     code: string;
     subtotal: number;
     paymentMethod?: BillingPaymentMethod | string;
+    customerId?: string;
   }): Observable<{ message: string; discount: number; coupon: BillingCoupon }> {
     return this.http.post<{ message: string; discount: number; coupon: BillingCoupon }>(
       `${this.base}/coupons/validate`,

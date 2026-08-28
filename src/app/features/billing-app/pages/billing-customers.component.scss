@@ -191,6 +191,11 @@
   border: 1px solid rgba(220, 20, 60, 0.25);
 }
 
+.btn--danger:hover:not(:disabled) {
+  background: rgba(220, 20, 60, 0.18);
+  border-color: rgba(220, 20, 60, 0.4);
+}
+
 .btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
@@ -236,6 +241,12 @@
     gap: 0.3rem;
     font-size: 0.82rem;
     color: var(--muted);
+
+    small {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: rgba(22, 50, 58, 0.55);
+    }
   }
 }
 

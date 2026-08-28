@@ -9,22 +9,28 @@
 .reports-form {
   display: grid;
   gap: 0.7rem;
-  /* Full-width card, but keep field column at prior side-panel width */
   width: 100%;
-  max-width: 36rem;
 }
 
 .reports-form > label,
 .reports-block,
 .reports-form > .form-row,
 .reports-form > .hint,
-.reports-actions {
+.reports-actions,
+.reports-form__cols {
   margin: 0;
 }
 
 .reports-block {
   display: grid;
   gap: 0.7rem;
+  align-content: start;
+}
+
+.reports-form__cols {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .form-row {
@@ -34,6 +40,10 @@
 
 .form-row--2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-row--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .form-row label {
@@ -116,16 +126,15 @@
   overflow: auto;
 }
 
-.preview-grid .pager {
-  padding: 0.85rem 0 0.35rem;
-  margin-top: 0.85rem;
+.preview-grid .pager,
+.pager.pager--shimmer {
+  padding: 0.75rem 0;
+  margin-top: 1rem;
   border-top: 1px solid rgba(148, 163, 184, 0.22);
 }
 
 .pager.pager--shimmer {
-  padding: 0.85rem 0 0.35rem;
-  margin-top: 0.85rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  border-top-color: rgba(148, 163, 184, 0.18);
 }
 
 .coverage-list {
@@ -150,8 +159,16 @@
   font-weight: 650;
 }
 
+@media (max-width: 960px) {
+  .form-row--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 720px) {
-  .form-row--2 {
+  .form-row--2,
+  .form-row--3,
+  .reports-form__cols {
     grid-template-columns: 1fr;
   }
 }

@@ -19,7 +19,8 @@
           <span class="sr-only">Select customer</span>
           <app-theme-select
             controlClass="input"
-            [(ngModel)]="selectedCustomerId"
+            [ngModel]="selectedCustomerId"
+            (ngModelChange)="onCustomerChange($event)"
             [options]="customerSelectOptions"
             [clearable]="true"
             placeholder="Select customer…"
