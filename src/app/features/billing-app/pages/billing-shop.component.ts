@@ -65,6 +65,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
 
   customers: BillingCustomer[] = [];
   selectedCustomer: BillingCustomer | null = null;
+  customerDetailShimmer = false;
   showAddCustomer = false;
   addCustomerLeaving = false;
   newCustomer = { name: '', email: '', phone: '', address: '' };
@@ -120,6 +121,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   private modalAutoTimer: ReturnType<typeof setInterval> | null = null;
   private readonly autoSlideMs = 2200;
   private cartScrollLocked = false;
+  private detailShimmerTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private readonly billing: BillingService,
@@ -177,6 +179,9 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     }
     this.stopAllCardAutoSlides();
     this.stopModalAutoSlide();
+    if (this.detailShimmerTimer) {
+      clearTimeout(this.detailShimmerTimer);
+    }
     this.unlockCartScroll();
     delete document.documentElement.dataset['nbBilling'];
     document.body.classList.remove('billing-mode');
@@ -368,6 +373,11 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     this.customerSearched = false;
     this.customers = [];
     this.customerSearch$.next('');
+    if (this.selectedCustomer) {
+      this.selectedCustomer = null;
+      this.maybeClearBankCouponForCustomer(null);
+    }
+    this.flashCustomerDetailShimmer();
   }
 
   runCustomerSearch(): void {
@@ -540,11 +550,14 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   }
 
   selectCustomer(customer: BillingCustomer): void {
-    this.selectedCustomer = customer;
-    this.customerQuery = customer.name;
+    this.selectedCustomer = null;
     this.customers = [customer];
+    this.customerQuery = customer.name;
     this.customerSearched = false;
-    this.maybeClearBankCouponForCustomer(customer);
+    this.flashCustomerDetailShimmer(() => {
+      this.selectedCustomer = customer;
+      this.maybeClearBankCouponForCustomer(customer);
+    });
   }
 
   clearCustomer(): void {
@@ -554,6 +567,20 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     this.customers = [];
     this.customerSearch$.next('');
     this.maybeClearBankCouponForCustomer(null);
+    this.flashCustomerDetailShimmer();
+  }
+
+  private flashCustomerDetailShimmer(then?: () => void): void {
+    if (this.detailShimmerTimer) {
+      clearTimeout(this.detailShimmerTimer);
+      this.detailShimmerTimer = null;
+    }
+    this.customerDetailShimmer = true;
+    this.detailShimmerTimer = setTimeout(() => {
+      this.customerDetailShimmer = false;
+      this.detailShimmerTimer = null;
+      then?.();
+    }, Math.min(SHIMMER_MS, 420));
   }
 
   private maybeClearBankCouponForCustomer(customer: BillingCustomer | null): void {
