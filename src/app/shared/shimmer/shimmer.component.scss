@@ -783,9 +783,34 @@
   border: 1px solid rgba(148, 163, 184, 0.18);
 }
 
+.shimmer-drawer-profile__section--ledger {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.88), rgba(232, 250, 247, 0.55));
+  border-color: rgba(95, 196, 176, 0.28);
+}
+
+.shimmer-drawer-profile__card-preview {
+  width: min(100%, 14rem);
+  height: 5.5rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(
+    110deg,
+    rgba(15, 118, 110, 0.22),
+    rgba(47, 111, 237, 0.18),
+    rgba(15, 118, 110, 0.16)
+  );
+  background-size: 200% 100%;
+  animation: shimmer-wave 1.35s ease-in-out infinite;
+  border: 1px solid rgba(95, 196, 176, 0.28);
+}
+
 .shimmer-drawer-profile__meta {
   display: grid;
   gap: 0.65rem;
+}
+
+.shimmer-drawer-profile__meta--grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem 0.85rem;
 }
 
 .shimmer-drawer-profile__meta > div {
@@ -799,16 +824,17 @@
 }
 
 .shimmer__grid--reports{grid-template-columns:1.05fr .95fr;align-items:stretch}
+.shimmer-reports-stack{display:grid;gap:1rem;align-items:start}
 .shimmer-card--report-form {
   min-height: 18rem;
   align-content: start;
 }
 
 .shimmer-card--report-list {
-  min-height: 18rem;
+  min-height: 12rem;
   align-content: start;
 }
-.shimmer-card--report-saved{margin-top:1rem;min-height:14rem;align-content:start}
+.shimmer-card--report-saved{min-height:14rem;align-content:start}
 @media (max-width:900px){.shimmer__grid--reports{grid-template-columns:1fr}}
 
 .shimmer-theme-grid {

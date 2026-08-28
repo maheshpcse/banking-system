@@ -1,5 +1,11 @@
-<div class="bulk" *ngIf="open" [class.is-leaving]="leaving" (click)="close()">
-  <div class="bulk__panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+<div
+  class="bulk"
+  *ngIf="open"
+  [class.is-leaving]="leaving"
+  data-backdrop="static"
+  data-keyboard="false"
+>
+  <div class="bulk__panel" role="dialog" aria-modal="true">
     <button type="button" class="bulk__close" (click)="close()" aria-label="Close" [disabled]="uploading"><span aria-hidden="true">×</span></button>
 
     <header class="bulk__head">
@@ -91,7 +97,9 @@
                 <td>{{ row.localError || 'Ready' }}</td>
                 <td>
                   <button type="button" class="bulk__icon-x" (click)="removeRow(row)" aria-label="Remove row">
-                    <span aria-hidden="true">×</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M6 6l12 12M18 6 6 18"></path>
+                    </svg>
                   </button>
                 </td>
               </tr>
@@ -124,7 +132,9 @@
                   <td>{{ row.localError || 'Ready' }}</td>
                   <td>
                     <button type="button" class="bulk__icon-x" (click)="removeRow(row)" aria-label="Remove row">
-                      <span aria-hidden="true">×</span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6 6 18"></path>
+                      </svg>
                     </button>
                   </td>
                 </tr>

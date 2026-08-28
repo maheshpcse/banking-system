@@ -10,7 +10,7 @@
     </div>
   </header>
 
-  <div class="report-layout">
+  <div class="report-layout report-layout--stack">
     <app-animated-card accent="sky" title="Schedule" subtitle="Build &amp; save">
       <form class="form reports-form" (ngSubmit)="schedule()">
         <label>
@@ -142,25 +142,21 @@
         </div>
       </form>
     </app-animated-card>
-
-    <app-animated-card accent="sand" title="Coverage" subtitle="What this report can include">
-      <ul class="coverage-list">
-        <li *ngFor="let d of datasetOptions">
-          <strong>{{ d.label }}</strong> — {{ d.hint }}
-        </li>
-      </ul>
-    </app-animated-card>
   </div>
 
   <div class="report-layout report-layout--stack report-layout--result" *ngIf="showReview || reviewing">
     <app-animated-card accent="rose" title="Review before schedule" subtitle="Preview grid">
+      <button
+        type="button"
+        class="btn btn--ghost btn--compact"
+        cardHeaderActions
+        [hidden]="!reviewRows.length || reviewing"
+        (click)="clearReview()"
+      >
+        Clear grid
+      </button>
       <ng-container *ngIf="!reviewing; else reviewShimmer">
-        <div class="review-toolbar" *ngIf="reviewRows.length">
-          <button type="button" class="btn btn--ghost btn--compact" (click)="clearReview()">
-            Clear grid
-          </button>
-        </div>
-        <div class="table-wrap" *ngIf="reviewRows.length; else noReview">
+        <div class="table-wrap preview-grid" *ngIf="reviewRows.length; else noReview">
           <table class="data-table data-table--compact">
             <thead>
               <tr>
@@ -256,6 +252,16 @@
           message="No schedules yet. Configure data, columns, and run time above, then save."
         ></app-empty-state>
       </ng-template>
+    </app-animated-card>
+  </div>
+
+  <div class="report-layout report-layout--stack report-layout--result">
+    <app-animated-card accent="sand" title="Coverage" subtitle="What this report can include">
+      <ul class="coverage-list">
+        <li *ngFor="let d of datasetOptions">
+          <strong>{{ d.label }}</strong> — {{ d.hint }}
+        </li>
+      </ul>
     </app-animated-card>
   </div>
 </section>

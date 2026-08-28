@@ -100,7 +100,12 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.otpSent = false;
     this.otpHint = '';
     this.maskedDestination = '';
+    this.form.reset({ identifier: '', password: '' });
+    this.form.markAsPristine();
+    this.form.markAsUntouched();
     this.otpForm.reset({ identifier: '', code: '' });
+    this.otpForm.markAsPristine();
+    this.otpForm.markAsUntouched();
   }
 
   submit(): void {
@@ -149,6 +154,15 @@ export class LoginComponent implements OnInit, OnDestroy {
           res.message ||
           'OTP sent and will expire in 10 minutes.';
         this.otpForm.controls.code.reset('');
+        if (res.delivered === false) {
+          await this.alerts.info(
+            this.otpChannel === 'phone'
+              ? 'OTP generated. SMS delivery is not configured on the server (set SMS_ENABLED=true and Twilio credentials). In development the code is printed in the API server console.'
+              : 'OTP generated. Email delivery is not configured on the server (set EMAIL_ENABLED=true and provider credentials). In development the code is printed in the API server console.',
+            'OTP ready'
+          );
+          return;
+        }
         await this.alerts.info(
           this.otpHint +
             (this.maskedDestination ? ` Sent to ${this.maskedDestination}.` : ''),

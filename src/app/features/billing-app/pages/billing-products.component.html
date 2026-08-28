@@ -107,7 +107,7 @@
                 </button>
                 <div class="row__actions">
                   <button type="button" class="link" (click)="edit(p)">Edit</button>
-                  <button type="button" class="link-danger" [disabled]="busy" (click)="archive(p)">Archive</button>
+                  <button type="button" class="link link--warn" [disabled]="busy" (click)="archive(p)">Archive</button>
                   <button type="button" class="link-danger" [disabled]="busy" (click)="purge(p)">Delete</button>
                 </div>
               </li>
@@ -170,7 +170,7 @@
                     <td>{{ p.gstPercentage }}%</td>
                     <td class="table__actions">
                       <button type="button" class="link" (click)="edit(p)">Edit</button>
-                      <button type="button" class="link-danger" [disabled]="busy" (click)="archive(p)">Archive</button>
+                      <button type="button" class="link link--warn" [disabled]="busy" (click)="archive(p)">Archive</button>
                       <button type="button" class="link-danger" [disabled]="busy" (click)="purge(p)">Delete</button>
                     </td>
                   </tr>
@@ -206,9 +206,10 @@
     class="form-modal"
     *ngIf="formOpen"
     [class.is-leaving]="formLeaving"
-    (click)="closeForm()"
+    data-backdrop="static"
+    data-keyboard="false"
   >
-    <div class="form-modal__panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <div class="form-modal__panel" role="dialog" aria-modal="true">
       <button type="button" class="form-modal__close" (click)="closeForm()" aria-label="Close" [disabled]="busy">
         <span aria-hidden="true">×</span>
       </button>
@@ -284,7 +285,9 @@
         <p class="eyebrow">Product detail</p>
         <h3>{{ p.name }}</h3>
       </div>
-      <button type="button" class="icon-close" (click)="closeDetail()" aria-label="Close">×</button>
+      <button type="button" class="icon-close" (click)="closeDetail()" aria-label="Close">
+        <span aria-hidden="true">×</span>
+      </button>
     </div>
     <dl class="detail-modal__meta">
       <div>
@@ -335,7 +338,7 @@
     <div class="detail-modal__actions">
       <button type="button" class="btn btn--ghost" (click)="edit(p)">Edit</button>
       <button type="button" class="btn btn--ghost" [disabled]="busy" (click)="archive(p)">Archive</button>
-      <button type="button" class="link-danger" [disabled]="busy" (click)="purge(p)">Delete forever</button>
+      <button type="button" class="btn btn--danger" [disabled]="busy" (click)="purge(p)">Delete forever</button>
     </div>
   </div>
 </section>

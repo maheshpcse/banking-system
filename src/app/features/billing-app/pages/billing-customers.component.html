@@ -166,9 +166,10 @@
     class="form-modal"
     *ngIf="formOpen"
     [class.is-leaving]="formLeaving"
-    (click)="closeForm()"
+    data-backdrop="static"
+    data-keyboard="false"
   >
-    <div class="form-modal__panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <div class="form-modal__panel" role="dialog" aria-modal="true">
       <button type="button" class="form-modal__close" (click)="closeForm()" aria-label="Close" [disabled]="busy">
         <span aria-hidden="true">×</span>
       </button>
@@ -230,7 +231,7 @@
         <p class="eyebrow">Customer detail</p>
         <h3>{{ c.name }}</h3>
       </div>
-      <button type="button" class="icon-close" (click)="closeDetail()" aria-label="Close">×</button>
+      <button type="button" class="icon-close" (click)="closeDetail()" aria-label="Close"><span aria-hidden="true">×</span></button>
     </div>
     <dl class="detail-modal__meta">
       <div>

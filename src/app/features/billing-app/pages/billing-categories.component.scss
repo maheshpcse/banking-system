@@ -276,7 +276,7 @@
   right: 0.7rem;
   width: 2.2rem;
   height: 2.2rem;
-  border: 0;
+  border: 1px solid rgba(15, 118, 110, 0.22);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.88);
   color: #0b1f33;
@@ -292,12 +292,13 @@
 .form-modal__close > span {
   display: block;
   line-height: 1;
-  transform: translateY(-0.08em);
+  transform: translateY(-1px);
 }
 
 .form-modal__close:hover:not(:disabled) {
-  background: rgba(47, 111, 237, 0.12);
-  color: #1d4ed8;
+  background: rgba(15, 118, 110, 0.12);
+  border-color: rgba(15, 118, 110, 0.45);
+  color: #0f766e;
 }
 
 .form-modal__head {
@@ -504,6 +505,13 @@
   padding: 0.85rem;
   cursor: pointer;
   color: inherit;
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.card-tile:hover {
+  background: rgba(255, 200, 1, 0.18);
+  border-color: rgba(255, 153, 50, 0.4);
+  box-shadow: 0 12px 28px rgba(255, 153, 50, 0.15);
 }
 
 .card-tile strong {
@@ -540,6 +548,14 @@
   text-transform: uppercase;
   color: var(--muted);
   font-weight: 750;
+}
+
+.table tbody tr {
+  transition: background 0.14s ease;
+}
+
+.table tbody tr:hover {
+  background: rgba(255, 200, 1, 0.18);
 }
 
 .name-btn {
@@ -652,7 +668,7 @@
 .icon-close {
   width: 2rem;
   height: 2rem;
-  border: 0;
+  border: 1px solid rgba(15, 118, 110, 0.22);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.85);
   font-size: 1.2rem;
@@ -661,6 +677,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  color: #0b1f33;
+}
+
+.icon-close > span {
+  display: block;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.icon-close:hover {
+  background: rgba(255, 153, 50, 0.16);
+  border-color: rgba(180, 83, 9, 0.45);
+  color: #b45309;
 }
 
 .detail-modal__meta {

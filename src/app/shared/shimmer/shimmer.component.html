@@ -825,7 +825,6 @@
       </div>
       <div class="shimmer-sales-targets__toolbar">
         <div class="shimmer-block shimmer-block--sm" *ngFor="let i of [1, 2]"></div>
-        <div class="shimmer-line shimmer-line--btn shimmer-line--btn-inline"></div>
       </div>
       <div class="shimmer__grid shimmer__grid--admin-stats shimmer-sales-targets__stats">
         <div class="shimmer-card shimmer-card--stat" *ngFor="let i of [1, 2, 3]">
@@ -886,7 +885,7 @@
         <div class="shimmer-line shimmer-line--title"></div>
         <div class="shimmer-line shimmer-line--lede"></div>
       </div>
-      <div class="shimmer__grid shimmer__grid--reports">
+      <div class="shimmer-reports-stack">
         <div class="shimmer-card shimmer-card--report-form">
           <div class="shimmer-line shimmer-line--xs"></div>
           <div class="shimmer-block shimmer-block--sm"></div>
@@ -902,30 +901,30 @@
           <div class="shimmer-line shimmer-line--btn shimmer-line--btn-inline"></div>
           <div class="shimmer-line shimmer-line--btn shimmer-line--btn-inline"></div>
         </div>
+        <div class="shimmer-card shimmer-card--report-saved">
+          <div class="shimmer-line shimmer-line--xs"></div>
+          <div class="shimmer-line shimmer-line--md"></div>
+          <div class="shimmer-data-table">
+            <div class="shimmer-data-table__head" style="grid-template-columns: repeat(6, minmax(0, 1fr))">
+              <div class="shimmer-data-table__cell" *ngFor="let c of [0, 1, 2, 3, 4, 5]">
+                <div class="shimmer-line shimmer-line--xs"></div>
+              </div>
+            </div>
+            <div
+              class="shimmer-data-table__row"
+              *ngFor="let i of [1, 2, 3, 4]"
+              style="grid-template-columns: repeat(6, minmax(0, 1fr))"
+            >
+              <div class="shimmer-data-table__cell" *ngFor="let c of [0, 1, 2, 3, 4, 5]">
+                <div class="shimmer-line" [class.shimmer-line--sm]="c === 0" [class.shimmer-line--xs]="c !== 0"></div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="shimmer-card shimmer-card--report-list">
           <div class="shimmer-line shimmer-line--xs"></div>
           <div class="shimmer-line shimmer-line--md"></div>
           <div class="shimmer-row" *ngFor="let i of [1, 2, 3, 4, 5, 6, 7]"></div>
-        </div>
-      </div>
-      <div class="shimmer-card shimmer-card--report-saved">
-        <div class="shimmer-line shimmer-line--xs"></div>
-        <div class="shimmer-line shimmer-line--md"></div>
-        <div class="shimmer-data-table">
-          <div class="shimmer-data-table__head" style="grid-template-columns: repeat(6, minmax(0, 1fr))">
-            <div class="shimmer-data-table__cell" *ngFor="let c of [0, 1, 2, 3, 4, 5]">
-              <div class="shimmer-line shimmer-line--xs"></div>
-            </div>
-          </div>
-          <div
-            class="shimmer-data-table__row"
-            *ngFor="let i of [1, 2, 3, 4]"
-            style="grid-template-columns: repeat(6, minmax(0, 1fr))"
-          >
-            <div class="shimmer-data-table__cell" *ngFor="let c of [0, 1, 2, 3, 4, 5]">
-              <div class="shimmer-line" [class.shimmer-line--sm]="c === 0" [class.shimmer-line--xs]="c !== 0"></div>
-            </div>
-          </div>
         </div>
       </div>
     </ng-container>
@@ -1145,7 +1144,7 @@
       <div class="shimmer-drawer-profile" aria-hidden="true">
         <div class="shimmer-drawer-profile__section">
           <div class="shimmer-line shimmer-line--xs shimmer-line--drawer-label"></div>
-          <div class="shimmer-drawer-profile__meta">
+          <div class="shimmer-drawer-profile__meta shimmer-drawer-profile__meta--grid">
             <div *ngFor="let i of [1, 2, 3, 4, 5, 6]">
               <div class="shimmer-line shimmer-line--xs"></div>
               <div class="shimmer-line shimmer-line--sm"></div>
@@ -1158,9 +1157,10 @@
           <div class="shimmer-line shimmer-line--sm"></div>
           <div class="shimmer-line shimmer-line--md"></div>
         </div>
-        <div class="shimmer-drawer-profile__section">
+        <div class="shimmer-drawer-profile__section shimmer-drawer-profile__section--ledger">
           <div class="shimmer-line shimmer-line--xs shimmer-line--drawer-label"></div>
-          <div class="shimmer-drawer-profile__meta">
+          <div class="shimmer-drawer-profile__card-preview"></div>
+          <div class="shimmer-drawer-profile__meta shimmer-drawer-profile__meta--grid">
             <div *ngFor="let i of [1, 2, 3, 4, 5]">
               <div class="shimmer-line shimmer-line--xs"></div>
               <div class="shimmer-line shimmer-line--sm"></div>

@@ -252,15 +252,12 @@
   class="shop-modal"
   *ngIf="productModalOpen && activeProduct as product"
   [class.is-leaving]="productModalLeaving"
-  (click)="closeProductModal()"
+  data-backdrop="static"
+  data-keyboard="false"
 >
-  <div class="shop-modal__panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+  <div class="shop-modal__panel" role="dialog" aria-modal="true">
     <button type="button" class="shop-modal__close" (click)="closeProductModal()" aria-label="Close">×</button>
-    <div
-      class="shop-modal__media"
-      (mouseenter)="startModalAutoSlide()"
-      (mouseleave)="stopModalAutoSlide()"
-    >
+    <div class="shop-modal__media">
       <span class="shop-cart-badge shop-cart-badge--lg" *ngIf="qtyInCart(product.id) as qty">
         <i aria-hidden="true"></i>
         <em>{{ qty }}</em>
@@ -515,9 +512,10 @@
   class="shop-modal shop-modal--sheet"
   *ngIf="showAddCustomer"
   [class.is-leaving]="addCustomerLeaving"
-  (click)="closeAddCustomer()"
+  data-backdrop="static"
+  data-keyboard="false"
 >
-  <div class="shop-modal__panel shop-modal__panel--sheet" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+  <div class="shop-modal__panel shop-modal__panel--sheet" role="dialog" aria-modal="true">
     <button type="button" class="shop-modal__close" (click)="closeAddCustomer()" aria-label="Close">×</button>
     <h2>Add customer</h2>
     <label>
