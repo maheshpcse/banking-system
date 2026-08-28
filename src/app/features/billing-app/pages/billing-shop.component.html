@@ -130,6 +130,10 @@
         </div>
       </div>
 
+      <div class="shop-customer__busy" *ngIf="customerBusy" aria-hidden="true">
+        <div class="shop-boot-bone shop-boot-bone--cust-hit" *ngFor="let i of [1, 2, 3]"></div>
+      </div>
+
       <div class="shop-customer__detail" *ngIf="selectedCustomer as c">
         <div class="shop-customer__detail-grid">
           <div><span>Name</span><strong>{{ c.name }}</strong></div>
@@ -138,6 +142,19 @@
           <div><span>Reward points</span><strong>{{ c.rewardPoints ?? 0 }}</strong></div>
           <div><span>Banking account</span><strong>{{ c.bankingAccountNumber || '—' }}</strong></div>
           <div><span>Address</span><strong>{{ c.address || '—' }}</strong></div>
+        </div>
+      </div>
+
+      <div
+        class="shop-customer__detail shop-customer__detail--shimmer"
+        *ngIf="!selectedCustomer && customerDetailShimmer"
+        aria-hidden="true"
+      >
+        <div class="shop-customer__detail-grid">
+          <div *ngFor="let i of [1, 2, 3, 4, 5, 6]">
+            <span class="shop-boot-bone shop-boot-bone--cust-label"></span>
+            <strong class="shop-boot-bone shop-boot-bone--cust-value"></strong>
+          </div>
         </div>
       </div>
     </div>

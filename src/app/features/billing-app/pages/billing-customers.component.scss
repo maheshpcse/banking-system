@@ -189,11 +189,14 @@
   background: rgba(220, 20, 60, 0.1);
   color: var(--crimson);
   border: 1px solid rgba(220, 20, 60, 0.25);
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .btn--danger:hover:not(:disabled) {
-  background: rgba(220, 20, 60, 0.18);
-  border-color: rgba(220, 20, 60, 0.4);
+  background: rgba(220, 20, 60, 0.2);
+  border-color: rgba(180, 35, 24, 0.55);
+  color: #b42318;
+  box-shadow: 0 0 0 1px rgba(180, 35, 24, 0.28);
 }
 
 .btn:disabled {
