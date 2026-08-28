@@ -33,12 +33,10 @@
 .shop-search__row{display:flex;align-items:stretch;gap:0.4rem;}
 .shop-search__field{position:relative;flex:1;min-width:0;display:flex;align-items:center;}
 .shop-search__field input{width:100%;box-sizing:border-box;}
-.shop-search__clear{position:absolute;right:0.45rem;top:50%;transform:translateY(-50%);width:1.55rem;height:1.55rem;border:0;border-radius:999px;background:rgba(47,111,237,0.12);color:var(--shop-arctic-deep);font-size:1rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;z-index:2;}
-.shop-search__clear span{display:block;line-height:1;transform:translateY(-1px);}
-.shop-search__clear:hover{background:rgba(47,111,237,0.22);color:var(--shop-arctic-deep);}
-.shop-search__field input::-webkit-search-cancel-button,.shop-search__field input::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none;}
-.shop-search--product input{min-height:3.25rem;padding:0.55rem 2.2rem 0.55rem 0.85rem;border-radius:1rem;border:1px solid rgba(47,111,237,0.22);background:rgba(255,255,255,0.72);font-family:var(--font-display);font-size:clamp(0.95rem,1.6vw,1.15rem);font-weight:600;color:var(--shop-ink);outline:0;}
-.shop-search--customer input{min-height:2.25rem;padding:0.4rem 2rem 0.4rem 0.75rem;border-radius:0.8rem;border:1px solid rgba(15,118,110,0.24);background:rgba(255,255,255,0.7);font-size:0.86rem;font-weight:600;color:var(--shop-ink);outline:0;font-family:var(--font-body);}
+/* Native type=search cancel (theme blue ×) — no custom shop-search__clear pill. */
+.shop-search__field input::-webkit-search-cancel-button{cursor:pointer;filter:invert(32%) sepia(92%) saturate(1800%) hue-rotate(208deg) brightness(0.95);}
+.shop-search--product input{min-height:3.25rem;padding:0.55rem 1rem;border-radius:1rem;border:1px solid rgba(47,111,237,0.22);background:rgba(255,255,255,0.72);font-family:var(--font-display);font-size:clamp(0.95rem,1.6vw,1.15rem);font-weight:600;color:var(--shop-ink);outline:0;}
+.shop-search--customer input{min-height:2.25rem;padding:0.4rem 0.75rem;border-radius:0.8rem;border:1px solid rgba(15,118,110,0.24);background:rgba(255,255,255,0.7);font-size:0.86rem;font-weight:600;color:var(--shop-ink);outline:0;font-family:var(--font-body);}
 .shop-filter-block{display:flex;flex-direction:column;gap:0.2rem;min-width:0;grid-column:1 / 2;}
 .shop-filters{display:flex;flex-wrap:wrap;gap:0.3rem;align-items:center;}
 .shop-filters button{min-height:2.15rem;padding:0.3rem 0.7rem;border-radius:999px;border:1px solid var(--shop-line);background:rgba(255,255,255,0.55);color:rgba(11,31,51,0.72);font-size:0.76rem;font-weight:700;}

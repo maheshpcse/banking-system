@@ -349,13 +349,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
 
   onProductQuery(value: string): void {
     this.productQuery = value;
-    this.productSearch$.next(value.trim());
-  }
-
-  clearProductQuery(): void {
-    this.productQuery = '';
-    this.productSearch$.next('');
-    this.reloadCatalog(false);
+    this.productSearch$.next(String(value || '').trim());
   }
 
   runProductSearch(): void {
@@ -364,20 +358,17 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   }
 
   onCustomerQuery(value: string): void {
-    this.customerQuery = value;
-    this.customerSearch$.next(String(value || '').trim());
-  }
-
-  clearCustomerQuery(): void {
-    this.customerQuery = '';
-    this.customerSearched = false;
-    this.customers = [];
-    this.customerSearch$.next('');
-    if (this.selectedCustomer) {
-      this.selectedCustomer = null;
-      this.maybeClearBankCouponForCustomer(null);
+    const next = String(value || '');
+    const hadQuery = String(this.customerQuery || '').trim().length > 0;
+    this.customerQuery = next;
+    this.customerSearch$.next(next.trim());
+    if (hadQuery && !next.trim()) {
+      if (this.selectedCustomer) {
+        this.selectedCustomer = null;
+        this.maybeClearBankCouponForCustomer(null);
+      }
+      this.flashCustomerDetailShimmer();
     }
-    this.flashCustomerDetailShimmer();
   }
 
   runCustomerSearch(): void {

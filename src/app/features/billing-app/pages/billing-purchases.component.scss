@@ -244,12 +244,9 @@
     cursor: pointer;
   }
 
+  /* Single theme wash on the whole row — no first-column accent (avoids double color on Product). */
   tbody tr:hover td {
     background: rgba(255, 200, 1, 0.22);
-  }
-
-  tbody tr:hover td:first-child {
-    box-shadow: inset 2px 0 0 rgba(255, 153, 50, 0.75);
   }
 }
 

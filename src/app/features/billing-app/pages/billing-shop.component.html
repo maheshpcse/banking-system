@@ -37,15 +37,6 @@
               placeholder="Search name, SKU, or category"
               autocomplete="off"
             />
-            <button
-              type="button"
-              class="shop-search__clear"
-              *ngIf="productQuery"
-              (click)="clearProductQuery()"
-              aria-label="Clear product search"
-            >
-              <span aria-hidden="true">×</span>
-            </button>
           </div>
           <button type="button" class="shop-solid shop-solid--search" (click)="runProductSearch()">Search</button>
         </div>
@@ -103,15 +94,6 @@
               placeholder="Search name, email, phone, or account"
               autocomplete="off"
             />
-            <button
-              type="button"
-              class="shop-search__clear"
-              *ngIf="customerQuery"
-              (click)="clearCustomerQuery()"
-              aria-label="Clear customer search"
-            >
-              <span aria-hidden="true">×</span>
-            </button>
           </div>
           <button type="button" class="shop-solid shop-solid--search" (click)="runCustomerSearch()">Search</button>
         </div>
