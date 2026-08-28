@@ -279,6 +279,17 @@ export class BillingPosComponent implements OnInit {
       void this.alerts.toastWarning('Cart empty', 'Add products before applying a coupon.');
       return;
     }
+    const coupon = this.coupons.find(
+      (c) => c.code.toUpperCase() === code.toUpperCase()
+    );
+    const minSubtotal = Number(coupon?.minSubtotal) || 0;
+    if (coupon && minSubtotal > this.cartSubtotal) {
+      void this.alerts.toastWarning(
+        'Minimum not met',
+        `This coupon requires a subtotal of at least ${minSubtotal.toFixed(2)}.`
+      );
+      return;
+    }
     this.couponBusy = true;
     try {
       const res = await firstValueFrom(

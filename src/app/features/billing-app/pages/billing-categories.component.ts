@@ -1,11 +1,16 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { AlertService } from '../../../core/services/alert.service';
 import { BillingService } from '../../../core/services/billing.service';
 import { BillingCategory } from '../../../core/models/banking.models';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
+import { ThemeSelectOption } from '../../../shared/theme-select/theme-select.component';
+
+type CategorySort = 'name-asc' | 'name-desc' | 'sort-asc' | 'sort-desc';
+type StatusFilter = 'all' | 'active' | 'inactive';
+type ViewMode = 'list' | 'grid' | 'table';
 
 @Component({
   selector: 'app-billing-categories',
@@ -14,13 +19,36 @@ import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 })
 export class BillingCategoriesComponent implements OnInit, OnDestroy {
   listLoading = true;
+  filterLoading = false;
   busy = false;
+  query = '';
   categories: BillingCategory[] = [];
   editingId: string | null = null;
+  formOpen = false;
+  formLeaving = false;
   detail: BillingCategory | null = null;
   detailLeaving = false;
   private detailTimer: ReturnType<typeof setTimeout> | null = null;
-  private readonly destroy$ = new Subject<void>();
+  private formTimer: ReturnType<typeof setTimeout> | null = null;
+
+  sort: CategorySort = 'name-asc';
+  statusFilter: StatusFilter = 'all';
+  view: ViewMode = 'table';
+  page = 1;
+  readonly pageSize = 8;
+
+  readonly sortOptions: ThemeSelectOption[] = [
+    { value: 'name-asc', label: 'Name A–Z' },
+    { value: 'name-desc', label: 'Name Z–A' },
+    { value: 'sort-asc', label: 'Sort low–high' },
+    { value: 'sort-desc', label: 'Sort high–low' }
+  ];
+
+  readonly statusOptions: ThemeSelectOption[] = [
+    { value: 'all', label: 'All status' },
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' }
+  ];
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
@@ -30,6 +58,9 @@ export class BillingCategoriesComponent implements OnInit, OnDestroy {
     active: [true]
   });
 
+  private readonly search$ = new Subject<string>();
+  private readonly destroy$ = new Subject<void>();
+
   constructor(
     private readonly billing: BillingService,
     private readonly alerts: AlertService,
@@ -37,6 +68,12 @@ export class BillingCategoriesComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.search$
+      .pipe(debounceTime(250), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.page = 1;
+        this.refreshFilteredView();
+      });
     this.load();
   }
 
@@ -44,12 +81,114 @@ export class BillingCategoriesComponent implements OnInit, OnDestroy {
     if (this.detailTimer) {
       clearTimeout(this.detailTimer);
     }
+    if (this.formTimer) {
+      clearTimeout(this.formTimer);
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   get activeCount(): number {
     return this.categories.filter((c) => c.active !== false).length;
+  }
+
+  get dataShimmerVariant():
+    | 'catalog-data-list'
+    | 'catalog-data-grid'
+    | 'catalog-data-table' {
+    if (this.view === 'list') {
+      return 'catalog-data-list';
+    }
+    if (this.view === 'grid') {
+      return 'catalog-data-grid';
+    }
+    return 'catalog-data-table';
+  }
+
+  get filtered(): BillingCategory[] {
+    const q = this.query.trim().toLowerCase();
+    let items = [...this.categories];
+    if (q) {
+      items = items.filter(
+        (c) => c.name.toLowerCase().includes(q) || String(c.slug || '').toLowerCase().includes(q)
+      );
+    }
+    if (this.statusFilter === 'active') {
+      items = items.filter((c) => c.active !== false);
+    } else if (this.statusFilter === 'inactive') {
+      items = items.filter((c) => c.active === false);
+    }
+
+    items.sort((a, b) => {
+      switch (this.sort) {
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'sort-asc':
+          return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+        case 'sort-desc':
+          return (b.sortOrder ?? 0) - (a.sortOrder ?? 0);
+        case 'name-asc':
+        default:
+          return a.name.localeCompare(b.name);
+      }
+    });
+    return items;
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filtered.length / this.pageSize));
+  }
+
+  get paged(): BillingCategory[] {
+    const start = (this.page - 1) * this.pageSize;
+    return this.filtered.slice(start, start + this.pageSize);
+  }
+
+  onQueryChange(value: string): void {
+    this.query = value;
+    this.search$.next(value.trim());
+  }
+
+  clearQuery(): void {
+    this.query = '';
+    this.search$.next('');
+  }
+
+  search(): void {
+    this.page = 1;
+    this.refreshFilteredView();
+  }
+
+  onFilterChange(): void {
+    this.page = 1;
+    this.refreshFilteredView();
+  }
+
+  setView(mode: ViewMode): void {
+    if (this.view === mode) {
+      return;
+    }
+    this.view = mode;
+    this.refreshFilteredView();
+  }
+
+  goPage(delta: number): void {
+    const next = Math.min(this.totalPages, Math.max(1, this.page + delta));
+    if (next === this.page) {
+      return;
+    }
+    this.page = next;
+    this.refreshFilteredView();
+  }
+
+  private refreshFilteredView(): void {
+    this.filterLoading = true;
+    setTimeout(() => {
+      if (this.page > this.totalPages) {
+        this.page = this.totalPages;
+      }
+      this.filterLoading = false;
+    }, 260);
   }
 
   load(): void {
@@ -66,6 +205,44 @@ export class BillingCategoriesComponent implements OnInit, OnDestroy {
           await this.alerts.error('Unable to load categories.');
         }
       });
+  }
+
+  private softReload(): void {
+    this.filterLoading = true;
+    withShimmerDelay(this.billing.listCategories(true), SHIMMER_MS)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          this.categories = res.items || [];
+          if (this.page > this.totalPages) {
+            this.page = this.totalPages;
+          }
+          this.filterLoading = false;
+        },
+        error: async () => {
+          this.filterLoading = false;
+          await this.alerts.error('Unable to refresh categories.');
+        }
+      });
+  }
+
+  openForm(): void {
+    this.cancelEdit();
+    this.formLeaving = false;
+    this.formOpen = true;
+  }
+
+  closeForm(): void {
+    if (!this.formOpen || this.formLeaving || this.busy) {
+      return;
+    }
+    this.formLeaving = true;
+    this.formTimer = setTimeout(() => {
+      this.formOpen = false;
+      this.formLeaving = false;
+      this.cancelEdit();
+      this.formTimer = null;
+    }, 180);
   }
 
   openDetail(category: BillingCategory): void {
@@ -104,6 +281,8 @@ export class BillingCategoriesComponent implements OnInit, OnDestroy {
       sortOrder: category.sortOrder ?? 0,
       active: category.active !== false
     });
+    this.formLeaving = false;
+    this.formOpen = true;
   }
 
   cancelEdit(): void {
@@ -140,8 +319,10 @@ export class BillingCategoriesComponent implements OnInit, OnDestroy {
     });
     this.busy = false;
     if (outcome.ok) {
+      this.formOpen = false;
+      this.formLeaving = false;
       this.cancelEdit();
-      this.load();
+      this.softReload();
     }
   }
 
@@ -162,9 +343,11 @@ export class BillingCategoriesComponent implements OnInit, OnDestroy {
         this.closeDetail();
       }
       if (this.editingId === category.id) {
+        this.formOpen = false;
+        this.formLeaving = false;
         this.cancelEdit();
       }
-      this.load();
+      this.softReload();
     }
   }
 
@@ -185,9 +368,11 @@ export class BillingCategoriesComponent implements OnInit, OnDestroy {
         this.closeDetail();
       }
       if (this.editingId === category.id) {
+        this.formOpen = false;
+        this.formLeaving = false;
         this.cancelEdit();
       }
-      this.load();
+      this.softReload();
     }
   }
 }

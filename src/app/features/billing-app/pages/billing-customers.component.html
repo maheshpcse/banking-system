@@ -56,58 +56,12 @@
         <button type="button" [class.is-active]="view === 'table'" (click)="setView('table')">Table</button>
       </div>
 
-      <button type="button" class="btn btn--ghost toolbar__add" (click)="toggleForm()">
-        {{ showForm ? 'Hide form' : 'Add customer' }}
-      </button>
+      <button type="button" class="btn btn--ghost toolbar__add" (click)="openForm()">Add customer</button>
       <button type="button" class="btn btn--primary" (click)="openBulkUpload()">Bulk upload</button>
     </div>
 
-    <div
-      class="layout"
-      [class.is-expanded]="!showForm"
-      [class.is-animating]="panelAnimating"
-    >
-      <form
-        #addForm
-        class="glass form"
-        [class.is-hidden]="!showForm"
-        [formGroup]="form"
-        (ngSubmit)="save()"
-      >
-        <h3>{{ editingId ? 'Edit customer' : 'Add customer' }}</h3>
-        <label>
-          Name
-          <input class="input" formControlName="name" />
-        </label>
-        <label>
-          Email
-          <input class="input" formControlName="email" />
-        </label>
-        <label>
-          Phone
-          <input class="input" formControlName="phone" />
-        </label>
-        <label>
-          Address
-          <input class="input" formControlName="address" />
-        </label>
-        <label>
-          Banking account #
-          <input class="input" formControlName="bankingAccountNumber" placeholder="Optional" />
-        </label>
-        <div class="form__actions">
-          <button type="button" class="btn btn--ghost" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
-          <button type="submit" class="btn btn--primary" [disabled]="busy">
-            {{ busy ? 'Saving…' : editingId ? 'Update' : 'Create' }}
-          </button>
-        </div>
-      </form>
-
-      <div
-        class="main-panel glass"
-        [style.minHeight.px]="dataPanelHeight"
-        [style.height.px]="dataPanelHeight"
-      >
+    <div class="layout is-expanded">
+      <div class="main-panel glass">
         <div class="main-panel__body" [class.is-empty]="!filterLoading && !filtered.length">
           <app-billing-panel-shimmer
             *ngIf="filterLoading"
@@ -123,66 +77,66 @@
               message="No customers match this search or filter."
             ></app-empty-state>
 
-        <ul class="list" *ngIf="filtered.length && view === 'list'">
-          <li *ngFor="let c of paged">
-            <button type="button" class="row" (click)="openDetail(c)">
-              <span class="thumb avatar">{{ initials(c.name) }}</span>
-              <div class="row__body">
-                <strong>{{ c.name }}</strong>
-                <span>{{ c.phone || c.email || 'No contact' }}</span>
-                <span class="row__rating">Rewards · {{ rewardsLabel(c.rewardPoints) }}</span>
-              </div>
-              <em class="row__amount">{{ c.bankingAccountNumber ? 'Linked' : 'Walk-up' }}</em>
-            </button>
-            <div class="row__actions">
-              <button type="button" class="link" (click)="edit(c)">Edit</button>
-              <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Remove</button>
-            </div>
-          </li>
-        </ul>
-
-        <div class="grid-view" *ngIf="filtered.length && view === 'grid'">
-          <button type="button" class="card-tile" *ngFor="let c of paged" (click)="openDetail(c)">
-            <span class="avatar avatar--lg">{{ initials(c.name) }}</span>
-            <strong>{{ c.name }}</strong>
-            <span>{{ c.phone || c.email || 'No contact' }}</span>
-            <small>{{ c.bankingAccountNumber ? 'Banking linked' : 'Walk-up only' }}</small>
-            <small class="rating-line">Rewards · {{ rewardsLabel(c.rewardPoints) }}</small>
-          </button>
-        </div>
-
-        <div class="table-wrap" *ngIf="filtered.length && view === 'table'">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Customer</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Rewards</th>
-                <th>Banking</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let c of paged">
-                <td>
-                  <button type="button" class="name-btn" (click)="openDetail(c)">
-                    <span class="avatar avatar--sm">{{ initials(c.name) }}</span>
-                    {{ c.name }}
-                  </button>
-                </td>
-                <td>{{ c.phone || '—' }}</td>
-                <td>{{ c.email || '—' }}</td>
-                <td>{{ rewardsLabel(c.rewardPoints) }}</td>
-                <td>{{ c.bankingAccountNumber || '—' }}</td>
-                <td class="table__actions">
+            <ul class="list" *ngIf="filtered.length && view === 'list'">
+              <li *ngFor="let c of paged">
+                <button type="button" class="row" (click)="openDetail(c)">
+                  <span class="thumb avatar">{{ initials(c.name) }}</span>
+                  <div class="row__body">
+                    <strong>{{ c.name }}</strong>
+                    <span>{{ c.phone || c.email || 'No contact' }}</span>
+                    <span class="row__rating">Rewards · {{ rewardsLabel(c.rewardPoints) }}</span>
+                  </div>
+                  <em class="row__amount">{{ c.bankingAccountNumber ? 'Linked' : 'Walk-up' }}</em>
+                </button>
+                <div class="row__actions">
                   <button type="button" class="link" (click)="edit(c)">Edit</button>
                   <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Remove</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                </div>
+              </li>
+            </ul>
+
+            <div class="grid-view" *ngIf="filtered.length && view === 'grid'">
+              <button type="button" class="card-tile" *ngFor="let c of paged" (click)="openDetail(c)">
+                <span class="avatar avatar--lg">{{ initials(c.name) }}</span>
+                <strong>{{ c.name }}</strong>
+                <span>{{ c.phone || c.email || 'No contact' }}</span>
+                <small>{{ c.bankingAccountNumber ? 'Banking linked' : 'Walk-up only' }}</small>
+                <small class="rating-line">Rewards · {{ rewardsLabel(c.rewardPoints) }}</small>
+              </button>
+            </div>
+
+            <div class="table-wrap" *ngIf="filtered.length && view === 'table'">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Rewards</th>
+                    <th>Banking</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let c of paged">
+                    <td>
+                      <button type="button" class="name-btn" (click)="openDetail(c)">
+                        <span class="avatar avatar--sm">{{ initials(c.name) }}</span>
+                        {{ c.name }}
+                      </button>
+                    </td>
+                    <td>{{ c.phone || '—' }}</td>
+                    <td>{{ c.email || '—' }}</td>
+                    <td>{{ rewardsLabel(c.rewardPoints) }}</td>
+                    <td>{{ c.bankingAccountNumber || '—' }}</td>
+                    <td class="table__actions">
+                      <button type="button" class="link" (click)="edit(c)">Edit</button>
+                      <button type="button" class="link-danger" [disabled]="busy" (click)="remove(c)">Remove</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </ng-container>
         </div>
 
@@ -207,6 +161,51 @@
       </div>
     </div>
   </ng-container>
+
+  <div
+    class="form-modal"
+    *ngIf="formOpen"
+    [class.is-leaving]="formLeaving"
+    (click)="closeForm()"
+  >
+    <div class="form-modal__panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <button type="button" class="form-modal__close" (click)="closeForm()" aria-label="Close" [disabled]="busy">
+        <span aria-hidden="true">×</span>
+      </button>
+      <form class="form" [formGroup]="form" (ngSubmit)="save()">
+        <header class="form-modal__head">
+          <p class="form-modal__eyebrow">NovaBill directory</p>
+          <h3>{{ editingId ? 'Edit customer' : 'Add customer' }}</h3>
+        </header>
+        <label>
+          Name
+          <input class="input" formControlName="name" />
+        </label>
+        <label>
+          Email
+          <input class="input" formControlName="email" />
+        </label>
+        <label>
+          Phone
+          <input class="input" formControlName="phone" />
+        </label>
+        <label>
+          Address
+          <input class="input" formControlName="address" />
+        </label>
+        <label>
+          Banking account #
+          <input class="input" formControlName="bankingAccountNumber" placeholder="Optional" />
+        </label>
+        <div class="form__actions">
+          <button type="button" class="btn btn--ghost" (click)="closeForm()">Cancel</button>
+          <button type="submit" class="btn btn--primary" [disabled]="busy">
+            {{ busy ? 'Saving…' : editingId ? 'Update' : 'Create' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <div
     class="detail-backdrop"

@@ -11,7 +11,13 @@
     <div class="auth-page__copy">
       <p class="auth-page__brand">{{ isBillingLogin ? 'NovaBill' : 'NovaBank' }}</p>
       <h1>{{ isBillingLogin ? 'Sign in to Billing' : 'Sign in to your vault' }}</h1>
-      <p>{{ isBillingLogin ? 'Manager or Admin access for NovaBill POS.' : 'Use your username or email with your password.' }}</p>
+      <p>
+        {{
+          isBillingLogin
+            ? 'Manager or Admin access for NovaBill POS.'
+            : 'Password, email OTP, or phone OTP — your choice.'
+        }}
+      </p>
     </div>
 
     <app-animated-card
@@ -21,7 +27,37 @@
       accent="sky"
       [tilt]="false"
     >
-      <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+      <div class="login-methods" role="tablist" aria-label="Sign-in method">
+        <button
+          type="button"
+          role="tab"
+          [class.is-active]="loginMethod === 'password'"
+          [attr.aria-selected]="loginMethod === 'password'"
+          (click)="setLoginMethod('password')"
+        >
+          Password
+        </button>
+        <button
+          type="button"
+          role="tab"
+          [class.is-active]="loginMethod === 'email-otp'"
+          [attr.aria-selected]="loginMethod === 'email-otp'"
+          (click)="setLoginMethod('email-otp')"
+        >
+          Email OTP
+        </button>
+        <button
+          type="button"
+          role="tab"
+          [class.is-active]="loginMethod === 'phone-otp'"
+          [attr.aria-selected]="loginMethod === 'phone-otp'"
+          (click)="setLoginMethod('phone-otp')"
+        >
+          Phone OTP
+        </button>
+      </div>
+
+      <form class="form" *ngIf="loginMethod === 'password'" [formGroup]="form" (ngSubmit)="submit()">
         <label>
           <span>Username or email</span>
           <input
@@ -96,6 +132,93 @@
 
         <button class="btn btn--primary" type="submit" [disabled]="loading">
           {{ loading ? 'Signing in…' : 'Sign in' }}
+        </button>
+      </form>
+
+      <form
+        class="form"
+        *ngIf="loginMethod !== 'password'"
+        [formGroup]="otpForm"
+        (ngSubmit)="verifyOtp()"
+      >
+        <label>
+          <span>{{ loginMethod === 'email-otp' ? 'Username or email' : 'Phone number' }}</span>
+          <input
+            [type]="loginMethod === 'email-otp' ? 'text' : 'tel'"
+            formControlName="identifier"
+            [attr.autocomplete]="loginMethod === 'email-otp' ? 'username' : 'tel'"
+            [placeholder]="loginMethod === 'email-otp' ? 'alex or you@email.com' : '+91 98765 43210'"
+          />
+          <p
+            class="form__field-error"
+            *ngIf="
+              fieldError(
+                otpForm.controls.identifier,
+                loginMethod === 'email-otp' ? 'Username or email' : 'Phone number'
+              ) as msg
+            "
+          >
+            {{ msg }}
+          </p>
+        </label>
+
+        <div class="otp-send-row">
+          <button
+            type="button"
+            class="btn btn--ghost"
+            [disabled]="otpSending || loading"
+            (click)="requestOtp()"
+          >
+            {{ otpSending ? 'Sending…' : otpSent ? 'Resend OTP' : 'Send OTP' }}
+          </button>
+          <p class="otp-info" *ngIf="otpSent">
+            OTP sent{{ maskedDestination ? ' to ' + maskedDestination : '' }} and will expire in 10 minutes.
+          </p>
+        </div>
+
+        <label>
+          <span>OTP code</span>
+          <input
+            type="text"
+            inputmode="numeric"
+            formControlName="code"
+            autocomplete="one-time-code"
+            maxlength="8"
+            placeholder="6-digit code"
+          />
+          <p class="form__field-error" *ngIf="fieldError(otpForm.controls.code, 'OTP code') as msg">
+            {{ msg }}
+          </p>
+        </label>
+
+        <p class="form__error" *ngIf="formError">{{ formError }}</p>
+
+        <div class="unlock-box" *ngIf="locked" role="region" aria-label="Request unlock" [formGroup]="unlockForm">
+          <p class="unlock-box__lede">
+            Ask a Super Admin to clear your sign-in lock. They will get an Alerts notification.
+          </p>
+          <label>
+            <span>Optional note</span>
+            <textarea
+              formControlName="message"
+              rows="2"
+              maxlength="500"
+              placeholder="Why you need access restored…"
+            ></textarea>
+          </label>
+          <button
+            class="btn btn--ghost"
+            type="button"
+            [disabled]="unlockLoading"
+            (click)="requestUnlock()"
+          >
+            {{ unlockLoading ? 'Sending…' : 'Request Super Admin unlock' }}
+          </button>
+          <p class="unlock-box__ok" *ngIf="unlockNotice">{{ unlockNotice }}</p>
+        </div>
+
+        <button class="btn btn--primary" type="submit" [disabled]="loading || !otpSent">
+          {{ loading ? 'Verifying…' : 'Verify & sign in' }}
         </button>
       </form>
 

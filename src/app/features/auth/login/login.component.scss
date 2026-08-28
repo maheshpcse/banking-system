@@ -255,3 +255,46 @@
   color: var(--success, #1f8a6e);
   font-weight: 650;
 }
+
+.login-methods {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.3rem;
+  margin: 0 0 1rem;
+  padding: 0.25rem;
+  border-radius: 0.85rem;
+  background: rgba(148, 163, 184, 0.14);
+}
+
+.login-methods button {
+  border: 0;
+  background: transparent;
+  border-radius: 0.7rem;
+  min-height: 2.15rem;
+  padding: 0.35rem 0.45rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.login-methods button.is-active {
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text);
+  box-shadow: 0 6px 14px rgba(15, 35, 55, 0.08);
+}
+
+.otp-send-row {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.otp-info {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: #0f766e;
+  font-weight: 650;
+}
+

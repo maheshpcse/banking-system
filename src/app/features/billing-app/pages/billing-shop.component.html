@@ -1,4 +1,4 @@
-<section class="shop" *ngIf="!pageLoading; else shopBoot">
+<section class="shop" [class.is-cart-open]="checkoutOpen" *ngIf="!pageLoading; else shopBoot">
   <div class="shop-top">
     <header class="shop-chrome">
       <div class="shop-chrome__brand">
@@ -37,6 +37,15 @@
               placeholder="Search name, SKU, or category"
               autocomplete="off"
             />
+            <button
+              type="button"
+              class="shop-search__clear"
+              *ngIf="productQuery"
+              (click)="clearProductQuery()"
+              aria-label="Clear product search"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
           </div>
           <button type="button" class="shop-solid shop-solid--search" (click)="runProductSearch()">Search</button>
         </div>
@@ -94,6 +103,15 @@
               placeholder="Search name, email, phone, or account"
               autocomplete="off"
             />
+            <button
+              type="button"
+              class="shop-search__clear"
+              *ngIf="customerQuery"
+              (click)="clearCustomerQuery()"
+              aria-label="Clear customer search"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
           </div>
           <button type="button" class="shop-solid shop-solid--search" (click)="runCustomerSearch()">Search</button>
         </div>
@@ -131,7 +149,13 @@
     </div>
 
     <div class="shop-grid" *ngIf="!catalogLoading && filteredProducts.length; else catalogEmpty">
-      <article class="shop-tile" *ngFor="let product of filteredProducts" (click)="openProduct(product)">
+      <article
+        class="shop-tile"
+        *ngFor="let product of filteredProducts"
+        (click)="openProduct(product)"
+        (mouseenter)="startCardAutoSlide(product)"
+        (mouseleave)="stopCardAutoSlide(product.id)"
+      >
         <div class="shop-tile__media">
           <span class="shop-cart-badge" *ngIf="qtyInCart(product.id) as qty">
             <i aria-hidden="true"></i>
@@ -143,6 +167,7 @@
             [src]="src"
             [alt]="product.name"
             [class.is-active]="slideFor(product) === i"
+            [class.is-rtl]="true"
           />
           <button
             type="button"
@@ -231,7 +256,11 @@
 >
   <div class="shop-modal__panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
     <button type="button" class="shop-modal__close" (click)="closeProductModal()" aria-label="Close">×</button>
-    <div class="shop-modal__media">
+    <div
+      class="shop-modal__media"
+      (mouseenter)="startModalAutoSlide()"
+      (mouseleave)="stopModalAutoSlide()"
+    >
       <span class="shop-cart-badge shop-cart-badge--lg" *ngIf="qtyInCart(product.id) as qty">
         <i aria-hidden="true"></i>
         <em>{{ qty }}</em>
@@ -242,6 +271,7 @@
         [src]="src"
         [alt]="product.name"
         [class.is-active]="activeSlide === i"
+        [class.is-rtl]="true"
       />
       <button
         type="button"
@@ -299,14 +329,15 @@
   </div>
 </div>
 
-<!-- Checkout XL modal -->
+<!-- Checkout XL modal — static backdrop (overlay click does not close) -->
 <div
   class="shop-modal shop-modal--checkout"
   *ngIf="checkoutOpen"
   [class.is-leaving]="checkoutLeaving"
-  (click)="closeCheckout()"
+  data-backdrop="static"
+  data-keyboard="false"
 >
-  <div class="shop-modal__panel shop-modal__panel--wide" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+  <div class="shop-modal__panel shop-modal__panel--wide" role="dialog" aria-modal="true">
     <button
       type="button"
       class="shop-modal__close"
@@ -356,19 +387,28 @@
           </dl>
 
           <div class="shop-checkout__coupon">
-            <label>
+            <label class="shop-checkout__coupon-select">
               <span>Coupon code</span>
               <app-theme-select
-                [(ngModel)]="selectedCouponCode"
+                class="shop-coupon-select"
+                [ngModel]="selectedCouponCode"
+                (ngModelChange)="onCouponSelect($event)"
                 [options]="couponSelectOptions"
                 placeholder="Select saved coupon…"
                 ariaLabel="Coupon codes"
                 [clearable]="true"
+                (cleared)="onCouponSelect('')"
               ></app-theme-select>
             </label>
             <label>
               <span>Or enter code</span>
-              <input type="text" [(ngModel)]="couponCodeInput" placeholder="SAVE10" />
+              <input
+                type="text"
+                [ngModel]="couponCodeInput"
+                (ngModelChange)="onCouponInput($event)"
+                [disabled]="!!selectedCouponCode"
+                placeholder="SAVE10"
+              />
             </label>
             <label>
               <span>Manual discount</span>

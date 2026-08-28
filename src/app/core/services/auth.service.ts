@@ -63,6 +63,28 @@ export class AuthService {
     );
   }
 
+  requestOtp(payload: {
+    channel: 'email' | 'phone';
+    identifier: string;
+  }): Observable<{ message: string; expiresInMinutes: number; channel: string; maskedDestination: string }> {
+    return this.http.post<{
+      message: string;
+      expiresInMinutes: number;
+      channel: string;
+      maskedDestination: string;
+    }>(`${environment.apiUrl}/auth/otp/request`, payload);
+  }
+
+  verifyOtp(payload: {
+    channel: 'email' | 'phone';
+    identifier: string;
+    code: string;
+  }): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/auth/otp/verify`, payload)
+      .pipe(tap((res) => this.persistSession(res)));
+  }
+
   forgotPassword(identifier: string): Observable<ForgotPasswordResponse> {
     return this.http.post<ForgotPasswordResponse>(`${environment.apiUrl}/auth/forgot-password`, {
       identifier

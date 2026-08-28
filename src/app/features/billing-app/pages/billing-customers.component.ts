@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
@@ -17,29 +17,19 @@ type ViewMode = 'list' | 'grid' | 'table';
   templateUrl: './billing-customers.component.html',
   styleUrls: ['./billing-customers.component.scss']
 })
-export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('addForm')
-  set addForm(ref: ElementRef<HTMLElement> | undefined) {
-    this.addFormRef = ref;
-    if (ref && this.showForm) {
-      setTimeout(() => this.bindFormHeightObserver(), 0);
-    }
-  }
-  private addFormRef?: ElementRef<HTMLElement>;
-
+export class BillingCustomersComponent implements OnInit, OnDestroy {
   listLoading = true;
   filterLoading = false;
   busy = false;
   query = '';
   customers: BillingCustomer[] = [];
   editingId: string | null = null;
-  showForm = true;
-  panelAnimating = false;
+  formOpen = false;
+  formLeaving = false;
   detail: BillingCustomer | null = null;
   detailLeaving = false;
   private detailTimer: ReturnType<typeof setTimeout> | null = null;
-  matchedPanelHeight: number | null = null;
-  lockedPanelHeight: number | null = null;
+  private formTimer: ReturnType<typeof setTimeout> | null = null;
   bulkOpen = false;
 
   sort: CustomerSort = 'name-asc';
@@ -70,14 +60,11 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
 
   private readonly search$ = new Subject<string>();
   private readonly destroy$ = new Subject<void>();
-  private panelTimer: ReturnType<typeof setTimeout> | null = null;
-  private formResizeObserver: ResizeObserver | null = null;
 
   constructor(
     private readonly billing: BillingService,
     private readonly alerts: AlertService,
-    private readonly fb: FormBuilder,
-    private readonly cdr: ChangeDetectorRef
+    private readonly fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
@@ -90,24 +77,15 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
     this.load();
   }
 
-  ngAfterViewInit(): void {
-    setTimeout(() => this.bindFormHeightObserver(), 0);
-  }
-
   ngOnDestroy(): void {
-    if (this.panelTimer) {
-      clearTimeout(this.panelTimer);
-    }
     if (this.detailTimer) {
       clearTimeout(this.detailTimer);
     }
-    this.formResizeObserver?.disconnect();
+    if (this.formTimer) {
+      clearTimeout(this.formTimer);
+    }
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  get dataPanelHeight(): number | null {
-    return this.lockedPanelHeight ?? this.matchedPanelHeight;
   }
 
   get dataShimmerVariant():
@@ -123,62 +101,23 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
     return 'catalog-data-table';
   }
 
-  toggleForm(): void {
-    if (this.showForm) {
-      this.capturePanelHeight();
-      this.formResizeObserver?.disconnect();
-      this.formResizeObserver = null;
-    }
-    this.panelAnimating = true;
-    this.showForm = !this.showForm;
-    if (this.panelTimer) {
-      clearTimeout(this.panelTimer);
-    }
-    this.panelTimer = setTimeout(() => {
-      this.panelAnimating = false;
-      if (this.showForm) {
-        this.bindFormHeightObserver();
-      }
-    }, 320);
+  openForm(): void {
+    this.cancelEdit();
+    this.formLeaving = false;
+    this.formOpen = true;
   }
 
-  private capturePanelHeight(): void {
-    const el = this.addFormRef?.nativeElement;
-    if (!el) {
+  closeForm(): void {
+    if (!this.formOpen || this.formLeaving || this.busy) {
       return;
     }
-    const height = Math.ceil(el.getBoundingClientRect().height);
-    if (height >= 120) {
-      this.matchedPanelHeight = height;
-      this.lockedPanelHeight = height;
-    }
-  }
-
-  private bindFormHeightObserver(): void {
-    this.formResizeObserver?.disconnect();
-    this.formResizeObserver = null;
-    if (!this.showForm || typeof ResizeObserver === 'undefined') {
-      return;
-    }
-    const el = this.addFormRef?.nativeElement;
-    if (!el) {
-      return;
-    }
-    const sync = (): void => {
-      if (!this.showForm) {
-        return;
-      }
-      const height = Math.ceil(el.getBoundingClientRect().height);
-      if (height < 120) {
-        return;
-      }
-      this.matchedPanelHeight = height;
-      this.lockedPanelHeight = height;
-      this.cdr.markForCheck();
-    };
-    this.formResizeObserver = new ResizeObserver(() => sync());
-    this.formResizeObserver.observe(el);
-    sync();
+    this.formLeaving = true;
+    this.formTimer = setTimeout(() => {
+      this.formOpen = false;
+      this.formLeaving = false;
+      this.cancelEdit();
+      this.formTimer = null;
+    }, 180);
   }
 
   get filtered(): BillingCustomer[] {
@@ -271,7 +210,6 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
           this.page = this.totalPages;
         }
         this.listLoading = false;
-        setTimeout(() => this.bindFormHeightObserver(), 0);
       },
       error: async () => {
         this.listLoading = false;
@@ -364,28 +302,13 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
       address: customer.address,
       bankingAccountNumber: customer.bankingAccountNumber || ''
     });
-    if (!this.showForm) {
-      this.panelAnimating = true;
-      this.showForm = true;
-      if (this.panelTimer) {
-        clearTimeout(this.panelTimer);
-      }
-      this.panelTimer = setTimeout(() => {
-        this.panelAnimating = false;
-        this.capturePanelHeight();
-        this.panelTimer = null;
-      }, 320);
-    }
-    this.formResizeObserver?.disconnect();
-    this.formResizeObserver = null;
+    this.formLeaving = false;
+    this.formOpen = true;
   }
 
   cancelEdit(): void {
     this.editingId = null;
     this.form.reset({ name: '', email: '', phone: '', address: '', bankingAccountNumber: '' });
-    if (this.showForm) {
-      this.bindFormHeightObserver();
-    }
   }
 
   openBulkUpload(): void {
@@ -434,6 +357,8 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
     });
     this.busy = false;
     if (outcome.ok) {
+      this.formOpen = false;
+      this.formLeaving = false;
       this.cancelEdit();
       this.softReload();
     }
@@ -456,6 +381,8 @@ export class BillingCustomersComponent implements OnInit, AfterViewInit, OnDestr
         this.closeDetail();
       }
       if (this.editingId === customer.id) {
+        this.formOpen = false;
+        this.formLeaving = false;
         this.cancelEdit();
       }
       this.softReload();

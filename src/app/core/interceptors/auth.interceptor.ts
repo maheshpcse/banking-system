@@ -28,6 +28,7 @@ export class AuthInterceptor implements HttpInterceptor {
         if (
           (error.status === 401 || loginLockedOut) &&
           !request.url.includes('/auth/login') &&
+          !request.url.includes('/auth/otp/') &&
           !request.url.includes('/auth/contact-admin')
         ) {
           this.auth.logout();
