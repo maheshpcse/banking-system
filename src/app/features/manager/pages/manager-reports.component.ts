@@ -334,13 +334,6 @@ export class ManagerReportsComponent implements OnInit, OnDestroy {
           await this.alerts.success(
             `Saved “${next.name}”. It stays until you clear it or it auto-expires.`
           );
-          this.notifications.push({
-            kind: 'system',
-            title: 'Report schedule saved',
-            body: `${next.name} · ${this.cadenceLabel} · runs ${new Date(next.runAt).toLocaleString()}`,
-            href: '/manager/reports',
-            browserPush: false
-          });
         } catch {
           this.saving = false;
           await this.alerts.error('Unable to save schedule on this device.');

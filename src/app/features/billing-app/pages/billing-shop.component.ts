@@ -118,7 +118,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   private leaveTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly cardAutoTimers = new Map<string, ReturnType<typeof setInterval>>();
   private modalAutoTimer: ReturnType<typeof setInterval> | null = null;
-  private readonly autoSlideMs = 1800;
+  private readonly autoSlideMs = 900;
   private cartScrollLocked = false;
 
   constructor(
@@ -141,9 +141,16 @@ export class BillingShopComponent implements OnInit, OnDestroy {
         debounceTime(220),
         distinctUntilChanged(),
         switchMap((q) => {
+          const query = String(q || '').trim();
+          if (!query) {
+            this.customerBusy = false;
+            this.customerSearched = false;
+            this.customers = [];
+            return of({ items: [] as BillingCustomer[] });
+          }
           this.customerBusy = true;
           this.customerSearched = true;
-          return withShimmerDelay(this.billing.listCustomers(q), Math.min(SHIMMER_MS, 420)).pipe(
+          return withShimmerDelay(this.billing.listCustomers(query), Math.min(SHIMMER_MS, 420)).pipe(
             catchError(() => of({ items: [] as BillingCustomer[] }))
           );
         }),
@@ -353,7 +360,6 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     this.customerQuery = '';
     this.customerSearched = false;
     this.customers = [];
-    this.customerSearch$.next('');
   }
 
   runCustomerSearch(): void {
@@ -449,6 +455,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
       return;
     }
     this.stopCardAutoSlide(product.id);
+    this.nextSlide(product);
     const timer = setInterval(() => this.nextSlide(product), this.autoSlideMs);
     this.cardAutoTimers.set(product.id, timer);
   }
@@ -466,6 +473,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
       return;
     }
     this.stopModalAutoSlide();
+    this.modalNext();
     this.modalAutoTimer = setInterval(() => this.modalNext(), this.autoSlideMs);
   }
 
@@ -487,6 +495,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     this.activeSlide = this.slideFor(product);
     this.productModalLeaving = false;
     this.productModalOpen = true;
+    this.startModalAutoSlide();
   }
 
   closeProductModal(): void {
@@ -533,7 +542,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     this.selectedCustomer = null;
     this.customerQuery = '';
     this.customerSearched = false;
-    this.customerSearch$.next('');
+    this.customers = [];
   }
 
   openAddCustomer(): void {

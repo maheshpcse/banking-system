@@ -190,8 +190,14 @@
     </div>
   </ng-container>
 
-  <div class="form-modal" *ngIf="formOpen" [class.is-leaving]="formLeaving" (click)="closeForm()">
-    <div class="form-modal__panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+  <div
+    class="form-modal"
+    *ngIf="formOpen"
+    [class.is-leaving]="formLeaving"
+    data-backdrop="static"
+    data-keyboard="false"
+  >
+    <div class="form-modal__panel" role="dialog" aria-modal="true">
       <button type="button" class="form-modal__close" (click)="closeForm()" aria-label="Close" [disabled]="busy">
         <span aria-hidden="true">×</span>
       </button>
@@ -232,20 +238,28 @@
     </div>
   </div>
 
-  <div class="detail-backdrop" *ngIf="detail" [class.is-leaving]="detailLeaving"></div>
+  <div
+    class="detail-backdrop"
+    *ngIf="detail"
+    [class.is-leaving]="detailLeaving"
+    data-backdrop="static"
+    data-keyboard="false"
+  ></div>
   <div
     class="detail-modal"
     *ngIf="detail as c"
     [class.is-leaving]="detailLeaving"
     role="dialog"
     aria-modal="true"
+    data-backdrop="static"
+    data-keyboard="false"
   >
     <div class="detail-modal__head">
       <div>
         <p class="eyebrow">Category detail</p>
         <h3>{{ c.name }}</h3>
       </div>
-      <button type="button" class="icon-close" (click)="closeDetail()" aria-label="Close">×</button>
+      <button type="button" class="icon-close" (click)="closeDetail()" aria-label="Close"><span aria-hidden="true">×</span></button>
     </div>
     <dl class="detail-modal__meta">
       <div>

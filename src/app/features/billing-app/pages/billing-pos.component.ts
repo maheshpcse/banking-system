@@ -57,10 +57,16 @@ export class BillingPosComponent implements OnInit {
   get couponSelectOptions(): ThemeSelectOption[] {
     return this.coupons
       .filter((c) => c.active !== false)
-      .map((c) => ({
-        value: c.code,
-        label: `${c.code} · ${c.discountType === 'percent' ? c.value + '%' : '$' + c.value}`
-      }));
+      .map((c) => {
+        const disc =
+          c.discountType === 'percent' ? `${c.value}%` : `$${Number(c.value).toFixed(2)}`;
+        const min = Number(c.minSubtotal) || 0;
+        const minNote = min > 0 ? ` · min ${min.toFixed(2)}` : '';
+        return {
+          value: c.code,
+          label: `${c.code} · ${disc}${minNote}`
+        };
+      });
   }
 
   constructor(
@@ -282,14 +288,16 @@ export class BillingPosComponent implements OnInit {
     const coupon = this.coupons.find(
       (c) => c.code.toUpperCase() === code.toUpperCase()
     );
+    // Prefer local listCoupons minSubtotal when the dropdown selection is known.
     const minSubtotal = Number(coupon?.minSubtotal) || 0;
-    if (coupon && minSubtotal > this.cartSubtotal) {
+    if (coupon && minSubtotal > 0 && this.cartSubtotal < minSubtotal) {
       void this.alerts.toastWarning(
-        'Minimum not met',
-        `This coupon requires a subtotal of at least ${minSubtotal.toFixed(2)}.`
+        'Minimum subtotal not met',
+        `“${coupon.code}” requires a cart subtotal of at least ${minSubtotal.toFixed(2)} (current: ${this.cartSubtotal.toFixed(2)}).`
       );
       return;
     }
+    // If not found locally, still call the API so the server can validate min/rules.
     this.couponBusy = true;
     try {
       const res = await firstValueFrom(
@@ -304,10 +312,9 @@ export class BillingPosComponent implements OnInit {
       void this.alerts.toastSuccess('Coupon applied', res.coupon.usageNote || res.message);
     } catch (err) {
       this.appliedCoupon = null;
-      void this.alerts.toastWarning(
-        'Coupon not applied',
-        (err as { error?: { message?: string } })?.error?.message || 'Invalid coupon.'
-      );
+      const message =
+        (err as { error?: { message?: string } })?.error?.message || 'Invalid coupon.';
+      void this.alerts.toastWarning('Coupon not applied', message);
     } finally {
       this.couponBusy = false;
     }

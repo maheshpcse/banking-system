@@ -66,12 +66,19 @@ export class AuthService {
   requestOtp(payload: {
     channel: 'email' | 'phone';
     identifier: string;
-  }): Observable<{ message: string; expiresInMinutes: number; channel: string; maskedDestination: string }> {
+  }): Observable<{
+    message: string;
+    expiresInMinutes: number;
+    channel: string;
+    maskedDestination: string;
+    delivered?: boolean;
+  }> {
     return this.http.post<{
       message: string;
       expiresInMinutes: number;
       channel: string;
       maskedDestination: string;
+      delivered?: boolean;
     }>(`${environment.apiUrl}/auth/otp/request`, payload);
   }
 
