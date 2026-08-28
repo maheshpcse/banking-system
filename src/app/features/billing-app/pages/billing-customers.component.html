@@ -256,6 +256,10 @@
         <dd>{{ rewardsLabel(c.rewardPoints) }}</dd>
       </div>
     </dl>
+    <div class="detail-modal__actions">
+      <button type="button" class="btn btn--ghost" (click)="edit(c)">Edit</button>
+      <button type="button" class="btn btn--danger" [disabled]="busy" (click)="remove(c)">Remove</button>
+    </div>
   </div>
 </section>
 
