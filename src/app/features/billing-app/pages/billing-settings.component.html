@@ -101,6 +101,7 @@
           <h3>Coupons</h3>
           <p class="hint">
             Create general, payment-type, and bank-linked coupons with expiry and usage notes. Applied at POS.
+            Bank kind requires customers with a non-empty banking account number.
           </p>
         </div>
         <button type="button" class="btn btn--ghost" *ngIf="editingCouponId" (click)="resetCouponForm()">
@@ -159,6 +160,7 @@
             formControlName="bankNote"
             placeholder="Required for bank-linked coupons (settlement / account rules)"
           />
+          <small class="hint">Only customers with a linked banking account can redeem bank coupons.</small>
         </label>
         <label>
           Min subtotal

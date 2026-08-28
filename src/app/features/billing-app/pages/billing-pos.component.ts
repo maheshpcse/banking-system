@@ -60,11 +60,12 @@ export class BillingPosComponent implements OnInit {
       .map((c) => {
         const disc =
           c.discountType === 'percent' ? `${c.value}%` : `$${Number(c.value).toFixed(2)}`;
-        const min = Number(c.minSubtotal) || 0;
-        const minNote = min > 0 ? ` · min ${min.toFixed(2)}` : '';
+        const min = Number(c.minSubtotal);
+        const minNote = Number.isFinite(min) && min > 0 ? ` · min ${min.toFixed(2)}` : '';
+        const bankNote = c.kind === 'bank' ? ' · Bank linked' : '';
         return {
           value: c.code,
-          label: `${c.code} · ${disc}${minNote}`
+          label: `${c.code} · ${disc}${bankNote}${minNote}`
         };
       });
   }
@@ -288,12 +289,34 @@ export class BillingPosComponent implements OnInit {
     const coupon = this.coupons.find(
       (c) => c.code.toUpperCase() === code.toUpperCase()
     );
+    if (coupon?.kind === 'bank') {
+      if (!this.selectedCustomerId) {
+        void this.alerts.toastWarning(
+          'Customer required',
+          'Select a customer before applying a bank-linked coupon.'
+        );
+        return;
+      }
+      const cust = this.customers.find((c) => c.id === this.selectedCustomerId);
+      if (!String(cust?.bankingAccountNumber || '').trim()) {
+        void this.alerts.toastWarning(
+          'Banking account required',
+          'Bank-linked coupons need a customer with a banking account number.'
+        );
+        return;
+      }
+    }
     // Prefer local listCoupons minSubtotal when the dropdown selection is known.
-    const minSubtotal = Number(coupon?.minSubtotal) || 0;
-    if (coupon && minSubtotal > 0 && this.cartSubtotal < minSubtotal) {
+    const minSubtotal = Number(coupon?.minSubtotal);
+    if (
+      coupon &&
+      Number.isFinite(minSubtotal) &&
+      minSubtotal > 0 &&
+      Number(this.cartSubtotal) < minSubtotal
+    ) {
       void this.alerts.toastWarning(
         'Minimum subtotal not met',
-        `“${coupon.code}” requires a cart subtotal of at least ${minSubtotal.toFixed(2)} (current: ${this.cartSubtotal.toFixed(2)}).`
+        `“${coupon.code}” requires a cart subtotal of at least ${minSubtotal.toFixed(2)} (current: ${Number(this.cartSubtotal).toFixed(2)}).`
       );
       return;
     }
@@ -302,7 +325,11 @@ export class BillingPosComponent implements OnInit {
     try {
       const res = await firstValueFrom(
         withShimmerDelay(
-          this.billing.validateCoupon({ code, subtotal: this.cartSubtotal }),
+          this.billing.validateCoupon({
+            code,
+            subtotal: this.cartSubtotal,
+            customerId: this.selectedCustomerId || undefined
+          }),
           SHIMMER_MS
         )
       );
@@ -317,6 +344,16 @@ export class BillingPosComponent implements OnInit {
       void this.alerts.toastWarning('Coupon not applied', message);
     } finally {
       this.couponBusy = false;
+    }
+  }
+
+  onCustomerChange(id: string): void {
+    this.selectedCustomerId = String(id || '');
+    if (this.appliedCoupon?.kind === 'bank') {
+      const cust = this.customers.find((c) => c.id === this.selectedCustomerId);
+      if (!String(cust?.bankingAccountNumber || '').trim()) {
+        this.clearCoupon();
+      }
     }
   }
 

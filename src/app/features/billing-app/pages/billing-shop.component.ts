@@ -118,7 +118,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   private leaveTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly cardAutoTimers = new Map<string, ReturnType<typeof setInterval>>();
   private modalAutoTimer: ReturnType<typeof setInterval> | null = null;
-  private readonly autoSlideMs = 900;
+  private readonly autoSlideMs = 2200;
   private cartScrollLocked = false;
 
   constructor(
@@ -142,7 +142,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
         distinctUntilChanged(),
         switchMap((q) => {
           const query = String(q || '').trim();
-          if (!query) {
+          if (query.length < 1) {
             this.customerBusy = false;
             this.customerSearched = false;
             this.customers = [];
@@ -279,10 +279,17 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   get couponSelectOptions(): ThemeSelectOption[] {
     return this.coupons
       .filter((c) => c.active)
-      .map((c) => ({
-        value: c.code,
-        label: `${c.code} · ${c.title || c.usageNote || c.discountType}`
-      }));
+      .map((c) => {
+        const disc =
+          c.discountType === 'percent' ? `${c.value}%` : `$${Number(c.value).toFixed(2)}`;
+        const min = Number(c.minSubtotal);
+        const minNote = Number.isFinite(min) && min > 0 ? ` · min ${min.toFixed(2)}` : '';
+        const bankNote = c.kind === 'bank' ? ' · Bank linked' : '';
+        return {
+          value: c.code,
+          label: `${c.code} · ${c.title || disc}${bankNote}${minNote}`
+        };
+      });
   }
 
   get sortSelectOptions(): ThemeSelectOption[] {
@@ -353,17 +360,18 @@ export class BillingShopComponent implements OnInit, OnDestroy {
 
   onCustomerQuery(value: string): void {
     this.customerQuery = value;
-    this.customerSearch$.next(value.trim());
+    this.customerSearch$.next(String(value || '').trim());
   }
 
   clearCustomerQuery(): void {
     this.customerQuery = '';
     this.customerSearched = false;
     this.customers = [];
+    this.customerSearch$.next('');
   }
 
   runCustomerSearch(): void {
-    this.customerSearch$.next(this.customerQuery.trim());
+    this.customerSearch$.next(String(this.customerQuery || '').trim());
   }
 
   setStockFilter(id: StockFilter): void {
@@ -490,7 +498,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
   }
 
   openProduct(product: BillingProduct): void {
-    this.stopCardAutoSlide(product.id);
+    this.stopAllCardAutoSlides();
     this.activeProduct = product;
     this.activeSlide = this.slideFor(product);
     this.productModalLeaving = false;
@@ -536,6 +544,7 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     this.customerQuery = customer.name;
     this.customers = [customer];
     this.customerSearched = false;
+    this.maybeClearBankCouponForCustomer(customer);
   }
 
   clearCustomer(): void {
@@ -543,6 +552,17 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     this.customerQuery = '';
     this.customerSearched = false;
     this.customers = [];
+    this.customerSearch$.next('');
+    this.maybeClearBankCouponForCustomer(null);
+  }
+
+  private maybeClearBankCouponForCustomer(customer: BillingCustomer | null): void {
+    if (this.appliedCoupon?.kind !== 'bank') {
+      return;
+    }
+    if (!String(customer?.bankingAccountNumber || '').trim()) {
+      this.clearDiscount();
+    }
   }
 
   openAddCustomer(): void {
@@ -710,11 +730,32 @@ export class BillingShopComponent implements OnInit, OnDestroy {
     }
 
     const saved = this.coupons.find((c) => String(c.code || '').toUpperCase() === code);
-    const minSubtotal = Number(saved?.minSubtotal || 0);
-    if (saved && minSubtotal > 0 && this.cartSubtotal < minSubtotal) {
+    if (saved?.kind === 'bank') {
+      if (!this.selectedCustomer) {
+        await this.alerts.toastWarning(
+          'Customer required',
+          'Select a customer before applying a bank-linked coupon.'
+        );
+        return;
+      }
+      if (!String(this.selectedCustomer.bankingAccountNumber || '').trim()) {
+        await this.alerts.toastWarning(
+          'Banking account required',
+          'Bank-linked coupons need a customer with a banking account number.'
+        );
+        return;
+      }
+    }
+    const minSubtotal = Number(saved?.minSubtotal);
+    if (
+      saved &&
+      Number.isFinite(minSubtotal) &&
+      minSubtotal > 0 &&
+      Number(this.cartSubtotal) < minSubtotal
+    ) {
       await this.alerts.toastWarning(
         'Minimum not met',
-        `This coupon requires a bill subtotal of at least ${minSubtotal.toFixed(2)}.`
+        `This coupon requires a bill subtotal of at least ${minSubtotal.toFixed(2)} (current: ${Number(this.cartSubtotal).toFixed(2)}).`
       );
       return;
     }
@@ -726,7 +767,8 @@ export class BillingShopComponent implements OnInit, OnDestroy {
           this.billing.validateCoupon({
             code,
             subtotal: this.cartSubtotal,
-            paymentMethod: this.payMethod
+            paymentMethod: this.payMethod,
+            customerId: this.selectedCustomer?.id
           }),
           SHIMMER_MS
         )
