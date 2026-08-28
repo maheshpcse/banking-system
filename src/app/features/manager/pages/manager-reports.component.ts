@@ -329,6 +329,7 @@ export class ManagerReportsComponent implements OnInit, OnDestroy {
           this.persist();
           this.saving = false;
           this.showReview = true;
+          this.reviewPage = 1;
           this.reviewRows = this.composeReviewRows(next);
           await this.alerts.success(
             `Saved “${next.name}”. It stays until you clear it or it auto-expires.`

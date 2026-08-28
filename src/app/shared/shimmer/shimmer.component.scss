@@ -799,7 +799,15 @@
 }
 
 .shimmer__grid--reports{grid-template-columns:1.05fr .95fr;align-items:stretch}
-.shimmer-card--report-form,.shimmer-card--report-list{min-height:22rem;align-content:start}
+.shimmer-card--report-form {
+  min-height: 18rem;
+  align-content: start;
+}
+
+.shimmer-card--report-list {
+  min-height: 18rem;
+  align-content: start;
+}
 .shimmer-card--report-saved{margin-top:1rem;min-height:14rem;align-content:start}
 @media (max-width:900px){.shimmer__grid--reports{grid-template-columns:1fr}}
 
