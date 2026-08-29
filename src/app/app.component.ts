@@ -16,6 +16,8 @@ export class AppComponent implements OnInit, OnDestroy {
   isMarketingSurface = true;
   isBillingSurface = false;
   isConsoleSurface = false;
+  /** Super Admin opened Account (/settings) outside the console shell. */
+  isSaAccountSurface = false;
   hasStickyNav = false;
   bootstrapping = false;
   bootVariant: 'dashboard' | 'history' | 'transfer' | 'settings' | 'form' = 'dashboard';
@@ -78,7 +80,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private syncChrome(url: string): void {
     const path = url.split('?')[0];
-    this.isConsoleSurface = path.startsWith('/console') || path.startsWith('/auth/console');
+    const isSa = !!this.auth.currentUser?.isSuperAdmin;
+    this.isSaAccountSurface = isSa && path.startsWith('/settings');
+    this.isConsoleSurface =
+      path.startsWith('/console') || path.startsWith('/auth/console') || this.isSaAccountSurface;
     this.isMarketingSurface =
       !this.isConsoleSurface &&
       (path === '/' ||

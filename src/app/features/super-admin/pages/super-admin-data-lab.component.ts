@@ -23,10 +23,10 @@ export class SuperAdminDataLabComponent implements OnDestroy {
   readonly commonPassword = 'Demo@12345';
 
   form = this.fb.group({
-    users: [8, [Validators.required, Validators.min(0), Validators.max(50)]],
-    products: [12, [Validators.required, Validators.min(0), Validators.max(200)]],
-    customers: [10, [Validators.required, Validators.min(0), Validators.max(200)]],
-    coupons: [6, [Validators.required, Validators.min(0), Validators.max(50)]]
+    users: [8, [Validators.required, Validators.min(0), Validators.max(40)]],
+    products: [12, [Validators.required, Validators.min(0), Validators.max(40)]],
+    customers: [10, [Validators.required, Validators.min(0), Validators.max(40)]],
+    coupons: [6, [Validators.required, Validators.min(0), Validators.max(40)]]
   });
 
   generating = false;

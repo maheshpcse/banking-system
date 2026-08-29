@@ -17,6 +17,11 @@
     <div class="ambient__sheen"></div>
   </div>
   <app-navbar *ngIf="!isBillingSurface && !isConsoleSurface && !isMarketingSurface"></app-navbar>
+  <a
+    *ngIf="isSaAccountSurface && !bootstrapping"
+    class="sa-return"
+    routerLink="/console"
+  >← Apex Console</a>
   <main [class.main--billing]="isBillingSurface" [class.main--console]="isConsoleSurface">
     <app-shimmer *ngIf="bootstrapping" [variant]="bootVariant"></app-shimmer>
     <div [hidden]="bootstrapping">
