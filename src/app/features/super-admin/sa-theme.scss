@@ -1,8 +1,6 @@
 /**
- * Apex Console theme — reskins the reused mint Banking admin page markup
- * (`.page`, `.data-table`, `.drawer`, etc.) into the obsidian/copper Console
- * look without touching the underlying component TypeScript or templates.
- * Scoped to `.sa-shell` so it never leaks into `/admin` or `/billing`.
+ * Apex Console theme — reskins reused Banking admin page markup under `.sa-shell`
+ * without changing component TypeScript or workflows. Scoped so `/admin` stays mint.
  */
 
 @keyframes sa-slide {
@@ -17,10 +15,21 @@
 }
 
 .sa-shell ::ng-deep {
+  /* Full-bleed page canvas -------------------------------------------------- */
   .page {
-    max-width: 1180px;
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    padding: 1.35rem 0 2.5rem;
     color: var(--sa-ink);
     animation: sa-slide 0.5s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+  }
+
+  .shimmer {
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    padding: 1.35rem 0 2.5rem;
   }
 
   .admin-hero {
@@ -47,6 +56,10 @@
   .muted,
   .form__hint {
     color: var(--sa-muted);
+  }
+
+  .form__field-error {
+    color: var(--sa-danger);
   }
 
   /* Filters / tabs -------------------------------------------------- */
@@ -85,7 +98,7 @@
     background: linear-gradient(
       90deg,
       rgba(232, 236, 239, 0.06) 0%,
-      rgba(201, 139, 75, 0.18) 45%,
+      rgba(201, 139, 75, 0.22) 45%,
       rgba(232, 236, 239, 0.06) 100%
     );
     background-size: 220% 100%;
@@ -121,6 +134,7 @@
   .btn {
     border-radius: var(--sa-radius);
     font-family: 'Manrope', sans-serif;
+    transform: none;
   }
 
   .btn--primary {
@@ -132,6 +146,7 @@
   .btn--primary:hover:not(:disabled) {
     background: linear-gradient(135deg, #d69a5c 0%, #b5793c 100%);
     box-shadow: 0 14px 28px rgba(201, 139, 75, 0.4);
+    transform: none;
   }
 
   .btn--ghost {
@@ -143,16 +158,25 @@
   .btn--ghost:hover:not(:disabled) {
     background: var(--sa-copper-soft);
     border-color: var(--sa-copper);
+    transform: none;
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
   }
 
   /* Tables --------------------------------------------------------------- */
   .table-wrap {
     border-radius: var(--sa-radius);
     box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+    background: var(--sa-panel);
+    border: 1px solid var(--sa-line);
+    overflow: auto;
   }
 
   .data-table {
-    background: var(--sa-panel);
+    background: transparent;
+    width: 100%;
   }
 
   .data-table th {
@@ -178,6 +202,14 @@
     background: rgba(201, 139, 75, 0.05);
   }
 
+  .account-cell {
+    color: var(--sa-ink);
+  }
+
+  .action-bar {
+    background: transparent;
+  }
+
   /* Pills ------------------------------------------------------------------ */
   .pill {
     border-radius: 0.35rem;
@@ -189,13 +221,17 @@
   }
 
   .pill[data-status='active'],
-  .pill[data-status='approved'] {
+  .pill[data-status='approved'],
+  .pill[data-status='manager'],
+  .pill[data-status='admin'],
+  .pill[data-status='customer'] {
     background: rgba(107, 191, 154, 0.16);
     color: var(--sa-success);
   }
 
   .pill[data-status='under_review'],
   .pill[data-status='pending'],
+  .pill[data-status='pending_approval'],
   .pill[data-status='address_required'],
   .pill[data-status='suspended'] {
     background: var(--sa-copper-soft);
@@ -214,8 +250,29 @@
     color: var(--sa-muted);
   }
 
+  .pill--login-blocked,
+  .pill--login-deactivated,
+  .pill--banking-blocked,
+  .pill--banking-deactivated {
+    background: rgba(209, 106, 106, 0.16);
+    color: var(--sa-danger);
+  }
+
+  .pill--login-deleted {
+    background: rgba(139, 149, 165, 0.18);
+    color: var(--sa-muted);
+  }
+
+  .pill--banking-suspended,
+  .pill--banking-under_review,
+  .pill--banking-address_required {
+    background: var(--sa-copper-soft);
+    color: var(--sa-copper);
+  }
+
   /* Icon buttons / menus --------------------------------------------------- */
-  .icon-btn {
+  .icon-btn,
+  .icon-btn--tx {
     background: rgba(232, 236, 239, 0.04);
     border: 1px solid var(--sa-line-strong);
     color: var(--sa-ink);
@@ -224,7 +281,8 @@
 
   .icon-btn:hover,
   .icon-btn--more:hover,
-  .icon-btn--close:hover {
+  .icon-btn--close:hover,
+  .icon-btn--tx:hover {
     background: var(--sa-copper-soft);
     border-color: var(--sa-copper);
     color: var(--sa-copper);
@@ -259,6 +317,11 @@
   }
 
   /* Request cards ----------------------------------------------------------- */
+  .request-list {
+    display: grid;
+    gap: 0.75rem;
+  }
+
   .request-card {
     background: var(--sa-panel);
     border: 1px solid var(--sa-line);
@@ -271,6 +334,10 @@
     color: var(--sa-ink);
   }
 
+  .request-card__copy p {
+    color: var(--sa-muted);
+  }
+
   /* Pager --------------------------------------------------------------------- */
   .pager {
     color: var(--sa-muted);
@@ -279,7 +346,7 @@
   /* Drawer / modals ------------------------------------------------------------- */
   .drawer-backdrop,
   .tx-modal-backdrop {
-    background: rgba(4, 6, 9, 0.62);
+    background: rgba(4, 6, 9, 0.72);
   }
 
   .drawer,
@@ -288,15 +355,23 @@
     border-left: 1px solid var(--sa-line-strong);
     border: 1px solid var(--sa-line-strong);
     box-shadow: -18px 0 44px rgba(0, 0, 0, 0.5);
+    color: var(--sa-ink);
   }
 
   .tx-modal {
     box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
   }
 
+  .tx-modal__head,
   .drawer__head {
     background: var(--sa-panel-raised);
     border-bottom: 1px solid var(--sa-line-strong);
+  }
+
+  .tx-modal__head h2,
+  .drawer__head h2 {
+    font-family: var(--sa-font-display);
+    color: var(--sa-ink);
   }
 
   .drawer__head .icon-btn--close {
@@ -306,11 +381,6 @@
   .drawer__eyebrow {
     color: var(--sa-copper);
     font-family: var(--sa-font-mono);
-  }
-
-  .drawer__head h2 {
-    font-family: var(--sa-font-display);
-    color: var(--sa-ink);
   }
 
   .drawer__section {
@@ -365,24 +435,38 @@
   .form input:not([type='checkbox']):not([type='radio']):not([type='file']),
   .form select,
   .form textarea,
-  .unlock-box textarea {
-    background-color: rgba(232, 236, 239, 0.04);
-    border: 1px solid var(--sa-line-strong);
-    color: var(--sa-ink);
-    border-radius: 0.45rem;
+  .unlock-box textarea,
+  input.input,
+  select.input,
+  textarea.input {
+    background-color: rgba(232, 236, 239, 0.04) !important;
+    border: 1px solid var(--sa-line-strong) !important;
+    color: var(--sa-ink) !important;
+    border-radius: 0.45rem !important;
+    box-shadow: none;
   }
 
   .form input:not([type='checkbox']):not([type='radio']):not([type='file']):hover,
-  .form select:hover {
-    background-color: rgba(201, 139, 75, 0.06);
-    border-color: rgba(201, 139, 75, 0.4);
+  .form select:hover,
+  input.input:hover,
+  select.input:hover {
+    background-color: rgba(201, 139, 75, 0.06) !important;
+    border-color: rgba(201, 139, 75, 0.4) !important;
   }
 
   .form input:not([type='checkbox']):not([type='radio']):not([type='file']):focus,
-  .form select:focus {
-    border-color: var(--sa-copper);
-    box-shadow: 0 0 0 4px rgba(201, 139, 75, 0.16);
-    background-color: rgba(232, 236, 239, 0.06);
+  .form select:focus,
+  input.input:focus,
+  select.input:focus {
+    border-color: var(--sa-copper) !important;
+    box-shadow: 0 0 0 4px rgba(201, 139, 75, 0.16) !important;
+    background-color: rgba(232, 236, 239, 0.06) !important;
+  }
+
+  .form select option,
+  select.input option {
+    background: #171c24;
+    color: #e8ecef;
   }
 
   .form__error {
@@ -399,30 +483,54 @@
     color: var(--sa-muted);
   }
 
-  /* Shimmers -------------------------------------------------------------------- */
-  .shimmer-card {
-    background: var(--sa-panel);
-    border: 1px solid var(--sa-line);
-    box-shadow: none;
+  app-empty-state .empty-state {
+    --es-ink: #e8ecef;
+    --es-muted: #8b95a5;
+    --es-accent: #c98b4b;
+    --es-accent-soft: rgba(201, 139, 75, 0.18);
+    --es-panel: rgba(23, 28, 36, 0.88);
+  }
+
+  /* Shimmers — copper-on-obsidian -------------------------------------------- */
+  .shimmer-card,
+  .shimmer-card--table,
+  .shimmer-card--auth,
+  .shimmer-drawer-profile__section {
+    background: var(--sa-panel) !important;
+    border: 1px solid var(--sa-line) !important;
+    box-shadow: none !important;
   }
 
   .shimmer-line,
   .shimmer-block,
   .shimmer-row,
-  .shimmer-chip {
+  .shimmer-chip,
+  .shimmer-avatar,
+  .shimmer-line--brand,
+  .shimmer-line--title,
+  .shimmer-line--lede,
+  .shimmer-line--btn,
+  .shimmer-line--xs,
+  .shimmer-line--sm,
+  .shimmer-line--md {
     background: linear-gradient(
-      90deg,
+      105deg,
       rgba(232, 236, 239, 0.05) 0%,
-      rgba(201, 139, 75, 0.16) 35%,
-      rgba(232, 236, 239, 0.1) 50%,
-      rgba(201, 139, 75, 0.16) 65%,
-      rgba(232, 236, 239, 0.05) 100%
-    );
-    background-size: 200% 100%;
+      rgba(201, 139, 75, 0.22) 42%,
+      rgba(232, 236, 239, 0.08) 78%
+    ) !important;
+    background-size: 220% 100% !important;
+    border-color: transparent !important;
   }
 
   .shimmer-tx-item {
-    background: rgba(232, 236, 239, 0.04);
-    border: 1px solid var(--sa-line);
+    background: rgba(232, 236, 239, 0.04) !important;
+    border: 1px solid var(--sa-line) !important;
+  }
+
+  .shimmer-stat,
+  .shimmer-hero,
+  .list-shimmer {
+    background: transparent;
   }
 }

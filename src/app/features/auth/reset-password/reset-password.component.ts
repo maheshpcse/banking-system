@@ -3,6 +3,7 @@ import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@ang
 import { Router } from '@angular/router';
 import { Subscription, of } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { AlertService } from '../../../core/services/alert.service';
 import { fieldError } from '../../../core/utils/form-errors';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
@@ -45,6 +46,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
   constructor(
     private readonly fb: FormBuilder,
     private readonly auth: AuthService,
+    private readonly alerts: AlertService,
     private readonly router: Router
   ) {
     const nav = this.router.getCurrentNavigation();
@@ -101,9 +103,24 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
             void this.router.navigateByUrl('/auth/login');
           }, 900);
         },
-        error: (err) => {
+        error: async (err) => {
           this.loading = false;
-          this.formError = err?.error?.message || 'Unable to update password.';
+          const code = err?.error?.code;
+          const message = err?.error?.message || 'Unable to update password.';
+          if (code === 'USE_CONSOLE_LOGIN') {
+            const goConsole = await this.alerts.infoWithAction({
+              title: 'Super Admin account',
+              text: message,
+              confirmText: 'Go to Console login',
+              cancelText: 'Close',
+              actionHint: 'Super Admin password reset is only available on the Apex Console.'
+            });
+            if (goConsole) {
+              void this.router.navigateByUrl('/auth/console/login');
+            }
+            return;
+          }
+          this.formError = message;
         }
       });
   }

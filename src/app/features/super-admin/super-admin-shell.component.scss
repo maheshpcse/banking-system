@@ -105,6 +105,15 @@
   padding-bottom: 6.75rem;
 }
 
+.sa-stage__fluid {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding-left: clamp(1rem, 2.4vw, 2rem);
+  padding-right: clamp(1rem, 2.4vw, 2rem);
+  box-sizing: border-box;
+}
+
 .sa-dock {
   position: fixed;
   left: 50%;
