@@ -49,6 +49,25 @@
   overflow: hidden;
 }
 
+.app-shell--console {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #0e1116;
+}
+
+.app-shell--console main.main--console {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .app-foot {
   flex: 0 0 auto;
   position: relative;

@@ -15,6 +15,7 @@ export class AppComponent implements OnInit, OnDestroy {
   showAmbient = false;
   isMarketingSurface = true;
   isBillingSurface = false;
+  isConsoleSurface = false;
   hasStickyNav = false;
   bootstrapping = false;
   bootVariant: 'dashboard' | 'history' | 'transfer' | 'settings' | 'form' = 'dashboard';
@@ -71,26 +72,35 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
     if (typeof document !== 'undefined') {
       document.body.classList.remove('nb-app-shell');
+      document.body.classList.remove('sa-mode');
     }
   }
 
   private syncChrome(url: string): void {
     const path = url.split('?')[0];
+    this.isConsoleSurface = path.startsWith('/console') || path.startsWith('/auth/console');
     this.isMarketingSurface =
-      path === '/' ||
-      path.startsWith('/novabill') ||
-      path.startsWith('/auth') ||
-      path.startsWith('/error');
+      !this.isConsoleSurface &&
+      (path === '/' ||
+        path.startsWith('/novabill') ||
+        path.startsWith('/auth') ||
+        path.startsWith('/error'));
     this.isBillingSurface = path.startsWith('/billing');
     this.showAmbient =
-      !this.isBillingSurface && (!this.isMarketingSurface || this.shellBoot.isBootstrapping);
+      !this.isBillingSurface &&
+      !this.isConsoleSurface &&
+      (!this.isMarketingSurface || this.shellBoot.isBootstrapping);
     this.hasStickyNav =
-      this.auth.isAuthenticated() && !this.isBillingSurface && !this.isMarketingSurface;
+      this.auth.isAuthenticated() &&
+      !this.isBillingSurface &&
+      !this.isConsoleSurface &&
+      !this.isMarketingSurface;
     this.bootVariant = this.variantForUrl(path);
     this.applyAppearance(this.auth.currentUser);
     if (typeof document !== 'undefined') {
       document.body.classList.toggle('nb-app-shell', this.hasStickyNav);
       document.body.classList.toggle('billing-mode', this.isBillingSurface);
+      document.body.classList.toggle('sa-mode', this.isConsoleSurface);
     }
   }
 
@@ -133,7 +143,11 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     const inApp =
-      !!user && this.auth.isAuthenticated() && !this.isMarketingSurface && !this.isBillingSurface;
+      !!user &&
+      this.auth.isAuthenticated() &&
+      !this.isMarketingSurface &&
+      !this.isBillingSurface &&
+      !this.isConsoleSurface;
     if (inApp) {
       root.dataset['nbTheme'] = user?.settings?.theme || 'daylight';
       root.dataset['nbFont'] = user?.settings?.fontScale || 'comfortable';

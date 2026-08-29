@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/auth.guard';
 import { RoleGuard } from './core/role.guard';
 import { BillingOperatorGuard } from './core/billing-operator.guard';
+import { SuperAdminGuard } from './core/super-admin.guard';
 
 const routes: Routes = [
   {
@@ -61,6 +62,12 @@ const routes: Routes = [
     canActivate: [AuthGuard, BillingOperatorGuard],
     loadChildren: () =>
       import('./features/billing-app/billing-app.module').then((m) => m.BillingAppModule)
+  },
+  {
+    path: 'console',
+    canActivate: [AuthGuard, SuperAdminGuard],
+    loadChildren: () =>
+      import('./features/super-admin/super-admin.module').then((m) => m.SuperAdminModule)
   },
   {
     path: 'error',
