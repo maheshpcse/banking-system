@@ -1,0 +1,428 @@
+/**
+ * Apex Console theme — reskins the reused mint Banking admin page markup
+ * (`.page`, `.data-table`, `.drawer`, etc.) into the obsidian/copper Console
+ * look without touching the underlying component TypeScript or templates.
+ * Scoped to `.sa-shell` so it never leaks into `/admin` or `/billing`.
+ */
+
+@keyframes sa-slide {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.sa-shell ::ng-deep {
+  .page {
+    max-width: 1180px;
+    color: var(--sa-ink);
+    animation: sa-slide 0.5s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+  }
+
+  .admin-hero {
+    align-items: flex-start;
+  }
+
+  .eyebrow {
+    font-family: var(--sa-font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--sa-copper);
+  }
+
+  .admin-hero h1 {
+    font-family: var(--sa-font-display);
+    color: var(--sa-ink);
+    letter-spacing: -0.02em;
+  }
+
+  .lede,
+  .hint,
+  .muted,
+  .form__hint {
+    color: var(--sa-muted);
+  }
+
+  /* Filters / tabs -------------------------------------------------- */
+  .filters button,
+  .tools button {
+    border: 1px solid var(--sa-line-strong);
+    background: rgba(232, 236, 239, 0.03);
+    color: var(--sa-muted);
+    border-radius: 0.4rem;
+  }
+
+  .filters button:hover,
+  .tools button:hover {
+    color: var(--sa-ink);
+    border-color: rgba(201, 139, 75, 0.4);
+  }
+
+  .filters button.is-active,
+  .tools button.is-active,
+  .tools .is-active,
+  .btn--compact.is-active {
+    background: var(--sa-copper-soft);
+    border-color: rgba(201, 139, 75, 0.55);
+    color: var(--sa-copper);
+    font-weight: 700;
+  }
+
+  .filter-row__label {
+    color: var(--sa-muted);
+    font-family: var(--sa-font-mono);
+  }
+
+  .filter-row__label-bone,
+  .filter-shimmer-chip,
+  .pager-shimmer__bone {
+    background: linear-gradient(
+      90deg,
+      rgba(232, 236, 239, 0.06) 0%,
+      rgba(201, 139, 75, 0.18) 45%,
+      rgba(232, 236, 239, 0.06) 100%
+    );
+    background-size: 220% 100%;
+  }
+
+  /* Stat cards -------------------------------------------------------- */
+  .stat-grid {
+    gap: 0.85rem;
+  }
+
+  .stat {
+    background: var(--sa-panel);
+    border: 1px solid var(--sa-line);
+    border-radius: var(--sa-radius);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+    color: var(--sa-ink);
+  }
+
+  .stat app-nb-icon {
+    color: var(--sa-copper);
+  }
+
+  .stat span {
+    color: var(--sa-muted);
+  }
+
+  .stat strong {
+    font-family: var(--sa-font-display);
+    color: var(--sa-ink);
+  }
+
+  /* Buttons ------------------------------------------------------------ */
+  .btn {
+    border-radius: var(--sa-radius);
+    font-family: 'Manrope', sans-serif;
+  }
+
+  .btn--primary {
+    background: linear-gradient(135deg, var(--sa-copper) 0%, var(--sa-copper-deep) 100%);
+    color: #0e1116;
+    box-shadow: 0 12px 24px rgba(201, 139, 75, 0.3);
+  }
+
+  .btn--primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #d69a5c 0%, #b5793c 100%);
+    box-shadow: 0 14px 28px rgba(201, 139, 75, 0.4);
+  }
+
+  .btn--ghost {
+    background: transparent;
+    color: var(--sa-ink);
+    border: 1px solid var(--sa-copper);
+  }
+
+  .btn--ghost:hover:not(:disabled) {
+    background: var(--sa-copper-soft);
+    border-color: var(--sa-copper);
+  }
+
+  /* Tables --------------------------------------------------------------- */
+  .table-wrap {
+    border-radius: var(--sa-radius);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+  }
+
+  .data-table {
+    background: var(--sa-panel);
+  }
+
+  .data-table th {
+    color: var(--sa-copper);
+    font-family: var(--sa-font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--sa-line-strong);
+    background: var(--sa-panel-raised);
+  }
+
+  .data-table td {
+    border-bottom: 1px solid var(--sa-line);
+    color: var(--sa-ink);
+  }
+
+  .data-table td span {
+    color: var(--sa-muted);
+  }
+
+  .data-table tr:hover td {
+    background: rgba(201, 139, 75, 0.05);
+  }
+
+  /* Pills ------------------------------------------------------------------ */
+  .pill {
+    border-radius: 0.35rem;
+    background: rgba(232, 236, 239, 0.08);
+    color: var(--sa-ink);
+    font-family: var(--sa-font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+  }
+
+  .pill[data-status='active'],
+  .pill[data-status='approved'] {
+    background: rgba(107, 191, 154, 0.16);
+    color: var(--sa-success);
+  }
+
+  .pill[data-status='under_review'],
+  .pill[data-status='pending'],
+  .pill[data-status='address_required'],
+  .pill[data-status='suspended'] {
+    background: var(--sa-copper-soft);
+    color: var(--sa-copper);
+  }
+
+  .pill[data-status='blocked'],
+  .pill[data-status='rejected'] {
+    background: rgba(209, 106, 106, 0.16);
+    color: var(--sa-danger);
+  }
+
+  .pill[data-status='deactivated'],
+  .pill[data-status='deleted'] {
+    background: rgba(139, 149, 165, 0.18);
+    color: var(--sa-muted);
+  }
+
+  /* Icon buttons / menus --------------------------------------------------- */
+  .icon-btn {
+    background: rgba(232, 236, 239, 0.04);
+    border: 1px solid var(--sa-line-strong);
+    color: var(--sa-ink);
+    border-radius: 0.45rem;
+  }
+
+  .icon-btn:hover,
+  .icon-btn--more:hover,
+  .icon-btn--close:hover {
+    background: var(--sa-copper-soft);
+    border-color: var(--sa-copper);
+    color: var(--sa-copper);
+    box-shadow: none;
+  }
+
+  .menu__panel {
+    background: var(--sa-panel-raised);
+    border: 1px solid var(--sa-line-strong);
+    border-radius: 0.55rem;
+    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.45);
+  }
+
+  .menu__section {
+    color: var(--sa-muted);
+  }
+
+  .menu__panel button {
+    color: var(--sa-ink);
+  }
+
+  .menu__panel button:hover {
+    background: var(--sa-copper-soft);
+  }
+
+  .menu__panel button.is-danger {
+    color: var(--sa-danger);
+  }
+
+  .menu__panel button.is-danger:hover {
+    background: rgba(209, 106, 106, 0.14);
+  }
+
+  /* Request cards ----------------------------------------------------------- */
+  .request-card {
+    background: var(--sa-panel);
+    border: 1px solid var(--sa-line);
+    border-radius: var(--sa-radius);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+  }
+
+  .request-card__copy strong {
+    font-family: var(--sa-font-display);
+    color: var(--sa-ink);
+  }
+
+  /* Pager --------------------------------------------------------------------- */
+  .pager {
+    color: var(--sa-muted);
+  }
+
+  /* Drawer / modals ------------------------------------------------------------- */
+  .drawer-backdrop,
+  .tx-modal-backdrop {
+    background: rgba(4, 6, 9, 0.62);
+  }
+
+  .drawer,
+  .tx-modal {
+    background: var(--sa-panel);
+    border-left: 1px solid var(--sa-line-strong);
+    border: 1px solid var(--sa-line-strong);
+    box-shadow: -18px 0 44px rgba(0, 0, 0, 0.5);
+  }
+
+  .tx-modal {
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
+  }
+
+  .drawer__head {
+    background: var(--sa-panel-raised);
+    border-bottom: 1px solid var(--sa-line-strong);
+  }
+
+  .drawer__head .icon-btn--close {
+    background: rgba(232, 236, 239, 0.06);
+  }
+
+  .drawer__eyebrow {
+    color: var(--sa-copper);
+    font-family: var(--sa-font-mono);
+  }
+
+  .drawer__head h2 {
+    font-family: var(--sa-font-display);
+    color: var(--sa-ink);
+  }
+
+  .drawer__section {
+    background: var(--sa-panel-raised);
+    border: 1px solid var(--sa-line);
+    box-shadow: none;
+  }
+
+  .drawer__section h3 {
+    font-family: var(--sa-font-display);
+    color: var(--sa-ink);
+  }
+
+  .section-title app-nb-icon,
+  .drawer__section h3 app-nb-icon {
+    color: var(--sa-copper);
+  }
+
+  .meta-grid dt {
+    color: var(--sa-muted);
+    font-family: var(--sa-font-mono);
+  }
+
+  .meta-grid dd {
+    color: var(--sa-ink);
+  }
+
+  .tx-chart__track {
+    background: rgba(232, 236, 239, 0.12);
+  }
+
+  .tx-chart__track span {
+    background: linear-gradient(90deg, var(--sa-copper), var(--sa-copper-deep));
+  }
+
+  .tx-timeline__dot {
+    background: var(--sa-copper);
+  }
+
+  .tx-timeline__dot[data-type='withdraw'],
+  .tx-timeline__dot[data-type='transfer_out'] {
+    background: var(--sa-danger);
+  }
+
+  /* Forms --------------------------------------------------------------------- */
+  .form label span {
+    color: var(--sa-muted);
+    font-family: var(--sa-font-mono);
+    font-size: 0.75rem;
+  }
+
+  .form input:not([type='checkbox']):not([type='radio']):not([type='file']),
+  .form select,
+  .form textarea,
+  .unlock-box textarea {
+    background-color: rgba(232, 236, 239, 0.04);
+    border: 1px solid var(--sa-line-strong);
+    color: var(--sa-ink);
+    border-radius: 0.45rem;
+  }
+
+  .form input:not([type='checkbox']):not([type='radio']):not([type='file']):hover,
+  .form select:hover {
+    background-color: rgba(201, 139, 75, 0.06);
+    border-color: rgba(201, 139, 75, 0.4);
+  }
+
+  .form input:not([type='checkbox']):not([type='radio']):not([type='file']):focus,
+  .form select:focus {
+    border-color: var(--sa-copper);
+    box-shadow: 0 0 0 4px rgba(201, 139, 75, 0.16);
+    background-color: rgba(232, 236, 239, 0.06);
+  }
+
+  .form__error {
+    color: var(--sa-danger);
+  }
+
+  .form__success {
+    color: var(--sa-success);
+  }
+
+  /* Empty state --------------------------------------------------------------- */
+  .empty-state,
+  app-empty-state {
+    color: var(--sa-muted);
+  }
+
+  /* Shimmers -------------------------------------------------------------------- */
+  .shimmer-card {
+    background: var(--sa-panel);
+    border: 1px solid var(--sa-line);
+    box-shadow: none;
+  }
+
+  .shimmer-line,
+  .shimmer-block,
+  .shimmer-row,
+  .shimmer-chip {
+    background: linear-gradient(
+      90deg,
+      rgba(232, 236, 239, 0.05) 0%,
+      rgba(201, 139, 75, 0.16) 35%,
+      rgba(232, 236, 239, 0.1) 50%,
+      rgba(201, 139, 75, 0.16) 65%,
+      rgba(232, 236, 239, 0.05) 100%
+    );
+    background-size: 200% 100%;
+  }
+
+  .shimmer-tx-item {
+    background: rgba(232, 236, 239, 0.04);
+    border: 1px solid var(--sa-line);
+  }
+}

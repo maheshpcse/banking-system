@@ -1,0 +1,218 @@
+<section class="page dl-page">
+  <header class="admin-hero">
+    <div>
+      <p class="eyebrow">Apex Console</p>
+      <h1>Data lab</h1>
+      <p class="lede">
+        Generate realistic demo staff, products, customers, and coupons — review, prune, then commit
+        only what you want written to the database.
+      </p>
+    </div>
+  </header>
+
+  <form class="dl-controls" [formGroup]="form" (ngSubmit)="generate()">
+    <label class="dl-controls__field">
+      <span>Staff users</span>
+      <input type="number" formControlName="users" min="0" max="50" />
+    </label>
+    <label class="dl-controls__field">
+      <span>Products</span>
+      <input type="number" formControlName="products" min="0" max="200" />
+    </label>
+    <label class="dl-controls__field">
+      <span>Customers</span>
+      <input type="number" formControlName="customers" min="0" max="200" />
+    </label>
+    <label class="dl-controls__field">
+      <span>Coupons</span>
+      <input type="number" formControlName="coupons" min="0" max="50" />
+    </label>
+    <button type="submit" class="btn btn--primary" [disabled]="form.invalid || generating">
+      <app-sa-icon name="spark"></app-sa-icon>
+      {{ generating ? 'Generating…' : hasGenerated ? 'Regenerate' : 'Generate' }}
+    </button>
+  </form>
+
+  <p class="dl-password-note" *ngIf="hasGenerated">
+    <app-sa-icon name="shield-key"></app-sa-icon>
+    Common password for generated staff users: <code>{{ commonPasswordFromServer || commonPassword }}</code>
+  </p>
+
+  <div class="dl-shimmer-grid" *ngIf="generating">
+    <app-shimmer variant="data-table" [columns]="5" [rows]="4"></app-shimmer>
+    <app-shimmer variant="data-table" [columns]="5" [rows]="4"></app-shimmer>
+    <app-shimmer variant="data-table" [columns]="5" [rows]="4"></app-shimmer>
+    <app-shimmer variant="data-table" [columns]="5" [rows]="4"></app-shimmer>
+  </div>
+
+  <ng-container *ngIf="!generating && hasGenerated">
+    <div class="dl-actions" *ngIf="totalRows">
+      <span class="dl-actions__count">{{ selectedCount }} of {{ totalRows }} selected</span>
+      <div class="dl-actions__buttons">
+        <button type="button" class="btn btn--ghost btn--compact" [disabled]="!selectedCount" (click)="removeSelected()">
+          <app-sa-icon name="trash"></app-sa-icon>
+          Remove selected
+        </button>
+        <button type="button" class="btn btn--ghost btn--compact" (click)="clearAll()">
+          <app-sa-icon name="clear"></app-sa-icon>
+          Clear all
+        </button>
+        <button
+          type="button"
+          class="btn btn--primary btn--compact"
+          [disabled]="!selectedCount || committing"
+          (click)="commitSelected()"
+        >
+          <app-sa-icon name="check"></app-sa-icon>
+          {{ committing ? 'Committing…' : 'Commit selected' }}
+        </button>
+      </div>
+    </div>
+
+    <app-empty-state *ngIf="!totalRows" kind="requests" message="Nothing generated yet. Set counts above and Generate."></app-empty-state>
+
+    <section class="dl-section" *ngIf="users.length">
+      <h2 class="dl-section__title"><app-sa-icon name="staff"></app-sa-icon> Staff users</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="dl-check-col">
+                <input
+                  type="checkbox"
+                  [checked]="isSectionAllSelected('users')"
+                  [indeterminate]="isSectionPartiallySelected('users')"
+                  (change)="toggleSectionAll('users')"
+                />
+              </th>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Password</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of users">
+              <td class="dl-check-col">
+                <input type="checkbox" [checked]="!!row.selected" (change)="toggleRow(row)" />
+              </td>
+              <td>{{ row.fullName }}</td>
+              <td>{{ row.username }}</td>
+              <td>{{ row.email }}</td>
+              <td><span class="pill" [attr.data-status]="row.role">{{ row.role }}</span></td>
+              <td><code>{{ row.password }}</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="dl-section" *ngIf="products.length">
+      <h2 class="dl-section__title"><app-sa-icon name="box"></app-sa-icon> Products</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="dl-check-col">
+                <input
+                  type="checkbox"
+                  [checked]="isSectionAllSelected('products')"
+                  [indeterminate]="isSectionPartiallySelected('products')"
+                  (change)="toggleSectionAll('products')"
+                />
+              </th>
+              <th>Name</th>
+              <th>SKU</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of products">
+              <td class="dl-check-col">
+                <input type="checkbox" [checked]="!!row.selected" (change)="toggleRow(row)" />
+              </td>
+              <td>{{ row.name }}</td>
+              <td>{{ row.sku }}</td>
+              <td>{{ row.category }}</td>
+              <td>{{ row.price }}</td>
+              <td>{{ row.stock }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="dl-section" *ngIf="customers.length">
+      <h2 class="dl-section__title"><app-sa-icon name="users"></app-sa-icon> Customers</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="dl-check-col">
+                <input
+                  type="checkbox"
+                  [checked]="isSectionAllSelected('customers')"
+                  [indeterminate]="isSectionPartiallySelected('customers')"
+                  (change)="toggleSectionAll('customers')"
+                />
+              </th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Rewards</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of customers">
+              <td class="dl-check-col">
+                <input type="checkbox" [checked]="!!row.selected" (change)="toggleRow(row)" />
+              </td>
+              <td>{{ row.name }}</td>
+              <td>{{ row.email }}</td>
+              <td>{{ row.phone }}</td>
+              <td>{{ row.rewardPoints }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="dl-section" *ngIf="coupons.length">
+      <h2 class="dl-section__title"><app-sa-icon name="ticket"></app-sa-icon> Coupons</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="dl-check-col">
+                <input
+                  type="checkbox"
+                  [checked]="isSectionAllSelected('coupons')"
+                  [indeterminate]="isSectionPartiallySelected('coupons')"
+                  (change)="toggleSectionAll('coupons')"
+                />
+              </th>
+              <th>Code</th>
+              <th>Title</th>
+              <th>Discount</th>
+              <th>Min subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of coupons">
+              <td class="dl-check-col">
+                <input type="checkbox" [checked]="!!row.selected" (change)="toggleRow(row)" />
+              </td>
+              <td>{{ row.code }}</td>
+              <td>{{ row.title }}</td>
+              <td>{{ row.value }}{{ row.discountType === 'percent' ? '%' : '' }}</td>
+              <td>{{ row.minSubtotal }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+</section>
