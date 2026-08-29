@@ -117,9 +117,9 @@ export class ConsoleLoginComponent implements OnInit, OnDestroy {
       next: async () => {
         await this.finishSignIn();
       },
-      error: (err) => {
+      error: async (err) => {
         this.loading = false;
-        this.handleAuthError(err);
+        await this.handleAuthError(err);
       }
     });
   }
@@ -156,9 +156,9 @@ export class ConsoleLoginComponent implements OnInit, OnDestroy {
           'OTP sent'
         );
       },
-      error: (err) => {
+      error: async (err) => {
         this.otpSending = false;
-        this.handleAuthError(err);
+        await this.handleAuthError(err);
       }
     });
   }
@@ -202,7 +202,7 @@ export class ConsoleLoginComponent implements OnInit, OnDestroy {
           }
           return;
         }
-        this.handleAuthError(err);
+        await this.handleAuthError(err);
       }
     });
   }
@@ -221,11 +221,22 @@ export class ConsoleLoginComponent implements OnInit, OnDestroy {
     });
   }
 
-  private handleAuthError(err: { error?: { code?: string; message?: string } }): void {
+  private async handleAuthError(err: { error?: { code?: string; message?: string } }): Promise<void> {
     const code = err?.error?.code;
     const message = err?.error?.message || 'Unable to sign in.';
     if (code === 'USE_BANKING_LOGIN') {
-      this.bankingLoginNotice = message;
+      this.loading = false;
+      this.otpSending = false;
+      const goBanking = await this.alerts.infoWithAction({
+        title: 'Wrong portal',
+        text: message,
+        confirmText: 'Go to Banking login',
+        cancelText: 'Close',
+        actionHint: 'Apex Console is restricted to Super Admin accounts only.'
+      });
+      if (goBanking) {
+        void this.router.navigateByUrl('/auth/login');
+      }
       return;
     }
     this.formError = message;

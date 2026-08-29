@@ -3,6 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription, of } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { AlertService } from '../../../core/services/alert.service';
 import { fieldError } from '../../../core/utils/form-errors';
 import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
@@ -25,6 +26,7 @@ export class ConsoleForgotPasswordComponent implements OnInit, OnDestroy {
   constructor(
     private readonly fb: FormBuilder,
     private readonly auth: AuthService,
+    private readonly alerts: AlertService,
     private readonly router: Router
   ) {}
 
@@ -70,9 +72,24 @@ export class ConsoleForgotPasswordComponent implements OnInit, OnDestroy {
           }
         });
       },
-      error: (err) => {
+      error: async (err) => {
         this.loading = false;
-        this.formError = err?.error?.message || 'Unable to verify that account.';
+        const code = err?.error?.code;
+        const message = err?.error?.message || 'Unable to verify that account.';
+        if (code === 'USE_BANKING_LOGIN') {
+          const goBanking = await this.alerts.infoWithAction({
+            title: 'Wrong portal',
+            text: message,
+            confirmText: 'Go to Banking login',
+            cancelText: 'Close',
+            actionHint: 'Password reset for customers, managers, and admins is on the Banking portal.'
+          });
+          if (goBanking) {
+            void this.router.navigateByUrl('/auth/login');
+          }
+          return;
+        }
+        this.formError = message;
       }
     });
   }

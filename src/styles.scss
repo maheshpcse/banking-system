@@ -884,3 +884,38 @@ html[data-nb-mode='light'] {
   font-variant-numeric: tabular-nums;
   color: #1d2a36;
 }
+
+/* Apex Console (Super Admin) — portal mismatch modals + residual chrome */
+body.sa-mode .swal2-popup {
+  background: #171c24 !important;
+  color: #e8ecef !important;
+  border: 1px solid rgba(201, 139, 75, 0.35) !important;
+  border-radius: 0.55rem !important;
+}
+
+body.sa-mode .swal2-title,
+body.sa-mode .swal2-html-container,
+body.sa-mode .nb-alert__text {
+  color: #e8ecef !important;
+}
+
+body.sa-mode .nb-alert__hint {
+  color: #8b95a5 !important;
+}
+
+body.sa-mode .swal2-confirm {
+  background: linear-gradient(135deg, #c98b4b, #a86b34) !important;
+  color: #0e1116 !important;
+  border: 0 !important;
+}
+
+body.sa-mode .swal2-cancel {
+  background: transparent !important;
+  color: #e8ecef !important;
+  border: 1px solid #c98b4b !important;
+}
+
+body.sa-mode .swal2-icon.swal2-info {
+  border-color: #c98b4b !important;
+  color: #c98b4b !important;
+}

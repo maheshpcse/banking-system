@@ -336,11 +336,11 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
     if (code === 'USE_CONSOLE_LOGIN') {
       const goConsole = await this.alerts.infoWithAction({
-        title: 'Super Admin account',
+        title: 'Wrong portal',
         text: message,
         confirmText: 'Go to Console login',
         cancelText: 'Close',
-        actionHint: 'Super Admin accounts sign in through the Apex Console, not the Banking login.'
+        actionHint: 'Super Admin accounts cannot authenticate on Banking or Billing pages. Use Apex Console only.'
       });
       if (goConsole) {
         void this.router.navigateByUrl('/auth/console/login');

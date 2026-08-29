@@ -40,6 +40,15 @@
   --es-accent-soft: rgba(255, 200, 1, 0.28);
 }
 
+:host-context(body.sa-mode) .empty-state,
+.empty-state[data-tone='console'] {
+  --es-ink: #e8ecef;
+  --es-muted: #8b95a5;
+  --es-accent: #c98b4b;
+  --es-accent-soft: rgba(201, 139, 75, 0.2);
+  --es-panel: rgba(23, 28, 36, 0.9);
+}
+
 .empty-state__art {
   width: min(9.5rem, 40vw);
 }
