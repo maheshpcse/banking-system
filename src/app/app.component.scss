@@ -68,6 +68,28 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.sa-return {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.65rem 1.15rem;
+  background: #171c24;
+  border-bottom: 1px solid rgba(201, 139, 75, 0.28);
+  color: #c98b4b;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  z-index: 5;
+}
+
+.sa-return:hover {
+  color: #e8ecef;
+  background: #1c222c;
+}
+
 .app-foot {
   flex: 0 0 auto;
   position: relative;
