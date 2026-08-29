@@ -114,11 +114,10 @@ export class ConsoleResetPasswordComponent implements OnInit, OnDestroy {
           const code = err?.error?.code;
           const message = err?.error?.message || 'Unable to update password.';
           if (code === 'USE_BANKING_LOGIN') {
-            const goBanking = await this.alerts.infoWithAction({
+            const goBanking = await this.alerts.portalMismatch({
               title: 'Wrong portal',
               text: message,
               confirmText: 'Go to Banking login',
-              cancelText: 'Close',
               actionHint: 'Apex Console password reset is for Super Admin only.'
             });
             if (goBanking) {

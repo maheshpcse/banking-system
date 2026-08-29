@@ -77,11 +77,10 @@ export class ConsoleForgotPasswordComponent implements OnInit, OnDestroy {
         const code = err?.error?.code;
         const message = err?.error?.message || 'Unable to verify that account.';
         if (code === 'USE_BANKING_LOGIN') {
-          const goBanking = await this.alerts.infoWithAction({
+          const goBanking = await this.alerts.portalMismatch({
             title: 'Wrong portal',
             text: message,
             confirmText: 'Go to Banking login',
-            cancelText: 'Close',
             actionHint: 'Password reset for customers, managers, and admins is on the Banking portal.'
           });
           if (goBanking) {

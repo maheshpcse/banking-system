@@ -108,11 +108,10 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
           const code = err?.error?.code;
           const message = err?.error?.message || 'Unable to update password.';
           if (code === 'USE_CONSOLE_LOGIN') {
-            const goConsole = await this.alerts.infoWithAction({
-              title: 'Super Admin account',
+            const goConsole = await this.alerts.portalMismatch({
+              title: 'Wrong portal',
               text: message,
               confirmText: 'Go to Console login',
-              cancelText: 'Close',
               actionHint: 'Super Admin password reset is only available on the Apex Console.'
             });
             if (goConsole) {
