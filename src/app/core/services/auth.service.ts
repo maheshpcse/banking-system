@@ -63,6 +63,39 @@ export class AuthService {
     );
   }
 
+  /**
+   * Detect Super Admin without creating a session — relies on Banking login
+   * rejecting `isSuperAdmin` before password verification (`USE_CONSOLE_LOGIN`).
+   * Skips when the API has not deployed portal gates (avoids burning lockout
+   * attempts on older servers).
+   */
+  probeSuperAdminPortalBlock(identifier: string): Promise<boolean> {
+    const id = String(identifier || '').trim();
+    if (!id) {
+      return Promise.resolve(false);
+    }
+    return new Promise((resolve) => {
+      this.http.get<{ features?: { portalGates?: boolean } }>(`${environment.apiUrl}/health`).subscribe({
+        next: (health) => {
+          if (!health?.features?.portalGates) {
+            resolve(false);
+            return;
+          }
+          this.http
+            .post(`${environment.apiUrl}/auth/login`, {
+              identifier: id,
+              password: '__portal_probe__'
+            })
+            .subscribe({
+              next: () => resolve(false),
+              error: (err) => resolve(err?.error?.code === 'USE_CONSOLE_LOGIN')
+            });
+        },
+        error: () => resolve(false)
+      });
+    });
+  }
+
   /** Super Admin Console login — rejects non–Super Admin accounts. */
   consoleLogin(payload: { identifier: string; password: string }): Observable<AuthResponse> {
     return this.http

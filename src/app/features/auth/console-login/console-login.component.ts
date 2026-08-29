@@ -221,15 +221,23 @@ export class ConsoleLoginComponent implements OnInit, OnDestroy {
     });
   }
 
-  private async handleAuthError(err: { error?: { code?: string; message?: string } }): Promise<void> {
-    const code = err?.error?.code;
-    const message = err?.error?.message || 'Unable to sign in.';
+  private async handleAuthError(err: {
+    status?: number;
+    error?: { code?: string; message?: string } | string;
+  }): Promise<void> {
+    this.loading = false;
+    this.otpSending = false;
+    const code = typeof err?.error === 'object' && err.error ? err.error.code : undefined;
+    const apiMessage =
+      typeof err?.error === 'object' && err.error
+        ? err.error.message
+        : typeof err?.error === 'string'
+          ? err.error
+          : undefined;
     if (code === 'USE_BANKING_LOGIN') {
-      this.loading = false;
-      this.otpSending = false;
       const goBanking = await this.alerts.portalMismatch({
         title: 'Wrong portal',
-        text: message,
+        text: apiMessage || 'Access denied.',
         confirmText: 'Go to Banking login',
         actionHint:
           'Apex Console authentication is restricted to Super Admin. Customers, managers, and admins must use Banking login.'
@@ -239,6 +247,12 @@ export class ConsoleLoginComponent implements OnInit, OnDestroy {
       }
       return;
     }
-    this.formError = message;
+    if (err?.status === 404) {
+      this.formError =
+        'Console sign-in API is not available on the server yet (missing /api/auth/console). Redeploy banking-system-server so Apex Console auth routes are live.';
+      await this.alerts.info(this.formError, 'Console API unavailable');
+      return;
+    }
+    this.formError = apiMessage || 'Unable to sign in.';
   }
 }

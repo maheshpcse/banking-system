@@ -88,6 +88,12 @@ export class ConsoleForgotPasswordComponent implements OnInit, OnDestroy {
           }
           return;
         }
+        if (err?.status === 404) {
+          this.formError =
+            'Console auth API is not available on the server yet. Redeploy banking-system-server so /api/auth/console routes are live.';
+          await this.alerts.info(this.formError, 'Console API unavailable');
+          return;
+        }
         this.formError = message;
       }
     });
