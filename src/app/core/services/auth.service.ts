@@ -63,6 +63,13 @@ export class AuthService {
     );
   }
 
+  /** Super Admin Console login — rejects non–Super Admin accounts. */
+  consoleLogin(payload: { identifier: string; password: string }): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/auth/console/login`, payload)
+      .pipe(tap((res) => this.persistSession(res)));
+  }
+
   requestOtp(payload: {
     channel: 'email' | 'phone';
     identifier: string;
@@ -82,6 +89,22 @@ export class AuthService {
     }>(`${environment.apiUrl}/auth/otp/request`, payload);
   }
 
+  consoleRequestOtp(payload: { identifier: string }): Observable<{
+    message: string;
+    expiresInMinutes: number;
+    channel: string;
+    maskedDestination: string;
+    delivered?: boolean;
+  }> {
+    return this.http.post<{
+      message: string;
+      expiresInMinutes: number;
+      channel: string;
+      maskedDestination: string;
+      delivered?: boolean;
+    }>(`${environment.apiUrl}/auth/console/otp/request`, { ...payload, channel: 'email' });
+  }
+
   verifyOtp(payload: {
     channel: 'email' | 'phone';
     identifier: string;
@@ -92,10 +115,26 @@ export class AuthService {
       .pipe(tap((res) => this.persistSession(res)));
   }
 
+  consoleVerifyOtp(payload: { identifier: string; code: string }): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/auth/console/otp/verify`, {
+        ...payload,
+        channel: 'email'
+      })
+      .pipe(tap((res) => this.persistSession(res)));
+  }
+
   forgotPassword(identifier: string): Observable<ForgotPasswordResponse> {
     return this.http.post<ForgotPasswordResponse>(`${environment.apiUrl}/auth/forgot-password`, {
       identifier
     });
+  }
+
+  consoleForgotPassword(identifier: string): Observable<ForgotPasswordResponse> {
+    return this.http.post<ForgotPasswordResponse>(
+      `${environment.apiUrl}/auth/console/forgot-password`,
+      { identifier }
+    );
   }
 
   /** Public — ask Super Admin to clear a login lock (no auth). */
@@ -126,6 +165,17 @@ export class AuthService {
     confirmPassword: string;
   }): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/reset-password`, payload);
+  }
+
+  consoleResetPassword(payload: {
+    resetToken: string;
+    password: string;
+    confirmPassword: string;
+  }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.apiUrl}/auth/console/reset-password`,
+      payload
+    );
   }
 
   refreshMe(): Observable<{ user: User }> {
