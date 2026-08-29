@@ -139,5 +139,30 @@
 </section>
 
 <ng-template #consoleShimmer>
-  <app-shimmer variant="auth" panel="login"></app-shimmer>
+  <section class="console-auth console-auth--shimmer" aria-hidden="true">
+    <div class="console-auth__stage">
+      <div class="console-auth__grid"></div>
+      <div class="console-auth__glow"></div>
+
+      <div class="console-auth__copy console-auth__copy--shimmer">
+        <span class="sa-bone sa-bone--brand"></span>
+        <span class="sa-bone sa-bone--title"></span>
+        <span class="sa-bone sa-bone--lede"></span>
+      </div>
+
+      <div class="console-panel console-panel--shimmer">
+        <div class="sa-bone-tabs">
+          <span class="sa-bone sa-bone--tab"></span>
+          <span class="sa-bone sa-bone--tab"></span>
+        </div>
+        <span class="sa-bone sa-bone--label"></span>
+        <span class="sa-bone sa-bone--field"></span>
+        <span class="sa-bone sa-bone--label"></span>
+        <span class="sa-bone sa-bone--field"></span>
+        <span class="sa-bone sa-bone--btn"></span>
+        <span class="sa-bone sa-bone--link"></span>
+        <span class="sa-bone sa-bone--link sa-bone--link-sm"></span>
+      </div>
+    </div>
+  </section>
 </ng-template>
