@@ -7,6 +7,9 @@ import { ResetPasswordComponent } from './reset-password/reset-password.componen
 import { StaffSignupComponent } from './staff-signup/staff-signup.component';
 import { StaffStatusComponent } from './staff-status/staff-status.component';
 import { ContactAdminComponent } from './contact-admin/contact-admin.component';
+import { ConsoleLoginComponent } from './console-login/console-login.component';
+import { ConsoleForgotPasswordComponent } from './console-forgot-password/console-forgot-password.component';
+import { ConsoleResetPasswordComponent } from './console-reset-password/console-reset-password.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -16,7 +19,10 @@ const routes: Routes = [
   { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'staff-signup', component: StaffSignupComponent },
   { path: 'staff-status', component: StaffStatusComponent },
-  { path: 'contact-admin', component: ContactAdminComponent }
+  { path: 'contact-admin', component: ContactAdminComponent },
+  { path: 'console/login', component: ConsoleLoginComponent },
+  { path: 'console/forgot-password', component: ConsoleForgotPasswordComponent },
+  { path: 'console/reset-password', component: ConsoleResetPasswordComponent }
 ];
 
 @NgModule({

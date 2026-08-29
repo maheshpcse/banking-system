@@ -1,5 +1,8 @@
 import { Component, Input } from '@angular/core';
 
+/** Names with a distinct Apex Console (sa-mode) glyph. */
+const SA_REMAPPED_NAMES: ReadonlySet<string> = new Set(['user', 'shield', 'clock', 'bell', 'chart', 'card']);
+
 export type NbIconName =
   | 'wallet'
   | 'arrow-up'
@@ -22,7 +25,7 @@ export type NbIconName =
   selector: 'app-nb-icon',
   template: `
     <svg class="nb-icon" viewBox="0 0 24 24" aria-hidden="true" [attr.data-name]="name">
-      <ng-container [ngSwitch]="name">
+      <ng-container [ngSwitch]="effectiveName">
         <g *ngSwitchCase="'wallet'">
           <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H19a1 1 0 0 1 1 1v2"></path>
           <rect x="2.5" y="8" width="19" height="11.5" rx="2.2"></rect>
@@ -94,6 +97,34 @@ export type NbIconName =
           <rect x="4.5" y="10.5" width="15" height="10" rx="2"></rect>
           <path d="M7.5 10.5V7.75a4.5 4.5 0 0 1 9 0V10.5"></path>
         </g>
+
+        <!-- Apex Console (sa-mode) variants — sharper, angular geometry -->
+        <g *ngSwitchCase="'sa-user'">
+          <path d="M12 4.5 8.75 6.35v3.7c0 2.55 1.4 4.35 3.25 5 1.85-.65 3.25-2.45 3.25-5v-3.7Z"></path>
+          <path d="M8.75 15.75h6.5l1.5 4.5h-9.5Z"></path>
+        </g>
+        <g *ngSwitchCase="'sa-shield'">
+          <path d="M12 3 19 6v5.6c0 4.5-2.95 7.5-7 8.8-4.05-1.3-7-4.3-7-8.8V6Z"></path>
+          <path d="M9 11.5 11 13.5 15.5 9"></path>
+        </g>
+        <g *ngSwitchCase="'sa-clock'">
+          <path d="M12 3.5 20.5 8v8L12 20.5 3.5 16V8Z"></path>
+          <path d="M12 8v4.5l3 1.75"></path>
+        </g>
+        <g *ngSwitchCase="'sa-bell'">
+          <path d="M6 17.5V10.5a6 6 0 0 1 12 0v7"></path>
+          <path d="M4.5 17.5h15"></path>
+          <path d="M9.5 20.5h5"></path>
+        </g>
+        <g *ngSwitchCase="'sa-chart'">
+          <path d="M4 4v16h16"></path>
+          <path d="M7.5 15.5 11 11l3 2.5 4-5.5"></path>
+        </g>
+        <g *ngSwitchCase="'sa-card'">
+          <path d="M3 6h18v12H3Z"></path>
+          <path d="M3 10.5h18"></path>
+          <path d="M6.5 14.5h4"></path>
+        </g>
       </ng-container>
     </svg>
   `,
@@ -117,4 +148,16 @@ export type NbIconName =
 })
 export class NbIconComponent {
   @Input() name: NbIconName = 'wallet';
+
+  /** Swaps to the sharper Apex Console glyph set while `body.sa-mode` is active. */
+  get effectiveName(): string {
+    if (SA_REMAPPED_NAMES.has(this.name) && this.isSaMode()) {
+      return `sa-${this.name}`;
+    }
+    return this.name;
+  }
+
+  private isSaMode(): boolean {
+    return typeof document !== 'undefined' && document.body.classList.contains('sa-mode');
+  }
 }

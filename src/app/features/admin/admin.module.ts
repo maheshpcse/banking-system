@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from '../../shared/shared.module';
+import { AdminPagesModule } from './admin-pages.module';
 import { AdminShellComponent } from './admin-shell.component';
 import { AdminOverviewComponent } from './pages/admin-overview.component';
 import { AdminCustomersComponent } from './pages/admin-customers.component';
@@ -23,14 +24,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [
-    AdminShellComponent,
-    AdminOverviewComponent,
-    AdminCustomersComponent,
-    AdminRequestsComponent,
-    AdminStaffComponent,
-    AdminNotificationsComponent
-  ],
-  imports: [SharedModule, RouterModule.forChild(routes)]
+  declarations: [AdminShellComponent],
+  imports: [SharedModule, AdminPagesModule, RouterModule.forChild(routes)]
 })
 export class AdminModule {}

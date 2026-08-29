@@ -1,0 +1,35 @@
+<div class="sa-shell">
+  <header class="sa-topbar">
+    <div class="sa-topbar__brand">
+      <span class="sa-topbar__mark" aria-hidden="true"></span>
+      <div>
+        <p class="sa-topbar__eyebrow">Apex Console</p>
+        <strong>Super Admin</strong>
+      </div>
+    </div>
+    <div class="sa-topbar__operator">
+      <span class="sa-topbar__operator-name">{{ operatorName }}</span>
+    </div>
+  </header>
+
+  <main class="sa-stage">
+    <router-outlet></router-outlet>
+  </main>
+
+  <nav class="sa-dock" aria-label="Console navigation">
+    <a
+      *ngFor="let item of dockItems"
+      class="sa-dock__item"
+      [routerLink]="item.path"
+      routerLinkActive="is-active"
+      [routerLinkActiveOptions]="{ exact: !!item.exact }"
+    >
+      <app-sa-icon [name]="item.icon"></app-sa-icon>
+      <span class="sa-dock__label">{{ item.label }}</span>
+    </a>
+    <button type="button" class="sa-dock__item sa-dock__item--action" (click)="signOut()">
+      <app-sa-icon name="signout"></app-sa-icon>
+      <span class="sa-dock__label">Sign out</span>
+    </button>
+  </nav>
+</div>

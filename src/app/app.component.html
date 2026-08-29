@@ -3,6 +3,7 @@
   [class.app-shell--marketing]="isMarketingSurface && !bootstrapping"
   [class.app-shell--has-nav]="hasStickyNav"
   [class.app-shell--billing]="isBillingSurface"
+  [class.app-shell--console]="isConsoleSurface"
 >
   <div class="ambient" *ngIf="showAmbient" aria-hidden="true">
     <div class="ambient__wash"></div>
@@ -15,15 +16,20 @@
     <div class="ambient__coin ambient__coin--c"></div>
     <div class="ambient__sheen"></div>
   </div>
-  <app-navbar *ngIf="!isBillingSurface && !isMarketingSurface"></app-navbar>
-  <main [class.main--billing]="isBillingSurface">
+  <app-navbar *ngIf="!isBillingSurface && !isConsoleSurface && !isMarketingSurface"></app-navbar>
+  <a
+    *ngIf="isSaAccountSurface && !bootstrapping"
+    class="sa-return"
+    routerLink="/console"
+  >← Apex Console</a>
+  <main [class.main--billing]="isBillingSurface" [class.main--console]="isConsoleSurface">
     <app-shimmer *ngIf="bootstrapping" [variant]="bootVariant"></app-shimmer>
     <div [hidden]="bootstrapping">
       <router-outlet></router-outlet>
     </div>
     <footer
       class="app-foot"
-      *ngIf="!isBillingSurface && !isMarketingSurface && !bootstrapping"
+      *ngIf="!isBillingSurface && !isConsoleSurface && !isMarketingSurface && !bootstrapping"
     >
       <span class="app-foot__sig">
         <a class="app-foot__link" routerLink="/">NovaBank</a>
@@ -35,10 +41,10 @@
         <a class="app-foot__link" routerLink="/">NovaBank</a>. All rights reserved.
       </span>
     </footer>
-    <div class="app-foot app-foot--shimmer" *ngIf="!isBillingSurface && !isMarketingSurface && bootstrapping" aria-hidden="true">
+    <div class="app-foot app-foot--shimmer" *ngIf="!isBillingSurface && !isConsoleSurface && !isMarketingSurface && bootstrapping" aria-hidden="true">
       <span class="app-foot__bone"></span>
       <span class="app-foot__bone app-foot__bone--copy"></span>
     </div>
   </main>
-  <app-portal-launch></app-portal-launch>
+  <app-portal-launch *ngIf="!isConsoleSurface"></app-portal-launch>
 </div>

@@ -1,0 +1,143 @@
+<section class="console-auth" *ngIf="!pageLoading; else consoleShimmer">
+  <div class="console-auth__stage">
+    <div class="console-auth__grid" aria-hidden="true"></div>
+    <div class="console-auth__glow" aria-hidden="true"></div>
+
+    <div class="console-auth__copy">
+      <p class="console-auth__brand"><app-sa-icon name="shield-key"></app-sa-icon> Apex Console</p>
+      <h1>Super Admin sign-in</h1>
+      <p>Password or email OTP. This console is restricted to Super Admin accounts.</p>
+    </div>
+
+    <div class="console-panel">
+      <div class="console-methods" role="tablist" aria-label="Sign-in method">
+        <button
+          type="button"
+          role="tab"
+          [class.is-active]="loginMethod === 'password'"
+          [attr.aria-selected]="loginMethod === 'password'"
+          (click)="setLoginMethod('password')"
+        >
+          Password
+        </button>
+        <button
+          type="button"
+          role="tab"
+          [class.is-active]="loginMethod === 'email-otp'"
+          [attr.aria-selected]="loginMethod === 'email-otp'"
+          (click)="setLoginMethod('email-otp')"
+        >
+          Email OTP
+        </button>
+      </div>
+
+      <form class="form" *ngIf="loginMethod === 'password'" [formGroup]="form" (ngSubmit)="submit()">
+        <label>
+          <span>Username or email</span>
+          <input type="text" formControlName="identifier" autocomplete="username" placeholder="root or you@apex.io" />
+          <p class="form__field-error" *ngIf="fieldError(form.controls.identifier, 'Username or email') as msg">
+            {{ msg }}
+          </p>
+        </label>
+        <label>
+          <span>Password</span>
+          <div class="password-field">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              class="password-field__toggle"
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <ng-container *ngIf="!showPassword; else hideIcon">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </ng-container>
+                <ng-template #hideIcon>
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94"></path>
+                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"></path>
+                  <path d="M14.12 14.12a3 3 0 0 1-4.24-4.24"></path>
+                  <path d="M1 1l22 22"></path>
+                </ng-template>
+              </svg>
+            </button>
+          </div>
+          <p class="form__field-error" *ngIf="fieldError(form.controls.password, 'Password') as msg">
+            {{ msg }}
+          </p>
+        </label>
+
+        <p class="form__error" *ngIf="formError">{{ formError }}</p>
+        <div class="console-banking-notice" *ngIf="bankingLoginNotice">
+          <p>{{ bankingLoginNotice }}</p>
+          <a routerLink="/auth/login">Go to Banking login</a>
+        </div>
+
+        <button class="btn btn--primary" type="submit" [disabled]="loading">
+          {{ loading ? 'Signing in…' : 'Sign in' }}
+        </button>
+      </form>
+
+      <form class="form" *ngIf="loginMethod === 'email-otp'" [formGroup]="otpForm" (ngSubmit)="verifyOtp()">
+        <label>
+          <span>Username or email</span>
+          <input type="text" formControlName="identifier" autocomplete="username" placeholder="root or you@apex.io" />
+          <p class="form__field-error" *ngIf="fieldError(otpForm.controls.identifier, 'Username or email') as msg">
+            {{ msg }}
+          </p>
+        </label>
+
+        <div class="otp-send-row">
+          <button type="button" class="btn btn--ghost" [disabled]="otpSending || loading" (click)="requestOtp()">
+            {{ otpSending ? 'Sending…' : otpSent ? 'Resend OTP' : 'Send OTP' }}
+          </button>
+          <p class="otp-info" *ngIf="otpSent">
+            OTP sent{{ maskedDestination ? ' to ' + maskedDestination : '' }} and will expire in 10 minutes.
+          </p>
+        </div>
+
+        <label>
+          <span>OTP code</span>
+          <input
+            type="text"
+            inputmode="numeric"
+            formControlName="code"
+            autocomplete="one-time-code"
+            maxlength="8"
+            placeholder="6-digit code"
+          />
+          <p class="form__field-error" *ngIf="fieldError(otpForm.controls.code, 'OTP code') as msg">
+            {{ msg }}
+          </p>
+        </label>
+
+        <p class="form__error" *ngIf="formError">{{ formError }}</p>
+        <div class="console-banking-notice" *ngIf="bankingLoginNotice">
+          <p>{{ bankingLoginNotice }}</p>
+          <a routerLink="/auth/login">Go to Banking login</a>
+        </div>
+
+        <button class="btn btn--primary" type="submit" [disabled]="loading || !otpSent">
+          {{ loading ? 'Verifying…' : 'Verify & sign in' }}
+        </button>
+      </form>
+
+      <p class="console-switch">
+        <a routerLink="/auth/console/forgot-password">Forgot password?</a>
+      </p>
+      <p class="console-switch console-switch--home">
+        <a routerLink="/auth/login">Not Super Admin? Banking login</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<ng-template #consoleShimmer>
+  <app-shimmer variant="auth" panel="login"></app-shimmer>
+</ng-template>

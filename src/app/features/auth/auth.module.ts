@@ -8,6 +8,10 @@ import { ResetPasswordComponent } from './reset-password/reset-password.componen
 import { StaffSignupComponent } from './staff-signup/staff-signup.component';
 import { StaffStatusComponent } from './staff-status/staff-status.component';
 import { ContactAdminComponent } from './contact-admin/contact-admin.component';
+import { ConsoleLoginComponent } from './console-login/console-login.component';
+import { ConsoleForgotPasswordComponent } from './console-forgot-password/console-forgot-password.component';
+import { ConsoleResetPasswordComponent } from './console-reset-password/console-reset-password.component';
+import { SaIconModule } from '../super-admin/icons/sa-icon.module';
 
 @NgModule({
   declarations: [
@@ -17,8 +21,11 @@ import { ContactAdminComponent } from './contact-admin/contact-admin.component';
     ResetPasswordComponent,
     StaffSignupComponent,
     StaffStatusComponent,
-    ContactAdminComponent
+    ContactAdminComponent,
+    ConsoleLoginComponent,
+    ConsoleForgotPasswordComponent,
+    ConsoleResetPasswordComponent
   ],
-  imports: [SharedModule, AuthRoutingModule]
+  imports: [SharedModule, AuthRoutingModule, SaIconModule]
 })
 export class AuthModule {}

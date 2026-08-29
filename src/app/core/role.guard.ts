@@ -14,6 +14,12 @@ export class RoleGuard implements CanActivate {
     const role = this.auth.currentUser?.role || 'customer';
     const allowed: UserRole[] = (route.data?.['roles'] as UserRole[]) || ['admin', 'manager'];
     const allowSuperAdmin = !!route.data?.['allowSuperAdmin'];
+    /* Super Admin has its own Apex Console (`/console`) — send them there
+     * instead of the mint Banking Admin shell, unless the route explicitly
+     * welcomes Super Admin (e.g. `/manager` for Billing oversight). */
+    if (this.auth.currentUser?.isSuperAdmin && !allowSuperAdmin) {
+      return this.router.parseUrl('/console');
+    }
     if (allowed.includes(role)) {
       return true;
     }
