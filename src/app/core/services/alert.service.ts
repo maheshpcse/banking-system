@@ -159,6 +159,53 @@ export class AlertService {
     });
   }
 
+  /**
+   * Wrong-portal authentication block (Banking ↔ Apex Console).
+   * Strong error modal with a primary CTA to the correct login.
+   */
+  async portalMismatch(options: {
+    title: string;
+    text: string;
+    confirmText: string;
+    actionHint?: string;
+    cancelText?: string;
+  }): Promise<boolean> {
+    const escape = (value: string) =>
+      String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    const result = await Swal.fire({
+      icon: 'error',
+      title: options.title,
+      html: `
+        <p class="nb-alert__text">${escape(options.text)}</p>
+        ${
+          options.actionHint
+            ? `<p class="nb-alert__hint" style="margin:0.85rem 0 0;font-size:0.92rem;">${escape(
+                options.actionHint
+              )}</p>`
+            : ''
+        }
+      `,
+      showCancelButton: true,
+      confirmButtonText: options.confirmText,
+      cancelButtonText: options.cancelText || 'Close',
+      reverseButtons: true,
+      confirmButtonColor: '#c45b6c',
+      cancelButtonColor: this.theme.cancelButtonColor,
+      background: this.theme.background,
+      color: this.theme.color,
+      ...this.staticBackdrop,
+      customClass: {
+        ...this.alertClasses,
+        confirmButton: 'nb-alert__confirm nb-alert__confirm--danger'
+      }
+    });
+    return !!result.isConfirmed;
+  }
+
   /** Info modal with a secondary navigation action (e.g. Check status). */
   async infoWithAction(options: {
     title?: string;

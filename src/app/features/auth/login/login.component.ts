@@ -174,6 +174,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         const message = err?.error?.message || 'Unable to send OTP.';
         const code = err?.error?.code;
         if (
+          code === 'USE_CONSOLE_LOGIN' ||
           code === 'STAFF_PENDING' ||
           code === 'STAFF_REJECTED' ||
           code === 'ACCOUNT_BLOCKED' ||
@@ -335,12 +336,12 @@ export class LoginComponent implements OnInit, OnDestroy {
       return;
     }
     if (code === 'USE_CONSOLE_LOGIN') {
-      const goConsole = await this.alerts.infoWithAction({
+      const goConsole = await this.alerts.portalMismatch({
         title: 'Wrong portal',
         text: message,
         confirmText: 'Go to Console login',
-        cancelText: 'Close',
-        actionHint: 'Super Admin accounts cannot authenticate on Banking or Billing pages. Use Apex Console only.'
+        actionHint:
+          'Super Admin accounts cannot sign in, use OTP, or reset passwords on Banking or Billing pages. Use Apex Console only.'
       });
       if (goConsole) {
         void this.router.navigateByUrl('/auth/console/login');

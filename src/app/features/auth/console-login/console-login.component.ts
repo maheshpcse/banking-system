@@ -227,12 +227,12 @@ export class ConsoleLoginComponent implements OnInit, OnDestroy {
     if (code === 'USE_BANKING_LOGIN') {
       this.loading = false;
       this.otpSending = false;
-      const goBanking = await this.alerts.infoWithAction({
+      const goBanking = await this.alerts.portalMismatch({
         title: 'Wrong portal',
         text: message,
         confirmText: 'Go to Banking login',
-        cancelText: 'Close',
-        actionHint: 'Apex Console is restricted to Super Admin accounts only.'
+        actionHint:
+          'Apex Console authentication is restricted to Super Admin. Customers, managers, and admins must use Banking login.'
       });
       if (goBanking) {
         void this.router.navigateByUrl('/auth/login');
