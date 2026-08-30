@@ -867,3 +867,136 @@
     margin-left: 0;
   }
 }
+
+/* Left filter drawer (Console / shared) ------------------------------------ */
+.sa-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin: 0 0 1.15rem;
+}
+
+.sa-toolbar__summary {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+
+.sa-toolbar__summary strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.filter-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(24, 38, 48, 0.28);
+  z-index: 1200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.36s var(--ease-out);
+}
+
+.filter-drawer-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.filter-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1210;
+  width: min(380px, 100vw);
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.98), rgba(241, 249, 252, 0.96));
+  border-right: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 18px 0 40px rgba(90, 120, 150, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.36s var(--ease-out);
+}
+
+.filter-drawer.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.filter-drawer__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex: 0 0 auto;
+  padding: 1.15rem 1.2rem 0.85rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.filter-drawer__head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.filter-drawer__eyebrow {
+  margin: 0 0 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.filter-drawer__body {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 1rem 1.2rem 1.25rem;
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.filter-drawer__field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.filter-drawer__field > span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.filter-drawer__field select {
+  width: 100%;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text);
+  padding: 0.65rem 0.85rem;
+  font: inherit;
+}
+
+.filter-drawer__foot {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.95rem 1.2rem 1.2rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(247, 251, 254, 0.96);
+}
+
+.filter-drawer__foot .btn {
+  flex: 1 1 auto;
+}
+
+.table-wrap.is-busy {
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}

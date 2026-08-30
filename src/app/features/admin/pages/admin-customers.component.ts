@@ -37,15 +37,21 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   users: User[] = [];
   pagination: AdminPagination = { page: 1, limit: 5, total: 0, pages: 1 };
   pageLoading = true;
-  /** Table-area shimmer when role/status filters / paging change after first paint */
+  /** Table-area shimmer when role/status filters / paging change (banking admin only) */
   listLoading = false;
+  /** Soft busy state on the table while SA refreshes filters/pages (keeps toolbar visible) */
+  tableBusy = false;
   menuOpenId: string | null = null;
   viewing: User | null = null;
   drawerOpen = false;
   drawerLoading = false;
+  filterDrawerOpen = false;
   roleFilter: RoleFilter = 'customer';
   loginStatusFilter: LoginStatusFilter = 'all';
   bankingStatusFilter: BankingStatusFilter = 'all';
+  draftRoleFilter: RoleFilter = 'all';
+  draftLoginStatusFilter: LoginStatusFilter = 'all';
+  draftBankingStatusFilter: BankingStatusFilter = 'all';
   readonly roleFilters: { id: RoleFilter; label: string }[] = [
     { id: 'all', label: 'All Roles' },
     { id: 'customer', label: 'Customers' },
@@ -113,6 +119,21 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
       : 'Manage customer sign-in and banking ledger access separately.';
   }
 
+  get filterSummary(): string {
+    const parts: string[] = [];
+    if (this.isSuperAdmin && this.roleFilter !== 'all') {
+      const role = this.roleFilters.find((r) => r.id === this.roleFilter);
+      parts.push(role?.label || this.formatStatus(this.roleFilter));
+    }
+    if (this.loginStatusFilter !== 'all') {
+      parts.push(`Login: ${this.formatStatus(this.loginStatusFilter)}`);
+    }
+    if (this.bankingStatusFilter !== 'all') {
+      parts.push(`Banking: ${this.formatStatus(this.bankingStatusFilter)}`);
+    }
+    return parts.length ? parts.join(' · ') : 'All roles · All statuses';
+  }
+
   get chartBars(): { label: string; total: number; pct: number }[] {
     const buckets: Record<string, number> = {
       deposit: 0,
@@ -167,7 +188,43 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     }
     if (this.viewing) {
       this.closeView();
+      return;
     }
+    if (this.filterDrawerOpen) {
+      this.closeFilterDrawer();
+    }
+  }
+
+  openFilterDrawer(): void {
+    this.draftRoleFilter = this.roleFilter;
+    this.draftLoginStatusFilter = this.loginStatusFilter;
+    this.draftBankingStatusFilter = this.bankingStatusFilter;
+    this.filterDrawerOpen = false;
+    this.setDrawerBodyClass(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.filterDrawerOpen = true;
+      });
+    });
+  }
+
+  closeFilterDrawer(): void {
+    this.filterDrawerOpen = false;
+    this.setDrawerBodyClass(false);
+  }
+
+  resetDraftFilters(): void {
+    this.draftRoleFilter = 'all';
+    this.draftLoginStatusFilter = 'all';
+    this.draftBankingStatusFilter = 'all';
+  }
+
+  applyFilters(): void {
+    this.roleFilter = this.draftRoleFilter;
+    this.loginStatusFilter = this.draftLoginStatusFilter;
+    this.bankingStatusFilter = this.draftBankingStatusFilter;
+    this.closeFilterDrawer();
+    this.loadPage(1, false);
   }
 
   setRoleFilter(id: RoleFilter): void {
@@ -197,6 +254,8 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   loadPage(page: number, initial = false): void {
     if (initial) {
       this.pageLoading = true;
+    } else if (this.isSuperAdmin) {
+      this.tableBusy = true;
     } else {
       this.listLoading = true;
     }
@@ -217,15 +276,23 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     if (this.bankingStatusFilter && this.bankingStatusFilter !== 'all') {
       opts.bankingStatus = this.bankingStatusFilter;
     }
-    withShimmerDelay(this.admin.refreshCustomers(page, 5, opts), SHIMMER_MS).subscribe({
+    const request$ = this.admin.refreshCustomers(page, 5, opts);
+    const load$ = initial
+      ? withShimmerDelay(request$, SHIMMER_MS)
+      : this.isSuperAdmin
+        ? request$
+        : withShimmerDelay(request$, SHIMMER_MS);
+    load$.subscribe({
       next: () => {
         this.pageLoading = false;
         this.listLoading = false;
+        this.tableBusy = false;
         this.menuOpenId = null;
       },
       error: async (err) => {
         this.pageLoading = false;
         this.listLoading = false;
+        this.tableBusy = false;
         await this.alerts.error(err?.error?.message || 'Unable to load directory');
       }
     });
@@ -417,7 +484,7 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     }
     if (open) {
       document.body.classList.add('nb-drawer-open');
-    } else if (!this.drawerOpen && !this.txModalOpen) {
+    } else if (!this.drawerOpen && !this.txModalOpen && !this.filterDrawerOpen) {
       document.body.classList.remove('nb-drawer-open');
     }
   }
