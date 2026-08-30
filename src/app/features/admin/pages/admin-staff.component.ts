@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { AccountStatus, User } from '../../../core/models/banking.models';
 import { AdminService } from '../../../core/services/admin.service';
 import { AlertService } from '../../../core/services/alert.service';
-import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/shimmer';
+import { AuthService } from '../../../core/services/auth.service';
+import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 import { formatStatusLabel } from '../../../core/utils/status-label';
 
 type StaffFilter = 'all' | 'pending_approval' | 'active' | 'rejected';
@@ -12,11 +13,13 @@ type StaffFilter = 'all' | 'pending_approval' | 'active' | 'rejected';
   templateUrl: './admin-staff.component.html',
   styleUrls: ['./admin-shared.scss']
 })
-export class AdminStaffComponent implements OnInit {
+export class AdminStaffComponent implements OnInit, OnDestroy {
   pageLoading = true;
-  listLoading = false;
   items: User[] = [];
   statusFilter: StaffFilter = 'all';
+  draftStatus: StaffFilter = 'all';
+  filterDrawerMounted = false;
+  filterDrawerOpen = false;
   readonly filters: { id: StaffFilter; label: string }[] = [
     { id: 'all', label: 'All' },
     { id: 'pending_approval', label: 'Pending' },
@@ -24,8 +27,21 @@ export class AdminStaffComponent implements OnInit {
     { id: 'rejected', label: 'Rejected' }
   ];
   readonly formatStatus = formatStatusLabel;
+  private filterDrawerCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(private readonly admin: AdminService, private readonly alerts: AlertService) {}
+  constructor(
+    private readonly admin: AdminService,
+    private readonly alerts: AlertService,
+    private readonly auth: AuthService
+  ) {}
+
+  get isSuperAdmin(): boolean {
+    return !!this.auth.currentUser?.isSuperAdmin;
+  }
+
+  get filterLabel(): string {
+    return this.filters.find((f) => f.id === this.statusFilter)?.label || 'All';
+  }
 
   get filtered(): User[] {
     if (this.statusFilter === 'all') {
@@ -38,32 +54,98 @@ export class AdminStaffComponent implements OnInit {
     this.reload(true);
   }
 
+  ngOnDestroy(): void {
+    if (this.filterDrawerCloseTimer) {
+      clearTimeout(this.filterDrawerCloseTimer);
+    }
+    this.setFilterDrawerBodyClass(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.filterDrawerMounted) {
+      this.closeFilterDrawer();
+    }
+  }
+
   setFilter(id: StaffFilter): void {
     if (this.statusFilter === id) {
       return;
     }
     this.statusFilter = id;
-    this.listLoading = true;
-    shimmerPause(SHIMMER_MS).subscribe(() => {
-      this.listLoading = false;
+  }
+
+  openFilterDrawer(): void {
+    if (this.filterDrawerCloseTimer) {
+      clearTimeout(this.filterDrawerCloseTimer);
+      this.filterDrawerCloseTimer = null;
+    }
+    this.draftStatus = this.statusFilter;
+    this.filterDrawerMounted = true;
+    this.filterDrawerOpen = false;
+    this.setFilterDrawerBodyClass(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.filterDrawerOpen = true;
+      });
     });
+  }
+
+  closeFilterDrawer(): void {
+    this.filterDrawerOpen = false;
+    this.setFilterDrawerBodyClass(false);
+    if (this.filterDrawerCloseTimer) {
+      clearTimeout(this.filterDrawerCloseTimer);
+    }
+    this.filterDrawerCloseTimer = setTimeout(() => {
+      this.filterDrawerMounted = false;
+      this.filterDrawerCloseTimer = null;
+    }, 380);
+  }
+
+  applyFilters(): void {
+    this.statusFilter = this.draftStatus;
+    this.closeFilterDrawer();
+  }
+
+  resetFilters(): void {
+    this.draftStatus = 'all';
+  }
+
+  private setFilterDrawerBodyClass(open: boolean): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    if (open) {
+      document.body.classList.add('nb-drawer-open');
+    } else {
+      document.body.classList.remove('nb-drawer-open');
+    }
   }
 
   reload(initial = false): void {
     if (initial) {
       this.pageLoading = true;
-    } else {
-      this.listLoading = true;
+      withShimmerDelay(this.admin.listStaff('all'), SHIMMER_MS).subscribe({
+        next: (items) => {
+          this.items = items;
+          this.pageLoading = false;
+        },
+        error: async (err) => {
+          this.pageLoading = false;
+          await this.alerts.error(
+            err?.error?.message || 'Unable to load staff. Super Admin access is required.'
+          );
+        }
+      });
+      return;
     }
-    withShimmerDelay(this.admin.listStaff('all'), SHIMMER_MS).subscribe({
+
+    this.admin.listStaff('all').subscribe({
       next: (items) => {
         this.items = items;
-        this.pageLoading = false;
-        this.listLoading = false;
       },
       error: async (err) => {
-        this.pageLoading = false;
-        this.listLoading = false;
         await this.alerts.error(
           err?.error?.message || 'Unable to load staff. Super Admin access is required.'
         );
