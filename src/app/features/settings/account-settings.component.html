@@ -1,9 +1,15 @@
-<section class="page" *ngIf="!loading; else settingsShimmer">
-  <header class="page__hero">
+<section class="page" [class.sa-account-page]="isConsoleAccount" *ngIf="!loading; else settingsShimmer">
+  <header class="page__hero" [class.admin-hero]="isConsoleAccount">
     <div>
-      <p class="eyebrow">NovaBank</p>
-      <h1>Account settings</h1>
-      <p class="lede">Profile, avatar, password, and premium preferences for your vault.</p>
+      <p class="eyebrow">{{ isConsoleAccount ? 'Apex Console' : 'NovaBank' }}</p>
+      <h1>{{ isConsoleAccount ? 'Operator account' : 'Account settings' }}</h1>
+      <p class="lede">
+        {{
+          isConsoleAccount
+            ? 'Identity, presence, security, and console preferences for Super Admin.'
+            : 'Profile, avatar, password, and premium preferences for your vault.'
+        }}
+      </p>
     </div>
     <div class="hero-avatar" [ngClass]="'hero-avatar--' + (user?.avatar?.style || avatarForm.value.style || 'mint')" aria-hidden="true">
       <img *ngIf="displayAvatarSrc() as image" [src]="image" alt="" />
@@ -11,7 +17,7 @@
     </div>
   </header>
 
-  <div class="settings-shell">
+  <div class="settings-shell" [class.settings-shell--console]="isConsoleAccount">
     <aside class="settings-nav" aria-label="Account settings sections">
       <button
         type="button"

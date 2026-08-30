@@ -23,8 +23,9 @@
     routerLink="/console"
   >← Apex Console</a>
   <main [class.main--billing]="isBillingSurface" [class.main--console]="isConsoleSurface">
-    <app-shimmer *ngIf="bootstrapping" [variant]="bootVariant"></app-shimmer>
-    <div [hidden]="bootstrapping">
+    <!-- Console has its own page shimmers — skip root boot cards to avoid a double flash. -->
+    <app-shimmer *ngIf="bootstrapping && !isConsoleSurface" [variant]="bootVariant"></app-shimmer>
+    <div [hidden]="bootstrapping && !isConsoleSurface">
       <router-outlet></router-outlet>
     </div>
     <footer

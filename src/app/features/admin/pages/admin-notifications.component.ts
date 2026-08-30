@@ -1,7 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AppNotification } from '../../../core/models/banking.models';
+import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
 @Component({
   selector: 'app-admin-notifications',
@@ -11,13 +13,28 @@ import { NotificationService } from '../../../core/services/notification.service
 export class AdminNotificationsComponent implements OnInit, OnDestroy {
   items: AppNotification[] = [];
   view: 'list' | 'table' = 'table';
+  pageLoading = true;
   private sub?: Subscription;
 
-  constructor(private readonly notifications: NotificationService) {}
+  constructor(
+    private readonly notifications: NotificationService,
+    private readonly auth: AuthService
+  ) {}
+
+  get isSuperAdmin(): boolean {
+    return !!this.auth.currentUser?.isSuperAdmin;
+  }
 
   ngOnInit(): void {
     this.sub = this.notifications.notifications$.subscribe((items) => (this.items = items));
-    this.notifications.refresh().subscribe();
+    withShimmerDelay(this.notifications.refresh(), SHIMMER_MS).subscribe({
+      next: () => {
+        this.pageLoading = false;
+      },
+      error: () => {
+        this.pageLoading = false;
+      }
+    });
   }
 
   ngOnDestroy(): void {

@@ -886,6 +886,18 @@ html[data-nb-mode='light'] {
 }
 
 /* Apex Console (Super Admin) — portal mismatch modals + residual chrome */
+/* Apex Console — force readable ink when mint widgets keep --text dark */
+body.sa-mode {
+  --text: #e8ecef;
+  --text-muted: #8b95a5;
+  --surface: #171c24;
+  --surface-solid: #171c24;
+  --surface-elevated: #1d232d;
+  --input-bg: rgba(232, 236, 239, 0.06);
+  --border: rgba(232, 236, 239, 0.14);
+  --border-strong: rgba(232, 236, 239, 0.22);
+}
+
 body.sa-mode .swal2-popup {
   background: #171c24 !important;
   color: #e8ecef !important;

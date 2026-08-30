@@ -30,7 +30,7 @@ export class SuperAdminShellComponent implements OnInit, OnDestroy {
     { path: '/console/staff', label: 'Staff', icon: 'staff' },
     { path: '/console/notifications', label: 'Alerts', icon: 'alerts' },
     { path: '/console/data-lab', label: 'Data lab', icon: 'lab' },
-    { path: '/settings', label: 'Account', icon: 'account' }
+    { path: '/console/account', label: 'Account', icon: 'account' }
   ];
 
   private routerSub?: Subscription;

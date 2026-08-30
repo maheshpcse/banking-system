@@ -1,6 +1,6 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subscription, of } from 'rxjs';
 import {
   AdminDemoService,
   DemoCommitResult,
@@ -11,6 +11,7 @@ import {
   DemoStaffUser
 } from '../../../core/services/admin-demo.service';
 import { AlertService } from '../../../core/services/alert.service';
+import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 
 type DemoSectionId = 'users' | 'products' | 'customers' | 'coupons';
 
@@ -19,14 +20,26 @@ type DemoSectionId = 'users' | 'products' | 'customers' | 'coupons';
   templateUrl: './super-admin-data-lab.component.html',
   styleUrls: ['./super-admin-data-lab.component.scss']
 })
-export class SuperAdminDataLabComponent implements OnDestroy {
+export class SuperAdminDataLabComponent implements OnInit, OnDestroy {
   readonly commonPassword = 'Demo@12345';
+  pageLoading = true;
+
+  readonly entityOptions: Array<{ id: DemoSectionId; label: string; hint: string }> = [
+    { id: 'users', label: 'Staff users', hint: 'Managers & admins' },
+    { id: 'products', label: 'Products', hint: 'Billing catalog' },
+    { id: 'customers', label: 'Customers', hint: 'Billing patrons' },
+    { id: 'coupons', label: 'Coupons', hint: 'Discount codes' }
+  ];
+
+  selectedEntities: Record<DemoSectionId, boolean> = {
+    users: true,
+    products: false,
+    customers: false,
+    coupons: false
+  };
 
   form = this.fb.group({
-    users: [8, [Validators.required, Validators.min(0), Validators.max(40)]],
-    products: [12, [Validators.required, Validators.min(0), Validators.max(40)]],
-    customers: [10, [Validators.required, Validators.min(0), Validators.max(40)]],
-    coupons: [6, [Validators.required, Validators.min(0), Validators.max(40)]]
+    count: [8, [Validators.required, Validators.min(1), Validators.max(40)]]
   });
 
   generating = false;
@@ -47,8 +60,18 @@ export class SuperAdminDataLabComponent implements OnDestroy {
     private readonly alerts: AlertService
   ) {}
 
+  ngOnInit(): void {
+    withShimmerDelay(of(true), SHIMMER_MS).subscribe(() => {
+      this.pageLoading = false;
+    });
+  }
+
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+  }
+
+  get selectedEntityCount(): number {
+    return this.entityOptions.filter((o) => this.selectedEntities[o.id]).length;
   }
 
   get totalRows(): number {
@@ -64,26 +87,42 @@ export class SuperAdminDataLabComponent implements OnDestroy {
     );
   }
 
+  toggleEntity(id: DemoSectionId): void {
+    this.selectedEntities[id] = !this.selectedEntities[id];
+  }
+
   generate(): void {
     if (this.form.invalid || this.generating) {
       this.form.markAllAsTouched();
       return;
     }
+    if (!this.selectedEntityCount) {
+      void this.alerts.info('Select at least one data type to generate.', 'Nothing selected');
+      return;
+    }
     this.generating = true;
-    const raw = this.form.getRawValue();
+    const count = Number(this.form.getRawValue().count) || 0;
     this.sub = this.demo
       .generate({
-        users: Number(raw.users) || 0,
-        products: Number(raw.products) || 0,
-        customers: Number(raw.customers) || 0,
-        coupons: Number(raw.coupons) || 0
+        users: this.selectedEntities.users ? count : 0,
+        products: this.selectedEntities.products ? count : 0,
+        customers: this.selectedEntities.customers ? count : 0,
+        coupons: this.selectedEntities.coupons ? count : 0
       })
       .subscribe({
         next: (res: DemoGenerateResult) => {
-          this.users = res.users || [];
-          this.products = res.products || [];
-          this.customers = res.customers || [];
-          this.coupons = res.coupons || [];
+          if (this.selectedEntities.users) {
+            this.users = res.users || [];
+          }
+          if (this.selectedEntities.products) {
+            this.products = res.products || [];
+          }
+          if (this.selectedEntities.customers) {
+            this.customers = res.customers || [];
+          }
+          if (this.selectedEntities.coupons) {
+            this.coupons = res.coupons || [];
+          }
           this.commonPasswordFromServer = res.commonPassword || this.commonPassword;
           this.hasGenerated = true;
           this.generating = false;

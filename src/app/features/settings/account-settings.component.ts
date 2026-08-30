@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { AlertService } from '../../core/services/alert.service';
 import { AccountLifecycleService } from '../../core/services/account-lifecycle.service';
@@ -371,8 +371,14 @@ export class AccountSettingsComponent implements OnInit, OnDestroy {
     private readonly alerts: AlertService,
     private readonly lifecycle: AccountLifecycleService,
     private readonly notifications: NotificationService,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
+    private readonly router: Router
   ) {}
+
+  /** Account opened inside Apex Console shell (`/console/account`). */
+  get isConsoleAccount(): boolean {
+    return !!this.auth.currentUser?.isSuperAdmin && this.router.url.includes('/console/account');
+  }
 
   get application(): AccountApplication | null {
     return this.lifecycle.applicationFor(this.user);

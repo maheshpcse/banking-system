@@ -35,9 +35,9 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
   private filterDrawerCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
-    private readonly admin: AdminService,
-    private readonly alerts: AlertService,
-    private readonly auth: AuthService
+    protected readonly admin: AdminService,
+    protected readonly alerts: AlertService,
+    protected readonly auth: AuthService
   ) {}
 
   get isSuperAdmin(): boolean {
