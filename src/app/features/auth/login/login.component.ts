@@ -124,6 +124,9 @@ export class LoginComponent implements OnInit, OnDestroy {
     const payload = this.form.getRawValue() as { identifier: string; password: string };
     this.auth.login(payload).subscribe({
       next: async () => {
+        if (await this.blockSuperAdminOnBankingPortal()) {
+          return;
+        }
         await this.finishSignIn(payload.identifier);
       },
       error: async (err) => {
@@ -210,6 +213,9 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.formError = '';
     this.auth.verifyOtp({ channel: this.otpChannel, identifier, code }).subscribe({
       next: async () => {
+        if (await this.blockSuperAdminOnBankingPortal()) {
+          return;
+        }
         await this.finishSignIn(identifier);
       },
       error: async (err) => {
@@ -236,11 +242,35 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Client-side portal gate — even if an older API still issues a Super Admin
+   * token on Banking/Billing login, clear the session and force Console.
+   */
+  private async blockSuperAdminOnBankingPortal(): Promise<boolean> {
+    if (!this.auth.currentUser?.isSuperAdmin) {
+      return false;
+    }
+    this.loading = false;
+    this.auth.logout({ redirect: false });
+    const goConsole = await this.alerts.portalMismatch({
+      title: 'Wrong portal',
+      text:
+        'Access denied. Super Admin accounts cannot sign in through the Banking or Billing portal. Use Apex Console instead.',
+      confirmText: 'Go to Console login',
+      actionHint:
+        'Super Admin accounts cannot sign in, use OTP, or reset passwords on Banking or Billing pages. Use Apex Console only.'
+    });
+    if (goConsole) {
+      void this.router.navigateByUrl('/auth/console/login');
+    }
+    return true;
+  }
+
   private async finishSignIn(identifier: string): Promise<void> {
     this.notifications.refresh().subscribe();
     const role = this.auth.currentUser?.role || 'customer';
     const next = this.route.snapshot.queryParamMap.get('next');
-    if (next === 'billing' && role === 'customer' && !this.auth.currentUser?.isSuperAdmin) {
+    if (next === 'billing' && role === 'customer') {
       this.loading = false;
       this.auth.logout({ redirect: false });
       const goLogin = await this.alerts.billingStaffOnly(
@@ -253,16 +283,9 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
     let dest = role === 'admin' ? '/admin' : role === 'manager' ? '/manager' : '/dashboard';
     let billingLaunch = false;
-    if (this.auth.currentUser?.isSuperAdmin && next !== 'billing') {
-      dest = '/console';
-    }
-    if (next === 'billing') {
-      if (this.auth.currentUser?.isSuperAdmin) {
-        dest = '/manager/billing';
-      } else if (role === 'manager' || role === 'admin') {
-        dest = '/billing';
-        billingLaunch = true;
-      }
+    if (next === 'billing' && (role === 'manager' || role === 'admin')) {
+      dest = '/billing';
+      billingLaunch = true;
     }
     this.notifications.startRealtime();
     if (billingLaunch) {

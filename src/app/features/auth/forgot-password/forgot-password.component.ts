@@ -56,7 +56,24 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
     const identifier = String(this.form.value.identifier || '').trim();
 
     this.auth.forgotPassword(identifier).subscribe({
-      next: (res) => {
+      next: async (res) => {
+        /* Probe login so an older API that still issues reset tokens for Super
+         * Admin is caught once portal gates are live (gate runs before password). */
+        const portalBlocked = await this.auth.probeSuperAdminPortalBlock(identifier);
+        if (portalBlocked) {
+          this.loading = false;
+          const goConsole = await this.alerts.portalMismatch({
+            title: 'Wrong portal',
+            text:
+              'Access denied. Super Admin accounts cannot reset a password through the Banking or Billing portal. Use Apex Console instead.',
+            confirmText: 'Go to Console login',
+            actionHint: 'Super Admin password reset is only available on the Apex Console.'
+          });
+          if (goConsole) {
+            void this.router.navigateByUrl('/auth/console/login');
+          }
+          return;
+        }
         this.loading = false;
         void this.router.navigate(['/auth/reset-password'], {
           state: {
