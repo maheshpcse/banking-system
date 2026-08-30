@@ -113,7 +113,6 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
 
   applyFilters(): void {
     this.statusFilter = this.draftStatus;
-    this.closeFilterDrawer();
     this.flashList();
   }
 

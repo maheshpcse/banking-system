@@ -236,7 +236,6 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     this.roleFilter = this.draftRoleFilter;
     this.loginStatusFilter = this.draftLoginStatusFilter;
     this.bankingStatusFilter = this.draftBankingStatusFilter;
-    this.closeFilterDrawer();
     this.loadPage(1, false);
   }
 

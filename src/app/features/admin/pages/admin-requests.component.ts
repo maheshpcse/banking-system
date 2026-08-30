@@ -146,7 +146,6 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
   applyFilters(): void {
     this.statusFilter = this.draftStatus;
     this.page = 1;
-    this.closeFilterDrawer();
     this.flashList();
   }
 

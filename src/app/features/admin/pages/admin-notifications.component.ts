@@ -138,7 +138,6 @@ export class AdminNotificationsComponent implements OnInit, OnDestroy {
 
   applyFilters(): void {
     const next = this.draftKindFilter;
-    this.closeFilterDrawer();
     this.flashList(() => {
       this.kindFilter = next;
       this.page = 1;
