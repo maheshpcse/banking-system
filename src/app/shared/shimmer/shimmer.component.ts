@@ -22,6 +22,7 @@ export class ShimmerComponent {
     | 'notifications-grid'
     | 'notifications-table'
     | 'admin-overview'
+    | 'admin-hero'
     | 'admin-customers'
     | 'admin-customers-table'
     | 'data-table'

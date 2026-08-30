@@ -156,70 +156,34 @@
   border-radius: var(--sa-radius, 0.55rem);
   background: var(--sa-panel, #171c24);
   border: 1px solid var(--sa-line, rgba(232, 236, 239, 0.1));
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: auto;
 }
 
-.dl-table {
+/* Match Customers directory table: auto layout, shrink-wrap checkbox col */
+.dl-table.data-table {
   width: 100%;
-  min-width: 52rem;
-  table-layout: fixed;
+  table-layout: auto;
   border-collapse: collapse;
+  min-width: 0;
 }
 
-.dl-table th,
-.dl-table td {
+.dl-table.data-table th,
+.dl-table.data-table td {
   text-align: left;
   vertical-align: middle;
   padding: 0.85rem 0.9rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
-  box-sizing: border-box;
 }
 
-.dl-col-check {
-  width: 3rem;
-}
-
-.dl-col-name {
-  width: 18%;
-}
-
-.dl-col-user,
-.dl-col-sku,
-.dl-col-phone {
-  width: 16%;
-}
-
-.dl-col-email {
-  width: 22%;
-}
-
-.dl-col-role,
-.dl-col-price,
-.dl-col-stock,
-.dl-col-rewards,
-.dl-col-disc,
-.dl-col-min {
-  width: 12%;
-}
-
-.dl-col-pass,
-.dl-col-cat,
-.dl-col-title {
-  width: 16%;
-}
-
-.dl-col-code {
-  width: 14%;
-}
-
-.dl-check-col {
-  width: 3rem;
+.dl-table.data-table th.dl-check-col,
+.dl-table.data-table td.dl-check-col {
+  width: 1%;
+  min-width: 2.5rem;
+  max-width: 2.75rem;
+  padding-left: 0.9rem;
+  padding-right: 0.55rem;
   text-align: center;
-  padding-left: 0.75rem;
-  padding-right: 0.5rem;
+  white-space: nowrap;
 }
 
 .dl-check-col input[type='checkbox'] {
@@ -227,14 +191,14 @@
   -webkit-appearance: none;
   width: 1.1rem;
   height: 1.1rem;
-  margin: 0 auto;
-  display: inline-block;
+  margin: 0;
   border: 1.5px solid rgba(201, 139, 75, 0.65);
   border-radius: 0.28rem;
   background: rgba(232, 236, 239, 0.04);
   cursor: pointer;
   vertical-align: middle;
   position: relative;
+  flex: none;
 }
 
 .dl-check-col input[type='checkbox']:checked {

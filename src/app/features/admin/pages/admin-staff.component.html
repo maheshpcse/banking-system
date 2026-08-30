@@ -121,13 +121,7 @@
 
 <ng-template #staffShimmer>
   <section class="page" *ngIf="isSuperAdmin; else bankingStaffShimmer">
-    <header class="admin-hero sa-hero-shimmer" aria-hidden="true">
-      <div>
-        <div class="shimmer-line shimmer-line--brand"></div>
-        <div class="shimmer-line shimmer-line--title"></div>
-        <div class="shimmer-line shimmer-line--lede"></div>
-      </div>
-    </header>
+    <app-shimmer variant="admin-hero"></app-shimmer>
     <div class="sa-toolbar sa-toolbar--shimmer" aria-hidden="true">
       <span class="sa-toolbar__btn-bone"></span>
       <span class="sa-toolbar__summary-bone"></span>
