@@ -132,6 +132,37 @@
     color: var(--sa-ink);
   }
 
+  .filter-drawer,
+  .filter-drawer__body,
+  .drawer__body,
+  .tx-modal__body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(201, 139, 75, 0.55) rgba(232, 236, 239, 0.06);
+  }
+
+  .filter-drawer::-webkit-scrollbar,
+  .filter-drawer__body::-webkit-scrollbar,
+  .drawer__body::-webkit-scrollbar,
+  .tx-modal__body::-webkit-scrollbar {
+    width: 0.55rem;
+    height: 0.55rem;
+  }
+
+  .filter-drawer::-webkit-scrollbar-track,
+  .filter-drawer__body::-webkit-scrollbar-track,
+  .drawer__body::-webkit-scrollbar-track,
+  .tx-modal__body::-webkit-scrollbar-track {
+    background: rgba(232, 236, 239, 0.04);
+  }
+
+  .filter-drawer::-webkit-scrollbar-thumb,
+  .filter-drawer__body::-webkit-scrollbar-thumb,
+  .drawer__body::-webkit-scrollbar-thumb,
+  .tx-modal__body::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(201, 139, 75, 0.7), rgba(168, 107, 52, 0.85));
+    border-radius: 999px;
+  }
+
   .filter-drawer__head {
     background: var(--sa-panel-raised);
     border-bottom: 1px solid var(--sa-line-strong);
@@ -503,6 +534,7 @@
 
   .drawer__body {
     padding: 1.15rem 1.5rem 2rem;
+    overflow: auto;
   }
 
   .drawer__section {
@@ -621,6 +653,17 @@
     font-size: 0.75rem;
   }
 
+  .settings-nav__item:hover {
+    color: #ffffff;
+    border-color: rgba(201, 139, 75, 0.4);
+    background: rgba(201, 139, 75, 0.1);
+  }
+
+  .settings-nav__item:hover strong,
+  .settings-nav__item:hover span {
+    color: #ffffff;
+  }
+
   .settings-nav__item.is-active {
     background: var(--sa-copper-soft);
     border-color: rgba(201, 139, 75, 0.45);
@@ -629,6 +672,86 @@
 
   .settings-nav__item.is-active span {
     color: rgba(201, 139, 75, 0.8);
+  }
+
+  /* Half-page form width for Identity / Presence / Security / Experience */
+  .sa-account-page .settings-panel .form,
+  .sa-account-page .settings-panel .form--prefs,
+  .sa-account-form-half {
+    max-width: min(50%, 32rem);
+    width: 100%;
+  }
+
+  .sa-account-page .settings-panel .form .btn,
+  .sa-account-page .settings-panel .form--prefs .btn {
+    width: auto;
+    justify-self: start;
+  }
+
+  /* Initials avatar style chips */
+  .style-chip {
+    background: rgba(232, 236, 239, 0.04) !important;
+    border: 1px solid var(--sa-line-strong) !important;
+    color: var(--sa-muted) !important;
+  }
+
+  .style-chip:hover {
+    background: rgba(201, 139, 75, 0.12) !important;
+    border-color: rgba(201, 139, 75, 0.45) !important;
+    color: #ffffff !important;
+  }
+
+  .style-chip.is-active,
+  .style-chip--mint.is-active,
+  .style-chip--sky.is-active,
+  .style-chip--sand.is-active,
+  .style-chip--rose.is-active,
+  .style-chip--slate.is-active {
+    background: var(--sa-copper-soft) !important;
+    border-color: var(--sa-copper) !important;
+    color: var(--sa-copper) !important;
+  }
+
+  /* Premium preferences — Data lab checkbox style */
+  .form--prefs .toggle input[type='checkbox'],
+  .toggle input[type='checkbox'] {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 1.1rem !important;
+    height: 1.1rem !important;
+    min-width: 1.1rem !important;
+    margin: 0 !important;
+    border: 1.5px solid rgba(201, 139, 75, 0.65) !important;
+    border-radius: 0.28rem !important;
+    background: rgba(232, 236, 239, 0.04) !important;
+    cursor: pointer !important;
+    position: relative;
+    box-shadow: none !important;
+  }
+
+  .form--prefs .toggle input[type='checkbox']:checked,
+  .toggle input[type='checkbox']:checked {
+    background: var(--sa-copper) !important;
+    border-color: var(--sa-copper) !important;
+  }
+
+  .form--prefs .toggle input[type='checkbox']:checked::after,
+  .toggle input[type='checkbox']:checked::after {
+    content: '';
+    position: absolute;
+    left: 0.28rem;
+    top: 0.08rem;
+    width: 0.28rem;
+    height: 0.55rem;
+    border: solid #0e1116;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .form--prefs .toggle span,
+  .toggle span {
+    color: var(--sa-ink) !important;
+    cursor: pointer;
   }
 
   .settings-panel,
@@ -725,6 +848,46 @@
     background: transparent;
   }
 
+  /* Copper shimmer fills — not Banking mint */
+  .shimmer-line,
+  .shimmer-block,
+  .shimmer-row,
+  .shimmer-chip,
+  .shimmer-data-table__cell .shimmer-line,
+  .shimmer-notif__icon,
+  .shimmer-stat,
+  .sa-hero-shimmer .shimmer-line {
+    background: linear-gradient(
+      90deg,
+      rgba(232, 236, 239, 0.06) 0%,
+      rgba(201, 139, 75, 0.28) 42%,
+      rgba(232, 236, 239, 0.08) 100%
+    ) !important;
+    background-size: 220% 100% !important;
+  }
+
+  .sa-hero-shimmer {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0;
+  }
+
+  .sa-hero-shimmer .shimmer-line--brand {
+    width: min(42%, 11rem);
+    height: 0.7rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .sa-hero-shimmer .shimmer-line--title {
+    width: min(58%, 18rem);
+    height: 1.85rem;
+  }
+
+  .sa-hero-shimmer .shimmer-line--lede {
+    width: min(72%, 28rem);
+    height: 0.9rem;
+  }
+
   /* Close icons — match Filters sidemenu (no white fill) -------------------- */
   .drawer__head .icon-btn--close,
   .tx-modal__head .icon-btn--close,
@@ -804,59 +967,20 @@
     color: var(--sa-ink) !important;
   }
 
-  /* Data lab checkboxes + table alignment ---------------------------------- */
-  .dl-check-col,
-  .data-table .dl-check-col {
-    width: 2.75rem;
-    text-align: center;
-    vertical-align: middle;
-  }
-
-  .dl-check-col input[type='checkbox'],
-  .data-table input[type='checkbox'] {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 1.1rem;
-    height: 1.1rem;
-    margin: 0;
-    border: 1.5px solid rgba(201, 139, 75, 0.65);
-    border-radius: 0.28rem;
-    background: rgba(232, 236, 239, 0.04);
-    cursor: pointer;
-    vertical-align: middle;
-    position: relative;
-  }
-
-  .dl-check-col input[type='checkbox']:checked,
-  .data-table input[type='checkbox']:checked {
-    background: var(--sa-copper);
-    border-color: var(--sa-copper);
-  }
-
-  .dl-check-col input[type='checkbox']:checked::after,
-  .data-table input[type='checkbox']:checked::after {
-    content: '';
-    position: absolute;
-    left: 0.28rem;
-    top: 0.08rem;
-    width: 0.28rem;
-    height: 0.55rem;
-    border: solid #0e1116;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-  }
-
-  .dl-section .data-table {
+  /* Data lab table alignment (checkbox styles live on the Data Lab component) */
+  .dl-section .dl-table {
     table-layout: fixed;
     width: 100%;
   }
 
-  .dl-section .data-table th,
-  .dl-section .data-table td {
+  .dl-section .dl-table th,
+  .dl-section .dl-table td {
+    text-align: left;
     vertical-align: middle;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  }
+
+  .dl-section .dl-table .dl-check-col {
+    text-align: center;
   }
 
   .filter-drawer__field app-theme-select {

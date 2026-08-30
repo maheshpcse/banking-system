@@ -22,6 +22,7 @@ type DemoSectionId = 'users' | 'products' | 'customers' | 'coupons';
 })
 export class SuperAdminDataLabComponent implements OnInit, OnDestroy {
   readonly commonPassword = 'Demo@12345';
+  readonly pageSize = 5;
   pageLoading = true;
 
   readonly entityOptions: Array<{ id: DemoSectionId; label: string; hint: string }> = [
@@ -36,6 +37,13 @@ export class SuperAdminDataLabComponent implements OnInit, OnDestroy {
     products: false,
     customers: false,
     coupons: false
+  };
+
+  sectionPage: Record<DemoSectionId, number> = {
+    users: 1,
+    products: 1,
+    customers: 1,
+    coupons: 1
   };
 
   form = this.fb.group({
@@ -87,8 +95,41 @@ export class SuperAdminDataLabComponent implements OnInit, OnDestroy {
     );
   }
 
+  get pagedUsers(): DemoStaffUser[] {
+    return this.slicePage(this.users, 'users');
+  }
+
+  get pagedProducts(): DemoProduct[] {
+    return this.slicePage(this.products, 'products');
+  }
+
+  get pagedCustomers(): DemoCustomer[] {
+    return this.slicePage(this.customers, 'customers');
+  }
+
+  get pagedCoupons(): DemoCoupon[] {
+    return this.slicePage(this.coupons, 'coupons');
+  }
+
   toggleEntity(id: DemoSectionId): void {
     this.selectedEntities[id] = !this.selectedEntities[id];
+  }
+
+  pagesFor(section: DemoSectionId): number {
+    const total = this.rowsFor(section).length;
+    return Math.max(1, Math.ceil(total / this.pageSize));
+  }
+
+  prevPage(section: DemoSectionId): void {
+    if (this.sectionPage[section] > 1) {
+      this.sectionPage[section] -= 1;
+    }
+  }
+
+  nextPage(section: DemoSectionId): void {
+    if (this.sectionPage[section] < this.pagesFor(section)) {
+      this.sectionPage[section] += 1;
+    }
   }
 
   generate(): void {
@@ -97,7 +138,7 @@ export class SuperAdminDataLabComponent implements OnInit, OnDestroy {
       return;
     }
     if (!this.selectedEntityCount) {
-      void this.alerts.info('Select at least one data type to generate.', 'Nothing selected');
+      void this.alerts.toastWarning('Nothing selected', 'Select at least one data type to generate.');
       return;
     }
     this.generating = true;
@@ -123,13 +164,14 @@ export class SuperAdminDataLabComponent implements OnInit, OnDestroy {
           if (this.selectedEntities.coupons) {
             this.coupons = res.coupons || [];
           }
+          this.resetPages();
           this.commonPasswordFromServer = res.commonPassword || this.commonPassword;
           this.hasGenerated = true;
           this.generating = false;
         },
         error: async (err) => {
           this.generating = false;
-          await this.alerts.error(err?.error?.message || 'Unable to generate demo data');
+          await this.alerts.toastError('Unable to generate', err?.error?.message || 'Unable to generate demo data');
         }
       });
   }
@@ -162,6 +204,7 @@ export class SuperAdminDataLabComponent implements OnInit, OnDestroy {
     this.products = this.products.filter((p) => !p.selected);
     this.customers = this.customers.filter((c) => !c.selected);
     this.coupons = this.coupons.filter((c) => !c.selected);
+    this.clampPages();
   }
 
   clearAll(): void {
@@ -170,6 +213,7 @@ export class SuperAdminDataLabComponent implements OnInit, OnDestroy {
     this.customers = [];
     this.coupons = [];
     this.hasGenerated = false;
+    this.resetPages();
   }
 
   async commitSelected(): Promise<void> {
@@ -181,7 +225,7 @@ export class SuperAdminDataLabComponent implements OnInit, OnDestroy {
     const customers = this.customers.filter((c) => c.selected);
     const coupons = this.coupons.filter((c) => c.selected);
     if (!users.length && !products.length && !customers.length && !coupons.length) {
-      await this.alerts.info('Select at least one row to commit.', 'Nothing selected');
+      await this.alerts.toastWarning('Nothing selected', 'Select at least one row to commit.');
       return;
     }
     this.committing = true;
@@ -192,16 +236,36 @@ export class SuperAdminDataLabComponent implements OnInit, OnDestroy {
         this.products = this.products.filter((p) => !p.selected);
         this.customers = this.customers.filter((c) => !c.selected);
         this.coupons = this.coupons.filter((c) => !c.selected);
+        this.clampPages();
         const summary =
           `Users ${res.users.created}/${res.users.created + res.users.skipped} · ` +
           `Products ${res.products.created}/${res.products.created + res.products.skipped} · ` +
           `Customers ${res.customers.created}/${res.customers.created + res.customers.skipped} · ` +
           `Coupons ${res.coupons.created}/${res.coupons.created + res.coupons.skipped}`;
-        await this.alerts.toastSuccessCorner('Demo data committed', summary);
+        await this.alerts.toastSuccessCorner('Commit selected', summary);
       },
       error: async (err) => {
         this.committing = false;
-        await this.alerts.error(err?.error?.message || 'Unable to commit demo data');
+        await this.alerts.toastError('Commit selected failed', err?.error?.message || 'Unable to commit demo data');
+      }
+    });
+  }
+
+  private slicePage<T>(rows: T[], section: DemoSectionId): T[] {
+    const page = this.sectionPage[section];
+    const start = (page - 1) * this.pageSize;
+    return rows.slice(start, start + this.pageSize);
+  }
+
+  private resetPages(): void {
+    this.sectionPage = { users: 1, products: 1, customers: 1, coupons: 1 };
+  }
+
+  private clampPages(): void {
+    (Object.keys(this.sectionPage) as DemoSectionId[]).forEach((key) => {
+      const max = this.pagesFor(key);
+      if (this.sectionPage[key] > max) {
+        this.sectionPage[key] = max;
       }
     });
   }

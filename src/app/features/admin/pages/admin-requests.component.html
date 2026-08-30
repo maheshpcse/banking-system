@@ -56,11 +56,11 @@
 
 <ng-template #requestsShimmer>
   <section class="page" *ngIf="isSuperAdmin; else bankingReqShimmer">
-    <header class="admin-hero" aria-hidden="true">
+    <header class="admin-hero sa-hero-shimmer" aria-hidden="true">
       <div>
-        <div class="sa-toolbar__summary-bone" style="width: 7rem; height: 0.7rem; margin-bottom: 0.65rem"></div>
-        <div class="sa-toolbar__summary-bone" style="width: 12rem; height: 1.6rem; margin-bottom: 0.55rem"></div>
-        <div class="sa-toolbar__summary-bone" style="width: min(28rem, 80%); height: 0.85rem"></div>
+        <div class="shimmer-line shimmer-line--brand"></div>
+        <div class="shimmer-line shimmer-line--title"></div>
+        <div class="shimmer-line shimmer-line--lede"></div>
       </div>
     </header>
     <div class="sa-toolbar sa-toolbar--shimmer" aria-hidden="true">

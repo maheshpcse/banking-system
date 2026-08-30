@@ -82,7 +82,15 @@
     <section class="dl-section" *ngIf="users.length">
       <h2 class="dl-section__title"><app-sa-icon name="staff"></app-sa-icon> Staff users</h2>
       <div class="table-wrap">
-        <table class="data-table">
+        <table class="data-table dl-table">
+          <colgroup>
+            <col class="dl-col-check" />
+            <col class="dl-col-name" />
+            <col class="dl-col-user" />
+            <col class="dl-col-email" />
+            <col class="dl-col-role" />
+            <col class="dl-col-pass" />
+          </colgroup>
           <thead>
             <tr>
               <th class="dl-check-col">
@@ -101,7 +109,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let row of users">
+            <tr *ngFor="let row of pagedUsers">
               <td class="dl-check-col">
                 <input type="checkbox" [checked]="!!row.selected" (change)="toggleRow(row)" />
               </td>
@@ -114,12 +122,34 @@
           </tbody>
         </table>
       </div>
+      <div class="pager" *ngIf="users.length > pageSize">
+        <button type="button" class="btn btn--ghost" (click)="prevPage('users')" [disabled]="sectionPage.users <= 1">
+          Previous
+        </button>
+        <span>Page {{ sectionPage.users }} of {{ pagesFor('users') }} · {{ users.length }} total</span>
+        <button
+          type="button"
+          class="btn btn--ghost"
+          (click)="nextPage('users')"
+          [disabled]="sectionPage.users >= pagesFor('users')"
+        >
+          Next
+        </button>
+      </div>
     </section>
 
     <section class="dl-section" *ngIf="products.length">
       <h2 class="dl-section__title"><app-sa-icon name="box"></app-sa-icon> Products</h2>
       <div class="table-wrap">
-        <table class="data-table">
+        <table class="data-table dl-table">
+          <colgroup>
+            <col class="dl-col-check" />
+            <col class="dl-col-name" />
+            <col class="dl-col-sku" />
+            <col class="dl-col-cat" />
+            <col class="dl-col-price" />
+            <col class="dl-col-stock" />
+          </colgroup>
           <thead>
             <tr>
               <th class="dl-check-col">
@@ -138,7 +168,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let row of products">
+            <tr *ngFor="let row of pagedProducts">
               <td class="dl-check-col">
                 <input type="checkbox" [checked]="!!row.selected" (change)="toggleRow(row)" />
               </td>
@@ -151,12 +181,33 @@
           </tbody>
         </table>
       </div>
+      <div class="pager" *ngIf="products.length > pageSize">
+        <button type="button" class="btn btn--ghost" (click)="prevPage('products')" [disabled]="sectionPage.products <= 1">
+          Previous
+        </button>
+        <span>Page {{ sectionPage.products }} of {{ pagesFor('products') }} · {{ products.length }} total</span>
+        <button
+          type="button"
+          class="btn btn--ghost"
+          (click)="nextPage('products')"
+          [disabled]="sectionPage.products >= pagesFor('products')"
+        >
+          Next
+        </button>
+      </div>
     </section>
 
     <section class="dl-section" *ngIf="customers.length">
       <h2 class="dl-section__title"><app-sa-icon name="users"></app-sa-icon> Customers</h2>
       <div class="table-wrap">
-        <table class="data-table">
+        <table class="data-table dl-table">
+          <colgroup>
+            <col class="dl-col-check" />
+            <col class="dl-col-name" />
+            <col class="dl-col-email" />
+            <col class="dl-col-phone" />
+            <col class="dl-col-rewards" />
+          </colgroup>
           <thead>
             <tr>
               <th class="dl-check-col">
@@ -174,7 +225,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let row of customers">
+            <tr *ngFor="let row of pagedCustomers">
               <td class="dl-check-col">
                 <input type="checkbox" [checked]="!!row.selected" (change)="toggleRow(row)" />
               </td>
@@ -186,12 +237,33 @@
           </tbody>
         </table>
       </div>
+      <div class="pager" *ngIf="customers.length > pageSize">
+        <button type="button" class="btn btn--ghost" (click)="prevPage('customers')" [disabled]="sectionPage.customers <= 1">
+          Previous
+        </button>
+        <span>Page {{ sectionPage.customers }} of {{ pagesFor('customers') }} · {{ customers.length }} total</span>
+        <button
+          type="button"
+          class="btn btn--ghost"
+          (click)="nextPage('customers')"
+          [disabled]="sectionPage.customers >= pagesFor('customers')"
+        >
+          Next
+        </button>
+      </div>
     </section>
 
     <section class="dl-section" *ngIf="coupons.length">
       <h2 class="dl-section__title"><app-sa-icon name="ticket"></app-sa-icon> Coupons</h2>
       <div class="table-wrap">
-        <table class="data-table">
+        <table class="data-table dl-table">
+          <colgroup>
+            <col class="dl-col-check" />
+            <col class="dl-col-code" />
+            <col class="dl-col-title" />
+            <col class="dl-col-disc" />
+            <col class="dl-col-min" />
+          </colgroup>
           <thead>
             <tr>
               <th class="dl-check-col">
@@ -209,7 +281,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let row of coupons">
+            <tr *ngFor="let row of pagedCoupons">
               <td class="dl-check-col">
                 <input type="checkbox" [checked]="!!row.selected" (change)="toggleRow(row)" />
               </td>
@@ -221,17 +293,31 @@
           </tbody>
         </table>
       </div>
+      <div class="pager" *ngIf="coupons.length > pageSize">
+        <button type="button" class="btn btn--ghost" (click)="prevPage('coupons')" [disabled]="sectionPage.coupons <= 1">
+          Previous
+        </button>
+        <span>Page {{ sectionPage.coupons }} of {{ pagesFor('coupons') }} · {{ coupons.length }} total</span>
+        <button
+          type="button"
+          class="btn btn--ghost"
+          (click)="nextPage('coupons')"
+          [disabled]="sectionPage.coupons >= pagesFor('coupons')"
+        >
+          Next
+        </button>
+      </div>
     </section>
   </ng-container>
 </section>
 
 <ng-template #labShimmer>
   <section class="page dl-page dl-page-shimmer" aria-busy="true">
-    <header class="admin-hero" aria-hidden="true">
+    <header class="admin-hero sa-hero-shimmer" aria-hidden="true">
       <div>
-        <div class="sa-toolbar__summary-bone" style="width: 7rem; height: 0.7rem; margin-bottom: 0.65rem"></div>
-        <div class="sa-toolbar__summary-bone" style="width: 10rem; height: 1.6rem; margin-bottom: 0.55rem"></div>
-        <div class="sa-toolbar__summary-bone" style="width: min(32rem, 85%); height: 0.85rem"></div>
+        <div class="shimmer-line shimmer-line--brand"></div>
+        <div class="shimmer-line shimmer-line--title"></div>
+        <div class="shimmer-line shimmer-line--lede"></div>
       </div>
     </header>
     <div class="dl-page-shimmer__controls" aria-hidden="true">

@@ -947,3 +947,44 @@ body.sa-mode .swal2-icon.swal2-info {
   border-color: #c98b4b !important;
   color: #c98b4b !important;
 }
+
+body.sa-mode .nb-toast.swal2-popup.swal2-toast {
+  background: #171c24 !important;
+  color: #e8ecef !important;
+  border: 1px solid rgba(201, 139, 75, 0.4) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45) !important;
+}
+
+body.sa-mode .nb-toast--success {
+  border-color: rgba(201, 139, 75, 0.55) !important;
+}
+
+body.sa-mode .nb-toast .swal2-title,
+body.sa-mode .nb-toast .nb-toast__title,
+body.sa-mode .nb-toast .swal2-html-container,
+body.sa-mode .nb-toast .nb-toast__text {
+  color: #e8ecef !important;
+}
+
+body.sa-mode .nb-toast--corner.swal2-popup.swal2-toast {
+  max-width: min(92vw, 36rem) !important;
+  width: max-content !important;
+}
+
+body.sa-mode .nb-toast .swal2-icon.swal2-success {
+  border-color: #c98b4b !important;
+}
+
+body.sa-mode .nb-toast .swal2-icon.swal2-success [class^='swal2-success-line'] {
+  background-color: #c98b4b !important;
+}
+
+body.sa-mode .nb-toast .swal2-icon.swal2-success .swal2-success-ring {
+  border-color: rgba(201, 139, 75, 0.35) !important;
+}
+
+body.sa-mode .nb-toast .swal2-icon.swal2-warning,
+body.sa-mode .nb-toast .swal2-icon.swal2-error {
+  border-color: #c98b4b !important;
+  color: #c98b4b !important;
+}

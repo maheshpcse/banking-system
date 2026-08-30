@@ -110,6 +110,22 @@
   border-radius: 0.5rem;
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.55);
   padding: 0.35rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 139, 75, 0.55) rgba(232, 236, 239, 0.06);
+}
+
+:host-context(body.sa-mode) .theme-select__menu::-webkit-scrollbar {
+  width: 0.55rem;
+  height: 0.55rem;
+}
+
+:host-context(body.sa-mode) .theme-select__menu::-webkit-scrollbar-track {
+  background: rgba(232, 236, 239, 0.04);
+}
+
+:host-context(body.sa-mode) .theme-select__menu::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(201, 139, 75, 0.7), rgba(168, 107, 52, 0.85));
+  border-radius: 999px;
 }
 
 :host-context(body.sa-mode) .theme-select__option {
