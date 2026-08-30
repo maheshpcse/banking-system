@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import { AdminRequestRow, AdminService } from '../../../core/services/admin.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/shimmer';
 import { formatStatusLabel } from '../../../core/utils/status-label';
 
 type RequestFilter = 'all' | 'under_review' | 'active' | 'rejected' | 'blocked' | 'deactivated';
@@ -16,6 +16,7 @@ type RequestFilter = 'all' | 'under_review' | 'active' | 'rejected' | 'blocked' 
 export class AdminRequestsComponent implements OnInit, OnDestroy {
   requests: AdminRequestRow[] = [];
   pageLoading = true;
+  listLoading = false;
   statusFilter: RequestFilter = 'all';
   draftStatus: RequestFilter = 'all';
   filterDrawerMounted = false;
@@ -33,6 +34,7 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
   readonly formatStatus = formatStatusLabel;
   private sub?: Subscription;
   private filterDrawerCloseTimer: ReturnType<typeof setTimeout> | null = null;
+  private listShimmerSub?: Subscription;
 
   constructor(
     protected readonly admin: AdminService,
@@ -46,6 +48,10 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
 
   get filterLabel(): string {
     return this.filters.find((f) => f.id === this.statusFilter)?.label || 'All';
+  }
+
+  get statusSelectOptions(): Array<{ value: string; label: string }> {
+    return this.filters.map((f) => ({ value: f.id, label: f.label }));
   }
 
   get filtered(): AdminRequestRow[] {
@@ -87,6 +93,7 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.listShimmerSub?.unsubscribe();
     if (this.filterDrawerCloseTimer) {
       clearTimeout(this.filterDrawerCloseTimer);
     }
@@ -140,10 +147,20 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
     this.statusFilter = this.draftStatus;
     this.page = 1;
     this.closeFilterDrawer();
+    this.flashList();
   }
 
   resetFilters(): void {
     this.draftStatus = 'all';
+    this.applyFilters();
+  }
+
+  private flashList(): void {
+    this.listShimmerSub?.unsubscribe();
+    this.listLoading = true;
+    this.listShimmerSub = shimmerPause(SHIMMER_MS).subscribe(() => {
+      this.listLoading = false;
+    });
   }
 
   private setFilterDrawerBodyClass(open: boolean): void {
