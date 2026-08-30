@@ -1,8 +1,8 @@
 <section class="page" *ngIf="!pageLoading; else overviewShimmer">
   <header class="admin-hero">
     <div>
-      <p class="eyebrow">NovaBank</p>
-      <h1>Operations desk</h1>
+      <p class="eyebrow">{{ isSuperAdmin ? 'Apex Console' : 'NovaBank' }}</p>
+      <h1>{{ isSuperAdmin ? 'Operations' : 'Operations desk' }}</h1>
       <p class="lede">
         {{
           isSuperAdmin

@@ -1,8 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AdminRequestRow, AdminService } from '../../../core/services/admin.service';
 import { AlertService } from '../../../core/services/alert.service';
-import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/shimmer';
+import { AuthService } from '../../../core/services/auth.service';
+import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
 import { formatStatusLabel } from '../../../core/utils/status-label';
 
 type RequestFilter = 'all' | 'under_review' | 'active' | 'rejected' | 'blocked' | 'deactivated';
@@ -15,8 +16,10 @@ type RequestFilter = 'all' | 'under_review' | 'active' | 'rejected' | 'blocked' 
 export class AdminRequestsComponent implements OnInit, OnDestroy {
   requests: AdminRequestRow[] = [];
   pageLoading = true;
-  listLoading = false;
   statusFilter: RequestFilter = 'all';
+  draftStatus: RequestFilter = 'all';
+  filterDrawerMounted = false;
+  filterDrawerOpen = false;
   readonly pageSize = 5;
   page = 1;
   readonly filters: { id: RequestFilter; label: string }[] = [
@@ -29,8 +32,21 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
   ];
   readonly formatStatus = formatStatusLabel;
   private sub?: Subscription;
+  private filterDrawerCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(private readonly admin: AdminService, private readonly alerts: AlertService) {}
+  constructor(
+    protected readonly admin: AdminService,
+    protected readonly alerts: AlertService,
+    protected readonly auth: AuthService
+  ) {}
+
+  get isSuperAdmin(): boolean {
+    return !!this.auth.currentUser?.isSuperAdmin;
+  }
+
+  get filterLabel(): string {
+    return this.filters.find((f) => f.id === this.statusFilter)?.label || 'All';
+  }
 
   get filtered(): AdminRequestRow[] {
     if (this.statusFilter === 'all') {
@@ -71,6 +87,17 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    if (this.filterDrawerCloseTimer) {
+      clearTimeout(this.filterDrawerCloseTimer);
+    }
+    this.setFilterDrawerBodyClass(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.filterDrawerMounted) {
+      this.closeFilterDrawer();
+    }
   }
 
   setFilter(id: RequestFilter): void {
@@ -79,10 +106,55 @@ export class AdminRequestsComponent implements OnInit, OnDestroy {
     }
     this.statusFilter = id;
     this.page = 1;
-    this.listLoading = true;
-    shimmerPause(SHIMMER_MS).subscribe(() => {
-      this.listLoading = false;
+  }
+
+  openFilterDrawer(): void {
+    if (this.filterDrawerCloseTimer) {
+      clearTimeout(this.filterDrawerCloseTimer);
+      this.filterDrawerCloseTimer = null;
+    }
+    this.draftStatus = this.statusFilter;
+    this.filterDrawerMounted = true;
+    this.filterDrawerOpen = false;
+    this.setFilterDrawerBodyClass(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.filterDrawerOpen = true;
+      });
     });
+  }
+
+  closeFilterDrawer(): void {
+    this.filterDrawerOpen = false;
+    this.setFilterDrawerBodyClass(false);
+    if (this.filterDrawerCloseTimer) {
+      clearTimeout(this.filterDrawerCloseTimer);
+    }
+    this.filterDrawerCloseTimer = setTimeout(() => {
+      this.filterDrawerMounted = false;
+      this.filterDrawerCloseTimer = null;
+    }, 380);
+  }
+
+  applyFilters(): void {
+    this.statusFilter = this.draftStatus;
+    this.page = 1;
+    this.closeFilterDrawer();
+  }
+
+  resetFilters(): void {
+    this.draftStatus = 'all';
+  }
+
+  private setFilterDrawerBodyClass(open: boolean): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    if (open) {
+      document.body.classList.add('nb-drawer-open');
+    } else {
+      document.body.classList.remove('nb-drawer-open');
+    }
   }
 
   prev(): void {

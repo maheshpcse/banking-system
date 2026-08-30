@@ -1,73 +1,75 @@
 <section class="page" *ngIf="!pageLoading; else customersShimmer">
   <header class="admin-hero">
     <div>
-      <p class="eyebrow">NovaBank</p>
+      <p class="eyebrow">{{ isSuperAdmin ? 'Apex Console' : 'NovaBank' }}</p>
       <h1>{{ pageTitle }}</h1>
       <p class="lede">{{ pageLede }}</p>
     </div>
   </header>
 
-  <div class="filters" *ngIf="isSuperAdmin && !listLoading">
-    <button
-      type="button"
-      *ngFor="let kind of roleFilters"
-      [class.is-active]="roleFilter === kind.id"
-      (click)="setRoleFilter(kind.id)"
-    >
-      {{ kind.label }}
-    </button>
-  </div>
-  <div class="filters filters--shimmer" *ngIf="isSuperAdmin && listLoading" aria-hidden="true">
-    <span class="filter-shimmer-chip" *ngFor="let i of [1, 2, 3, 4]"></span>
+  <!-- Super Admin: toolbar + left filter drawer (no tab strips / filter shimmers) -->
+  <div class="sa-toolbar" *ngIf="isSuperAdmin">
+    <button type="button" class="btn btn--ghost" (click)="openFilterDrawer()">Filters</button>
+    <p class="sa-toolbar__summary">
+      <strong>{{ filterSummary }}</strong>
+    </p>
   </div>
 
-  <ng-container *ngIf="!listLoading; else statusFiltersShimmer">
-    <div class="filter-row">
-      <span class="filter-row__label">Login</span>
-      <div class="filters filters--inline" role="tablist" aria-label="Login status">
-        <button
-          type="button"
-          *ngFor="let kind of loginStatusFilters"
-          [class.is-active]="loginStatusFilter === kind.id"
-          (click)="setLoginStatusFilter(kind.id)"
-        >
-          {{ kind.label }}
-        </button>
+  <!-- Banking admin: existing tab-style filter strips -->
+  <ng-container *ngIf="!isSuperAdmin">
+    <ng-container *ngIf="!listLoading; else statusFiltersShimmer">
+      <div class="filter-row">
+        <span class="filter-row__label">Login</span>
+        <div class="filters filters--inline" role="tablist" aria-label="Login status">
+          <button
+            type="button"
+            *ngFor="let kind of loginStatusFilters"
+            [class.is-active]="loginStatusFilter === kind.id"
+            (click)="setLoginStatusFilter(kind.id)"
+          >
+            {{ kind.label }}
+          </button>
+        </div>
       </div>
-    </div>
 
-    <div class="filter-row">
-      <span class="filter-row__label">Banking</span>
-      <div class="filters filters--inline" role="tablist" aria-label="Banking status">
-        <button
-          type="button"
-          *ngFor="let kind of bankingStatusFilters"
-          [class.is-active]="bankingStatusFilter === kind.id"
-          (click)="setBankingStatusFilter(kind.id)"
-        >
-          {{ kind.label }}
-        </button>
+      <div class="filter-row">
+        <span class="filter-row__label">Banking</span>
+        <div class="filters filters--inline" role="tablist" aria-label="Banking status">
+          <button
+            type="button"
+            *ngFor="let kind of bankingStatusFilters"
+            [class.is-active]="bankingStatusFilter === kind.id"
+            (click)="setBankingStatusFilter(kind.id)"
+          >
+            {{ kind.label }}
+          </button>
+        </div>
       </div>
-    </div>
+    </ng-container>
+
+    <ng-template #statusFiltersShimmer>
+      <div class="filter-row filter-row--shimmer" aria-hidden="true">
+        <span class="filter-row__label-bone"></span>
+        <div class="filters filters--inline filters--shimmer">
+          <span class="filter-shimmer-chip" *ngFor="let i of [1, 2, 3, 4, 5]"></span>
+        </div>
+      </div>
+      <div class="filter-row filter-row--shimmer" aria-hidden="true">
+        <span class="filter-row__label-bone"></span>
+        <div class="filters filters--inline filters--shimmer">
+          <span class="filter-shimmer-chip" *ngFor="let i of [1, 2, 3, 4, 5, 6, 7]"></span>
+        </div>
+      </div>
+    </ng-template>
   </ng-container>
 
-  <ng-template #statusFiltersShimmer>
-    <div class="filter-row filter-row--shimmer" aria-hidden="true">
-      <span class="filter-row__label-bone"></span>
-      <div class="filters filters--inline filters--shimmer">
-        <span class="filter-shimmer-chip" *ngFor="let i of [1, 2, 3, 4, 5]"></span>
-      </div>
-    </div>
-    <div class="filter-row filter-row--shimmer" aria-hidden="true">
-      <span class="filter-row__label-bone"></span>
-      <div class="filters filters--inline filters--shimmer">
-        <span class="filter-shimmer-chip" *ngFor="let i of [1, 2, 3, 4, 5, 6, 7]"></span>
-      </div>
-    </div>
-  </ng-template>
-
-  <ng-container *ngIf="!listLoading; else listShimmer">
-    <div class="table-wrap" [class.is-menu-open]="!!menuOpenId" *ngIf="users.length; else emptyCustomers">
+  <ng-container *ngIf="isSuperAdmin || !listLoading; else listShimmer">
+    <div
+      class="table-wrap"
+      [class.is-menu-open]="!!menuOpenId"
+      [class.is-busy]="tableBusy"
+      *ngIf="users.length; else emptyCustomers"
+    >
       <table class="data-table">
         <thead>
           <tr>
@@ -215,7 +217,12 @@
     </div>
 
     <div class="pager" *ngIf="pagination.total > 0">
-      <button type="button" class="btn btn--ghost" (click)="prev()" [disabled]="pagination.page <= 1">
+      <button
+        type="button"
+        class="btn btn--ghost"
+        (click)="prev()"
+        [disabled]="tableBusy || pagination.page <= 1"
+      >
         Previous
       </button>
       <span>Page {{ pagination.page }} of {{ pagination.pages }} · {{ pagination.total }} total</span>
@@ -223,7 +230,7 @@
         type="button"
         class="btn btn--ghost"
         (click)="next()"
-        [disabled]="pagination.page >= pagination.pages"
+        [disabled]="tableBusy || pagination.page >= pagination.pages"
       >
         Next
       </button>
@@ -250,6 +257,71 @@
     </div>
   </div>
 </ng-template>
+
+<!-- Super Admin filter drawer (left) -->
+<div
+  class="filter-drawer-backdrop"
+  *ngIf="isSuperAdmin"
+  [class.is-open]="filterDrawerOpen"
+  data-backdrop="static"
+  data-keyboard="false"
+></div>
+<aside
+  class="filter-drawer"
+  *ngIf="isSuperAdmin"
+  [class.is-open]="filterDrawerOpen"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Directory filters"
+  tabindex="-1"
+  data-backdrop="static"
+  data-keyboard="false"
+>
+  <header class="filter-drawer__head">
+    <div>
+      <p class="filter-drawer__eyebrow">Directory</p>
+      <h2>Filters</h2>
+    </div>
+    <button
+      type="button"
+      class="icon-btn icon-btn--close"
+      (click)="closeFilterDrawer()"
+      aria-label="Close filters"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 6l12 12M18 6 6 18"></path>
+      </svg>
+    </button>
+  </header>
+
+  <div class="filter-drawer__body">
+    <label class="filter-drawer__field">
+      <span>Role</span>
+      <select [(ngModel)]="draftRoleFilter">
+        <option *ngFor="let kind of roleFilters" [ngValue]="kind.id">{{ kind.label }}</option>
+      </select>
+    </label>
+
+    <label class="filter-drawer__field">
+      <span>Login status</span>
+      <select [(ngModel)]="draftLoginStatusFilter">
+        <option *ngFor="let kind of loginStatusFilters" [ngValue]="kind.id">{{ kind.label }}</option>
+      </select>
+    </label>
+
+    <label class="filter-drawer__field">
+      <span>Banking status</span>
+      <select [(ngModel)]="draftBankingStatusFilter">
+        <option *ngFor="let kind of bankingStatusFilters" [ngValue]="kind.id">{{ kind.label }}</option>
+      </select>
+    </label>
+  </div>
+
+  <footer class="filter-drawer__foot">
+    <button type="button" class="btn btn--ghost" (click)="resetDraftFilters()">Reset</button>
+    <button type="button" class="btn btn--primary" (click)="applyFilters()">Apply</button>
+  </footer>
+</aside>
 
 <div
   class="drawer-backdrop"

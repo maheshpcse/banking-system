@@ -1,13 +1,17 @@
-<section class="page">
+<section class="page" *ngIf="!pageLoading; else alertsShimmer">
   <header class="admin-hero">
     <div>
-      <p class="eyebrow">NovaBank</p>
-      <h1>Operations notifications</h1>
+      <p class="eyebrow">{{ isSuperAdmin ? 'Apex Console' : 'NovaBank' }}</p>
+      <h1>{{ isSuperAdmin ? 'Alerts' : 'Operations notifications' }}</h1>
       <p class="lede">Timeline of approvals, transfers, and account events.</p>
     </div>
     <div class="tools">
-      <button type="button" class="btn btn--ghost" [class.is-active]="view === 'table'" (click)="view = 'table'">Table</button>
-      <button type="button" class="btn btn--ghost" [class.is-active]="view === 'list'" (click)="view = 'list'">List</button>
+      <button type="button" class="btn btn--ghost" [class.is-active]="view === 'table'" (click)="view = 'table'">
+        Table
+      </button>
+      <button type="button" class="btn btn--ghost" [class.is-active]="view === 'list'" (click)="view = 'list'">
+        List
+      </button>
       <button type="button" class="btn btn--ghost" (click)="markAll()">Mark all read</button>
     </div>
   </header>
@@ -15,7 +19,13 @@
   <div class="table-wrap" *ngIf="view === 'table' && items.length">
     <table class="data-table">
       <thead>
-        <tr><th>When</th><th>Kind</th><th>Title</th><th>Detail</th><th>Read</th></tr>
+        <tr>
+          <th>When</th>
+          <th>Kind</th>
+          <th>Title</th>
+          <th>Detail</th>
+          <th>Read</th>
+        </tr>
       </thead>
       <tbody>
         <tr *ngFor="let item of items">
@@ -39,6 +49,13 @@
     </article>
   </div>
 
-  <app-empty-state *ngIf="!items.length" kind="notifications"
-    message="No notifications yet."></app-empty-state>
+  <app-empty-state
+    *ngIf="!items.length"
+    kind="notifications"
+    message="No notifications yet."
+  ></app-empty-state>
 </section>
+
+<ng-template #alertsShimmer>
+  <app-shimmer variant="admin-customers"></app-shimmer>
+</ng-template>

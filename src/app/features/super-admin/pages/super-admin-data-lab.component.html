@@ -1,47 +1,51 @@
-<section class="page dl-page">
+<section class="page dl-page" *ngIf="!pageLoading; else labShimmer">
   <header class="admin-hero">
     <div>
       <p class="eyebrow">Apex Console</p>
       <h1>Data lab</h1>
       <p class="lede">
-        Generate realistic demo staff, products, customers, and coupons — review, prune, then commit
-        only what you want written to the database.
+        Choose which datasets to create, set how many records each should get, then review and commit.
       </p>
     </div>
   </header>
 
   <form class="dl-controls" [formGroup]="form" (ngSubmit)="generate()">
+    <div class="dl-entities" role="group" aria-label="Data types">
+      <button
+        type="button"
+        class="dl-entity"
+        *ngFor="let opt of entityOptions"
+        [class.is-active]="selectedEntities[opt.id]"
+        [attr.aria-pressed]="selectedEntities[opt.id]"
+        (click)="toggleEntity(opt.id)"
+      >
+        <strong>{{ opt.label }}</strong>
+        <span>{{ opt.hint }}</span>
+      </button>
+    </div>
+
     <label class="dl-controls__field">
-      <span>Staff users</span>
-      <input type="number" formControlName="users" min="0" max="50" />
+      <span>Records per selected type</span>
+      <input type="number" formControlName="count" min="1" max="40" />
     </label>
-    <label class="dl-controls__field">
-      <span>Products</span>
-      <input type="number" formControlName="products" min="0" max="200" />
-    </label>
-    <label class="dl-controls__field">
-      <span>Customers</span>
-      <input type="number" formControlName="customers" min="0" max="200" />
-    </label>
-    <label class="dl-controls__field">
-      <span>Coupons</span>
-      <input type="number" formControlName="coupons" min="0" max="50" />
-    </label>
-    <button type="submit" class="btn btn--primary" [disabled]="form.invalid || generating">
+
+    <button
+      type="submit"
+      class="btn btn--primary"
+      [disabled]="form.invalid || generating || !selectedEntityCount"
+    >
       <app-sa-icon name="spark"></app-sa-icon>
-      {{ generating ? 'Generating…' : hasGenerated ? 'Regenerate' : 'Generate' }}
+      {{ generating ? 'Generating…' : hasGenerated ? 'Generate selected' : 'Generate' }}
     </button>
   </form>
 
-  <p class="dl-password-note" *ngIf="hasGenerated">
+  <p class="dl-password-note" *ngIf="hasGenerated && users.length">
     <app-sa-icon name="shield-key"></app-sa-icon>
-    Common password for generated staff users: <code>{{ commonPasswordFromServer || commonPassword }}</code>
+    Common password for generated staff users:
+    <code>{{ commonPasswordFromServer || commonPassword }}</code>
   </p>
 
   <div class="dl-shimmer-grid" *ngIf="generating">
-    <app-shimmer variant="data-table" [columns]="5" [rows]="4"></app-shimmer>
-    <app-shimmer variant="data-table" [columns]="5" [rows]="4"></app-shimmer>
-    <app-shimmer variant="data-table" [columns]="5" [rows]="4"></app-shimmer>
     <app-shimmer variant="data-table" [columns]="5" [rows]="4"></app-shimmer>
   </div>
 
@@ -69,7 +73,11 @@
       </div>
     </div>
 
-    <app-empty-state *ngIf="!totalRows" kind="requests" message="Nothing generated yet. Set counts above and Generate."></app-empty-state>
+    <app-empty-state
+      *ngIf="!totalRows"
+      kind="requests"
+      message="Nothing generated yet. Select types, set a count, then Generate."
+    ></app-empty-state>
 
     <section class="dl-section" *ngIf="users.length">
       <h2 class="dl-section__title"><app-sa-icon name="staff"></app-sa-icon> Staff users</h2>
@@ -216,3 +224,7 @@
     </section>
   </ng-container>
 </section>
+
+<ng-template #labShimmer>
+  <app-shimmer variant="admin-customers"></app-shimmer>
+</ng-template>

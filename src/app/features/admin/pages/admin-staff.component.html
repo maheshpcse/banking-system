@@ -1,7 +1,7 @@
 <section class="page" *ngIf="!pageLoading; else shimmer">
   <header class="admin-hero">
     <div>
-      <p class="eyebrow">NovaBank</p>
+      <p class="eyebrow">{{ isSuperAdmin ? 'Apex Console' : 'NovaBank' }}</p>
       <h1>Staff directory</h1>
       <p class="lede">
         Super Admin only — review manager and admin registrations, then activate or decline access.
@@ -9,7 +9,14 @@
     </div>
   </header>
 
-  <div class="filters">
+  <div class="sa-toolbar" *ngIf="isSuperAdmin">
+    <button type="button" class="btn btn--ghost" (click)="openFilterDrawer()">Filters</button>
+    <p class="sa-toolbar__summary">
+      Status: <strong>{{ filterLabel }}</strong>
+    </p>
+  </div>
+
+  <div class="filters" *ngIf="!isSuperAdmin">
     <button
       type="button"
       *ngFor="let kind of filters"
@@ -20,91 +27,89 @@
     </button>
   </div>
 
-  <ng-container *ngIf="!listLoading; else listShimmer">
-    <div class="table-wrap" *ngIf="filtered.length; else empty">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Staff</th>
-            <th>Login</th>
-            <th class="actions-col">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let user of filtered">
-            <td>
-              <strong>{{ user.fullName }}</strong>
-            </td>
-            <td>{{ user.username || '—' }}</td>
-            <td>{{ user.email }}</td>
-            <td>
-              <span class="pill" [attr.data-status]="user.role">{{ formatStatus(user.role) }}</span>
-            </td>
-            <td>
-              <span class="pill" [attr.data-status]="user.staffStatus || 'active'">
-                {{ formatStatus(user.staffStatus || 'active') }}
-              </span>
-            </td>
-            <td>
-              <span class="pill" [attr.data-status]="loginStatusOf(user)">
-                {{ formatStatus(loginStatusOf(user)) }}
-              </span>
-            </td>
-            <td class="actions-col">
-              <div class="request-card__actions" *ngIf="(user.staffStatus || 'active') === 'pending_approval'">
-                <button type="button" class="btn btn--ghost btn--compact" (click)="reject(user)">Decline</button>
-                <button type="button" class="btn btn--primary btn--compact" (click)="approve(user)">Activate</button>
-              </div>
-              <div class="request-card__actions" *ngIf="isActiveStaff(user)">
-                <button
-                  type="button"
-                  class="btn btn--ghost btn--compact"
-                  *ngIf="!isLoginBlocked(user)"
-                  (click)="setStaffStatus(user, 'blocked')"
-                >
-                  Block login
-                </button>
-                <button
-                  type="button"
-                  class="btn btn--ghost btn--compact"
-                  *ngIf="isLoginBlocked(user)"
-                  (click)="setStaffStatus(user, 'active')"
-                >
-                  Unblock login
-                </button>
-                <button
-                  type="button"
-                  class="btn btn--ghost btn--compact"
-                  *ngIf="canDeactivateStaff(user)"
-                  (click)="setStaffStatus(user, 'deactivated')"
-                >
-                  Deactivate login
-                </button>
-                <button
-                  type="button"
-                  class="btn btn--ghost btn--compact"
-                  *ngIf="isLoginDeactivated(user)"
-                  (click)="setStaffStatus(user, 'active')"
-                >
-                  Activate login
-                </button>
-                <button type="button" class="btn btn--ghost btn--compact" (click)="removeStaff(user)">Delete</button>
-              </div>
-              <span
-                class="muted"
-                *ngIf="(user.staffStatus || 'active') !== 'pending_approval' && !isActiveStaff(user)"
-                >—</span
+  <div class="table-wrap" *ngIf="filtered.length; else empty">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Staff</th>
+          <th>Login</th>
+          <th class="actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filtered">
+          <td>
+            <strong>{{ user.fullName }}</strong>
+          </td>
+          <td>{{ user.username || '—' }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <span class="pill" [attr.data-status]="user.role">{{ formatStatus(user.role) }}</span>
+          </td>
+          <td>
+            <span class="pill" [attr.data-status]="user.staffStatus || 'active'">
+              {{ formatStatus(user.staffStatus || 'active') }}
+            </span>
+          </td>
+          <td>
+            <span class="pill" [attr.data-status]="loginStatusOf(user)">
+              {{ formatStatus(loginStatusOf(user)) }}
+            </span>
+          </td>
+          <td class="actions-col">
+            <div class="request-card__actions" *ngIf="(user.staffStatus || 'active') === 'pending_approval'">
+              <button type="button" class="btn btn--ghost btn--compact" (click)="reject(user)">Decline</button>
+              <button type="button" class="btn btn--primary btn--compact" (click)="approve(user)">Activate</button>
+            </div>
+            <div class="request-card__actions" *ngIf="isActiveStaff(user)">
+              <button
+                type="button"
+                class="btn btn--ghost btn--compact"
+                *ngIf="!isLoginBlocked(user)"
+                (click)="setStaffStatus(user, 'blocked')"
               >
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </ng-container>
+                Block login
+              </button>
+              <button
+                type="button"
+                class="btn btn--ghost btn--compact"
+                *ngIf="isLoginBlocked(user)"
+                (click)="setStaffStatus(user, 'active')"
+              >
+                Unblock login
+              </button>
+              <button
+                type="button"
+                class="btn btn--ghost btn--compact"
+                *ngIf="canDeactivateStaff(user)"
+                (click)="setStaffStatus(user, 'deactivated')"
+              >
+                Deactivate login
+              </button>
+              <button
+                type="button"
+                class="btn btn--ghost btn--compact"
+                *ngIf="isLoginDeactivated(user)"
+                (click)="setStaffStatus(user, 'active')"
+              >
+                Activate login
+              </button>
+              <button type="button" class="btn btn--ghost btn--compact" (click)="removeStaff(user)">Delete</button>
+            </div>
+            <span
+              class="muted"
+              *ngIf="(user.staffStatus || 'active') !== 'pending_approval' && !isActiveStaff(user)"
+              >—</span
+            >
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <ng-template #empty>
     <app-empty-state kind="staff"
@@ -116,6 +121,42 @@
   <app-shimmer variant="admin-customers"></app-shimmer>
 </ng-template>
 
-<ng-template #listShimmer>
-  <app-shimmer variant="data-table" [columns]="7" [rows]="6"></app-shimmer>
-</ng-template>
+<div
+  class="filter-drawer-backdrop"
+  *ngIf="filterDrawerMounted"
+  [class.is-open]="filterDrawerOpen"
+  (click)="closeFilterDrawer()"
+></div>
+<aside
+  class="filter-drawer"
+  *ngIf="filterDrawerMounted"
+  [class.is-open]="filterDrawerOpen"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Filters"
+  (click)="$event.stopPropagation()"
+>
+  <header class="filter-drawer__head">
+    <div>
+      <p class="filter-drawer__eyebrow">Refine</p>
+      <h2>Filters</h2>
+    </div>
+    <button type="button" class="icon-btn icon-btn--close" (click)="closeFilterDrawer()" aria-label="Close filters">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 6l12 12M18 6 6 18"></path>
+      </svg>
+    </button>
+  </header>
+  <div class="filter-drawer__body">
+    <label class="filter-drawer__field">
+      <span>Status</span>
+      <select [(ngModel)]="draftStatus" name="staffStatusFilter">
+        <option *ngFor="let kind of filters" [ngValue]="kind.id">{{ kind.label }}</option>
+      </select>
+    </label>
+  </div>
+  <footer class="filter-drawer__foot">
+    <button type="button" class="btn btn--ghost" (click)="resetFilters()">Reset</button>
+    <button type="button" class="btn btn--primary" (click)="applyFilters()">Apply</button>
+  </footer>
+</aside>

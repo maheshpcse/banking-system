@@ -1,13 +1,20 @@
 <section class="page" *ngIf="!pageLoading; else requestsShimmer">
   <header class="admin-hero">
     <div>
-      <p class="eyebrow">NovaBank</p>
+      <p class="eyebrow">{{ isSuperAdmin ? 'Apex Console' : 'NovaBank' }}</p>
       <h1>Opening requests</h1>
       <p class="lede">Verify address and card details, then approve or reject.</p>
     </div>
   </header>
 
-  <div class="filters">
+  <div class="sa-toolbar" *ngIf="isSuperAdmin">
+    <button type="button" class="btn btn--ghost" (click)="openFilterDrawer()">Filters</button>
+    <p class="sa-toolbar__summary">
+      Status: <strong>{{ filterLabel }}</strong>
+    </p>
+  </div>
+
+  <div class="filters" *ngIf="!isSuperAdmin">
     <button
       type="button"
       *ngFor="let kind of filters"
@@ -18,28 +25,26 @@
     </button>
   </div>
 
-  <ng-container *ngIf="!listLoading; else listShimmer">
-    <div class="request-list" *ngIf="filtered.length; else empty">
-      <article class="request-card" *ngFor="let row of paged">
-        <div class="request-card__copy">
-          <strong>{{ row.fullName }}</strong>
-          <p>{{ row.email }} · {{ row.submittedAt | date: 'medium' }}</p>
-          <p class="muted">{{ row.address?.line1 }}, {{ row.address?.city }} {{ row.address?.postalCode }}</p>
-          <span class="pill" [attr.data-status]="row.status">{{ formatStatus(row.status) }}</span>
-        </div>
-        <div class="request-card__actions" *ngIf="row.status === 'under_review'">
-          <button type="button" class="btn btn--ghost btn--compact" (click)="reject(row)">Reject</button>
-          <button type="button" class="btn btn--primary btn--compact" (click)="approve(row)">Approve</button>
-        </div>
-      </article>
-    </div>
+  <div class="request-list" *ngIf="filtered.length; else empty">
+    <article class="request-card" *ngFor="let row of paged">
+      <div class="request-card__copy">
+        <strong>{{ row.fullName }}</strong>
+        <p>{{ row.email }} · {{ row.submittedAt | date: 'medium' }}</p>
+        <p class="muted">{{ row.address?.line1 }}, {{ row.address?.city }} {{ row.address?.postalCode }}</p>
+        <span class="pill" [attr.data-status]="row.status">{{ formatStatus(row.status) }}</span>
+      </div>
+      <div class="request-card__actions" *ngIf="row.status === 'under_review'">
+        <button type="button" class="btn btn--ghost btn--compact" (click)="reject(row)">Reject</button>
+        <button type="button" class="btn btn--primary btn--compact" (click)="approve(row)">Approve</button>
+      </div>
+    </article>
+  </div>
 
-    <div class="pager" *ngIf="filtered.length">
-      <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
-      <span>Page {{ page }} / {{ pages }} · {{ filtered.length }} total</span>
-      <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
-    </div>
-  </ng-container>
+  <div class="pager" *ngIf="filtered.length">
+    <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
+    <span>Page {{ page }} / {{ pages }} · {{ filtered.length }} total</span>
+    <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
+  </div>
 </section>
 
 <ng-template #empty>
@@ -51,13 +56,42 @@
   <app-shimmer variant="admin-requests"></app-shimmer>
 </ng-template>
 
-<ng-template #listShimmer>
-  <div class="list-shimmer">
-    <app-shimmer variant="admin-requests-list"></app-shimmer>
-    <div class="pager pager--shimmer" aria-hidden="true">
-      <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
-      <span class="pager-shimmer__bone pager-shimmer__bone--label"></span>
-      <span class="pager-shimmer__bone pager-shimmer__bone--btn"></span>
+<div
+  class="filter-drawer-backdrop"
+  *ngIf="filterDrawerMounted"
+  [class.is-open]="filterDrawerOpen"
+  (click)="closeFilterDrawer()"
+></div>
+<aside
+  class="filter-drawer"
+  *ngIf="filterDrawerMounted"
+  [class.is-open]="filterDrawerOpen"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Filters"
+  (click)="$event.stopPropagation()"
+>
+  <header class="filter-drawer__head">
+    <div>
+      <p class="filter-drawer__eyebrow">Refine</p>
+      <h2>Filters</h2>
     </div>
+    <button type="button" class="icon-btn icon-btn--close" (click)="closeFilterDrawer()" aria-label="Close filters">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 6l12 12M18 6 6 18"></path>
+      </svg>
+    </button>
+  </header>
+  <div class="filter-drawer__body">
+    <label class="filter-drawer__field">
+      <span>Status</span>
+      <select [(ngModel)]="draftStatus" name="requestStatusFilter">
+        <option *ngFor="let kind of filters" [ngValue]="kind.id">{{ kind.label }}</option>
+      </select>
+    </label>
   </div>
-</ng-template>
+  <footer class="filter-drawer__foot">
+    <button type="button" class="btn btn--ghost" (click)="resetFilters()">Reset</button>
+    <button type="button" class="btn btn--primary" (click)="applyFilters()">Apply</button>
+  </footer>
+</aside>
