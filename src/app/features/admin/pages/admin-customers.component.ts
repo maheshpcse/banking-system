@@ -134,6 +134,18 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     return parts.length ? parts.join(' · ') : 'All roles · All statuses';
   }
 
+  get roleSelectOptions(): Array<{ value: string; label: string }> {
+    return this.roleFilters.map((f) => ({ value: f.id, label: f.label }));
+  }
+
+  get loginSelectOptions(): Array<{ value: string; label: string }> {
+    return this.loginStatusFilters.map((f) => ({ value: f.id, label: f.label }));
+  }
+
+  get bankingSelectOptions(): Array<{ value: string; label: string }> {
+    return this.bankingStatusFilters.map((f) => ({ value: f.id, label: f.label }));
+  }
+
   get chartBars(): { label: string; total: number; pct: number }[] {
     const buckets: Record<string, number> = {
       deposit: 0,
@@ -217,6 +229,7 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
     this.draftRoleFilter = 'all';
     this.draftLoginStatusFilter = 'all';
     this.draftBankingStatusFilter = 'all';
+    this.applyFilters();
   }
 
   applyFilters(): void {
@@ -254,10 +267,9 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
   loadPage(page: number, initial = false): void {
     if (initial) {
       this.pageLoading = true;
-    } else if (this.isSuperAdmin) {
-      this.tableBusy = true;
     } else {
       this.listLoading = true;
+      this.tableBusy = this.isSuperAdmin;
     }
     const opts: {
       scope?: 'all' | 'customers';
@@ -277,12 +289,7 @@ export class AdminCustomersComponent implements OnInit, OnDestroy {
       opts.bankingStatus = this.bankingStatusFilter;
     }
     const request$ = this.admin.refreshCustomers(page, 5, opts);
-    const load$ = initial
-      ? withShimmerDelay(request$, SHIMMER_MS)
-      : this.isSuperAdmin
-        ? request$
-        : withShimmerDelay(request$, SHIMMER_MS);
-    load$.subscribe({
+    withShimmerDelay(request$, SHIMMER_MS).subscribe({
       next: () => {
         this.pageLoading = false;
         this.listLoading = false;

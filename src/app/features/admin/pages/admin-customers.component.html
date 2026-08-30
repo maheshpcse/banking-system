@@ -7,7 +7,7 @@
     </div>
   </header>
 
-  <!-- Super Admin: toolbar + left filter drawer (no tab strips / filter shimmers) -->
+  <!-- Super Admin: toolbar stays visible while table shimmers on filter apply -->
   <div class="sa-toolbar" *ngIf="isSuperAdmin">
     <button type="button" class="btn btn--ghost" (click)="openFilterDrawer()">Filters</button>
     <p class="sa-toolbar__summary">
@@ -63,7 +63,7 @@
     </ng-template>
   </ng-container>
 
-  <ng-container *ngIf="isSuperAdmin || !listLoading; else listShimmer">
+  <ng-container *ngIf="!listLoading; else listShimmer">
     <div
       class="table-wrap"
       [class.is-menu-open]="!!menuOpenId"
@@ -244,7 +244,23 @@
 </ng-template>
 
 <ng-template #customersShimmer>
-  <app-shimmer variant="admin-customers"></app-shimmer>
+  <section class="page" *ngIf="isSuperAdmin; else bankingCustomersShimmer">
+    <header class="admin-hero" aria-hidden="true">
+      <div>
+        <div class="sa-toolbar__summary-bone" style="width: 7rem; height: 0.7rem; margin-bottom: 0.65rem"></div>
+        <div class="sa-toolbar__summary-bone" style="width: 12rem; height: 1.6rem; margin-bottom: 0.55rem"></div>
+        <div class="sa-toolbar__summary-bone" style="width: min(28rem, 80%); height: 0.85rem"></div>
+      </div>
+    </header>
+    <div class="sa-toolbar sa-toolbar--shimmer" aria-hidden="true">
+      <span class="sa-toolbar__btn-bone"></span>
+      <span class="sa-toolbar__summary-bone"></span>
+    </div>
+    <app-shimmer variant="data-table" [columns]="7" [rows]="6"></app-shimmer>
+  </section>
+  <ng-template #bankingCustomersShimmer>
+    <app-shimmer variant="admin-customers"></app-shimmer>
+  </ng-template>
 </ng-template>
 
 <ng-template #listShimmer>
@@ -297,23 +313,32 @@
   <div class="filter-drawer__body">
     <label class="filter-drawer__field">
       <span>Role</span>
-      <select [(ngModel)]="draftRoleFilter">
-        <option *ngFor="let kind of roleFilters" [ngValue]="kind.id">{{ kind.label }}</option>
-      </select>
+      <app-theme-select
+        [(ngModel)]="draftRoleFilter"
+        [options]="roleSelectOptions"
+        placeholder="Select role"
+        ariaLabel="Role filter"
+      ></app-theme-select>
     </label>
 
     <label class="filter-drawer__field">
       <span>Login status</span>
-      <select [(ngModel)]="draftLoginStatusFilter">
-        <option *ngFor="let kind of loginStatusFilters" [ngValue]="kind.id">{{ kind.label }}</option>
-      </select>
+      <app-theme-select
+        [(ngModel)]="draftLoginStatusFilter"
+        [options]="loginSelectOptions"
+        placeholder="Select login status"
+        ariaLabel="Login status filter"
+      ></app-theme-select>
     </label>
 
     <label class="filter-drawer__field">
       <span>Banking status</span>
-      <select [(ngModel)]="draftBankingStatusFilter">
-        <option *ngFor="let kind of bankingStatusFilters" [ngValue]="kind.id">{{ kind.label }}</option>
-      </select>
+      <app-theme-select
+        [(ngModel)]="draftBankingStatusFilter"
+        [options]="bankingSelectOptions"
+        placeholder="Select banking status"
+        ariaLabel="Banking status filter"
+      ></app-theme-select>
     </label>
   </div>
 

@@ -22,6 +22,18 @@
   --ts-line: rgba(22, 50, 58, 0.14);
 }
 
+/* Apex Console — copper/obsidian select (not mint Banking / orange Billing). */
+:host-context(body.sa-mode) {
+  --ts-accent: #c98b4b;
+  --ts-accent-deep: #a86b34;
+  --ts-accent-soft: rgba(201, 139, 75, 0.2);
+  --ts-accent-border: rgba(201, 139, 75, 0.55);
+  --ts-ink: #e8ecef;
+  --ts-muted: #8b95a5;
+  --ts-line: rgba(232, 236, 239, 0.18);
+  --ts-surface: #1d232d;
+}
+
 .theme-select {
   position: relative;
   width: 100%;
@@ -71,6 +83,49 @@
   border-color: var(--ts-accent);
   box-shadow: 0 0 0 4px var(--ts-accent-soft);
   background-color: #fff;
+}
+
+:host-context(body.sa-mode) .theme-select__control {
+  border-radius: 0.45rem;
+  background-color: rgba(232, 236, 239, 0.04);
+  border-color: var(--ts-line);
+  min-height: 2.65rem;
+}
+
+:host-context(body.sa-mode) .theme-select__control:hover:not(:disabled) {
+  background-color: rgba(201, 139, 75, 0.1);
+  border-color: var(--ts-accent-border);
+}
+
+:host-context(body.sa-mode) .theme-select.is-open .theme-select__control,
+:host-context(body.sa-mode) .theme-select__control:focus {
+  background-color: #171c24;
+  border-color: var(--ts-accent);
+  box-shadow: 0 0 0 3px var(--ts-accent-soft);
+}
+
+:host-context(body.sa-mode) .theme-select__menu {
+  background: #171c24;
+  border: 1px solid rgba(201, 139, 75, 0.4);
+  border-radius: 0.5rem;
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.55);
+  padding: 0.35rem;
+}
+
+:host-context(body.sa-mode) .theme-select__option {
+  border-radius: 0.35rem;
+  color: var(--ts-ink);
+}
+
+:host-context(body.sa-mode) .theme-select__option:hover,
+:host-context(body.sa-mode) .theme-select__option.is-active {
+  background: rgba(201, 139, 75, 0.16);
+  color: #c98b4b;
+}
+
+:host-context(body.sa-mode) .theme-select__clear {
+  background: rgba(232, 236, 239, 0.08);
+  color: var(--ts-ink);
 }
 
 .theme-select.is-disabled .theme-select__control,
@@ -238,6 +293,11 @@
 
 :host-context(html[data-nb-billing='1']) .theme-select__option.is-selected {
   background: rgba(255, 200, 1, 0.32);
+}
+
+:host-context(body.sa-mode) .theme-select__option.is-selected {
+  background: rgba(201, 139, 75, 0.22);
+  color: #c98b4b;
 }
 
 .theme-select__option.is-disabled,
