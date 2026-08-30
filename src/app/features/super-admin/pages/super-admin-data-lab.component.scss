@@ -153,12 +153,99 @@
 }
 
 .dl-check-col {
-  width: 1%;
+  width: 2.75rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.dl-section .table-wrap {
+  border-radius: var(--sa-radius, 0.55rem);
+  background: var(--sa-panel, #171c24);
+  border: 1px solid var(--sa-line, rgba(232, 236, 239, 0.1));
+  overflow: auto;
+}
+
+.dl-section .data-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.dl-section .data-table th,
+.dl-section .data-table td {
+  vertical-align: middle;
+  padding: 0.75rem 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.dl-check-col input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  border: 1.5px solid rgba(201, 139, 75, 0.65);
+  border-radius: 0.28rem;
+  background: rgba(232, 236, 239, 0.04);
+  cursor: pointer;
+  vertical-align: middle;
+  position: relative;
+}
+
+.dl-check-col input[type='checkbox']:checked {
+  background: var(--sa-copper, #c98b4b);
+  border-color: var(--sa-copper, #c98b4b);
+}
+
+.dl-check-col input[type='checkbox']:checked::after {
+  content: '';
+  position: absolute;
+  left: 0.28rem;
+  top: 0.08rem;
+  width: 0.28rem;
+  height: 0.55rem;
+  border: solid #0e1116;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 .dl-section code {
   font-family: var(--sa-font-mono, 'IBM Plex Mono', monospace);
   font-size: 0.82rem;
   color: var(--sa-muted, #8b95a5);
+}
+
+.dl-page-shimmer {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.dl-page-shimmer__controls {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: var(--sa-radius, 0.55rem);
+  background: var(--sa-panel, #171c24);
+  border: 1px solid var(--sa-line, rgba(232, 236, 239, 0.1));
+}
+
+.dl-page-shimmer__entities {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.dl-page-shimmer__entity {
+  height: 3.6rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(
+    105deg,
+    rgba(232, 236, 239, 0.05) 0%,
+    rgba(201, 139, 75, 0.22) 42%,
+    rgba(232, 236, 239, 0.08) 78%
+  );
+  background-size: 220% 100%;
+  animation: sa-toolbar-shimmer 1.15s ease-in-out infinite;
 }

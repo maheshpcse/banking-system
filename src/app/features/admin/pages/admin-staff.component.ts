@@ -1,9 +1,10 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { AccountStatus, User } from '../../../core/models/banking.models';
 import { AdminService } from '../../../core/services/admin.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { SHIMMER_MS, withShimmerDelay } from '../../../core/utils/shimmer';
+import { SHIMMER_MS, shimmerPause, withShimmerDelay } from '../../../core/utils/shimmer';
 import { formatStatusLabel } from '../../../core/utils/status-label';
 
 type StaffFilter = 'all' | 'pending_approval' | 'active' | 'rejected';
@@ -15,6 +16,7 @@ type StaffFilter = 'all' | 'pending_approval' | 'active' | 'rejected';
 })
 export class AdminStaffComponent implements OnInit, OnDestroy {
   pageLoading = true;
+  listLoading = false;
   items: User[] = [];
   statusFilter: StaffFilter = 'all';
   draftStatus: StaffFilter = 'all';
@@ -28,6 +30,7 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
   ];
   readonly formatStatus = formatStatusLabel;
   private filterDrawerCloseTimer: ReturnType<typeof setTimeout> | null = null;
+  private listShimmerSub?: Subscription;
 
   constructor(
     private readonly admin: AdminService,
@@ -43,6 +46,10 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
     return this.filters.find((f) => f.id === this.statusFilter)?.label || 'All';
   }
 
+  get statusSelectOptions(): Array<{ value: string; label: string }> {
+    return this.filters.map((f) => ({ value: f.id, label: f.label }));
+  }
+
   get filtered(): User[] {
     if (this.statusFilter === 'all') {
       return this.items;
@@ -55,6 +62,7 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.listShimmerSub?.unsubscribe();
     if (this.filterDrawerCloseTimer) {
       clearTimeout(this.filterDrawerCloseTimer);
     }
@@ -106,10 +114,20 @@ export class AdminStaffComponent implements OnInit, OnDestroy {
   applyFilters(): void {
     this.statusFilter = this.draftStatus;
     this.closeFilterDrawer();
+    this.flashList();
   }
 
   resetFilters(): void {
     this.draftStatus = 'all';
+    this.applyFilters();
+  }
+
+  private flashList(): void {
+    this.listShimmerSub?.unsubscribe();
+    this.listLoading = true;
+    this.listShimmerSub = shimmerPause(SHIMMER_MS).subscribe(() => {
+      this.listLoading = false;
+    });
   }
 
   private setFilterDrawerBodyClass(open: boolean): void {

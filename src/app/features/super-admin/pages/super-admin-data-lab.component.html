@@ -226,5 +226,20 @@
 </section>
 
 <ng-template #labShimmer>
-  <app-shimmer variant="admin-customers"></app-shimmer>
+  <section class="page dl-page dl-page-shimmer" aria-busy="true">
+    <header class="admin-hero" aria-hidden="true">
+      <div>
+        <div class="sa-toolbar__summary-bone" style="width: 7rem; height: 0.7rem; margin-bottom: 0.65rem"></div>
+        <div class="sa-toolbar__summary-bone" style="width: 10rem; height: 1.6rem; margin-bottom: 0.55rem"></div>
+        <div class="sa-toolbar__summary-bone" style="width: min(32rem, 85%); height: 0.85rem"></div>
+      </div>
+    </header>
+    <div class="dl-page-shimmer__controls" aria-hidden="true">
+      <div class="dl-page-shimmer__entities">
+        <span class="dl-page-shimmer__entity" *ngFor="let i of [1, 2, 3, 4]"></span>
+      </div>
+      <div class="sa-toolbar__summary-bone" style="width: 14rem; height: 2.5rem"></div>
+      <div class="sa-toolbar__btn-bone" style="width: 9rem; height: 2.5rem"></div>
+    </div>
+  </section>
 </ng-template>

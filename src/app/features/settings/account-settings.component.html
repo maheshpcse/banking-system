@@ -814,5 +814,29 @@
 </section>
 
 <ng-template #settingsShimmer>
-  <app-shimmer variant="settings"></app-shimmer>
+  <section class="page" *ngIf="isConsoleAccount; else bankingSettingsShimmer" aria-busy="true">
+    <header class="page__hero admin-hero" aria-hidden="true">
+      <div>
+        <div class="sa-toolbar__summary-bone" style="width: 7rem; height: 0.7rem; margin-bottom: 0.65rem"></div>
+        <div class="sa-toolbar__summary-bone" style="width: 14rem; height: 1.6rem; margin-bottom: 0.55rem"></div>
+        <div class="sa-toolbar__summary-bone" style="width: min(28rem, 80%); height: 0.85rem"></div>
+      </div>
+      <div class="sa-toolbar__btn-bone" style="width: 4.5rem; height: 4.5rem; border-radius: 999px"></div>
+    </header>
+    <div class="settings-shell settings-shell--console" aria-hidden="true">
+      <div class="settings-nav" style="pointer-events: none">
+        <span class="sa-toolbar__summary-bone" style="width: 9.75rem; height: 3.4rem" *ngFor="let i of [1, 2, 3, 4]"></span>
+      </div>
+      <div class="settings-panel" style="min-height: 16rem; padding: 1.25rem">
+        <div class="sa-toolbar__summary-bone" style="width: 8rem; height: 1rem; margin-bottom: 1rem"></div>
+        <div class="sa-toolbar__summary-bone" style="width: 100%; height: 2.5rem; margin-bottom: 0.75rem"></div>
+        <div class="sa-toolbar__summary-bone" style="width: 100%; height: 2.5rem; margin-bottom: 0.75rem"></div>
+        <div class="sa-toolbar__summary-bone" style="width: 100%; height: 2.5rem; margin-bottom: 1rem"></div>
+        <div class="sa-toolbar__btn-bone" style="width: 8rem; height: 2.5rem"></div>
+      </div>
+    </div>
+  </section>
+  <ng-template #bankingSettingsShimmer>
+    <app-shimmer variant="settings"></app-shimmer>
+  </ng-template>
 </ng-template>

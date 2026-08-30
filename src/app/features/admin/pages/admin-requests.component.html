@@ -25,26 +25,28 @@
     </button>
   </div>
 
-  <div class="request-list" *ngIf="filtered.length; else empty">
-    <article class="request-card" *ngFor="let row of paged">
-      <div class="request-card__copy">
-        <strong>{{ row.fullName }}</strong>
-        <p>{{ row.email }} · {{ row.submittedAt | date: 'medium' }}</p>
-        <p class="muted">{{ row.address?.line1 }}, {{ row.address?.city }} {{ row.address?.postalCode }}</p>
-        <span class="pill" [attr.data-status]="row.status">{{ formatStatus(row.status) }}</span>
-      </div>
-      <div class="request-card__actions" *ngIf="row.status === 'under_review'">
-        <button type="button" class="btn btn--ghost btn--compact" (click)="reject(row)">Reject</button>
-        <button type="button" class="btn btn--primary btn--compact" (click)="approve(row)">Approve</button>
-      </div>
-    </article>
-  </div>
+  <ng-container *ngIf="!listLoading; else listShimmer">
+    <div class="request-list" *ngIf="filtered.length; else empty">
+      <article class="request-card" *ngFor="let row of paged">
+        <div class="request-card__copy">
+          <strong>{{ row.fullName }}</strong>
+          <p>{{ row.email }} · {{ row.submittedAt | date: 'medium' }}</p>
+          <p class="muted">{{ row.address?.line1 }}, {{ row.address?.city }} {{ row.address?.postalCode }}</p>
+          <span class="pill" [attr.data-status]="row.status">{{ formatStatus(row.status) }}</span>
+        </div>
+        <div class="request-card__actions" *ngIf="row.status === 'under_review'">
+          <button type="button" class="btn btn--ghost btn--compact" (click)="reject(row)">Reject</button>
+          <button type="button" class="btn btn--primary btn--compact" (click)="approve(row)">Approve</button>
+        </div>
+      </article>
+    </div>
 
-  <div class="pager" *ngIf="filtered.length">
-    <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
-    <span>Page {{ page }} / {{ pages }} · {{ filtered.length }} total</span>
-    <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
-  </div>
+    <div class="pager" *ngIf="filtered.length">
+      <button type="button" class="btn btn--ghost" [disabled]="page <= 1" (click)="prev()">Previous</button>
+      <span>Page {{ page }} / {{ pages }} · {{ filtered.length }} total</span>
+      <button type="button" class="btn btn--ghost" [disabled]="page >= pages" (click)="next()">Next</button>
+    </div>
+  </ng-container>
 </section>
 
 <ng-template #empty>
@@ -53,7 +55,27 @@
 </ng-template>
 
 <ng-template #requestsShimmer>
-  <app-shimmer variant="admin-requests"></app-shimmer>
+  <section class="page" *ngIf="isSuperAdmin; else bankingReqShimmer">
+    <header class="admin-hero" aria-hidden="true">
+      <div>
+        <div class="sa-toolbar__summary-bone" style="width: 7rem; height: 0.7rem; margin-bottom: 0.65rem"></div>
+        <div class="sa-toolbar__summary-bone" style="width: 12rem; height: 1.6rem; margin-bottom: 0.55rem"></div>
+        <div class="sa-toolbar__summary-bone" style="width: min(28rem, 80%); height: 0.85rem"></div>
+      </div>
+    </header>
+    <div class="sa-toolbar sa-toolbar--shimmer" aria-hidden="true">
+      <span class="sa-toolbar__btn-bone"></span>
+      <span class="sa-toolbar__summary-bone"></span>
+    </div>
+    <app-shimmer variant="admin-requests-list"></app-shimmer>
+  </section>
+  <ng-template #bankingReqShimmer>
+    <app-shimmer variant="admin-requests"></app-shimmer>
+  </ng-template>
+</ng-template>
+
+<ng-template #listShimmer>
+  <app-shimmer variant="admin-requests-list"></app-shimmer>
 </ng-template>
 
 <div
@@ -85,9 +107,12 @@
   <div class="filter-drawer__body">
     <label class="filter-drawer__field">
       <span>Status</span>
-      <select [(ngModel)]="draftStatus" name="requestStatusFilter">
-        <option *ngFor="let kind of filters" [ngValue]="kind.id">{{ kind.label }}</option>
-      </select>
+      <app-theme-select
+        [(ngModel)]="draftStatus"
+        [options]="statusSelectOptions"
+        placeholder="Select status"
+        ariaLabel="Status filter"
+      ></app-theme-select>
     </label>
   </div>
   <footer class="filter-drawer__foot">

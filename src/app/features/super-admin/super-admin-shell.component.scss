@@ -103,6 +103,30 @@
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 6.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 139, 75, 0.55) rgba(232, 236, 239, 0.06);
+}
+
+.sa-stage::-webkit-scrollbar {
+  width: 0.55rem;
+  height: 0.55rem;
+}
+
+.sa-stage::-webkit-scrollbar-track {
+  background: rgba(232, 236, 239, 0.04);
+  border-radius: 999px;
+}
+
+.sa-stage::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(201, 139, 75, 0.75), rgba(168, 107, 52, 0.85));
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.sa-stage::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #d69a5c, #a86b34);
+  background-clip: padding-box;
 }
 
 .sa-stage__fluid {
