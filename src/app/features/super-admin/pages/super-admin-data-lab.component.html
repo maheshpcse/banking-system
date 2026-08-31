@@ -115,7 +115,12 @@
         </table>
       </div>
       <div class="pager" *ngIf="users.length">
-        <button type="button" class="btn btn--ghost" (click)="prevPage('users')" [disabled]="sectionPage.users <= 1">
+        <button
+          type="button"
+          class="btn btn--ghost"
+          (click)="prevPage('users')"
+          [disabled]="sectionPage.users <= 1"
+        >
           Previous
         </button>
         <span>Page {{ sectionPage.users }} of {{ pagesFor('users') }} · {{ users.length }} total</span>
@@ -166,7 +171,12 @@
         </table>
       </div>
       <div class="pager" *ngIf="products.length">
-        <button type="button" class="btn btn--ghost" (click)="prevPage('products')" [disabled]="sectionPage.products <= 1">
+        <button
+          type="button"
+          class="btn btn--ghost"
+          (click)="prevPage('products')"
+          [disabled]="sectionPage.products <= 1"
+        >
           Previous
         </button>
         <span>Page {{ sectionPage.products }} of {{ pagesFor('products') }} · {{ products.length }} total</span>
@@ -215,7 +225,12 @@
         </table>
       </div>
       <div class="pager" *ngIf="customers.length">
-        <button type="button" class="btn btn--ghost" (click)="prevPage('customers')" [disabled]="sectionPage.customers <= 1">
+        <button
+          type="button"
+          class="btn btn--ghost"
+          (click)="prevPage('customers')"
+          [disabled]="sectionPage.customers <= 1"
+        >
           Previous
         </button>
         <span>Page {{ sectionPage.customers }} of {{ pagesFor('customers') }} · {{ customers.length }} total</span>
@@ -264,7 +279,12 @@
         </table>
       </div>
       <div class="pager" *ngIf="coupons.length">
-        <button type="button" class="btn btn--ghost" (click)="prevPage('coupons')" [disabled]="sectionPage.coupons <= 1">
+        <button
+          type="button"
+          class="btn btn--ghost"
+          (click)="prevPage('coupons')"
+          [disabled]="sectionPage.coupons <= 1"
+        >
           Previous
         </button>
         <span>Page {{ sectionPage.coupons }} of {{ pagesFor('coupons') }} · {{ coupons.length }} total</span>

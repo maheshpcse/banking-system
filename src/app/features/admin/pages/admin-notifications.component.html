@@ -95,15 +95,17 @@
 
 <ng-template #alertsShimmer>
   <section class="page" *ngIf="isSuperAdmin; else bankingAlertsShimmer">
-    <div class="admin-hero admin-hero--shimmer" aria-hidden="true">
-      <app-shimmer variant="admin-hero"></app-shimmer>
-      <div class="tools tools--shimmer">
-        <span class="sa-toolbar__btn-bone" style="width: 3.5rem"></span>
-        <span class="sa-toolbar__btn-bone" style="width: 3.5rem"></span>
-        <span class="sa-toolbar__btn-bone" style="width: 3.75rem"></span>
-        <span class="sa-toolbar__btn-bone" style="width: 7rem"></span>
+    <header class="admin-hero" aria-hidden="true">
+      <div class="admin-hero__copy">
+        <app-shimmer variant="admin-hero"></app-shimmer>
       </div>
-    </div>
+      <div class="tools tools--shimmer" aria-hidden="true">
+        <span class="sa-tool-shimmer sa-tool-shimmer--list"></span>
+        <span class="sa-tool-shimmer sa-tool-shimmer--grid"></span>
+        <span class="sa-tool-shimmer sa-tool-shimmer--table"></span>
+        <span class="sa-tool-shimmer sa-tool-shimmer--mark"></span>
+      </div>
+    </header>
     <div class="sa-toolbar sa-toolbar--shimmer" aria-hidden="true">
       <span class="sa-toolbar__btn-bone"></span>
       <span class="sa-toolbar__summary-bone"></span>
