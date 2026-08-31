@@ -248,6 +248,18 @@ export class ConsoleLoginComponent implements OnInit, OnDestroy {
       return;
     }
     if (err?.status === 404) {
+      const code = typeof err?.error === 'object' && err.error ? err.error.code : undefined;
+      const apiMessage =
+        typeof err?.error === 'object' && err.error
+          ? err.error.message
+          : typeof err?.error === 'string'
+            ? err.error
+            : undefined;
+      // User/OTP not found still returns 404 from a live console API — show that message.
+      if (code === 'OTP_USER_NOT_FOUND' || code === 'USER_NOT_FOUND' || apiMessage) {
+        this.formError = apiMessage || 'No account matches that username or email.';
+        return;
+      }
       this.formError =
         'Console sign-in API is not available on the server yet (missing /api/auth/console). Redeploy banking-system-server so Apex Console auth routes are live.';
       await this.alerts.info(this.formError, 'Console API unavailable');

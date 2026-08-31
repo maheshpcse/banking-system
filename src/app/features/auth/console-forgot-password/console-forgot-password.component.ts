@@ -75,7 +75,8 @@ export class ConsoleForgotPasswordComponent implements OnInit, OnDestroy {
       error: async (err) => {
         this.loading = false;
         const code = err?.error?.code;
-        const message = err?.error?.message || 'Unable to verify that account.';
+        const apiMessage = err?.error?.message as string | undefined;
+        const message = apiMessage || 'Unable to verify that account.';
         if (code === 'USE_BANKING_LOGIN') {
           const goBanking = await this.alerts.portalMismatch({
             title: 'Wrong portal',
@@ -89,6 +90,12 @@ export class ConsoleForgotPasswordComponent implements OnInit, OnDestroy {
           return;
         }
         if (err?.status === 404) {
+          // Live API returns 404 + USER_NOT_FOUND / message when the identity is unknown.
+          // Only treat empty/non-JSON 404 as a missing deploy of /api/auth/console.
+          if (code === 'USER_NOT_FOUND' || apiMessage) {
+            this.formError = apiMessage || 'No account found for that username or email.';
+            return;
+          }
           this.formError =
             'Console auth API is not available on the server yet. Redeploy banking-system-server so /api/auth/console routes are live.';
           await this.alerts.info(this.formError, 'Console API unavailable');
