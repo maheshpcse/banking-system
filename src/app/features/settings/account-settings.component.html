@@ -815,24 +815,20 @@
 
 <ng-template #settingsShimmer>
   <section class="page" *ngIf="isConsoleAccount; else bankingSettingsShimmer" aria-busy="true">
-    <header class="page__hero admin-hero sa-hero-shimmer" aria-hidden="true">
-      <div>
-        <div class="shimmer-line shimmer-line--brand"></div>
-        <div class="shimmer-line shimmer-line--title"></div>
-        <div class="shimmer-line shimmer-line--lede"></div>
-      </div>
+    <div class="page__hero admin-hero admin-hero--shimmer" aria-hidden="true">
+      <app-shimmer variant="admin-hero"></app-shimmer>
       <div class="sa-toolbar__btn-bone" style="width: 4.5rem; height: 4.5rem; border-radius: 999px"></div>
-    </header>
+    </div>
     <div class="settings-shell settings-shell--console" aria-hidden="true">
       <div class="settings-nav" style="pointer-events: none">
         <span class="sa-toolbar__summary-bone" style="width: 9.75rem; height: 3.4rem" *ngFor="let i of [1, 2, 3, 4]"></span>
       </div>
-      <div class="settings-panel sa-account-form-half" style="min-height: 16rem; padding: 1.25rem">
+      <div class="settings-panel sa-account-card-half" style="min-height: 16rem; padding: 1.25rem">
         <div class="sa-toolbar__summary-bone" style="width: 8rem; height: 1rem; margin-bottom: 1rem"></div>
-        <div class="sa-toolbar__summary-bone" style="width: 100%; max-width: 100%; height: 2.5rem; margin-bottom: 0.75rem"></div>
-        <div class="sa-toolbar__summary-bone" style="width: 100%; max-width: 100%; height: 2.5rem; margin-bottom: 0.75rem"></div>
-        <div class="sa-toolbar__summary-bone" style="width: 100%; max-width: 100%; height: 2.5rem; margin-bottom: 1rem"></div>
-        <div class="sa-toolbar__btn-bone" style="width: 8rem; height: 2.5rem"></div>
+        <div class="sa-toolbar__summary-bone" style="width: 100%; height: 2.5rem; margin-bottom: 0.75rem"></div>
+        <div class="sa-toolbar__summary-bone" style="width: 100%; height: 2.5rem; margin-bottom: 0.75rem"></div>
+        <div class="sa-toolbar__summary-bone" style="width: 100%; height: 2.5rem; margin-bottom: 1rem"></div>
+        <div class="sa-toolbar__btn-bone" style="width: 100%; height: 2.5rem"></div>
       </div>
     </div>
   </section>

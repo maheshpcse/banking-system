@@ -83,14 +83,6 @@
       <h2 class="dl-section__title"><app-sa-icon name="staff"></app-sa-icon> Staff users</h2>
       <div class="table-wrap">
         <table class="data-table dl-table">
-          <colgroup>
-            <col class="dl-col-check" />
-            <col class="dl-col-name" />
-            <col class="dl-col-user" />
-            <col class="dl-col-email" />
-            <col class="dl-col-role" />
-            <col class="dl-col-pass" />
-          </colgroup>
           <thead>
             <tr>
               <th class="dl-check-col">
@@ -122,7 +114,7 @@
           </tbody>
         </table>
       </div>
-      <div class="pager" *ngIf="users.length > pageSize">
+      <div class="pager" *ngIf="users.length">
         <button type="button" class="btn btn--ghost" (click)="prevPage('users')" [disabled]="sectionPage.users <= 1">
           Previous
         </button>
@@ -142,14 +134,6 @@
       <h2 class="dl-section__title"><app-sa-icon name="box"></app-sa-icon> Products</h2>
       <div class="table-wrap">
         <table class="data-table dl-table">
-          <colgroup>
-            <col class="dl-col-check" />
-            <col class="dl-col-name" />
-            <col class="dl-col-sku" />
-            <col class="dl-col-cat" />
-            <col class="dl-col-price" />
-            <col class="dl-col-stock" />
-          </colgroup>
           <thead>
             <tr>
               <th class="dl-check-col">
@@ -181,7 +165,7 @@
           </tbody>
         </table>
       </div>
-      <div class="pager" *ngIf="products.length > pageSize">
+      <div class="pager" *ngIf="products.length">
         <button type="button" class="btn btn--ghost" (click)="prevPage('products')" [disabled]="sectionPage.products <= 1">
           Previous
         </button>
@@ -201,13 +185,6 @@
       <h2 class="dl-section__title"><app-sa-icon name="users"></app-sa-icon> Customers</h2>
       <div class="table-wrap">
         <table class="data-table dl-table">
-          <colgroup>
-            <col class="dl-col-check" />
-            <col class="dl-col-name" />
-            <col class="dl-col-email" />
-            <col class="dl-col-phone" />
-            <col class="dl-col-rewards" />
-          </colgroup>
           <thead>
             <tr>
               <th class="dl-check-col">
@@ -237,7 +214,7 @@
           </tbody>
         </table>
       </div>
-      <div class="pager" *ngIf="customers.length > pageSize">
+      <div class="pager" *ngIf="customers.length">
         <button type="button" class="btn btn--ghost" (click)="prevPage('customers')" [disabled]="sectionPage.customers <= 1">
           Previous
         </button>
@@ -257,13 +234,6 @@
       <h2 class="dl-section__title"><app-sa-icon name="ticket"></app-sa-icon> Coupons</h2>
       <div class="table-wrap">
         <table class="data-table dl-table">
-          <colgroup>
-            <col class="dl-col-check" />
-            <col class="dl-col-code" />
-            <col class="dl-col-title" />
-            <col class="dl-col-disc" />
-            <col class="dl-col-min" />
-          </colgroup>
           <thead>
             <tr>
               <th class="dl-check-col">
@@ -293,7 +263,7 @@
           </tbody>
         </table>
       </div>
-      <div class="pager" *ngIf="coupons.length > pageSize">
+      <div class="pager" *ngIf="coupons.length">
         <button type="button" class="btn btn--ghost" (click)="prevPage('coupons')" [disabled]="sectionPage.coupons <= 1">
           Previous
         </button>
@@ -313,13 +283,7 @@
 
 <ng-template #labShimmer>
   <section class="page dl-page dl-page-shimmer" aria-busy="true">
-    <header class="admin-hero sa-hero-shimmer" aria-hidden="true">
-      <div>
-        <div class="shimmer-line shimmer-line--brand"></div>
-        <div class="shimmer-line shimmer-line--title"></div>
-        <div class="shimmer-line shimmer-line--lede"></div>
-      </div>
-    </header>
+    <app-shimmer variant="admin-hero"></app-shimmer>
     <div class="dl-page-shimmer__controls" aria-hidden="true">
       <div class="dl-page-shimmer__entities">
         <span class="dl-page-shimmer__entity" *ngFor="let i of [1, 2, 3, 4]"></span>

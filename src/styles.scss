@@ -964,15 +964,15 @@ body.sa-mode .nb-toast .nb-toast__title,
 body.sa-mode .nb-toast .swal2-html-container,
 body.sa-mode .nb-toast .nb-toast__text {
   color: #e8ecef !important;
+  white-space: nowrap !important;
 }
 
 body.sa-mode .nb-toast--corner.swal2-popup.swal2-toast {
-  max-width: min(92vw, 36rem) !important;
-  width: max-content !important;
+  max-width: min(42rem, calc(100vw - 1.5rem)) !important;
 }
 
 body.sa-mode .nb-toast .swal2-icon.swal2-success {
-  border-color: #c98b4b !important;
+  border-color: transparent !important;
 }
 
 body.sa-mode .nb-toast .swal2-icon.swal2-success [class^='swal2-success-line'] {

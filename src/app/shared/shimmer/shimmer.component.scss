@@ -5,6 +5,7 @@
 }
 
 .shimmer--history-ledger,
+.shimmer--admin-hero,
 .shimmer--admin-customers-table,
 .shimmer--data-table,
 .shimmer--tx-timeline,
@@ -37,6 +38,10 @@
 
 .shimmer--manager-sales-chart {
   min-height: 14rem;
+}
+
+.shimmer--admin-hero {
+  min-height: 0;
 }
 
 .shimmer--settings-panel {

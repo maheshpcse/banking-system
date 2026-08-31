@@ -237,12 +237,23 @@ export class SuperAdminDataLabComponent implements OnInit, OnDestroy {
         this.customers = this.customers.filter((c) => !c.selected);
         this.coupons = this.coupons.filter((c) => !c.selected);
         this.clampPages();
-        const summary =
-          `Users ${res.users.created}/${res.users.created + res.users.skipped} · ` +
-          `Products ${res.products.created}/${res.products.created + res.products.skipped} · ` +
-          `Customers ${res.customers.created}/${res.customers.created + res.customers.skipped} · ` +
-          `Coupons ${res.coupons.created}/${res.coupons.created + res.coupons.skipped}`;
-        await this.alerts.toastSuccessCorner('Commit selected', summary);
+        const parts: string[] = [];
+        if (res.users.created || res.users.skipped) {
+          parts.push(`Users ${res.users.created}`);
+        }
+        if (res.products.created || res.products.skipped) {
+          parts.push(`Products ${res.products.created}`);
+        }
+        if (res.customers.created || res.customers.skipped) {
+          parts.push(`Customers ${res.customers.created}`);
+        }
+        if (res.coupons.created || res.coupons.skipped) {
+          parts.push(`Coupons ${res.coupons.created}`);
+        }
+        await this.alerts.toastSuccessCorner(
+          'Commit selected',
+          parts.length ? parts.join(' · ') : 'Selected rows committed'
+        );
       },
       error: async (err) => {
         this.committing = false;
