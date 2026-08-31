@@ -44,30 +44,30 @@
 
   .admin-hero {
     align-items: flex-start;
-    gap: 0.35rem;
+    gap: 1rem;
     margin-bottom: 1.35rem;
     padding-bottom: 1.15rem;
     border-bottom: 1px solid var(--sa-line);
     position: relative;
   }
 
-  .admin-hero--shimmer {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 1rem;
-  }
-
-  .admin-hero--shimmer app-shimmer {
+  .admin-hero__copy {
     flex: 1 1 auto;
     min-width: 0;
   }
 
+  .admin-hero__copy app-shimmer {
+    display: block;
+  }
+
+  .admin-hero__copy .shimmer__hero--admin {
+    margin-bottom: 0 !important;
+  }
+
+  .admin-hero .tools,
   .tools--shimmer {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    pointer-events: none;
+    flex: 0 0 auto;
+    align-self: flex-end;
   }
 
   .sa-toolbar,
@@ -511,8 +511,18 @@
     color: var(--sa-muted);
   }
 
-  /* Pager --------------------------------------------------------------------- */
+  /* Pager */
   .pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+    margin-top: 1rem;
+    color: var(--sa-muted);
+    font-weight: 650;
+  }
+
+  .pager span {
     color: var(--sa-muted);
   }
 

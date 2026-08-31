@@ -851,6 +851,49 @@
   background: rgba(95, 196, 176, 0.18);
 }
 
+.tools--shimmer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  pointer-events: none;
+}
+
+.sa-tool-shimmer {
+  display: inline-block;
+  height: 2.35rem;
+  border-radius: 0.4rem;
+  background: linear-gradient(
+    105deg,
+    rgba(232, 236, 239, 0.05) 0%,
+    rgba(201, 139, 75, 0.22) 42%,
+    rgba(232, 236, 239, 0.08) 78%
+  );
+  background-size: 220% 100%;
+  animation: sa-tool-shimmer 1.15s ease-in-out infinite;
+}
+
+.sa-tool-shimmer--list,
+.sa-tool-shimmer--grid {
+  width: 3.35rem;
+}
+
+.sa-tool-shimmer--table {
+  width: 3.85rem;
+}
+
+.sa-tool-shimmer--mark {
+  width: 7.35rem;
+}
+
+@keyframes sa-tool-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
 .notif-list,
 .notif-grid {
   display: grid;
